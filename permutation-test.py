@@ -1,5 +1,5 @@
 import permutation
-
+import math
 
 
 def per_to_str(perm):
@@ -10,22 +10,30 @@ def per_to_str(perm):
     
 perms={}
     
-for i in range(10):
-
+for i in range(12000):
     perm0=permutation.ran_perm(5)
-#    print perm0
     perm = per_to_str(perm0)
-#    print perm                 
     if perm in perms:
-        print perm, "A"
         perms[perm]+=1
     else:
-        print perm, "B"
         perms[perm]=1
     
 kk=perms.keys()
+kk.sort()
 print len(kk)
 
+sum=0
 for kkk in kk:
-    print kkk,perms[kkk]
-        
+#    print kkk,perms[kkk]
+    sum+=perms[kkk]
+
+average=sum/len(kk)
+
+var=0
+for kkk in kk:
+    var+=((perms[kkk]-average)*(perms[kkk]-average))
+
+
+sigma=math.sqrt(var/len(kkk))
+
+print average, sigma
