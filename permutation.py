@@ -31,6 +31,8 @@ def ran_combination(K,M):
         perm[k],perm[l]=perm[l],perm[k]
     return perm[0:2]    
  
-if __name__=='__main__':
-    for i in range(100):
-        print ran_combination(4,2)
+def permutation2str(perm):
+    result=""
+    for el in perm:
+        result+=str(el)
+    return result

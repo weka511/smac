@@ -17,38 +17,29 @@
 
 import permutation
 import math
-
-
-def per_to_str(perm):
-    result=""
-    for el in perm:
-        result+=str(el)
-    return result
+  
+for i in range(10):    
+    perms={}
+        
+    for i in range(12000):
+        perm0=permutation.ran_perm(5)
+        perm = permutation.permutation2str(perm0)
+        if perm in perms:
+            perms[perm]+=1
+        else:
+            perms[perm]=1
+        
+    count= len(perms.keys())
     
-perms={}
+    sum=0
+    for kk in perms.keys():
+        sum+=perms[kk]
     
-for i in range(1200000):
-    perm0=permutation.ran_perm(5)
-    perm = per_to_str(perm0)
-    if perm in perms:
-        perms[perm]+=1
-    else:
-        perms[perm]=1
+    average=sum/count
     
-count= len(perms.keys())
-print count
-
-sum=0
-for kk in perms.keys():
-    sum+=perms[kk]
-
-average=sum/count
-
-var=0
-for kk in perms.keys():
-    var+=((perms[kk]-average)*(perms[kk]-average))
-
-
-sigma=math.sqrt(var/count)
-
-print average, sigma
+    chi_squared=0
+    for kk in perms.keys():
+        chi_squared+=((perms[kk]-average)*(perms[kk]-average))
+    
+    ss=math.sqrt(2*chi_squared)
+    print count, average, chi_squared, ss, math.sqrt(2*count-1)
