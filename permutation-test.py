@@ -10,7 +10,7 @@ def per_to_str(perm):
     
 perms={}
     
-for i in range(12000):
+for i in range(120000):
     perm0=permutation.ran_perm(5)
     perm = per_to_str(perm0)
     if perm in perms:
@@ -24,7 +24,6 @@ print len(kk)
 
 sum=0
 for kkk in kk:
-#    print kkk,perms[kkk]
     sum+=perms[kkk]
 
 average=sum/len(kk)
