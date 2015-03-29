@@ -21,7 +21,7 @@ import math
 for i in range(10):    
     perms={}
         
-    for i in range(12000):
+    for i in range(120000):
         perm0=permutation.ran_perm(5)
         perm = permutation.permutation2str(perm0)
         if perm in perms:
