@@ -5,13 +5,10 @@ Code I have written for course: *Statistical Mechanics and Computations*
 
 ## Chapter 1
 
---------------------------------
-Exercise  Programs
---------  ------------------
-1.9       permutation.py
-          permutation-test.py
-          permutation-histogram.py
+* 1.9
+ *  permutation.py
+ * permutation-test.py
+ * permutation-histogram.py
           
 
-----------------------------
 
