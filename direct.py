@@ -1,6 +1,6 @@
 # direct.py
 
-# Copyright (C) 2015 Greenweaves Software Oty Ltd
+# Copyright (C) 2015 Greenweaves Software Pty Ltd
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,17 +18,22 @@
 import random
 import token
 
-n_trials = 4000
+n_trials = 40000000
 
 t1=token.Token("foo.txt")
 [total_trials,n_hits]= t1.read([0,0])
 
-for iter in range(n_trials):
-    x, y = random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)
-    if x*x + y*y < 1.0: 
-        n_hits += 1
-    total_trials+=1
+try:
+    for iter in range(n_trials):
+        x, y = random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)
+        if x*x + y*y < 1.0: 
+            n_hits += 1
+        total_trials+=1
+        
+    print total_trials,n_hits,4.0 * n_hits / float(total_trials)
     
-print total_trials,n_hits,4.0 * n_hits / float(total_trials)
-
-t1.write([total_trials,n_hits])
+    t1.write([total_trials,n_hits])
+except (KeyboardInterrupt, SystemExit):
+    print "Interrupted"
+    t1.write([total_trials,n_hits])
+    print "Saved"
