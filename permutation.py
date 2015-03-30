@@ -17,6 +17,8 @@
 
 import random
 
+# generate random permutations
+
 def ran_perm(K):
     perm = range(K)
     for k in range(K):
