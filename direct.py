@@ -18,7 +18,7 @@
 import random
 import token
 
-n_trials = 4000000
+n_trials = 40000000
 
 registry=token.Registry()
 registry.register_all("direct%d.txt")
