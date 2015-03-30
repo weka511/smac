@@ -5,6 +5,10 @@ Code I have written for course: *Statistical Mechanics and Computations*
 
 ## Chapter 1 Monte Carlo Methods
 
+* 1.1 Algorithm 1.1
+* 1.2 Algorithm 1.1
+ * markov-pi.py
+ * token.py
 * 1.3 Store state in file
  * direct.py
  * token.py

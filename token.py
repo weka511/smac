@@ -32,12 +32,12 @@ class Token:
             with open(self.name,"r") as f:
                 date_line=f.readline().strip(' \t\n\r')
                 self.time=time.strptime(date_line, self.timeformat)
-                return self.line2ints(f.readline().strip(' \t\n\r'))
+                return self.line2floats(f.readline().strip(' \t\n\r'))
         else:
             return initial
         
-    def line2ints(self,line):
-        return [int(s) for s in line.split(",")]
+    def line2floats(self,line):
+        return [float(s) for s in line.split(",")]
     
     def write(self,values):
         with open(self.name,"w") as f:
