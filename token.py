@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import os.path
+import os
 import time
 import tempfile
 
@@ -59,8 +59,9 @@ class Token:
 
             
 class Registry:
-    def __init__(self):
+    def __init__(self,kill_token="kill.txt"):
         self.tokens=[]
+        self.kill_token=kill_token
     def register(self,token):
         self.tokens.append(token)
     def register_all(self,pattern):    
@@ -84,10 +85,11 @@ class Registry:
           elif token.exists():
               latestToken=token
         return latestToken.read(initial)
-if __name__ == "__main__":
-    t1=Token("foo.txt")
-    print t1.read([0,1])
-    t1.write([1,2])
-    registry=Registry()
-    registry.register_all("bar%d.txt")
-    registry.write([1,2,3,4])
+    def is_kill_token_present(self):
+       if os.path.isfile(self.kill_token):
+           print "killing"
+           os.remove(self.kill_token)
+           return True
+       else:
+           return False
+   

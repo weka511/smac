@@ -27,6 +27,8 @@ registry.register_all("direct%d.txt")
 
 try:
     for iter in range(n_trials):
+        if registry.is_kill_token_present():
+            break
         x, y = random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)
         if x*x + y*y < 1.0: 
             n_hits += 1
