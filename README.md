@@ -6,6 +6,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 ## Chapter 1
 
 * 1.3
+ * direct.py
  * token.py
 * 1.9
  *  permutation.py

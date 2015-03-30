@@ -17,10 +17,11 @@
 
 import os.path
 import time
+import tempfile
 
 class Token:
     def __init__(self,name):
-        self.name=name
+        self.name=os.path.join(tempfile.gettempdir(),name)
         self.timeformat="%a, %d %b %Y %H:%M:%S +0000"
     
     def exists(self):
