@@ -18,10 +18,12 @@
 import random
 import token
 
-n_trials = 40000000
+n_trials = 4000000
 
-t1=token.Token("foo.txt")
-[total_trials,n_hits]= t1.read([0,0])
+registry=token.Registry()
+registry.register_all("direct%d.txt")
+
+[total_trials,n_hits]= registry.read([0,0])
 
 try:
     for iter in range(n_trials):
@@ -32,8 +34,8 @@ try:
         
     print total_trials,n_hits,4.0 * n_hits / float(total_trials)
     
-    t1.write([total_trials,n_hits])
+    registry.write([total_trials,n_hits])
 except (KeyboardInterrupt, SystemExit):
     print "Interrupted"
-    t1.write([total_trials,n_hits])
+    registry.write([total_trials,n_hits])
     print "Saved"

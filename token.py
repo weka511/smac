@@ -56,8 +56,38 @@ class Token:
     
     def precedes(self,other):
         return self.time<other.time
-    
+
+            
+class Registry:
+    def __init__(self):
+        self.tokens=[]
+    def register(self,token):
+        self.tokens.append(token)
+    def register_all(self,pattern):    
+        self.register_one(pattern,1)
+        self.register_one(pattern,2)
+    def register_one(self,pattern,n):
+        self.register(Token(pattern%n))
+    def write(self,values):
+        for token in self.tokens:
+            token.write(values)        
+    def read(self,initial):
+        latestToken=None
+        for token in self.tokens:
+          if latestToken==None:
+              latestToken=token
+          elif token.exists() and latestToken.exists():
+              latestToken.read(initial)
+              token.read(initial)
+              if latestToken.precedes(token):
+                  latestToken=token
+          elif token.exists():
+              latestToken=token
+        return latestToken.read(initial)
 if __name__ == "__main__":
     t1=Token("foo.txt")
     print t1.read([0,1])
     t1.write([1,2])
+    registry=Registry()
+    registry.register_all("bar%d.txt")
+    registry.write([1,2,3,4])
