@@ -15,10 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random
-import token
+import random, smacfiletoken as ftk
 
-registry=token.Registry()
+registry=ftk.Registry()
 registry.register_all("markov-pi%d.txt")
 
 x, y = 1.0, 1.0

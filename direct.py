@@ -15,29 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random
-import token
+import random, smacfiletoken as ftk, pylab, math
 
 n_trials = 40000000
 
-registry=token.Registry()
+registry=ftk.Registry()
 registry.register_all("direct%d.txt")
 
 [total_trials,n_hits]= registry.read([0,0])
 
-try:
-    for iter in range(n_trials):
-        if registry.is_kill_token_present():
-            break
-        x, y = random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)
-        if x*x + y*y < 1.0: 
-            n_hits += 1
-        total_trials+=1
-        
-    print total_trials,n_hits,4.0 * n_hits / float(total_trials)
+
+for iter in range(n_trials):
+    if registry.is_kill_token_present(): break
+    x, y = random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)
+    if x*x + y*y < 1.0: 
+        n_hits += 1
+    total_trials+=1
     
-    registry.write([total_trials,n_hits])
-except (KeyboardInterrupt, SystemExit):
-    print "Interrupted"
-    registry.write([total_trials,n_hits])
-    print "Saved"
+print total_trials,n_hits,4.0 * n_hits / float(total_trials)
+
+registry.write([total_trials,n_hits])
