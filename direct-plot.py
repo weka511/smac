@@ -22,7 +22,7 @@ n = 1
 
 errors=[]
 iterations=[]
-while n<7:
+while n<8:
     print n_trials
     error=0
     for i in range(20):
@@ -37,7 +37,7 @@ while n<7:
         print n_trials,n_hits,pi_approx
     n_trials *= 10
     n+=1
-    errors.append(math.sqrt(error))
+    errors.append(math.log(error))
     iterations.append(n)    
     
 pylab.plot(iterations, errors, 'o')
