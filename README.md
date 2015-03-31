@@ -6,8 +6,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 ## Chapter 1 Monte Carlo Methods
 
 * 1.1 Algorithm 1.1
- * direct.py
- * smacfiletoken.py
+ * direct-plot.py
 * 1.2 Algorithm 1.2
  * markov-pi.py
  * smacfiletoken.py
