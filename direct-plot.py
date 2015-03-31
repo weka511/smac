@@ -18,31 +18,25 @@
 import random,math,pylab
 
 n_trials=10
-n = 1
 
 errors=[]
 iterations=[]
-while n<8:
-    print n_trials
+for n in range(8):
     error=0
     for i in range(20):
         n_hits=0
         for iter in range(n_trials):
             x, y = random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)
-            if x*x + y*y < 1.0: 
-                n_hits += 1
-        
+            if x*x + y*y < 1.0:  n_hits += 1
         pi_approx=4.0 * n_hits / float(n_trials)
         error+=(math.pi-pi_approx)*(math.pi-pi_approx)
-        print n_trials,n_hits,pi_approx
     n_trials *= 10
-    n+=1
     errors.append(math.log(error))
     iterations.append(n)    
     
 pylab.plot(iterations, errors, 'o')
-pylab.xlabel('iteration')
-pylab.ylabel('apparent error')
-pylab.title('Bunching:  error vs iteration number')
-pylab.savefig('apparent_error_bunching.png')
+pylab.xlabel('Log N trials')
+pylab.ylabel('Log Error')
+pylab.title('Error vs iteration number')
+pylab.savefig('direct-plot.png')
 pylab.show()

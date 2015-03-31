@@ -5,7 +5,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 
 ## Chapter 1 Monte Carlo Methods
 
-* 1.1 Algorithm 1.1
+* 1.1 Implement Algorithm 1.1. Plot error and investigate relationship with N.
  * direct-plot.py
 * 1.2 Algorithm 1.2
  * markov-pi.py
