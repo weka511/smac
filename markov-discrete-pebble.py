@@ -18,31 +18,26 @@
 import random, math, pylab
 
 neighbour_table =[
-    [2,4,0,0],
-    [3,5,1,0],
-    [0,6,2,0],
-    [5,7,0,1],
+    [2,4],
+    [3,5,1],
+    [6,2],
+    [5,7,1],
     [6,8,4,2],
-    [0,9,5,3],
-    [8,0,0,4],
-    [9,0,7,5],
-    [0,0,8,6]
+    [9,5,3],
+    [8,4],
+    [9,7,5],
+    [8,6]
 ]
 
 def markov_discrete_pebble(k,table):
-    neighbours=table[k-1]
-    while True:
-        n=random.randint(0,3)
-        if neighbours[n]!=0: return neighbours[n]
+    return random.choice(table[k-1])
 
 ns=[]
 sds=[]
 n=10
 for i in range(7):
     visits=[0,0,0,0,0,0,0,0,0]
-    
     k=1
-    
     for iteration in range(n):
         visits[k-1]+=1
         k=markov_discrete_pebble(k,neighbour_table)
