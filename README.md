@@ -13,6 +13,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 * 1.3 Store state in file
  * direct.py
  * smacfiletoken.py
+
 ### Section 1.2
 * 1.9 Sample permutations
  *  permutation.py
