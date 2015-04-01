@@ -21,7 +21,7 @@ def float_range(lower,upper,step):
     return [step*i for i in range(lower,upper+1)]
 
 def normalize(xs):
-    m=max(x)
+    m=max(xs)
     return [x/m for x in xs]
 
 def perform_markov(n_trials,delta):
@@ -56,10 +56,19 @@ for delta in deltas:
     mean_reject=sum_reject/n
     errors.append(mean_sq)
     rejections.append(mean_reject)
-    
-pylab.plot(deltas, errors, 'o',deltas,rejections,'+')
+ 
+pylab.figure(1) 
+pylab.subplot(211)    
+pylab.plot(deltas, normalize(errors), 'o',deltas,rejections,'+')
 pylab.xlabel('Delta')
 pylab.ylabel('Error')
 pylab.title('Error and rejection rate vs step size')
+
+pylab.subplot(212)
+pylab.plot(rejections, errors,'x')
+pylab.xlabel('Rejection')
+pylab.ylabel('Error')
+pylab.title('Error vs rejection rate')
 pylab.savefig('markov-pi.png')
+
 pylab.show()
