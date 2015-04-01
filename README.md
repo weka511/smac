@@ -7,9 +7,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 
 * 1.1 Implement Algorithm 1.1. Plot error and investigate relationship with N.
  * direct-plot.py
-* 1.2 Algorithm 1.2
+* 1.2 Implement Algorithm 1.2.Plot error and rejection rate.
  * markov-pi.py
- * smacfiletoken.py
 * 1.3 Store state in file
  * direct.py
  * smacfiletoken.py
