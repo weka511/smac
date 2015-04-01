@@ -8,11 +8,13 @@ Code I have written for course: *Statistical Mechanics and Computations*
 ### Section 1.1
 * 1.1 Implement Algorithm 1.1. Plot error and investigate relationship with N.
  * direct-plot.py
-* 1.2 Implement Algorithm 1.2.Plot error and rejection rate.
+* 1.2 Implement Algorithm 1.2. Plot error and rejection rate.
  * markov-pi.py
 * 1.3 Store state in file
  * direct.py
  * smacfiletoken.py
+* 1.4 Use table
+ * markov-discrete-pebble.py
 
 ### Section 1.2
 * 1.9 Sample permutations
