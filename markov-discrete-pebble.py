@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random
+import random, math, pylab
 
 neighbour_table =[
     [2,4,0,0],
@@ -34,16 +34,35 @@ def markov_discrete_pebble(k,table):
     while True:
         n=random.randint(0,3)
         if neighbours[n]!=0: return neighbours[n]
-    
-visits=[0,0,0,0,0,0,0,0,0]
 
-k=1
-n=10000
-for iteration in range(n):
+ns=[]
+sds=[]
+n=10
+for i in range(7):
+    visits=[0,0,0,0,0,0,0,0,0]
+    
+    k=1
+    
+    for iteration in range(n):
+        visits[k-1]+=1
+        k=markov_discrete_pebble(k,neighbour_table)
     visits[k-1]+=1
-    k=markov_discrete_pebble(k,neighbour_table)
-visits[k-1]+=1
-
-for v in visits:
-    print v/float(n)
     
+    sum_sq=0
+    mean=1.0/len(visits)
+    
+    for v in visits:
+        freq= v/float(n)
+        diff=freq-mean
+        print freq, abs(diff)
+        sum_sq+=diff*diff
+    n*=10
+    ns.append(i)
+    sds.append(math.log(sum_sq))
+               
+pylab.plot(ns, sds, 'o')
+pylab.xlabel('Log N trials')
+pylab.ylabel('Log Error')
+pylab.title('Error vs iteration number')
+pylab.savefig('markov-discrete-pebble.png')
+pylab.show()
