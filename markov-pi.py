@@ -43,7 +43,7 @@ n=25
 errors=[]
 deltas=float_range(1,30,0.1)
 rejections=[]
-n_trials=4000
+n_trials=400000
 for delta in deltas:
     sum_sq=0
     sum_reject=0
