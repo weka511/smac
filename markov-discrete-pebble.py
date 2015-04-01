@@ -30,9 +30,20 @@ neighbour_table =[
 ]
 
 def markov_discrete_pebble(k,table):
-    neighbours=table[k]
+    neighbours=table[k-1]
     while True:
         n=random.randint(0,3)
         if neighbours[n]!=0: return neighbours[n]
     
 visits=[0,0,0,0,0,0,0,0,0]
+
+k=1
+n=10000
+for iteration in range(n):
+    visits[k-1]+=1
+    k=markov_discrete_pebble(k,neighbour_table)
+visits[k-1]+=1
+
+for v in visits:
+    print v/float(n)
+    
