@@ -15,6 +15,9 @@
 
  You should have received a copy of the GNU General Public License
  along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ This script calculates the eigenvalues and eigenvectors of the transfer matrix from exercise 1.8,
+ and iterates the matrix to show convergence the dumb way.
 
  #}
 TRANSFER=[
