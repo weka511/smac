@@ -19,29 +19,45 @@ import markovdiscretepebble as mdp
 
 
 def explore_space(m,n,max_iterations):
-    def getKK(j,values):
-        if j<1:
-            return values[0]
-        elif j<n-1:
-            return values[1]
-        else:
-            return values[2]
     def getK(i,j):
+        def helper(j,values):
+            if j<1:
+                return values[0]
+            elif j<n-1:
+                return values[1]
+            else:
+                return values[2]        
         if i<1:
-            return getKK(j,[1,2,3])
+            return helper(j,[1,2,3])
         elif i<m-1:
-            return getKK(j,[4,5,6])
+            return helper(j,[4,5,6])
         else:
-            return getKK(j,[7,8,9])
+            return helper(j,[7,8,9])
+
+    counts=[]
+    for i in range(m*n):
+        counts.append(0)
         
     i=0
     j=0
     iteration=0
     while iteration<max_iterations:
         k=getK(i,j)
-        print i,j,k
-        k_new=mdp.markov_discrete_pebble(k,mdp.neighbour_table)    
-        (i,j)=mdp.step(k,k_new)
+        k_new=mdp.markov_discrete_pebble(k,mdp.neighbour_table)
+ #       print i,j,k,k_new
+        (i_step,j_step)=mdp.step(k,k_new)
+        i+=i_step
+        j+=j_step
+        counts[n*i+j]+=1
         iteration+=1
     
-explore_space(5,3,10)
+    mean=1.0/(m*n)    
+    sum_sq=0.0    
+
+    for i in range(m*n):
+        diff=counts[i]/float(max_iterations)-mean
+        sum_sq+=(diff*diff)
+        
+    print sum_sq
+    
+explore_space(200,100,100000)
