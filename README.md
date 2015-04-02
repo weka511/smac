@@ -15,6 +15,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
  * smacfiletoken.py
 * 1.4 Use table
  * markov-discrete-pebble.py
+ * large-markov.pi
 
 ### Section 1.2
 * 1.9 Sample permutations
