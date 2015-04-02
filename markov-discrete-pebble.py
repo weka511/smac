@@ -29,35 +29,45 @@ neighbour_table =[
     [8,6]
 ]
 
+def row(cell):
+   return (cell-1) /3;
+    
+def column(cell):
+   return (cell-1)%3
+
+def step(from_cell,to_cell):
+   return (row(to_cell)-row(from_cell),column(to_cell)-column(from_cell))
+
 def markov_discrete_pebble(k,table):
     return random.choice(table[k-1])
 
-ns=[]
-sds=[]
-n=10
-for i in range(7):
-    visits=[0,0,0,0,0,0,0,0,0]
-    k=1
-    for iteration in range(n):
-        visits[k-1]+=1
-        k=markov_discrete_pebble(k,neighbour_table)
-    visits[k-1]+=1
-    
-    sum_sq=0
-    mean=1.0/len(visits)
-    
-    for v in visits:
-        freq= v/float(n)
-        diff=freq-mean
-        print freq, abs(diff)
-        sum_sq+=diff*diff
-    n*=10
-    ns.append(i)
-    sds.append(math.log(sum_sq))
-               
-pylab.plot(ns, sds, 'o')
-pylab.xlabel('Log N trials')
-pylab.ylabel('Log Error')
-pylab.title('Error vs iteration number')
-pylab.savefig('markov-discrete-pebble.png')
-pylab.show()
+if __name__=="__main__":
+   ns=[]
+   sds=[]
+   n=10
+   for i in range(7):
+       visits=[0,0,0,0,0,0,0,0,0]
+       k=1
+       for iteration in range(n):
+           visits[k-1]+=1
+           k=markov_discrete_pebble(k,neighbour_table)
+       visits[k-1]+=1
+       
+       sum_sq=0
+       mean=1.0/len(visits)
+       
+       for v in visits:
+           freq= v/float(n)
+           diff=freq-mean
+           print freq, abs(diff)
+           sum_sq+=diff*diff
+       n*=10
+       ns.append(i)
+       sds.append(math.log(sum_sq))
+                  
+   pylab.plot(ns, sds, 'o')
+   pylab.xlabel('Log N trials')
+   pylab.ylabel('Log Error')
+   pylab.title('Error vs iteration number')
+   pylab.savefig('markov-discrete-pebble.png')
+   pylab.show()
