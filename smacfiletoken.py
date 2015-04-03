@@ -1,4 +1,4 @@
-# token.py
+# smacfiletoken.py
 
 # Copyright (C) 2015 Greenweaves Software Pty Ltd
 
@@ -15,13 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
-import time
-import tempfile
+import os, time, tempfile
 
+def make_temp_file(name):
+    return os.path.join(tempfile.gettempdir(),name)
+    
 class Token:
     def __init__(self,name):
-        self.name=os.path.join(tempfile.gettempdir(),name)
+        self.name=make_temp_file(name)
         self.timeformat="%a, %d %b %Y %H:%M:%S +0000"
     
     def exists(self):

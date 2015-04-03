@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random, math
+import random, math, smacfiletoken as ft
 
 def naive_gauss(k):
     return sum([random.random()-0.5 for kk in range(k)])/math.sqrt(k/12.0)
@@ -26,30 +26,25 @@ if __name__=="__main__":
 m=10
 n=100
 
-def pl(k):
+for k in range(1,12):
     frequencies=[]
     xs=[]
     for i in range(2*m+1):
         xs.append(i)
         frequencies.append(0)
+        
     for i in range(n):
         r=naive_gauss(k)
-        rindex=int(m*(r+1))
-        if (rindex<0):
-#            print rindex
-            rindex=0
-        if (rindex>2*m):
-            print rindex
-            rindex=2*m
+        rindex=int(m*r/math.sqrt(12*k))+m
         frequencies[rindex]+=1
+        
     for i in range(2*m+1):
         frequencies[i]/=float(2*m+1)
- #   pylab.subplot(100+k)   
+ 
     pylab.plot(xs, frequencies, 'o')
-    #pylab.xlabel('Log N trials')
-    #pylab.ylabel('Log Error')
-    #pylab.title('Error vs iteration number')
-    #pylab.savefig('markov-discrete-pebble.png')
-    pylab.show()    
+    pylab.xlabel('Value')
+    pylab.ylabel('Frequency')
+    pylab.title('Gauss')
+    pylab.savefig(ft.make_temp_file('markov-discrete-pebble.png'))
     
-pl(8)
+pylab.show()    
