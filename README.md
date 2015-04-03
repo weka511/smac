@@ -26,7 +26,9 @@ Code I have written for course: *Statistical Mechanics and Computations*
  * permutation-histogram.py
 
 * 1.12 Gauss
- * gauss.py
+ * naivegauss.py
+ * boxmuller.py
+
 ### Section 3 Statistical data analysis
 
 ### Section 1.4 Computing

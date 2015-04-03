@@ -17,14 +17,14 @@
 
 import random, math, smacfiletoken as ft
 
-def naive_gauss(k):
+def gauss(k):
     return sum([random.random()-0.5 for kk in range(k)])/math.sqrt(k/12.0)
 
 if __name__=="__main__":
     import pylab
     
-m=10
-n=100
+m=25
+n=1000
 
 for k in range(1,12):
     frequencies=[]
@@ -34,17 +34,17 @@ for k in range(1,12):
         frequencies.append(0)
         
     for i in range(n):
-        r=naive_gauss(k)
+        r=gauss(k)
         rindex=int(m*r/math.sqrt(12*k))+m
         frequencies[rindex]+=1
         
     for i in range(2*m+1):
         frequencies[i]/=float(2*m+1)
  
-    pylab.plot(xs, frequencies, 'o')
+    pylab.plot(xs, frequencies)
     pylab.xlabel('Value')
     pylab.ylabel('Frequency')
     pylab.title('Gauss')
-    pylab.savefig(ft.make_temp_file('markov-discrete-pebble.png'))
+    pylab.savefig(ft.make_temp_file('gauss.png'))
     
 pylab.show()    
