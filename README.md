@@ -21,10 +21,12 @@ Code I have written for course: *Statistical Mechanics and Computations*
 
 ### Section 1.2 Basic Sampling
 * 1.9 Sample permutations
- *  permutation.py
+ * permutation.py
  * permutation-test.py
  * permutation-histogram.py
 
+* 1.12 Gauss
+ * gauss.py
 ### Section 3 Statistical data analysis
 
 ### Section 1.4 Computing
