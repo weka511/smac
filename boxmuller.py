@@ -17,7 +17,7 @@
 
 import random, math, smacfiletoken as ft, naivegauss
 
-def gauss(sigma):
+def gauss0(sigma):
     phi=random.random()*2*math.pi
     while phi==2*math.pi:phi=random.random()*2*math.pi
     rr=random.random()
@@ -28,12 +28,23 @@ def gauss(sigma):
     y=r*math.sin(phi)
     return (x,y)
 
-if __name__=="__main__":
-    import pylab
-    
+def gauss1(sigma):
+    upsilon1=2
+    while upsilon1==0 or upsilon1>1:
+        x=2*random.random()-1
+        y=2*random.random()-1
+        upsilon1=x*x+y*y
+    upsilon=-math.log(upsilon1)
+    upsilon2=sigma*math.sqrt(2*upsilon/upsilon1)
+    x*=upsilon2*x
+    y*=upsilon2*y
+    return (x,y)
+
+
+
+def get_freq(sigma,gauss):
     m=25
-    n=10000
-    
+    n=10000    
     frequencies=[]
     xs=[]
     for i in range(2*m+1):
@@ -41,7 +52,7 @@ if __name__=="__main__":
         frequencies.append(0)
         
     for i in range(n):
-        r,s=gauss(0.25)
+        r,s=gauss(sigma)
         rindex=int(m*r)+m
         frequencies[rindex]+=1
         rindex=int(m*s)+m
@@ -49,7 +60,11 @@ if __name__=="__main__":
         
     for i in range(2*m+1):
         frequencies[i]/=float(2*m+1)
+    return (xs, frequencies)
     
+if __name__=="__main__":
+    import pylab
+    (xs, frequencies)=get_freq(0.25,gauss0)
     pylab.figure(1)
     pylab.plot(xs, frequencies)
     pylab.xlabel('Value')
@@ -57,7 +72,15 @@ if __name__=="__main__":
     pylab.title('Gauss')
     pylab.savefig(ft.make_temp_file('gauss1.png'))
     
+    (xs, frequencies)=get_freq(0.25,gauss1)
     pylab.figure(2)
+    pylab.plot(xs, frequencies)
+    pylab.xlabel('Value')
+    pylab.ylabel('Frequency')
+    pylab.title('Gauss')
+    pylab.savefig(ft.make_temp_file('gauss1.png'))
+    
+    pylab.figure(3)
     
     (xss,frs)=naivegauss.get_frequencies(12)
     pylab.plot(xss,frs)
