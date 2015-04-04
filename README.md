@@ -30,6 +30,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
  * boxmuller.py
 
 ### Section 3 Statistical data analysis
+* 1.18 Binomial Convolution
+ * binomialconvolution.py
 
 ### Section 1.4 Computing
 
