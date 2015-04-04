@@ -19,8 +19,9 @@ import math
 
 # Algorithm 1.25 from Krauth
 def binomial_convolution(theta,pi):
-    pi1=[0]+pi+[0]
-    return [theta*x + (1-theta)*y for (x,y) in zip(pi1[:-1],pi1[1:])]
+    def calculate_row(pi):
+        return [theta*x + (1-theta)*y for (x,y) in zip(pi[:-1],pi[1:])]
+    return calculate_row([0]+pi+[0])
     
 
 if __name__=="__main__":
