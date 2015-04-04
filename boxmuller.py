@@ -29,15 +29,15 @@ def gauss0(sigma):
     return (x,y)
 
 def gauss1(sigma):
-    upsilon1=2
+    upsilon1=2 # force loop to be executed at least once
     while upsilon1==0 or upsilon1>1:
         x=2*random.random()-1
         y=2*random.random()-1
         upsilon1=x*x+y*y
     upsilon=-math.log(upsilon1)
     upsilon2=sigma*math.sqrt(2*upsilon/upsilon1)
-    x*=upsilon2*x
-    y*=upsilon2*y
+    x*=upsilon2
+    y*=upsilon2
     return (x,y)
 
 
