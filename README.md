@@ -1,7 +1,7 @@
 # Statistical Mechanics and Computations
 Code I have written for course: *Statistical Mechanics and Computations*
  and also to familiarize myself with _git_. Includes exercises from the textbook
-*Statistical Mechanics: Algorithms and Computations,* by *Werner Krauth*.
+*Statistical Mechanics: Algorithms and Computations* by *Werner Krauth*.
 
 ## Chapter 1 Monte Carlo Methods
 

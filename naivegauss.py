@@ -20,13 +20,11 @@ import random, math, smacfiletoken as ft
 def gauss(k):
     return sum([random.random()-0.5 for kk in range(k)])/math.sqrt(k/12.0)
 
-if __name__=="__main__":
-    import pylab
-    
+
 m=25
 n=1000
 
-for k in range(1,12):
+def get_frequencies(k):
     frequencies=[]
     xs=[]
     for i in range(2*m+1):
@@ -41,10 +39,17 @@ for k in range(1,12):
     for i in range(2*m+1):
         frequencies[i]/=float(2*m+1)
  
-    pylab.plot(xs, frequencies)
-    pylab.xlabel('Value')
-    pylab.ylabel('Frequency')
-    pylab.title('Gauss')
-    pylab.savefig(ft.make_temp_file('gauss.png'))
+    return (xs,frequencies)
+
+if __name__=="__main__":
+    import pylab
     
-pylab.show()    
+    for k in range(1,12):
+        (xs,frequencies)=get_frequencies(k)
+        pylab.plot(xs,frequencies)
+        pylab.xlabel('Value')
+        pylab.ylabel('Frequency')
+        pylab.title('Gauss')
+        pylab.savefig(ft.make_temp_file('gauss.png'))
+        
+    pylab.show()    
