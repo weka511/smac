@@ -26,8 +26,11 @@ def direct_gamma_zeta(gamma,zeta,n):
     return (mean,math.sqrt(sigma2/n-mean*mean)/math.sqrt(n))
 
 def run(zeta,n):
+    print(zeta)
     for gamma in [2.0,1.0,0.0,-0.1,-0.4,-0.8]:
         (s,t)=direct_gamma_zeta(gamma,zeta,n)
-        print gamma, s-t,s+t, 1/(gamma+1)
+        print gamma, s-t,s+t, (zeta+1)/(gamma+1)
             
-        
+if __name__=="__main__":
+    for zeta in [0.0, -0.1, -0.7]:
+        run(zeta,1000)

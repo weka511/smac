@@ -36,5 +36,6 @@ Code I have written for course: *Statistical Mechanics and Computations*
 ### Section 1.4 Computing
  * 1.22 Importance sampling
   * direct.gamma-zeta.py
+  * markov-zeta.py
 
 
