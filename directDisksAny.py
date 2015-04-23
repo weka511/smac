@@ -30,4 +30,13 @@ def direct_disks_any(n,l_x,l_y):
    return math.pi*0.5*sigma_squared*n/(l_x*l_y)
    
 
-print direct_disks_any(10,1,1)
+#print direct_disks_any(10,1,1)
+
+etas=[]
+
+for i in range(100000):
+   etas.append(direct_disks_any(16,1,1))
+   
+n, bins, patches = pylab.hist(etas,50)
+
+pylab(show)
