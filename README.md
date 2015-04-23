@@ -29,7 +29,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
  * naivegauss.py
  * boxmuller.py
 
-### Section 3 Statistical data analysis
+### Section 1.3 Statistical data analysis
 * 1.18 Binomial Convolution
  * binomialconvolution.py
 
@@ -37,5 +37,12 @@ Code I have written for course: *Statistical Mechanics and Computations*
  * 1.22 Importance sampling
   * direct.gamma-zeta.py
   * markov-zeta.py
+
+## Chapter 2 Hard Disks and Spheres
+
+### Section 2.2 Boltzmann's Statistical Mechanics
+ * directDisksAny.py
+
+
 
 
