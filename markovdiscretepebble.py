@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random, math, pylab
+import random, math, matplotlib.pyplot as plt
 
 neighbour_table =[
     [2,4],
@@ -65,9 +65,9 @@ if __name__=="__main__":
        ns.append(i)
        sds.append(math.log(sum_sq))
                   
-   pylab.plot(ns, sds, 'o')
-   pylab.xlabel('Log N trials')
-   pylab.ylabel('Log Error')
-   pylab.title('Error vs iteration number')
-   pylab.savefig('markov-discrete-pebble.png')
-   pylab.show()
+   plt.plot(ns, sds, 'o')
+   plt.xlabel('Log N trials')
+   plt.ylabel('Log Error')
+   plt.title('Error vs iteration number')
+   plt.savefig('markov-discrete-pebble.png')
+   plt.show()

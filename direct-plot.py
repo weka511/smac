@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random,math,pylab
+import random,math,matplotlib.pyplot as plt
 
 n_trials=10
 
@@ -34,9 +34,9 @@ for n in range(8):
     errors.append(math.log(error))
     iterations.append(n)    
     
-pylab.plot(iterations, errors, 'o')
-pylab.xlabel('Log N trials')
-pylab.ylabel('Log Error')
-pylab.title('Error vs iteration number')
-pylab.savefig('direct-plot.png')
-pylab.show()
+plt.plot(iterations, errors, 'o')
+plt.xlabel('Log N trials')
+plt.ylabel('Log Error')
+plt.title('Error vs iteration number')
+plt.savefig('direct-plot.png')
+plt.show()

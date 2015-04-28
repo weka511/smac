@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
-import random, pylab
+import random, matplotlib.pyplot as plt
 
 def markov_zeta(delta,zeta,x):
     x_bar=x+2*delta*random.random()-delta
@@ -32,8 +32,8 @@ if __name__=="__main__":
     for i in range(0,n):
         x=markov_zeta(delta,zeta,x)
         xs.append(x)
-    pylab.figure(1)   
-    pylab.plot(xs)
+    plt.figure(1)   
+    plt.plot(xs)
     
     x=1
     zeta=-1.6
@@ -42,5 +42,5 @@ if __name__=="__main__":
     for i in range(0,n):
         x=markov_zeta(delta,zeta,x)
         xs.append(x)
-    pylab.figure(2)    
-    pylab.plot(xs)
+    plt.figure(2)    
+    plt.plot(xs)

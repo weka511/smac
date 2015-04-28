@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random, math, pylab
+import random, math, matplotlib.pyplot as plt
 
 
 def float_range(lower,upper,step):
@@ -58,18 +58,18 @@ for delta in deltas:
     errors.append(mean_sq)
     rejections.append(mean_reject)
  
-pylab.figure(1) 
-pylab.subplot(211)    
-pylab.plot(deltas, normalize(errors), 'o',deltas,rejections,'+')
-pylab.xlabel('Delta')
-pylab.ylabel('Error')
-pylab.title('Error and rejection rate vs step size')
+plt.figure(1) 
+plt.subplot(211)    
+plt.plot(deltas, normalize(errors), 'o',deltas,rejections,'+')
+plt.xlabel('Delta')
+plt.ylabel('Error')
+plt.title('Error and rejection rate vs step size')
 
-pylab.subplot(212)
-pylab.plot(rejections, errors,'x')
-pylab.xlabel('Rejection')
-pylab.ylabel('Error')
-pylab.title('Error vs rejection rate')
-pylab.savefig('markov-pi.png')
+plt.subplot(212)
+plt.plot(rejections, errors,'x')
+plt.xlabel('Rejection')
+plt.ylabel('Error')
+plt.title('Error vs rejection rate')
+plt.savefig('markov-pi.png')
 
-pylab.show()
+plt.show()
