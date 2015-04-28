@@ -28,7 +28,7 @@ def gauss0(sigma):
     y=r*math.sin(phi)
     return (x,y)
 
-def gauss1(sigma):
+def gauss(sigma=1.0):
     upsilon1=2 # force loop to be executed at least once
     while upsilon1==0 or upsilon1>1:
         x=2*random.random()-1
@@ -40,53 +40,18 @@ def gauss1(sigma):
     y*=upsilon2
     return (x,y)
 
-
-
-def get_freq(sigma,gauss):
-    m=25
-    n=10000    
-    frequencies=[]
-    xs=[]
-    for i in range(2*m+1):
-        xs.append(i)
-        frequencies.append(0)
-        
-    for i in range(n):
-        r,s=gauss(sigma)
-        rindex=int(m*r)+m
-        frequencies[rindex]+=1
-        rindex=int(m*s)+m
-        frequencies[rindex]+=1
-        
-    for i in range(2*m+1):
-        frequencies[i]/=float(2*m+1)
-    return (xs, frequencies)
     
 if __name__=="__main__":
     import matplotlib.pyplot as plt
-    (xs, frequencies)=get_freq(0.25,gauss0)
-    plt.figure(1)
-    plt.plot(xs, frequencies)
-    plt.xlabel('Value')
-    plt.ylabel('Frequency')
-    plt.title('Gauss')
-    plt.savefig(ft.make_temp_file('gauss1.png'))
-    
-    (xs, frequencies)=get_freq(0.25,gauss1)
-    plt.figure(2)
-    plt.plot(xs, frequencies)
-    plt.xlabel('Value')
-    plt.ylabel('Frequency')
-    plt.title('Gauss')
-    plt.savefig(ft.make_temp_file('gauss1.png'))
-    
-    plt.figure(3)
-    
-    (xss,frs)=naivegauss.get_frequencies(12)
-    plt.plot(xss,frs)
-    plt.xlabel('Value')
-    plt.ylabel('Frequency')
-    plt.title('Gauss')
-    plt.savefig(ft.make_temp_file('gauss2.png'))
-        
+    gaussian_numbers=[]
+    for i in range(1000000):
+        (x,y)=gauss()
+        gaussian_numbers.append(x)
+        gaussian_numbers.append(y)   
+    plt.hist(gaussian_numbers,bins=200)
+    plt.title("Gaussian Histogram")
+    plt.xlabel("Value")
+    plt.ylabel("Frequency")
     plt.show()    
+
+ 
