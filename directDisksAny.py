@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random, math, pylab
+import random, math, matplotlib.pyplot as plt
 
 def distance(z1,z2):
    return (z1[0]-z2[0])*(z1[0]-z2[0])+(z1[1]-z2[1])*(z1[1]-z2[1])
@@ -37,6 +37,6 @@ etas=[]
 for i in range(100000):
    etas.append(direct_disks_any(16,1,1))
    
-n, bins, patches = pylab.hist(etas,50)
+n, bins, patches = plt.hist(etas,50)
 
-pylab(show)
+plt.show()
