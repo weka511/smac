@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random, math, smacfiletoken as ft, naivegauss
+import random, math
 
 def gauss0(sigma):
     phi=random.random()*2*math.pi
@@ -28,7 +28,7 @@ def gauss0(sigma):
     y=r*math.sin(phi)
     return (x,y)
 
-def gauss(sigma=1.0):
+def box_muller(sigma=1.0):
     upsilon1=2 # force loop to be executed at least once
     while upsilon1==0 or upsilon1>1:
         x=2*random.random()-1
@@ -40,15 +40,28 @@ def gauss(sigma=1.0):
     y*=upsilon2
     return (x,y)
 
-    
+even=True
+next_value=0
+
+def gauss(sigma=1.0):
+    global even
+    global next_value
+    if even:
+       (value,next_value)=box_muller(sigma)
+    else:
+        value=next_value
+    even= not even
+    return value
+
 if __name__=="__main__":
     import matplotlib.pyplot as plt
     gaussian_numbers=[]
     for i in range(1000000):
-        (x,y)=gauss()
-        gaussian_numbers.append(x)
-        gaussian_numbers.append(y)   
-    plt.hist(gaussian_numbers,bins=200)
+        gaussian_numbers.append(gauss())
+        #(x,y)=gauss()
+        #gaussian_numbers.append(x)
+        #gaussian_numbers.append(y)   
+    plt.hist(gaussian_numbers,bins=200,normed=True)
     plt.title("Gaussian Histogram")
     plt.xlabel("Value")
     plt.ylabel("Frequency")

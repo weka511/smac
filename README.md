@@ -18,6 +18,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
  * large-markov.pi
 * 1.8 Eigenvalues of transfer matrix
  * transfer.m
+* 1.13 Vectors within Uniform sphere
+ * sphere-test.py
 
 ### Section 1.2 Basic Sampling
 * 1.9 Sample permutations
