@@ -5,6 +5,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 
 ## Chapter 1 Monte Carlo Methods
 
+ * smac.c   Useful functions
+
 ### Section 1.1 Popular Games in Monaco
 * 1.1 Implement Algorithm 1.1. Plot error and investigate relationship with N.
  * direct-plot.py

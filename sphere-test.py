@@ -15,13 +15,37 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import boxmuller, math
+import boxmuller, math, random,numpy, smac
 
 
-def direct_surface(d):
-    sigma=1.0/math.sqrt(d)    
-    xs=[boxmuller.gauss(sigma) for k in range(d)] 
-    Sigma=sum(x*x for x in xs)
-    return [x/Sigma for x in xs]
 
-print direct_surface(5)
+def accept(d):
+    xs = direct_sphere(d)
+    xs.append(2.0*random.random()-1)
+#    print xs
+    sumsq=sum ([x*x for x in xs])
+#    print sumsq
+    return sumsq<=1
+
+def acceptance_ratio(d,n):
+    count=0
+    for i in range(n):
+        if accept(d): count+=1
+    return float(count)/n
+
+if __name__=="__main__":
+#    print direct_sphere(10)
+#    print acceptance_ratio(250,1000)
+#    print acceptance_ratio(250,1000)*acceptance_ratio(251,1000), math.pi/(252/2)
+    import matplotlib.pyplot as plt
+    sg=smac.SphereGenerator(300000)
+    xx=sg.direct_sphere()
+    energies=[]
+    for i in range(len(xx)/3):
+        energies.append( xx[3*i]*xx[3*i] + xx[3*i+1]*xx[3*i+1] + xx[3*i+2]*xx[3*i+2] )
+    plt.hist(energies,bins=500)
+    plt.title("Gaussian Histogram")
+    plt.xlabel("Value")
+    plt.ylabel("Frequency")
+    plt.show()          
+        
