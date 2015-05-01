@@ -62,7 +62,8 @@ class SphereGenerator:
     def __init__(self,d,sigma=1.0,gauss=BoxMuller(1.0)):
         self.d=d
         self.gauss=gauss
-
+        self.n=3
+        
     def root_sigma(self,xs):
         Sigma=sum(x*x for x in xs)
         return math.sqrt(Sigma)
@@ -71,14 +72,29 @@ class SphereGenerator:
         xs=[self.gauss.gauss() for k in range(self.d)] 
         upsilon=random.random()**(1.0/self.d)
         RootSigma=self.root_sigma(xs)
-        return [upsilon*x/RootSigma for x in xs]
+        return extract_points([upsilon*x/RootSigma for x in xs],self.n)
         
     def direct_surface(self):
         sigma=1.0/math.sqrt(self.d)    
         xs=[gauss.gauss() for k in range(self.d)] 
         Sigma=sum(x*x for x in xs)
         return [x/Sigma for x in xs]   
-        
+
+def extract_points(xs,n):
+    if len(xs)%n==0:
+        i=0
+        result=[]
+        point=[]
+        while i<len(xs):
+            for k in range(n):
+                point.append(xs[i])
+                i+=1
+            result.append(tuple(point))
+            point=[]
+        return result 
+    else:
+        raise ValueError("Dimension {0} does not divide {1} length exactly".format(n,len(xs)))
+    
 if __name__=="__main__":
     print "Library only"
     

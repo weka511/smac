@@ -38,11 +38,9 @@ if __name__=="__main__":
 #    print acceptance_ratio(250,1000)
 #    print acceptance_ratio(250,1000)*acceptance_ratio(251,1000), math.pi/(252/2)
     import matplotlib.pyplot as plt
-    sg=smac.SphereGenerator(300000)
-    xx=sg.direct_sphere()
-    energies=[]
-    for i in range(len(xx)/3):
-        energies.append( xx[3*i]*xx[3*i] + xx[3*i+1]*xx[3*i+1] + xx[3*i+2]*xx[3*i+2] )
+    N=1000000
+    sg=smac.SphereGenerator(3*N)
+    energies=[x*x+y*y+z*z for (x,y,z) in sg.direct_sphere()]
     plt.hist(energies,bins=500)
     plt.title("Gaussian Histogram")
     plt.xlabel("Value")
