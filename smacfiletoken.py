@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
+# Problem 1.3 from Werner Krauth, Statistical Mechanics, Algorithms & Computations
+# Tested using direct.py (Problem 1.1)
+
 import os, time, tempfile
 
 def make_temp_file(name):
@@ -26,7 +29,7 @@ class Token:
         self.timeformat="%a, %d %b %Y %H:%M:%S +0000"
     
     def exists(self):
-       return os.path.isfile(self.name)
+        return os.path.isfile(self.name)
        
     def read(self,initial):
         if self.exists():
@@ -58,7 +61,9 @@ class Token:
     def precedes(self,other):
         return self.time<other.time
 
-            
+# This class allows Tokens to be stored in a Regisrty file
+# Or retrieved, and it also manages kill Tokens
+
 class Registry:
     def __init__(self,kill_token="kill.txt"):
         self.tokens=[]
@@ -87,10 +92,10 @@ class Registry:
               latestToken=token
         return latestToken.read(initial)
     def is_kill_token_present(self):
-       if os.path.isfile(self.kill_token):
-           print "killing"
-           os.remove(self.kill_token)
-           return True
-       else:
-           return False
+        if os.path.isfile(self.kill_token):
+            print ("killing")
+            os.remove(self.kill_token)
+            return True
+        else:
+            return False
    

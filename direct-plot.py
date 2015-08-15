@@ -18,10 +18,12 @@
 import random,math,matplotlib.pyplot as plt
 
 n_trials=10
+mult = 2
 
 errors=[]
 iterations=[]
-for n in range(8):
+for n in range(12):
+    print ('n=%(n)d,n_trials=%(n_trials)d'%locals())
     error=0
     for i in range(20):
         n_hits=0
@@ -30,7 +32,7 @@ for n in range(8):
             if x*x + y*y < 1.0:  n_hits += 1
         pi_approx=4.0 * n_hits / float(n_trials)
         error+=(math.pi-pi_approx)*(math.pi-pi_approx)
-    n_trials *= 10
+    n_trials *= mult
     errors.append(math.log(error))
     iterations.append(n)    
     

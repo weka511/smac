@@ -38,7 +38,7 @@ if __name__=="__main__":
 #    print acceptance_ratio(250,1000)
 #    print acceptance_ratio(250,1000)*acceptance_ratio(251,1000), math.pi/(252/2)
     import matplotlib.pyplot as plt
-    N=100000
+    N=1000000
     sg=smac.SphereGenerator(3,N)
     energies=[x*x+y*y+z*z for (x,y,z) in sg.direct_sphere()]
     plt.hist(energies,bins=500)

@@ -15,12 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random, math, matplotlib.pyplot as plt
+# Problem 1.2 from Werner Krauth, Statistical Mechanics, Algorithms & Computations
 
+import random, math, matplotlib.pyplot as plt
 
 def float_range(lower,upper,step):
     return [step*i for i in range(lower,upper+1)]
 
+# Calculate normalized errors, uisng the maximum as our normalization.
+# Normalized errors range from 0 to 1
 def normalize(xs):
     m=max(xs)
     return [x/m for x in xs]
@@ -40,36 +43,40 @@ def perform_markov(n_trials,delta):
     
     return (4.0 * n_hits / float(n_trials), n_reject/ float(n_trials))
 
-n=25
-errors=[]
-deltas=float_range(1,30,0.1)
-rejections=[]
-n_trials=400000
-for delta in deltas:
-    sum_sq=0
-    sum_reject=0
-    for i in range(n):
-        (result,reject)=perform_markov(n_trials,delta)
-        error=result-math.pi
-        sum_sq+=error*error
-        sum_reject+=reject
-    mean_sq=sum_sq/n
-    mean_reject=sum_reject/n
-    errors.append(mean_sq)
-    rejections.append(mean_reject)
- 
-plt.figure(1) 
-plt.subplot(211)    
-plt.plot(deltas, normalize(errors), 'o',deltas,rejections,'+')
-plt.xlabel('Delta')
-plt.ylabel('Error')
-plt.title('Error and rejection rate vs step size')
+if __name__=='__main__':
+    n=25
+    errors=[]
+    deltas=float_range(1,30,0.1)
+    rejections=[]
+    n_trials=400000
+    for delta in deltas:
+        sum_sq=0
+        sum_reject=0
+        for i in range(n):
+            (result,reject)=perform_markov(n_trials,delta)
+            error=result-math.pi
+            sum_sq+=error*error
+            sum_reject+=reject
+        mean_sq=sum_sq/n
+        mean_reject=sum_reject/n
+        errors.append(mean_sq)
+        rejections.append(mean_reject)
+     
+    plt.figure(1) 
+    plt.subplot(211)
+    plt.plot(deltas, normalize(errors), 'o', label='Errors')
+    plt.plot(deltas, rejections,'+', label='Rejections')
+    plt.xlabel('Delta')
+    plt.ylabel('Error')
+    plt.title('Error and rejection rate vs step size')
+    legend = plt.legend(loc='upper center', shadow=True, fontsize='x-large')
+    legend.get_frame().set_facecolor('#00FFCC')    
 
-plt.subplot(212)
-plt.plot(rejections, errors,'x')
-plt.xlabel('Rejection')
-plt.ylabel('Error')
-plt.title('Error vs rejection rate')
-plt.savefig('markov-pi.png')
-
-plt.show()
+    plt.subplot(212)
+    plt.plot(rejections[1:], errors[1:],'x')
+    plt.xlabel('Rejection')
+    plt.ylabel('Error')
+    plt.title('Error vs rejection rate')
+    plt.savefig('markov-pi.png')
+    
+    plt.show()
