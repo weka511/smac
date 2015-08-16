@@ -15,56 +15,81 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random, math, matplotlib.pyplot as plt
+import random, math, numpy as np, matplotlib.pyplot as plt
+
+# Table 1.3 (0-8 instead of 1-9)
 
 neighbour_table =[
-    [2,4],
-    [3,5,1],
-    [6,2],
-    [5,7,1],
-    [6,8,4,2],
-    [9,5,3],
-    [8,4],
-    [9,7,5],
-    [8,6]
+    [ 1,  3, -1, -1],
+    [ 2,  4,  0, -1],
+    [-1,  5,  1, -1],
+    [ 4,  6, -1,  0],
+    [ 5,  7,  3,  1],
+    [-1,  8,  4,  2],
+    [ 7, -1, -1,  3],
+    [ 8, -1,  6,  4],
+    [-1, -1,  7,  5]
 ]
 
 def row(cell):
-   return (cell-1) /3;
+   return cell //3
     
 def column(cell):
-   return (cell-1)%3
+   return cell%3
 
 def step(from_cell,to_cell):
    return (row(to_cell)-row(from_cell),column(to_cell)-column(from_cell))
 
 def markov_discrete_pebble(k,table):
-    return random.choice(table[k-1])
+   k_next=random.choice(table[k])
+   if k_next==-1:
+      return k
+   else:
+      return k_next
 
+def markov_visits(m,n,i,j,N):
+   def index(i,j):
+      def index(ii,mm):
+         if ii==0:
+            return 0
+         elif ii==mm-1:
+            return 2
+         else:
+            return 1
+      row_index=index(i,m)
+      col_index=index(j,n)
+      return row_index*3+col_index   
+   visits=np.zeros((m,n),dtype=int)
+   k=index(i,j)
+   for trial in range(N):
+      k_next = markov_discrete_pebble(k,neighbour_table)
+      r = row(k)
+      col = column(k)
+      di,dj = step(k,k_next)
+      i+=di
+      j+=dj
+      visits[i,j]+=1
+      k=index(i,j)
+   frequencies=np.zeros((m,n),dtype=float)
+   for i in range(m):
+      for j in range(n):
+         frequencies[i,j]=visits[i,j]/N
+   return frequencies
+ 
+     
 if __name__=="__main__":
+   
+   N=1
    ns=[]
    sds=[]
-   n=10
-   for i in range(7):
-       visits=[0,0,0,0,0,0,0,0,0]
-       k=1
-       for iteration in range(n):
-           visits[k-1]+=1
-           k=markov_discrete_pebble(k,neighbour_table)
-       visits[k-1]+=1
-       
-       sum_sq=0
-       mean=1.0/len(visits)
-       
-       for v in visits:
-           freq= v/float(n)
-           diff=freq-mean
-           print freq, abs(diff)
-           sum_sq+=diff*diff
-       n*=10
-       ns.append(i)
-       sds.append(math.log(sum_sq))
-                  
+   for i in range(6):
+      N*=10
+      m=10
+      n=20
+      frequencies=markov_visits(m,n,0,0,N)
+      ns.append(math.log(N))
+      sds.append(math.log(np.std(frequencies)))
+      
    plt.plot(ns, sds, 'o')
    plt.xlabel('Log N trials')
    plt.ylabel('Log Error')
