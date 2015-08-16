@@ -78,17 +78,16 @@ def markov_visits(m,n,i,j,N):
  
      
 if __name__=="__main__":
-   
+   m=51
+   n=91   
    N=1
    ns=[]
    sds=[]
-   for i in range(6):
+   for i in range(7):
       N*=10
-      m=10
-      n=20
       frequencies=markov_visits(m,n,0,0,N)
       ns.append(math.log(N))
-      sds.append(math.log(np.std(frequencies)))
+      sds.append(math.log(np.std(frequencies)/np.mean(frequencies)))
       
    plt.plot(ns, sds, 'o')
    plt.xlabel('Log N trials')
