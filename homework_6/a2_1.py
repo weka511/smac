@@ -1,6 +1,9 @@
 '''
 This program encompasses both version of the program from step A2.
+Function mcmc carries out the Markov Chain Monte Carlo evolution,
+and plot produces the graphs.
 '''
+
 import random, math, pylab
 
 alpha = 0.5
@@ -12,8 +15,15 @@ def gauss_cut(cut=1.0):
         if abs(x) <= cut:
             return x
         
-def mc(proposer=lambda: random.uniform(-1.0, 1.0),
+def mcmc(proposer=lambda: random.uniform(-1.0, 1.0),
        accepter=lambda u:math.exp(-0.5 * u ** 2 - alpha * u ** 4 )):
+    '''
+    Perform Markov Chain Monte Carlo evolution
+    
+    Arguments:
+        proposer   Propose data to be used for the next step
+        accepter   Decide whether to accept propsed value
+    '''
     samples_x = []
     samples_y = []
     x, y = 0.0, 0.0
@@ -43,12 +53,16 @@ def plot(name,samples_x, samples_y):
     pylab.title(name)
     pylab.savefig('{0}.png'.format(name))
 
+# Evolve and plot with uniform distribution
+
 pylab.figure(1)    
-(samples_x, samples_y)=mc()
+(samples_x, samples_y)=mcmc()
 plot('A2_1',samples_x, samples_y)
 
+# Evolve and plot with gauss_cut
+
 pylab.figure(2) 
-(samples_x, samples_y)=mc(proposer=gauss_cut, 
+(samples_x, samples_y)=mcmc(proposer=gauss_cut, 
                           accepter=lambda u:math.exp(- alpha * u ** 4 ))
 plot('A2_2',samples_x, samples_y)
 
