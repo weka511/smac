@@ -1,3 +1,6 @@
+'''
+This program encompasses both version of the program from step A2.
+'''
 import random, math, pylab
 
 alpha = 0.5
