@@ -1,3 +1,9 @@
+'''
+This program encompasses both version of the program from step A2.
+Function mcmc carries out the Markov Chain Monte Carlo evolution,
+and plot produces the graphs.
+'''
+
 import random, math, pylab
 
 def gauss_cut(cut=1.0):
@@ -11,6 +17,13 @@ nsamples = 1000000
 
 def select(proposer=lambda: random.uniform(-1.0, 1.0),
        accepter=lambda u:math.exp(-0.5 * u ** 2 - alpha * u ** 4 )):
+    '''
+    Perform direct sampling Monte Carlo evolution
+    
+    Arguments:
+        proposer   Propose data to be used for the next step
+        accepter   Decide whether to accept propsed value
+    '''    
     samples_x = []
     samples_y = []
     for sample in range(nsamples):
