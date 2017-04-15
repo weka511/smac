@@ -16,7 +16,7 @@ alpha = 0.5
 nsamples = 1000000
 
 def select(proposer=lambda: random.uniform(-1.0, 1.0),
-       accepter=lambda u:math.exp(-0.5 * u ** 2 - alpha * u ** 4 )):
+           accepter=lambda x,y: math.exp(-0.5 * (x ** 2 + y ** 2) - alpha * (x ** 4 + y ** 4))):
     '''
     Perform direct sampling Monte Carlo evolution
     
@@ -28,9 +28,9 @@ def select(proposer=lambda: random.uniform(-1.0, 1.0),
     samples_y = []
     for sample in range(nsamples):
         while True:
-            x = gauss_cut()
-            y = gauss_cut()
-            p = math.exp( - alpha * (x ** 4 + y ** 4))
+            x = proposer()
+            y = proposer()
+            p = accepter(x,y)
             if random.uniform(0.0, 1.0) < p:
                 break
         samples_x.append(x)
@@ -57,7 +57,7 @@ plot('A1_1',samples_x, samples_y)
 
 pylab.figure(2) 
 (samples_x, samples_y)=select(proposer=gauss_cut, 
-                          accepter=lambda u:math.exp(- alpha * u ** 4 ))
+                              accepter=lambda x,y: math.exp(- alpha * (x ** 4 + y ** 4)))
 plot('A1_2',samples_x, samples_y)
 
 pylab.show()
