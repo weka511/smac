@@ -7,4 +7,4 @@ for k in range(100000):
     if random.uniform(0.0, 1.0) <  \
          math.exp (- x_new ** 2 / 2.0) / math.exp (- x ** 2 / 2.0): 
         x = x_new 
-    print x
+    print (x)
