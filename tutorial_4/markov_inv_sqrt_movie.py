@@ -11,8 +11,8 @@ for k in range(n_trials):
         if random.uniform(0.0, 1.0) < math.sqrt(x) / math.sqrt(x_new): 
             x = x_new 
     if 1.0 / math.sqrt(x) > y_max: 
-         y_max =  1.0 / math.sqrt(x)
-         print (y_max, x, k)
+        y_max =  1.0 / math.sqrt(x)
+        print (y_max, x, k)
     data.append(x)
 
 pylab.hist(data, bins=100, normed='True')

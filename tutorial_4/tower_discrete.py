@@ -17,7 +17,7 @@ def bisection_search(eta, w_cumulative):
 def tower_sample(weights):
     sum_w = sum(weights)
     w_cumulative = [0.0]
-    for l in xrange(len(weights)):
+    for l in range(len(weights)):
         w_cumulative.append(w_cumulative[l] + weights[l])
     eta = random.random() * sum_w
     sampled_choice = bisection_search(eta, w_cumulative)
@@ -25,6 +25,6 @@ def tower_sample(weights):
 
 weights = [0.4, 0.3, 0.8, 0.1, 0.2]
 n_samples = 20
-for sample in xrange(n_samples):
-    print tower_sample(weights)
+for sample in range(n_samples):
+    print (tower_sample(weights))
 
