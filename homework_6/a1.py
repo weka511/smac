@@ -1,6 +1,8 @@
 '''
-This program encompasses both version of the program from step A2.
-Function mcmc carries out the Markov Chain Monte Carlo evolution,
+Path sampling: A firework of algorithms
+
+This program encompasses both version of the program from step A1.
+Function evolve carries out the Markov Chain Monte Carlo evolution,
 and plot produces the graphs.
 '''
 
@@ -15,7 +17,7 @@ def gauss_cut(cut=1.0):
 alpha = 0.5
 nsamples = 1000000
 
-def select(proposer=lambda: random.uniform(-1.0, 1.0),
+def evolve(proposer=lambda: random.uniform(-1.0, 1.0),
            accepter=lambda x,y: math.exp(-0.5 * (x ** 2 + y ** 2) - alpha * (x ** 4 + y ** 4))):
     '''
     Perform direct sampling Monte Carlo evolution
@@ -50,13 +52,13 @@ def plot(name,samples_x, samples_y):
 # Evolve and plot with uniform distribution
 
 pylab.figure(1)    
-(samples_x, samples_y)=select()
+(samples_x, samples_y)=evolve()
 plot('A1_1',samples_x, samples_y)
 
 # Evolve and plot with gauss_cut
 
 pylab.figure(2) 
-(samples_x, samples_y)=select(proposer=gauss_cut, 
+(samples_x, samples_y)=evolve(proposer=gauss_cut, 
                               accepter=lambda x,y: math.exp(- alpha * (x ** 4 + y ** 4)))
 plot('A1_2',samples_x, samples_y)
 
