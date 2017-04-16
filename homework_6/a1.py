@@ -14,7 +14,7 @@ def gauss_cut(cut=1.0):
         if abs(x) <= cut:
             return x
 
-def compare(x1s,y1s,x2s,y2s,bins=(10,10),xmin=-1,xmax=+1,ymin=-1,ymax=+1):
+def compare(x1s,y1s,x2s,y2s,bins=(30,30),xmin=-1,xmax=+1,ymin=-1,ymax=+1):
     w,h=bins
     def histogram(xs,ys):
         def index (u,umin,umax,r):
@@ -27,7 +27,7 @@ def compare(x1s,y1s,x2s,y2s,bins=(10,10),xmin=-1,xmax=+1,ymin=-1,ymax=+1):
         return counts
     h1=[item for sublist in histogram(x1s,y1s) for item in sublist]
     h2=[item for sublist in histogram(x2s,y2s) for item in sublist]
-    h3=[abs (a/b if b>0 else a) for (a,b) in zip(h1,h2)]
+    h3=[abs (a/b if b>0 else 1 if a==0 else 0) for (a,b) in zip(h1,h2)]
     iis = [i for i in range(len(h1))]
     pylab.plot(iis,h3,'g') # iis,h1,'r',iis,h2,'b',
     
@@ -89,5 +89,12 @@ compare(x1s,y1s,x2s,y2s)
 
 pylab.figure(5)
 compare(x1s,y1s,x3s,y3s)
+
+pylab.figure(6) 
+(x6s, y6s)=evolve(accepter=lambda x,y: math.exp(- alpha * (x ** 4 + y ** 4)))
+plot('A1_2',x6s, y6s)
+
+pylab.figure(7)
+compare(x1s,y1s,x6s,y6s)
 
 pylab.show()
