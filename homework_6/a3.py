@@ -54,7 +54,8 @@ alpha = 0.5
 nsteps = 1000000
 
 def evolve(proposer=lambda: random.uniform(-1.0, 1.0),
-          accepter=lambda x,y: math.exp(-0.5 * (x ** 2 + y ** 2) - alpha * (x ** 4 + y ** 4))):
+          accepter=lambda x,y: (-0.5 * (x ** 2 + y ** 2) - alpha * (x ** 4 + y ** 4)),
+          balance= lambda exp_new,exp_old: math.exp(exp_new - exp_old)):
     samples_x = []
     samples_y = []
     x, y = 0.0, 0.0
@@ -63,7 +64,7 @@ def evolve(proposer=lambda: random.uniform(-1.0, 1.0),
         ynew = proposer()
         exp_new = accepter(xnew,ynew)
         exp_old = accepter(x,y)
-        if random.uniform(0.0, 1.0) < math.exp(exp_new - exp_old):
+        if random.uniform(0.0, 1.0) < balance(exp_new,exp_old):
             x = xnew
             y = ynew
         samples_x.append(x)
@@ -89,7 +90,7 @@ plot('A3_1',x1s, y1s)
 
 pylab.figure(2) 
 (x2s, y2s)=evolve(proposer=gauss_cut, 
-                  accepter=lambda x,y: math.exp(- alpha * (x ** 4 + y ** 4)))
+                  accepter=lambda x,y: (- alpha * (x ** 4 + y ** 4)))
 plot('A3_2',x2s, y2s)
 
 pylab.figure(3)
