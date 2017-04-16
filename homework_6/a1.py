@@ -2,8 +2,9 @@
 Path sampling: A firework of algorithms
 
 This program encompasses both version of the program from step A1.
-Function evolve carries out the Markov Chain Monte Carlo evolution,
-and plot produces the graphs.
+Function 'evolve' carries out the Markov Chain Monte Carlo evolution,
+plot produces the graphs, and 'compare' allows us to judge whether the
+distributions match.
 '''
 
 import random, math, pylab
@@ -14,8 +15,26 @@ def gauss_cut(cut=1.0):
         if abs(x) <= cut:
             return x
 
-def compare(x1s,y1s,x2s,y2s,bins=(30,30),xmin=-1,xmax=+1,ymin=-1,ymax=+1):
+def compare(x1s,y1s,x2s,y2s,bins=(30,30),xrange=(-1,+1),yrange=(-1,1)):
+    '''
+    Compare samples from two 2D distribitions by generating counts for two
+    histograms, then calculating and plotting ratios.
+    
+    Ideally we should see small random variations about unity, not
+    systematic differences, as long as the two distributions are the same.
+    
+    Arguments:
+        x1s     X coordinates of points sampled from 1st distibution
+        y1s     Y coordinates of points sampled from 1st distibution
+        x2s     X coordinates of points sampled from 2nd distibution
+        y2s     Y coordinates of points sampled from 2nd distibution
+        bins    Number of bins (X & Y) for data
+        xrange  Range of x data
+        yrange  Range of y data
+    '''
     w,h=bins
+    xmin,xmax=xrange
+    ymin,ymax=yrange
     def histogram(xs,ys):
         def index (u,umin,umax,r):
             return int((r-1)*(u-umin)/(umax-umin))
