@@ -23,8 +23,8 @@ def evolve(proposer=lambda: random.uniform(-1.0, 1.0),
     Perform Markov Chain Monte Carlo evolution
     
     Arguments:
-        proposer   Propose data to be used for the next step
-        accepter   Decide whether to accept propsed value
+        proposer   Function which proposes data to be used for the next step
+        accepter   Function which decides whether to accept proposed value
     '''
     samples_x = []
     samples_y = []

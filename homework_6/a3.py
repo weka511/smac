@@ -1,3 +1,7 @@
+'''
+Peer-graded Assignment: Path sampling: A firework of algorithms
+'''
+
 import random, math, pylab
 
 def gauss_cut(cut=1.0):
