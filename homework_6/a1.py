@@ -99,21 +99,7 @@ pylab.figure(2)
 plot('A1_2',x2s, y2s)
 
 pylab.figure(3) 
-(x3s,y3s)=evolve(proposer=gauss_cut, 
-                              accepter=lambda x,y: math.exp(- alpha * (x ** 4 + y ** 4))/1.2839612169628702)
-plot('A1_2a',x3s,y3s)
 
-pylab.figure(4)
 compare(x1s,y1s,x2s,y2s)
-
-pylab.figure(5)
-compare(x1s,y1s,x3s,y3s)
-
-pylab.figure(6) 
-(x6s, y6s)=evolve(accepter=lambda x,y: math.exp(- alpha * (x ** 4 + y ** 4)))
-plot('A1_2',x6s, y6s)
-
-pylab.figure(7)
-compare(x1s,y1s,x6s,y6s)
 
 pylab.show()
