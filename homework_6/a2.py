@@ -3,7 +3,7 @@ Path sampling: A firework of algorithms
 
 This program encompasses both version of the program from step A2.
 Function 'evolve' carries out the Markov Chain Monte Carlo evolution,
-plot produces the graphs, and 'compare' allows us to judge whether the
+'plot' produces the graphs, and 'compare' allows us to judge whether the
 distributions match.
 '''
 
