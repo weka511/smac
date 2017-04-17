@@ -1,8 +1,7 @@
 '''
 Path sampling: A firework of algorithms
 
-This program is tor step B1. I have restructured into separate functions
-for the main steps.
+This program is tor step C1.
 '''
 
 import math, random, pylab, time
@@ -34,9 +33,7 @@ def create_path():
     x = [5.0] * N
     data = []
     Ncut = N//2
-    sigma = 1.0 / math.sqrt( 2.0 * math.tanh( beta / 2.0))
     for step in range(n_steps):
-        x[0] = random.gauss(0.0, sigma)
         x=levy_harmonic_path(x[0], x[0], dtau, N)
         x = x[Ncut:] + x[:Ncut] 
         if step % N == 0:
@@ -61,7 +58,7 @@ def plot_histogram(data,figure=1):
     pylab.ylabel('$\\pi(x)$ (normalized)')
     pylab.title('Levy harmonic path (beta=%s, N=%i)' % (beta, N))
     pylab.xlim(-2, 2)
-    pylab.savefig('plot_B3_beta%s.png' % beta)
+    pylab.savefig('plot_B2_beta%s.png' % beta)
 
 def plot_path(x,figure=1):
     pylab.figure(figure)
@@ -70,7 +67,7 @@ def plot_path(x,figure=1):
     pylab.xlabel('$x$')
     pylab.ylabel('$Time=\\frac{i \\beta}{N}$')
     pylab.title('Levy harmonic path')
-    pylab.savefig('plot_B3_path_beta%s.png' % beta)
+    pylab.savefig('plot_B1_path_beta%s.png' % beta)
     
 x,data = create_path()
 write_path(x)
