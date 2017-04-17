@@ -6,16 +6,34 @@ This program is tor step C1.
 
 import math, random, pylab, time
 
-def rho_free(x, y, beta):
-    return math.exp(-(x - y) ** 2 / (2.0 * beta))
-
-start_time = time.time()
-
-beta = 20.0
+cubic=0
+quartic=0
+beta = 1#20.0
 N = 80
 dtau = beta / N
 delta = 1.0
-n_steps = 4000000
+n_steps = 400000#0
+
+def V(x, cubic, quartic):
+    return x ** 2 / 2.0 + cubic * x ** 3 + quartic * x ** 4
+
+def rho_free(x, y, beta):
+    return math.exp(-(x - y) ** 2 / (2.0 * beta))
+
+def calculate_trotter_weight(x):
+    return math.exp(sum(-V(a, cubic, quartic) * dtau for a in x))
+
+
+
+def levy_free_path(xstart, xend, dtau, N):
+    x = [xstart]
+    for k in range(1, N):
+        dtau_prime = (N - k) * dtau
+        x_mean = (dtau_prime * x[k - 1] + dtau * xend) / \
+                 (dtau + dtau_prime)
+        sigma = math.sqrt(1.0 / (1.0 / dtau + 1.0 / dtau_prime))
+        x.append(random.gauss(x_mean, sigma))
+    return x
 
 def levy_harmonic_path(xstart, xend, dtau, N):
     x = [xstart]
@@ -29,12 +47,19 @@ def levy_harmonic_path(xstart, xend, dtau, N):
                1.0 / math.sqrt(Ups1)))
     return x
 
-def create_path():
+def create_path(levy_path=lambda xstart, xend, dtau, N:levy_harmonic_path(xstart, xend, dtau, N)):
     x = [5.0] * N
     data = []
     Ncut = N//2
+    old_trotter_weight = calculate_trotter_weight(x)
     for step in range(n_steps):
-        x=levy_harmonic_path(x[0], x[0], dtau, N)
+        accepted=False
+        while not accepted:
+            x_new = levy_free_path(x[0], x[Ncut], dtau, Ncut) + x[Ncut:]
+            new_trotter_weight = calculate_trotter_weight(x_new)
+            accepted=random.random()<new_trotter_weight/old_trotter_weight
+        old_trotter_weight=new_trotter_weight
+        x=x_new[:]
         x = x[Ncut:] + x[:Ncut] 
         if step % N == 0:
             k = random.randint(0, N - 1)
@@ -68,8 +93,9 @@ def plot_path(x,figure=1):
     pylab.ylabel('$Time=\\frac{i \\beta}{N}$')
     pylab.title('Levy harmonic path')
     pylab.savefig('plot_B1_path_beta%s.png' % beta)
-    
-x,data = create_path()
+
+start_time = time.time()    
+x,data = create_path(levy_path=lambda xstart, xend, dtau, N:levy_free_path(xstart, xend, dtau, N))
 write_path(x)
 plot_histogram(data)
 plot_path(x,figure=2)
