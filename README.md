@@ -1,10 +1,13 @@
 # Statistical Mechanics and Computations
 
-## homework_n   Programs from homework from course
+## homework_n   
+Programs from homework from course
 
-## tutorial_n   Programs from tutorial from course
+## tutorial_n
+Programs from tutorial from course
 
-## lecture_n    Programs from lectures from course
+## lecture_n
+Programs from lectures from course
 
 ## Book
 Code I have written for course: *Statistical Mechanics and Computations*
