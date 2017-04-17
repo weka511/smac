@@ -6,22 +6,25 @@ This program is tor step C1.
 
 import math, random, pylab, time
 
-cubic   = -1
-quartic = 1
+cubic   = 0
+quartic = 0
 beta    = 20.0
 N       = 100
 dtau    = beta / N
 delta   = 1.0
 n_steps = 4000000
 
-def V(x, cubic, quartic):
+def V_harmonic(x, cubic, quartic):
     return x ** 2 / 2.0 + cubic * x ** 3 + quartic * x ** 4
+
+def V_anharm(x, cubic, quartic):
+    return cubic * x ** 3 + quartic * x ** 4
 
 def rho_free(x, y, beta):
     return math.exp(-(x - y) ** 2 / (2.0 * beta))
 
-def calculate_trotter_weight(x):
-    return math.exp(sum(-V(a, cubic, quartic) * dtau for a in x))
+def calculate_trotter_weight(x,V=lambda x: V_harmonic(x, cubic, quartic)):
+    return math.exp(sum(-V(a) * dtau for a in x))
 
 
 
@@ -58,7 +61,7 @@ def create_path(levy_path=lambda xstart, xend, dtau, N:levy_harmonic_path(xstart
         while not accepted:
             x_new = levy_path(x[0], x[Ncut], dtau, Ncut) + x[Ncut:]
             new_trotter_weight = calculate_trotter_weight(x_new)
-            accepted=random.random()<new_trotter_weight/old_trotter_weight
+            accepted=old_trotter_weight==0 or random.random()<new_trotter_weight/old_trotter_weight
             n_trials+=1
         old_trotter_weight=new_trotter_weight
         x=x_new[:]
@@ -101,7 +104,7 @@ def plot_path(x,figure=1):
     pylab.savefig('plot_B1_path_beta%s.png' % beta)
 
 start_time = time.time()    
-x,data = create_path(levy_path=lambda xstart, xend, dtau, N:levy_free_path(xstart, xend, dtau, N))
+x,data = create_path(levy_path=lambda xstart, xend, dtau, N:levy_harmonic_path(xstart, xend, dtau, N))
 write_path(x)
 plot_histogram(data)
 plot_path(x,figure=2)
