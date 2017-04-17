@@ -57,7 +57,7 @@ def plot_histogram(data,figure=1):
     pylab.legend()
     pylab.xlabel('$x$')
     pylab.ylabel('$\\pi(x)$ (normalized)')
-    pylab.title('naive_harmonic_path (beta=%s, N=%i)' % (beta, N))
+    pylab.title('Levy harmonic path (beta=%s, N=%i)' % (beta, N))
     pylab.xlim(-2, 2)
     pylab.savefig('plot_B2_beta%s.png' % beta)
 
@@ -75,6 +75,6 @@ write_path(x)
 plot_histogram(data)
 plot_path(x,figure=2)
 
-print('--- %s seconds ---' % (time.time() - start_time))
+print('--- {0:.1f} minutes ---'.format((time.time() - start_time)/60))
 
 pylab.show()
