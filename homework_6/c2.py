@@ -1,13 +1,13 @@
 '''
 Path sampling: A firework of algorithms
 
-This program is tor step C1.
+This program is tor step C2.
 '''
 
 import math, random, pylab, time
 
-cubic   = 0
-quartic = 0
+cubic   = -1
+quartic = 1
 beta    = 20.0
 N       = 100
 dtau    = beta / N
@@ -92,7 +92,7 @@ def plot_histogram(data,figure=1):
     pylab.ylabel('$\\pi(x)$ (normalized)')
     pylab.title('Levy harmonic path (beta=%s, N=%i)' % (beta, N))
     pylab.xlim(-2, 2)
-    pylab.savefig('plot_B2_beta%s.png' % beta)
+    pylab.savefig('plot_C2_beta%s.png' % beta)
 
 def plot_path(x,figure=1):
     pylab.figure(figure)
@@ -101,7 +101,7 @@ def plot_path(x,figure=1):
     pylab.xlabel('$x$')
     pylab.ylabel('$Time=\\frac{i \\beta}{N}$')
     pylab.title('Levy harmonic path')
-    pylab.savefig('plot_B1_path_beta%s.png' % beta)
+    pylab.savefig('plot_C1_path_beta%s.png' % beta)
 
 start_time = time.time()    
 x,data = create_path(levy_path=lambda xstart, xend, dtau, N:levy_harmonic_path(xstart, xend, dtau, N))

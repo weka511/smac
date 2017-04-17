@@ -58,7 +58,7 @@ def create_path(levy_path=lambda xstart, xend, dtau, N:levy_harmonic_path(xstart
         while not accepted:
             x_new = levy_path(x[0], x[Ncut], dtau, Ncut) + x[Ncut:]
             new_trotter_weight = calculate_trotter_weight(x_new)
-            accepted=random.random()<new_trotter_weight/old_trotter_weight
+            accepted=old_trotter_weight==0 or random.random()<new_trotter_weight/old_trotter_weight
             n_trials+=1
         old_trotter_weight=new_trotter_weight
         x=x_new[:]
@@ -89,7 +89,7 @@ def plot_histogram(data,figure=1):
     pylab.ylabel('$\\pi(x)$ (normalized)')
     pylab.title('Levy harmonic path (beta=%s, N=%i)' % (beta, N))
     pylab.xlim(-2, 2)
-    pylab.savefig('plot_B2_beta%s.png' % beta)
+    pylab.savefig('plot_C1_beta%s.png' % beta)
 
 def plot_path(x,figure=1):
     pylab.figure(figure)
@@ -98,7 +98,7 @@ def plot_path(x,figure=1):
     pylab.xlabel('$x$')
     pylab.ylabel('$Time=\\frac{i \\beta}{N}$')
     pylab.title('Levy harmonic path')
-    pylab.savefig('plot_B1_path_beta%s.png' % beta)
+    pylab.savefig('plot_C1_path_beta%s.png' % beta)
 
 start_time = time.time()    
 x,data = create_path(levy_path=lambda xstart, xend, dtau, N:levy_free_path(xstart, xend, dtau, N))
