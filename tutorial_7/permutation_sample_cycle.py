@@ -2,7 +2,7 @@ import random
 
 N = 20
 stats = [0] * (N + 1)
-L = range(N)
+L = list(range(N))
 nsteps = 1000000
 for step in range(nsteps):
     i = random.randint(0, N - 1)
@@ -13,7 +13,7 @@ for step in range(nsteps):
         for k in range(N):
             cycle_dict[k] = L[k]
         while cycle_dict != {}:
-            starting_element = cycle_dict.keys()[0]
+            starting_element = list(cycle_dict.keys())[0]
             cycle_length = 0
             old_element = starting_element
             while True:
@@ -23,4 +23,4 @@ for step in range(nsteps):
                 else: old_element = new_element
             stats[cycle_length] += 1
 for k in range(1, N + 1):
-    print k, stats[k] 
+    print (k, stats[k])

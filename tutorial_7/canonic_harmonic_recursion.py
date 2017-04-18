@@ -13,4 +13,4 @@ def canonic_recursion(N, beta):
 N = 1000
 beta = 1.0
 Z = canonic_recursion(N, beta)
-print N, Z[-1]
+print (N, Z[-1])
