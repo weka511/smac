@@ -2,7 +2,7 @@ import random
 
 N = 3
 statistics = {}
-L = range(N)
+L = [l for l in range(N)]
 nsteps = 10000
 for step in range(nsteps):
     i = random.randint(0, N - 1)
@@ -12,9 +12,9 @@ for step in range(nsteps):
         statistics[tuple(L)] += 1
     else:
         statistics[tuple(L)] = 1
-    print L
-    print range(N)
-    print
+    print (L)
+    print ([l for l in range(N)])
+    print ()
 
 for item in statistics:
-    print item, statistics[item]
+    print (item, statistics[item])

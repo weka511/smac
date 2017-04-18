@@ -31,7 +31,7 @@ for j in range(N):
     a = levy_harmonic_path(1, beta)
     positions[a[0]] = a[0]
 for step in range(nsteps):
-    boson_a = random.choice(positions.keys())
+    boson_a = random.choice(list(positions.keys()))
     perm_cycle = []
     while True:
         perm_cycle.append(boson_a)
@@ -43,9 +43,9 @@ for step in range(nsteps):
     positions[perm_cycle[-1]] = perm_cycle[0]
     for j in range(len(perm_cycle) - 1):
         positions[perm_cycle[j]] = perm_cycle[j + 1]
-    a_1 = random.choice(positions.keys())
+    a_1 = random.choice(list(positions.keys()))
     b_1 = positions.pop(a_1)
-    a_2 = random.choice(positions.keys())
+    a_2 = random.choice(list(positions.keys()))
     b_2 = positions.pop(a_2)
     weight_new = rho_harm(a_1, b_2, beta) * rho_harm(a_2, b_1, beta)
     weight_old = rho_harm(a_1, b_1, beta) * rho_harm(a_2, b_2, beta)
