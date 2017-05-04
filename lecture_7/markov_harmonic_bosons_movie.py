@@ -66,7 +66,7 @@ i_color = 0
 # find and plot permutation cycles:
 while positions:
     x, y, z = [], [], []
-    starting_boson = positions.keys()[0]
+    starting_boson = list(positions.keys())[0]
     boson_old = starting_boson
     while True:
         x.append(boson_old[0])
