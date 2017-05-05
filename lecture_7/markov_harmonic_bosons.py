@@ -1,3 +1,15 @@
+#-*- coding: ISO-8859-1 -*-
+
+
+# To simulate ideal bosons in a 3D harmonic trap, we start with the 
+# identity permutation and with random positions sampled from the diagonal
+# harmonic density matrix in x, y and z. For each particle move, we sample a 
+# random particle, identify its permutation cycle, and sample a new Lévy 
+# quantum path for the entire cycle. For each permutation move, 
+# we sample 2 random particles like this and this,
+# and we attempt an exchange of their permutation partners.
+
+
 import random, math
  
 '''
@@ -18,14 +30,13 @@ def levy_harmonic_path(k, beta):
                 for d in range(3)])
     x = [xk]
     for j in range(1, k):
-        Upsilon_1 = (1.0 / math.tanh(beta) +
-                     1.0 / math.tanh((k - j) * beta))
+        Upsilon_1 = (1.0 / math.tanh(beta) + 1.0 / math.tanh((k - j) * beta))
         Upsilon_2 = [x[j - 1][d] / math.sinh(beta) + xk[d] /
                      math.sinh((k - j) * beta) for d in range(3)]
         x_mean = [Upsilon_2[d] / Upsilon_1 for d in range(3)]
         sigma = 1.0 / math.sqrt(Upsilon_1)
-        dummy = [random.gauss(x_mean[d], sigma) for d in range(3)]
-        x.append(tuple(dummy))
+        xk_next = [random.gauss(x_mean[d], sigma) for d in range(3)]
+        x.append(tuple(xk_next))
     return x
 
 '''
@@ -51,10 +62,10 @@ def rho_harm(x, xp, beta):
 # state. This is the essence of Bose-Einstein condensation. We will treat it
 # again in more detail in this week's tutorial. 
 
-N = 128
+N = 128     # Number of particles
 T_star = 0.9
 beta = 1.0 / (T_star * N ** (1.0 / 3.0))
-nsteps = 1000000
+nsteps = 10000000
 
 # In this very short program, there are no particle indices. The particle
 # positions x, y and z, are the "keys" of a "dictionary" called "positions".
@@ -81,10 +92,11 @@ for step in range(nsteps):
         if boson_b == perm_cycle[0]: break # why? I guess position can get modified below
         else: boson_a = boson_b
         
-    # Then, we simply resample the entire path of the cycle 
-    # from the Levy quantum path. 
-    k = len(perm_cycle)  # I have done some experiments, 
-                         #and k does get quite a bit larger after a while
+    # Length of permutation cycle. I have done some experiments,  
+    # and length reached 19 with 1000000 steps, 27 with 10000000 
+    k = len(perm_cycle)
+
+    # Resample the entire path of the cycle from the Levy quantum path. 
     perm_cycle = levy_harmonic_path(k, beta)
     positions[perm_cycle[-1]] = perm_cycle[0]
     for j in range(len(perm_cycle) - 1):
