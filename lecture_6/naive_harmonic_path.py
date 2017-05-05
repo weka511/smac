@@ -12,7 +12,7 @@ x = [0.0] * N                # initial path
 for step in range(n_steps):
     k = random.randint(0, N - 1)                  # random slice
     knext, kprev = (k + 1) % N, (k - 1) % N       # next/previous slices
-    x_new = x[k] + random.uniform(-delta, delta)  # new position at slice k
+    x_new = x[k] + random.uniform(-delta, delta)  # proposed new position at slice k
     old_weight = (rho_free(x[knext], x[k], dtau) *
                   rho_free(x[k], x[kprev], dtau) *
                   math.exp(-0.5 * dtau * x[k] ** 2))
