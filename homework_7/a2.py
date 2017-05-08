@@ -56,7 +56,7 @@ for step in range(nsteps):
     x0s.append(high[0])
     x1s.append(high[1])
 
-_,xs,_ =  pylab.hist([x0s,x1s],label=['Alice','Bob'],bins=50,normed=True)
+_,xs,_ =  pylab.hist([x0s,x1s],label=['Higgs','Ziggs'],bins=50,normed=True)
 
 ys = [pi_two_bosons(x,beta) for x in xs] 
 
@@ -64,5 +64,5 @@ pylab.plot(xs,ys,label='Theoretical')
 pylab.xlabel('$x$')
 pylab.ylabel('$Probability$')
 pylab.legend()
-pylab.title('Two Bosons: Alice & Bob')
-pylab.savefig('A1.png')
+pylab.title('$Two Bosons: Higgs & Ziggs')
+pylab.savefig('A2.png')
