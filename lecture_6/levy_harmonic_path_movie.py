@@ -15,7 +15,11 @@ for step in range(len(colours)):
         x.append(random.gauss(Ups2 / Ups1, 1.0 / math.sqrt(Ups1)))
     x.append(xend)
 
-    pylab.plot(x, [j * dtau for j in range(N + 1)], 'o-',color=colours[step],label='{}'.format(step))
+    pylab.plot(x, 
+               [j * dtau for j in range(N + 1)],
+               'o-',
+               color=colours[step],
+               label='{}'.format(step))
     pylab.xlabel('$x$', fontsize=18)
     pylab.ylabel('$\\tau$', fontsize=18)
     pylab.title('Harmonic paths')

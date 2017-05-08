@@ -21,21 +21,20 @@ x1s = []
 high = low[:]
 data = []
 for step in range(nsteps):
+    if low[0]!=high[0] or low[1]!=high[1]: print (low,high)
     k = random.choice([0, 1])
     low[k] = levy_harmonic_path(1)[0]
     high[k] = low[k]
     x0s.append(low[0])
     x1s.append(low[1])
 
-#xs = [0.1 * a for a in range(-30,31)]
-#ys = [nsteps*pi_x(x,beta) for x in xs]
+_,xs,_ =  pylab.hist([x0s,x1s],label=['Alice','Bob'],bins=50,normed=True)
 
-_, xs, _ =  pylab.hist([x0s,x1s],label=['0','1'],bins=25)
-print (xs)
-ys = [nsteps*pi_x(x,beta)/3 for x in xs]  # 3?
+ys = [pi_x(x,beta) for x in xs] 
 
-pylab.plot(xs,ys,label='pi_x')
-pylab.xlabel('position')
-pylab.ylabel('count')
+pylab.plot(xs,ys,label='Theoretical')
+pylab.xlabel('$x$')
+pylab.ylabel('$Probability$')
 pylab.legend()
-pylab.title('A1')
+pylab.title('Two Distinguishable Quantum Particles: Alice & Bob')
+pylab.savefig('A1.png')
