@@ -1,5 +1,17 @@
 import math, random, pylab
 
+def z(beta):
+    return 1.0 / (1.0 - math.exp(- beta))
+
+def pi_two_bosons(x, beta):
+    pi_x_1 = math.sqrt(math.tanh(beta / 2.0)) / math.sqrt(math.pi) *\
+             math.exp(-x ** 2 * math.tanh(beta / 2.0))
+    pi_x_2 = math.sqrt(math.tanh(beta)) / math.sqrt(math.pi) *\
+             math.exp(-x ** 2 * math.tanh(beta))
+    weight_1 = z(beta) ** 2 / (z(beta) ** 2 + z(2.0 * beta))
+    weight_2 = z(2.0 * beta) / (z(beta) ** 2 + z(2.0 * beta))
+    return pi_x_1 * weight_1 + pi_x_2 * weight_2
+
 def levy_harmonic_path(k):
     x = [random.gauss(0.0, 1.0 / math.sqrt(2.0 * math.tanh(k * beta / 2.0)))]
     if k == 2:
@@ -18,6 +30,10 @@ nsteps = 500000
 low = levy_harmonic_path(2)
 high = low[:]
 data = []
+
+x0s = []
+x1s = []
+
 for step in range(nsteps):
     # move 1
     if low[0] == high[0]:
@@ -36,3 +52,17 @@ for step in range(nsteps):
                   rho_harm_1d(low[1], high[0], beta))
     if random.uniform(0.0, 1.0) < weight_new / weight_old:
         high[0], high[1] = high[1], high[0]
+        
+    x0s.append(high[0])
+    x1s.append(high[1])
+
+_,xs,_ =  pylab.hist([x0s,x1s],label=['Alice','Bob'],bins=50,normed=True)
+
+ys = [pi_two_bosons(x,beta) for x in xs] 
+
+pylab.plot(xs,ys,label='Theoretical')
+pylab.xlabel('$x$')
+pylab.ylabel('$Probability$')
+pylab.legend()
+pylab.title('Two Bosons: Alice & Bob')
+pylab.savefig('A1.png')
