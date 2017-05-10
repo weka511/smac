@@ -92,3 +92,50 @@ for boson in positions.keys():
     print (boson, positions[boson])
     
 write_configuration(filename,positions)
+
+# snippet 3: Analyze cycles, do 3d plot
+import pylab, mpl_toolkits.mplot3d
+
+fig = pylab.figure()
+ax = mpl_toolkits.mplot3d.axes3d.Axes3D(fig)
+ax.set_aspect('equal')
+n_colors = 10
+list_colors = pylab.cm.rainbow(numpy.linspace(0, 1, n_colors))[::-1]
+dict_colors = {}
+i_color = 0
+positions_copy = positions.copy()
+while positions_copy:
+    x, y, z = [], [], []
+    starting_boson = list(positions_copy.keys())[0]
+    boson_old = starting_boson
+    while True:
+        x.append(boson_old[0])
+        y.append(boson_old[1])
+        z.append(boson_old[2])
+        boson_new = positions_copy.pop(boson_old)
+        if boson_new == starting_boson: break
+        else: boson_old = boson_new
+    len_cycle = len(x)
+    if len_cycle > 2:
+        x.append(x[0])
+        y.append(y[0])
+        z.append(z[0])
+    if len_cycle in dict_colors:
+        color = dict_colors[len_cycle]
+        ax.plot(x, y, z, '+-', c=color, lw=0.75)
+    else:
+        color = list_colors[i_color]
+        i_color = (i_color + 1) % n_colors
+        dict_colors[len_cycle] = color
+        ax.plot(x, y, z, '+-', c=color, label='k=%i' % len_cycle, lw=0.75)
+pylab.title(str(N) + ' bosons at T* = ' + str(T_star))
+pylab.legend()
+ax.set_xlabel('$x$', fontsize=16)
+ax.set_ylabel('$y$', fontsize=16)
+ax.set_zlabel('$z$', fontsize=16)
+xmax = 6.0
+ax.set_xlim3d([-xmax, xmax])
+ax.set_ylim3d([-xmax, xmax])
+ax.set_zlim3d([-xmax, xmax])
+pylab.savefig('plot_boson_configuration_{0}.png'.format(T_star))
+pylab.show()
