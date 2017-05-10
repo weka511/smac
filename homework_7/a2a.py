@@ -79,7 +79,7 @@ P_one_cycle_s   = []
 P_two_cycles   = []
 calculated_P_one_cycle_s  = []
 calculated_P_two_cycles  = []
-nsteps = 500000
+nsteps = 5000
 for i in range(50):
     beta = 0.1*(i+1)
     N_one_cycle,N_two_cycles=  calculate_probabilities(beta,nsteps = nsteps)
