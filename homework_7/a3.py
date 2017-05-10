@@ -48,6 +48,6 @@ pylab.plot(rs,
            label='Theoretical')
 pylab.xlabel('$r$')
 pylab.ylabel('$Probability$')
-pylab.title(r'$A3:\ Distinguishable\ particles\ in\ a\ trap.\ \beta={0},\ nsteps={1}$'.format(beta,nsteps))
+pylab.title(r'$A3:\ Distinguishable\ particles\ in\ a\ trap.\ \beta={0},\ nsteps={1:,}$'.format(beta,nsteps))
 pylab.legend()
 pylab.savefig('A3.png')
