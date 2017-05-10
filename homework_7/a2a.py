@@ -32,7 +32,7 @@ def rho_harm_1d(x, xp, beta):
     return math.exp(- Upsilon_1 - Upsilon_2)
 
 
-def calculate_probabilities(beta = 2.0,nsteps = 5000): #00
+def calculate_probabilities(beta = 2.0,nsteps = 500000):
     low = levy_harmonic_path(2)
     high = low[:]
     data = []
