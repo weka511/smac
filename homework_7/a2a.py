@@ -40,9 +40,9 @@ def calculate_probabilities(beta = 2.0,nsteps = 500000):
     x0s = []
     x1s = []
     
-    N1 = 0
-    N2 = 0
-    same = False
+    N_one_cycle = 0
+    N_two_cycles = 0
+    same = False # Initially low==high i.e. both are in same cycle
     
     for step in range(nsteps):
         # move 1
@@ -68,39 +68,38 @@ def calculate_probabilities(beta = 2.0,nsteps = 500000):
         x1s.append(high[1])
         
         if same:
-            N1 += 1
+            N_one_cycle += 1
         else:
-            N2 += 1
+            N_two_cycles += 1
             
-    return (N1,N2)
+    return (N_one_cycle,N_two_cycles)
 
 betas = []
-p1s   = []
-p2s   = []
-tp1s  = []
-tp2s  = []
-
+P_one_cycle_s   = []
+P_two_cycles   = []
+calculated_P_one_cycle_s  = []
+calculated_P_two_cycles  = []
+nsteps = 500000
 for i in range(50):
     beta = 0.1*(i+1)
-    n1,n2=  calculate_probabilities(beta)
-    p1=n1/(n1+n2)
-    p2=n2/(n1+n2)
+    N_one_cycle,N_two_cycles=  calculate_probabilities(beta,nsteps = nsteps)
+    p1=N_one_cycle/(N_one_cycle+N_two_cycles)
+    p2=N_two_cycles/(N_one_cycle+N_two_cycles)
     fract_two_cycles = z(beta) ** 2 / (z(beta) ** 2 + z(2.0 * beta))
     fract_one_cycle = z(2.0 * beta) / (z(beta) ** 2 + z(2.0 * beta))   
-    #print (beta, p1,p2,fract_one_cycle,fract_two_cycles)
     betas.append(beta)
-    p1s.append(p1)
-    p2s.append(p2)
-    tp1s.append(fract_one_cycle)
-    tp2s.append(fract_two_cycles)
+    P_one_cycle_s.append(p1)
+    P_two_cycles.append(p2)
+    calculated_P_one_cycle_s.append(fract_one_cycle)
+    calculated_P_two_cycles.append(fract_two_cycles)
 
-pylab.plot(betas,p1s,color='r',label='Probability one cycle')
-pylab.plot(betas,p2s,color='g',label='Probability two cycles')
-pylab.plot(betas,tp1s,color='b',label='Fract one cycle (theoretical)')
-pylab.plot(betas,tp2s,color='m',label='Fract two cycles (theoretical)')
+pylab.plot(betas,P_one_cycle_s,'o',color='r',label='Probability one cycle')
+pylab.plot(betas,P_two_cycles,'o',color='g',label='Probability two cycles')
+pylab.plot(betas,calculated_P_one_cycle_s,color='b',label='Fract one cycle (theoretical)')
+pylab.plot(betas,calculated_P_two_cycles,color='m',label='Fract two cycles (theoretical)')
 
 pylab.xlabel(r'$\beta$')
 pylab.ylabel('$Probability$')
 pylab.legend()
-pylab.title('$Probability\ of\ one\ and\ two\ cycles$')
+pylab.title('$Probability\ of\ one\ and\ two\ cycles\ (nsteps={0})$'.format(nsteps))
 pylab.savefig('A2A.png')
