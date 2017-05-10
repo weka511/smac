@@ -14,11 +14,11 @@ import random, math
  
 '''
 This function is used at multiples of the inverse temperature beta,
-corresponding to the length of the permutation cycle. 
+corresponding to the length of some permutation cycle. 
 We use it to resample the positions of the entire cycle.
 
   Parameters:
-    k       Number of points
+    k       Length of some permutation cycle
     beta    Inverse temperature
     
   Returns:
@@ -72,16 +72,24 @@ nsteps = 10000000
 # These are the positions at tau=0. The "values" of this dictionary are the
 # positions at tau=beta, the positions of the permutation partners. 
 
+# At high temperature, particles are quite far from each other, and attempts
+# to perform a transposition are usually rejected. At lower temperature,
+# beta becomes larger and the transpositions are accepted more easily. All of
+# a sudden particles clamp together. The transpositions are accepted and
+# particles are on long permutation cycles. On long permutation cycles,
+# they seem to be at much lower temperature. In fact, they are in the ground
+# state. This is the essence of Bose-Einstein condensation.
+
 positions = {}
 for j in range(N):
     a = levy_harmonic_path(1, beta) # Since k is 1, len(a)=1
     positions[a[0]] = a[0]
     
 for step in range(nsteps):
-    # We sample a random particle
+    # Sample a random particle
     boson_a = random.choice(list(positions.keys()))
     
-    # and compute the permutation cycle it is on.
+    # Compute the permutation cycle it is on.
     perm_cycle = []
 
     while True:
@@ -89,7 +97,7 @@ for step in range(nsteps):
         # Here we sample a random key, and the pop operation outputs the positions
         # of the permutation partner.
         boson_b = positions.pop(boson_a)   
-        if boson_b == perm_cycle[0]: break # why? I guess position can get modified below
+        if boson_b == perm_cycle[0]: break # a
         else: boson_a = boson_b
         
     # Length of permutation cycle. I have done some experiments,  

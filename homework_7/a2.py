@@ -1,5 +1,11 @@
 import math, random, pylab
 
+'''
+Compute partition function for a particle with energy levels 0, 1, 2
+
+  Parameters:
+     beta
+'''
 def z(beta):
     return 1.0 / (1.0 - math.exp(- beta))
 

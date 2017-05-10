@@ -16,14 +16,13 @@ def levy_harmonic_path(k, beta):
     return x
  
 def rho_harm(x, xp, beta):
-    Upsilon_1 = sum((x[d] + xp[d]) ** 2 / 4.0 *
+    def Upsilon(plus):
+        return sum((x[d] + xp[d] if plus else -xp[d]) ** 2 / 4.0 *
                     math.tanh(beta / 2.0) for d in range(3))
-    Upsilon_2 = sum((x[d] - xp[d]) ** 2 / 4.0 /
-                    math.tanh(beta / 2.0) for d in range(3))
-    return math.exp(- Upsilon_1 - Upsilon_2)
+    return math.exp(- Upsilon(True) - Upsilon(False))
 
 N = 256
-T_star = 0.6
+T_star = 0.1
 beta = 1.0 / (T_star * N ** (1.0 / 3.0))
 nsteps = 1000000
 positions = {}
