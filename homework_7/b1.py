@@ -22,14 +22,41 @@ def rho_harm_3d(x, xp):
                     math.tanh(beta / 2.0) for d in range(3))
     return math.exp(- Upsilon_1 - Upsilon_2)
 
+# snippet 1: read the configuration from a file (if possible)
+def read_configuration(filename = 'data_boson_configuration.txt'):
+    positions = {}
+    if os.path.isfile(filename):
+        f = open(filename, 'r')
+        for line in f:
+            a = line.split()
+            positions[tuple([float(a[0]), float(a[1]), float(a[2])])] = \
+                   tuple([float(a[3]), float(a[4]), float(a[5])])
+        f.close()
+        if len(positions) != N:
+            sys.exit('Number of positions is {0}, should be {1}'.format(len(positions), N))
+        print ('Starting from file {0}'.format(filename))
+    else:
+        for k in range(N):
+            a = levy_harmonic_path_3d(1)
+            positions[a[0]] = a[0]
+        print ('Starting from a new configuration - {0} positions'.format(len(positions)))
+    return (filename,positions)
+
+def write_configuration(filename,positions):
+    # snippet 2: write configuration on a file
+    f = open(filename, 'w')
+    for a in positions:
+        b = positions[a]
+        f.write(str(a[0]) + ' ' + str(a[1]) + ' ' + str(a[2]) + ' ' +
+                str(b[0]) + ' ' + str(b[1]) + ' ' + str(b[2]) + '\n')
+    f.close()
+    
 N = 64
 T_star = 0.7
 beta = 1.0 / (T_star * N ** (1.0 / 3.0))
 # Initial condition
-positions = {}
-for k in range(N):
-    a = levy_harmonic_path_3d(1)
-    positions[a[0]] = a[0]
+filename,positions =  read_configuration()
+
 # Monte Carlo loop
 nsteps = 10000
 for step in range(nsteps):
@@ -63,3 +90,5 @@ for step in range(nsteps):
         positions[a_2] = b_2
 for boson in positions.keys():
     print (boson, positions[boson])
+    
+write_configuration(filename,positions)
