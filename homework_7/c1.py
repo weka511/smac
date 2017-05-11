@@ -1,7 +1,7 @@
 import random, math, numpy, os, sys
 
-omega = [4.0, 4.0, 1.0] # example, please adapt
-omega = [1.0, 5.0, 1.0] # example, please adapt
+omega = [4.0, 4.0, 1.0] # example, please adapt cigar
+#omega = [1.0, 5.0, 1.0] # example, please adapt Pancake
 
 def levy_harmonic_path_3d_anisotropic(k):
     sigma = [1.0 / math.sqrt(2.0 * omega[d] *
@@ -119,7 +119,7 @@ while positions_copy:
         i_color = (i_color + 1) % n_colors
         dict_colors[len_cycle] = color
         ax.plot(x, y, z, '+-', c=color, label='k=%i' % len_cycle, lw=0.75)
-pylab.title(str(N) + ' bosons at T* = ' + str(T_star))
+pylab.title(str(N) + ' bosons at T* = ' + str(T_star) + ', omega=' +str(omega))
 pylab.legend()
 ax.set_xlabel('$x$', fontsize=16)
 ax.set_ylabel('$y$', fontsize=16)
