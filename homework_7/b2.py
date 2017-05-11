@@ -51,14 +51,18 @@ def write_configuration(filename,positions):
                 str(b[0]) + ' ' + str(b[1]) + ' ' + str(b[2]) + '\n')
     f.close()
     
-N = 64
-T_star = 0.04
+N = 512
+T_star = 0.8
 beta = 1.0 / (T_star * N ** (1.0 / 3.0))
 # Initial condition
 filename,positions =  read_configuration()
 
 # Monte Carlo loop
-nsteps = 10000
+nsteps = 1000000
+x1s = []
+x2s = []
+cycle_min = 10
+
 for step in range(nsteps):
     # move 1: resample one permutation cycle
     boson_a = random.choice(list(positions.keys()))
@@ -70,7 +74,10 @@ for step in range(nsteps):
             break
         else:
             boson_a = boson_b
+    x1s.append(boson_a[0])
     k = len(perm_cycle)
+    if k>cycle_min:
+        x2s.append(boson_a[0])
     perm_cycle = levy_harmonic_path_3d(k)
     positions[perm_cycle[-1]] = perm_cycle[0]
     for k in range(len(perm_cycle) - 1):
@@ -93,49 +100,20 @@ for boson in positions.keys():
     
 write_configuration(filename,positions)
 
-# snippet 3: Analyze cycles, do 3d plot
-
-
-fig = pylab.figure()
-ax = mpl_toolkits.mplot3d.axes3d.Axes3D(fig)
-ax.set_aspect('equal')
-n_colors = 10
-list_colors = pylab.cm.rainbow(numpy.linspace(0, 1, n_colors))[::-1]
-dict_colors = {}
-i_color = 0
-positions_copy = positions.copy()
-while positions_copy:
-    x, y, z = [], [], []
-    starting_boson = list(positions_copy.keys())[0]
-    boson_old = starting_boson
-    while True:
-        x.append(boson_old[0])
-        y.append(boson_old[1])
-        z.append(boson_old[2])
-        boson_new = positions_copy.pop(boson_old)
-        if boson_new == starting_boson: break
-        else: boson_old = boson_new
-    len_cycle = len(x)
-    if len_cycle > 2:
-        x.append(x[0])
-        y.append(y[0])
-        z.append(z[0])
-    if len_cycle in dict_colors:
-        color = dict_colors[len_cycle]
-        ax.plot(x, y, z, '+-', c=color, lw=0.75)
-    else:
-        color = list_colors[i_color]
-        i_color = (i_color + 1) % n_colors
-        dict_colors[len_cycle] = color
-        ax.plot(x, y, z, '+-', c=color, label='k=%i' % len_cycle, lw=0.75)
-pylab.title(str(N) + ' bosons at T* = ' + str(T_star))
+pylab.hist([x1s,x2s],
+           normed=True,
+           bins=50,
+           color=['b','r'],
+           label=['$Positions$',
+                  r'$cycle\ length>{0}$'.format(cycle_min)])
+xs = [0.1*i -3 for i in range(61)]
+pylab.plot(xs,
+           [math.exp(-x*x)/math.sqrt(math.pi) for x in xs],
+           color='g',
+           label=r'$\frac{e^{-x^2}}{\sqrt{\pi}}$')
+pylab.xlim(-3,3)
+pylab.xlabel('$x$')
+pylab.ylabel('$Probability$')
+pylab.title(r'$cycle\_min={0},\ N={1},\ T^*={2}(\beta={4}),\ nsteps={3}$'.format(cycle_min, N, T_star, nsteps,beta))
 pylab.legend()
-ax.set_xlabel('$x$', fontsize=16)
-ax.set_ylabel('$y$', fontsize=16)
-ax.set_zlabel('$z$', fontsize=16)
-xmax = 6.0
-ax.set_xlim3d([-xmax, xmax])
-ax.set_ylim3d([-xmax, xmax])
-ax.set_zlim3d([-xmax, xmax])
-pylab.savefig('plot_boson_configuration_{0}.png'.format(T_star))
-pylab.show()
+pylab.savefig('Xpositions.png')
