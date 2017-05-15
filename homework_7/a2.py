@@ -1,22 +1,25 @@
 import math, random, pylab
 
-'''
-Compute partition function for a particle with energy levels 0, 1, 2
 
-  Parameters:
-     beta
-'''
 def z(beta):
+    '''
+    Compute partition function for a particle with energy levels 0, 1, 2
+    
+      Parameters:
+         beta
+    '''    
     return 1.0 / (1.0 - math.exp(- beta))
 
 def pi_two_bosons(x, beta):
-    pi_x_1 = math.sqrt(math.tanh(beta / 2.0)) / math.sqrt(math.pi) *\
-             math.exp(-x ** 2 * math.tanh(beta / 2.0))
-    pi_x_2 = math.sqrt(math.tanh(beta)) / math.sqrt(math.pi) *\
-             math.exp(-x ** 2 * math.tanh(beta))
-    weight_1 = z(beta) ** 2 / (z(beta) ** 2 + z(2.0 * beta))
-    weight_2 = z(2.0 * beta) / (z(beta) ** 2 + z(2.0 * beta))
-    return pi_x_1 * weight_1 + pi_x_2 * weight_2
+    '''
+    '''
+    def pi(beta):
+        return math.sqrt(math.tanh(beta)) / math.sqrt(math.pi) *\
+               math.exp(-x ** 2 * math.tanh(beta))
+    def weight(beta):
+        return z(beta) ** 2 
+    return (pi(beta/2) * weight(beta) + pi(beta) * weight(2*beta))/\
+           (z(beta) ** 2 + z(2.0 * beta))
 
 def levy_harmonic_path(k):
     x = [random.gauss(0.0, 1.0 / math.sqrt(2.0 * math.tanh(k * beta / 2.0)))]

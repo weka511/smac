@@ -1,5 +1,6 @@
 #-*- coding: ISO-8859-1 -*-
 
+import random, math
 
 # To simulate ideal bosons in a 3D harmonic trap, we start with the 
 # identity permutation and with random positions sampled from the diagonal
@@ -8,9 +9,6 @@
 # quantum path for the entire cycle. For each permutation move, 
 # we sample 2 random particles like this and this,
 # and we attempt an exchange of their permutation partners.
-
-
-import random, math
  
 '''
 This function is used at multiples of the inverse temperature beta,
@@ -50,9 +48,6 @@ def rho_harm(x, xp, beta):
                     math.tanh(beta / 2.0) for d in range(3))
     return math.exp(- Upsilon_1 - Upsilon_2)
 
-
-
-# Output of markov_harmonic_bosons.py is show here.
 # At high temperature, particles are quite far from each other, and attempts
 # to perform a transposition are usually rejected. At lower temperature, beta
 # becomes larger and the transpositions are accepted more easily.
