@@ -15,6 +15,7 @@ def direct_gamma(gamma,generator=False,K=10000,N=1000000):
 
 
 if __name__ == '__main__':
+    pylab.style.use('ggplot')
     xs = []
     ys = []
     
