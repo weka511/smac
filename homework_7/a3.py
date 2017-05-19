@@ -51,3 +51,21 @@ pylab.ylabel('$Probability$')
 pylab.title(r'$A3:\ Distinguishable\ particles\ in\ a\ trap.\ \beta={0},\ nsteps={1:,}$'.format(beta,nsteps))
 pylab.legend()
 pylab.savefig('A3.png')
+
+# In the histogram above, I observe that the general shape is similar to the 
+# analytic expression, up to a pronounced peak at short distance,
+#in which the histogram height doubles.
+
+#This effect that we see at play in its simplest realization (two particles 
+# in one dimension) is called boson bunching, and corresponds to the doubling
+# of the statistical weight of configurations in which the two particles 
+# are at a short distance (approximately, smaller than sqrt(2*pi*beta)).
+# It is a pure consequence of bosonic permutations, which takes place at any temperature.
+
+
+# NB: The real explanation is that for small distances (distance smaller 
+# than the de Broglie wavelength), the weight of the || configuration 
+# (two cycles of length 1) is the same as the weight of the X configuration 
+#(cycle of length 2), whereas at large distance only the || term contributes.
+# This also explains why the density is twice the classical density.
+# 

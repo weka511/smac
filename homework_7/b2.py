@@ -117,3 +117,9 @@ pylab.ylabel('$Probability$')
 pylab.title(r'$cycle\_min={0},\ N={1},\ T^*={2}(\beta={4}),\ nsteps={3}$'.format(cycle_min, N, T_star, nsteps,beta))
 pylab.legend()
 pylab.savefig('Xpositions.png')
+
+#The histograms are different: The first histogram gives the x-distribution
+# of all particles, and the second one is for those particles on long
+# permutation cycles. These particles "live" effectively at inverse temperature
+# k beta with k > cycle_length, this is like lower temperature.
+# At low temperatures, these particles are in the ground state.
