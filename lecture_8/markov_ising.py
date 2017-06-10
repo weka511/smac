@@ -14,4 +14,4 @@ for step in range(nsteps):
     delta_E = 2.0 * S[k] * sum(S[nn] for nn in nbr[k])
     if random.uniform(0.0, 1.0) < math.exp(-beta * delta_E):
         S[k] *= -1
-print S, sum(S)
+print (S, sum(S))

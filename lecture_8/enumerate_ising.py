@@ -1,10 +1,19 @@
-def gray_flip(t, N):
-    k = t[0]
-    if k > N: return t, k
-    t[k - 1] = t[k]
-    t[k] = k + 1
-    if k != 1: t[0] = 1
-    return t, k
+def gray_flip(tau, N):
+    ''''
+    Determine which bit is to be flipped
+      Parameters:
+        tau
+        N     Lenght of t
+      Returns:
+        tau
+        k     Bit that is to be flipped
+    '''
+    k = tau[0]
+    if k > N: return tau, k #Guard - appears not to happen
+    tau[k - 1] = tau[k]
+    tau[k] = k + 1
+    if k != 1: tau[0] = 1
+    return tau, k
 
 L = 4
 N = L * L 
@@ -20,11 +29,13 @@ nbr = {i : ((i // L) * L + (i + 1) % L, (i + L) % N,
                                     for i in range(N)}
 S = [-1] * N
 E = -2 * N
-print (S, E)
+#print (S, E)
 tau = list(range(1, N + 2))
+print (tau)
 for i in range(1, 2 ** N):
-    tau, k = gray_flip(tau, N)
+    tau, k = gray_flip(tau, N) # k-1 is index whose content gets flipped
+    print (k,tau)
     h = sum(S[n] for n in nbr[k - 1])
     E += 2 * h * S[k - 1] 
     S[k - 1] *= -1
-    print (S, E)
+    #print (S, E)

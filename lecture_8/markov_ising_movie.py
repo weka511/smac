@@ -11,7 +11,7 @@ list_av_m = []
 S = [random.choice([1, -1]) for k in range(N)]
 M = sum(S)
 for T in list_T:
-    print 'T =', T
+    print ('T = {0}'.format( T))
     beta = 1.0 / T
     M_tot = 0.0
     n_measures = 0
