@@ -11,7 +11,7 @@ list_av_m = []
 S = [random.choice([1, -1]) for k in range(N)]
 M = sum(S)
 for T in list_T:
-    print T
+    print (T)
     p  = 1.0 - math.exp(-2.0 / T)
     M_tot = 0.0
     n_flipped_spins = 0
