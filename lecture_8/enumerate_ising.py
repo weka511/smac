@@ -5,7 +5,7 @@ def gray_flip(tau, N):
         tau
         N     Lenght of t
       Returns:
-        tau
+        tau   New value for next iteration
         k     Bit that is to be flipped
     '''
     k = tau[0]
@@ -29,13 +29,13 @@ nbr = {i : ((i // L) * L + (i + 1) % L, (i + L) % N,
                                     for i in range(N)}
 S = [-1] * N
 E = -2 * N
-#print (S, E)
+print (S, E)
 tau = list(range(1, N + 2))
-print (tau)
+#print (tau)
 for i in range(1, 2 ** N):
     tau, k = gray_flip(tau, N) # k-1 is index whose content gets flipped
-    print (k,tau)
+    #print (k,tau)
     h = sum(S[n] for n in nbr[k - 1])
     E += 2 * h * S[k - 1] 
     S[k - 1] *= -1
-    #print (S, E)
+    print (S, E)
