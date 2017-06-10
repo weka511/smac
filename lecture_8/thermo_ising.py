@@ -11,7 +11,7 @@ if os.path.isfile(filename):
         dos[int(E)] = int(N_E)
     f.close()
 else:
-   exit('input file missing')
+    exit('input file missing')
 list_T = [0.5 + 0.5 * i for i in range(10)]
 for T in list_T:
     Z = 0.0
@@ -26,4 +26,4 @@ for T in list_T:
     E2_av /= Z
     E_av /= Z
     cv = (E2_av - E_av ** 2) / N / T ** 2
-    print T, E_av / float(N), cv
+    print (T, E_av / float(N), cv)

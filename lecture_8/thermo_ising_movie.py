@@ -11,7 +11,7 @@ if os.path.isfile(filename):
         dos[int(E)] = int(N_E)
     f.close()
 else:
-   exit('input file missing')
+    exit('input file missing')
 list_T = [0.5 + 0.01 * i for i in range(500)]
 list_cv = []
 for T in list_T:
