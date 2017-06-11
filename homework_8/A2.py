@@ -12,7 +12,7 @@ def x_y(k, L):
     return x, y
 
 L = 128
-MULT = 1000
+MULT = 10000
 N = L * L
 nbr = {i : ((i // L) * L + (i + 1) % L, (i + L) % N,
             (i // L) * L + (i - 1) % L, (i - L) % N) \
