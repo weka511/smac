@@ -12,13 +12,13 @@ def x_y(k, L):
     return x, y
 
 L = 128
-MULT = 10000
+MULT = 1000
 N = L * L
 nbr = {i : ((i // L) * L + (i + 1) % L, (i + L) % N,
             (i // L) * L + (i - 1) % L, (i - L) % N) \
                                     for i in range(N)}
 
-T = 2.27
+T = 1
 filename = 'data_local_'+ str(L) + '_' + str(T) + '.txt'
 if os.path.isfile(filename):
     f = open(filename, 'r')
