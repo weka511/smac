@@ -1,4 +1,4 @@
-import random, math
+import random, math, os, pylab
 
 def energy(S, N, nbr):
     E = 0.0
@@ -6,15 +6,31 @@ def energy(S, N, nbr):
         E -=  S[k] * sum(S[nn] for nn in nbr[k])
     return 0.5 * E
 
-L = 6
-MULT = 10000000
+def x_y(k, L):
+    y = k // L
+    x = k - y * L
+    return x, y
+
+L = 128
+MULT = 10000
 N = L * L
 nbr = {i : ((i // L) * L + (i + 1) % L, (i + L) % N,
             (i // L) * L + (i - 1) % L, (i - L) % N) \
                                     for i in range(N)}
 
-T = 2.0
-S = [random.choice([1, -1]) for k in range(N)]
+T = 2.27
+filename = 'data_local_'+ str(L) + '_' + str(T) + '.txt'
+if os.path.isfile(filename):
+    f = open(filename, 'r')
+    S = []
+    for line in f:
+        S.append(int(line))
+    f.close()
+    print ('Starting from file {0}'.format(filename))
+else:
+    S = [random.choice([1, -1]) for k in range(N)]
+    print ('Starting from a random configuration')
+    
 nsteps = N * MULT
 beta = 1.0 / T
 Energy = energy(S, N, nbr)
@@ -32,30 +48,12 @@ print('nsteps={0}, mean energy per spin: {1}'.format(
     nsteps,
     sum(E) / float(len(E) * N)))
 
-# snipets
-filename = 'data_local_'+ str(L) + '_' + str(T) + '.txt'
-if os.path.isfile(filename):
-    f = open(filename, 'r')
-    S = []
-    for line in f:
-        S.append(int(line))
-    f.close()
-    print ('Starting from file', filename)
-else:
-    S = [random.choice([1, -1]) for k in range(N)]
-    print ('Starting from a random configuration')
-
-#    
 f = open(filename, 'w')
 for a in S:
     f.write(str(a) + '\n')
-f.close() 
+f.close()   
 
-#
-def x_y(k, L):
-    y = k // L
-    x = k - y * L
-    return x, y
+
 
 conf = [[0 for x in range(L)] for y in range(L)]
 for k in range(N):
