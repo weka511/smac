@@ -1,3 +1,6 @@
+# This was first implemented by Bortz, Kalos, and Lebowitz in 1975
+# They called their algorithm the n-fold way
+
 import random, math
 
 def tower_sample(weights):
@@ -21,7 +24,8 @@ L = 6
 N = L * L
 nbr = {i : ((i // L) * L + (i + 1) % L, (i + L) % N,
             (i // L) * L + (i - 1) % L, (i - L) % N)
-                                    for i in range(N)}
+                                    for i in range(N)} 
+
 S = [random.choice([1, -1]) for k in range(N)]
 E = -0.5 * sum(S[k] * sum(S[nn] for nn in nbr[k]) for k in range(N))
 tot_spin_flips = N * 10000
