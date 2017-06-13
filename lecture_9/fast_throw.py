@@ -8,4 +8,4 @@ while t < t_max:
     delta_t = 1 + int(math.log(Upsilon) /
               log_lambda)
     t += delta_t
-    print t, 'flip'
+    print ('{0} flip'.format(t))

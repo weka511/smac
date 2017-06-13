@@ -28,7 +28,7 @@ p = math.exp(- 2.0 * h / T)
 tmax = 10
 sigma = 1
 for t in range(tmax):
-    print t
+    print (t)
     snapshot(sigma, T, t)
     if sigma == -1:
         sigma = 1
