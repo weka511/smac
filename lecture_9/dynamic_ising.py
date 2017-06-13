@@ -45,4 +45,4 @@ while n_spin_flips < tot_spin_flips:
     n_spin_flips += 1
     E += 2.0 * S[k] * sum(S[nn] for nn in nbr[k])
     S[k] *= -1
-print 'T = %f, E_av = %f' %(T, E_tot / float(t_tot) / N)
+print ('T = {0}, E_av = {1}'.format(T, E_tot / float(t_tot) / N))

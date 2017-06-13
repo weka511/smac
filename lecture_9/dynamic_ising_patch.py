@@ -61,4 +61,4 @@ while n_spin_flips < tot_spin_flips:
         site_to_class[m] = new_class_m
     E += delta_E[old_class_k]
     S[k] *= -1
-print 'T = %f, E_av = %f' %(T, E_tot / float(t) / N)
+print ('T = {0}, E_av = {1}'.format(T, E_tot / float(t) / N))
