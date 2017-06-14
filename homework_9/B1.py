@@ -23,7 +23,7 @@ def resize_disks(positions, r, N, gamma):
     r = r + gamma * (Upsilon - r)
     return r
 
-N = 13
+N = 19
 gamma  = 0.375 #0.5 0.25
 min_density = 0.78
 #     Several independent runs are performed, and each time one solution is found.
