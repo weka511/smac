@@ -6,7 +6,7 @@ def dist(x, y):
 def tour_length(cities, N):
     return sum(dist(cities[k + 1], cities[k]) for k in range(N - 1)) + dist(cities[0], cities[N - 1])
 
-N = 10
+N = 50
 random.seed(54321)
 cities = [(random.uniform(0.0, 1.0), random.uniform(0.0, 1.0)) for i in range(N)]
 random.seed()
