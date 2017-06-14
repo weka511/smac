@@ -68,7 +68,7 @@ for run in range(250):
     # This is done only for configurations that are above a given density
     # min_density (to avoid storing configurations which are clearly not optimal).
     if eta > min_density:
-        f = open('N_{0}_eta_{1}_gamma_{2}'.format(N,eta,gamma), 'w')
+        f = open('N_{0}_eta_{1}_gamma_{2}.dat'.format(N,eta,gamma), 'w')
         for a in positions:
             f.write(str(a[0]) + ' ' + str(a[1]) + ' ' + str(a[2]) + '\n')
         f.close()
