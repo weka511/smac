@@ -15,7 +15,7 @@ beta = 1.0
 n_accept = 0
 best_energy = float('inf')
 energy =  tour_length(cities, N)
-for step in xrange(1000000):
+for step in range(1000000):
     if n_accept == 100:
         beta *=  1.005
         n_accept = 0
@@ -57,5 +57,5 @@ pylab.plot([cities[0][0], cities[N - 1][0]], [cities[0][1], cities[N - 1][1]], '
 pylab.title(str(best_energy))
 pylab.axis('scaled')
 pylab.axis([0.0, 1.0, 0.0, 1.0])
-pylab.savefig('plot_tsp_simulated_annealing_N' + str(N) + '_energy' + str(best_energy) + '.png')
+pylab.savefig('plot_tsp_simulated_annealing_N_{0}_energy_{1}.png'.format(N,best_energy))
 pylab.show()
