@@ -1,6 +1,8 @@
 import random, math
 
+
 def unit_sphere():
+    'Return the coordintes of a random point on a unit sphere'
     x = [random.gauss(0.0, 1.0) for i in range(3)]
     norm =  math.sqrt(sum(xk ** 2 for xk in x))
     return [xk / norm for xk in x]
@@ -10,26 +12,23 @@ def minimum_distance(positions, N):
              for j in range(3))) for l in range(N) for k in range(l)]
     return min(dists)
 
-#    The annealing schedule consists in increasing the disk radius
-# (which corresponds to decreasing the temperature). The parameter gamma
-# constitutes an annealing rate (gamma=1 gives a fast annealing,
-# while a small gamma makes the annealing slower).
 
 def resize_disks(positions, r, N, gamma):
+    '''
+    The annealing schedule consists in increasing the disk radius
+    (which corresponds to decreasing the temperature). The parameter gamma
+    constitutes an annealing rate (gamma=1 gives a fast annealing,
+    while a small gamma makes the annealing slower).'''
     Upsilon = minimum_distance(positions, N) / 2.0
     r = r + gamma * (Upsilon - r)
     return r
 
 N = 13
-gamma  = 0.5
+gamma  = 0.375 #0.5 0.25
 min_density = 0.78
 #     Several independent runs are performed, and each time one solution is found.
 
-
-
-
-for run in range(10):
-    print ('run {0}'.format(run))
+for run in range(250):
     sigma  = 0.25
     r = 0.0
     positions = [unit_sphere() for j in range(N)]
@@ -38,9 +37,7 @@ for run in range(10):
     while sigma > 1.e-8:
         step += 1
         if step % 500000 == 0:
-            # The parameter eta = N * (1 - sqrt(1 - r^2)) / 2 is the 
-            # surface area of the spherical caps formed by the disks.
-            eta = N / 2.0 * (1.0 - math.sqrt(1.0 - r ** 2))
+            eta = N / 2.0 * (1.0 - math.sqrt(1.0 - r ** 2)) #surface area of the spherical caps formed by the disks.
             print ('{0} {1} {2} {3}'.format( r, eta, sigma, acc_rate))
         k = random.randint(0, N - 1)
         newpos = [positions[k][j] + random.gauss(0, sigma) for j in range(3)]
@@ -65,13 +62,13 @@ for run in range(10):
             # radius r reads R = 1 / (1 / r -1).
             R = 1.0 / (1.0 / r - 1.0)
             eta = 1.0 * N / 2.0 * (1.0 - math.sqrt(1.0 - r ** 2))
-    print ('final density: {0} (gamma = {1})'.format(eta, gamma))
+    print ('Run {0}. final density: {1} (gamma = {2})'.format(run+1,eta, gamma))
     
     # For each run, the final configuration is written on a file. 
     # This is done only for configurations that are above a given density
     # min_density (to avoid storing configurations which are clearly not optimal).
     if eta > min_density:
-        f = open('N_' + str(N) + '_final_'+ str(eta) + '.txt', 'w')
+        f = open('N_{0}_eta_{1}_gamma_{2}'.format(N,eta,gamma), 'w')
         for a in positions:
             f.write(str(a[0]) + ' ' + str(a[1]) + ' ' + str(a[2]) + '\n')
         f.close()
