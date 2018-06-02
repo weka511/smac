@@ -6,7 +6,7 @@ def prob(x):
     return (s1 + 2.0 * s2) / math.sqrt(2.0 * math.pi)
 
 delta = 0.001
-nsteps = 100000000
+nsteps = 10000
 acc_tot = 0
 x = 0.0
 x_av = 0.0
