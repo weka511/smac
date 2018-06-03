@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Implement Algorithm 1.29, subtract mean vakue for each sample, and generate
+# Implement Algorithm 1.29, subtract mean value for each sample, and generate
 # histograms of the average of N samples and the rescaled averages.
 
 import random,pylab,math,numpy as np

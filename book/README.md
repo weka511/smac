@@ -39,7 +39,7 @@ Code exercises from the textbook
 
 #### Section 1.4 Computing
  * 1.22 Importance sampling
-   * direct-gamma.py  Implement Algorithm 1.29, subtract mean vakue for each sample, and generate histograms of the average of N samples  and the escaled averages.
+   * direct-gamma.py  Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
    * direct-gamma-zeta.py
    * markov-zeta.py
 
