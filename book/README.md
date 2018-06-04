@@ -41,7 +41,7 @@ Code exercises from the textbook
  * 1.22 Importance sampling
    * direct-gamma.py  Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
    * direct-gamma-zeta.py
-   * markov-zeta.py
+   * markov-zeta.py  Implement Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.
 
 ### Chapter 2 Hard Disks and Spheres
 

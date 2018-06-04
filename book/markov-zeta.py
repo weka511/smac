@@ -1,4 +1,4 @@
-# Copyright (C) 2015 Greenweaves Software Pty Ltd
+# Copyright (C) 2015,2018 Greenweaves Software Limited
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,8 +23,11 @@ def markov_zeta(delta,zeta,x):
     return x
 
 if __name__=="__main__":
-    delta=0.01
-    n=500000
+    from matplotlib import rc
+    rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+    rc('text', usetex=True)    
+    delta=0.005
+    n=1000000
     x=1
     zeta=-0.8
     xs=[]
@@ -34,6 +37,8 @@ if __name__=="__main__":
         xs.append(x)
     plt.figure(1)   
     plt.plot(xs)
+    plt.title('$\zeta=-0.8$')
+    plt.savefig('markov-zeta-0-8.png')
     
     x=1
     zeta=-1.6
@@ -44,3 +49,6 @@ if __name__=="__main__":
         xs.append(x)
     plt.figure(2)    
     plt.plot(xs)
+    plt.title('$\zeta=-1.6$')
+    plt.savefig('markov-zeta-1-6.png')
+    plt.show()
