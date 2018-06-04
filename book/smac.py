@@ -1,6 +1,6 @@
 # smac.py
 
-# Copyright (C) 2015 Greenweaves Software Pty Ltd
+# Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -67,17 +67,13 @@ class SphereGenerator:
     def root_sigma(self,xs):
         return math.sqrt(sum(sum(el*el for el in x) for x in xs))
     
- #   def mply(self,xx,mm):
- #       return tuple(xxx*mm for xxx in xx)
     
     def direct_sphere(self):
         xs=[tuple([self.gauss.gauss() for j in range(self.d)]) for i in range(self.n)] 
         upsilon=random.random()**(1.0/(self.d*self.n))
         RootSigma=self.root_sigma(xs)
         return [tuple(el*upsilon/RootSigma for el in x) for x in xs]
-    #return [self.mply(xx,upsilon*RootSigma) for xx in xs]
-#        return self.extract_points([upsilon*x/RootSigma for x in xs],self.n)
-        
+
     def direct_surface(self):
         sigma=1.0/math.sqrt(self.d)    
         xs=[gauss.gauss() for k in range(self.d)] 
@@ -100,5 +96,5 @@ class SphereGenerator:
             raise ValueError("Dimension {0} does not divide {1} length exactly".format(n,len(xs)))
     
 if __name__=="__main__":
-    print "Library only"
+    print ("Library only")
     

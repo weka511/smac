@@ -1,6 +1,6 @@
 # permutation-test.py
 
-# Copyright (C) 2015 Greenweaves Software Pty Ltd
+# Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import permutation
-import math
+import permutation, math
 
 perms={}
      
@@ -29,4 +28,4 @@ for i in range(120000):
         perms[perm]=1
 
 for kk in perms.keys():
-    print kk,", ",perms[kk]
+    print (kk,", ",perms[kk])

@@ -1,6 +1,6 @@
 # binomialconvolution.py
 
-# Copyright (C) 2015 Greenweaves Software Pty Ltd
+# Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,5 +29,5 @@ if __name__=="__main__":
     theta=math.pi/4
     for i in range(8):
         pi=binomial_convolution(theta,pi)
-        print pi
+        print (pi)
     

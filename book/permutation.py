@@ -1,6 +1,6 @@
 # permutation.py
 
-# Copyright (C) 2015 Greenweaves Software Pty Ltd
+# Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import random
 # generate random permutations
 
 def ran_perm(K):
-    perm = range(K)
+    perm = list(range(K))
     for k in range(K):
         l=random.randint(k,K-1)
         perm[k],perm[l]=perm[l],perm[k]
@@ -37,4 +37,4 @@ def permutation2str(perm):
     result=""
     for el in perm:
         result+=str(el)
-    return result
+    return (result)
