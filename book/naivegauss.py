@@ -1,6 +1,6 @@
 # gauss.py
 
-# Copyright (C) 2015 Greenweaves Software Pty Ltd
+# Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -46,10 +46,11 @@ if __name__=="__main__":
     
     for k in range(1,12):
         (xs,frequencies)=get_frequencies(k)
-        plt.plot(xs,frequencies)
+        plt.plot(xs,frequencies,label='k={0}'.format(k))
         plt.xlabel('Value')
         plt.ylabel('Frequency')
         plt.title('Gauss')
+        plt.legend(loc='upper left')
         plt.savefig(ft.make_temp_file('gauss.png'))
         
     plt.show()    
