@@ -113,7 +113,7 @@ if __name__=='__main__':
         #print (i,Nbr(i,3,3))
     #for i in range(16):
         #print (i,Nbr(i,4,4,periodic=True))
-    for E,Ns in enumerate_ising(4,4):
+    for E,Ns in enumerate_ising(6,6):
         print (E,Ns)
     
     #N=4

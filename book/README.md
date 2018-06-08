@@ -52,5 +52,5 @@ Code exercises from the textbook
 
 ### Section 5.1 The Ising model - exact computations
 
- * ising.py  Gray code for Ising
+ * ising.py  Algorithm 5.3 enumerate-ising and 5.2 grey-flip. Tested against Table 5.2 4x4 case.
  
