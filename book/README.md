@@ -1,7 +1,7 @@
 # Statistical Mechanics and Computations - Book
 
 Code exercises from the textbook
-*Statistical Mechanics: Algorithms and Computations* by *Werner Krauth*.
+[*Statistical Mechanics: Algorithms and Computations*](http://blancopeck.net/Statistics.pdf) by *Werner Krauth*.
 
 ## 1 Monte Carlo Methods
 
@@ -47,8 +47,16 @@ Code exercises from the textbook
 
 ### Section 2.2 Boltzmann's Statistical Mechanics
  * directDisksAny.py
- 
-## 3 Order and disorder in spin systems
+
+## 3 Density Matrices and Path Integrals
+
+## 4 Bosons
+
+## 5 Order and disorder in spin systems
+
+## Entropic Forces
+
+## Dynamic Monte Carlo Methods
 
 ### Section 5.1 The Ising model - exact computations
 
