@@ -25,8 +25,7 @@ Code exercises from the textbook
 
 ### Section 1.2 Basic Sampling
 * 1.9 Sample permutations
-  * permutation.py
-  * permutation-test.py
+  * permutation.py    Sample permutations using Alg. 1.11 and verify that it generate all 120 permutaions of 5 elements equally often.
   * permutation-histogram.py
 
 * 1.12 Gauss

@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-import random
+import random,math
 
 # generate random permutations
 
@@ -38,3 +38,30 @@ def permutation2str(perm):
     for el in perm:
         result+=str(el)
     return (result)
+
+if __name__=='__main__':
+    for i in range(10):    
+        perms={}
+            
+        for i in range(120000):
+            perm0=ran_perm(5)
+            perm = permutation2str(perm0)
+            if perm in perms:
+                perms[perm]+=1
+            else:
+                perms[perm]=1
+            
+        count= len(perms.keys())
+        
+        sum=0
+        for kk in perms.keys():
+            sum+=perms[kk]
+        
+        average=sum/count
+        
+        chi_squared=0
+        for kk in perms.keys():
+            chi_squared+=((perms[kk]-average)*(perms[kk]-average))
+        
+        ss=math.sqrt(2*chi_squared)
+        print (count, average, chi_squared, ss, math.sqrt(2*count-1))    
