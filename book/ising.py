@@ -19,19 +19,6 @@ import math
 #
 # Find neighbours in rectangular array indexed: 0, 1, ... m*n-1
 #
-# 0 [2, 1]
-# 1 [3, 0]
-# 2 [0, 3]
-# 3 [1, 2]
-#  0 [3, 1]
-#  1 [4, 0, 2]
-#  2 [5, 1]
-#  3 [0, 6, 4]
-#  4 [1, 7, 3, 5]
-#  5 [2, 8, 4]
-#  6 [3, 7]
-#  7 [4, 6, 8]
-#  8 [5, 7]
 def Nbr(k,m,n,periodic=False):
     neighbours = []
     def add_periodic(k,incr):
@@ -92,35 +79,19 @@ def enumerate_ising(m,n,periodic=True):
     E         = -2 * N
     Ns[E]     = 2
     spins     = ''.join([('+' if sigma[j]>0 else '-') for j in range(N)])
-    #print ('{0} {1} h={2},E={3},N={4}'.format('-', spins, '-', E, Ns[E+2*N]))
     for i in range(2**(N-1)-1):
         k,tau     = gray_flip(tau,N)
         k         -= 1
         h         = sum(sigma[j] for j in Nbr(k,m,n,periodic=periodic))
         E         += (2*sigma[k] * h)
-        #print (i,E,2**(N-1)-1,k,Nbr(k,m,n,periodic=periodic))
         if not E in Ns:
             Ns[E] = 0
         Ns[E] += 2
 
         sigma[k]  = -sigma[k]
         spins     = ''.join([('+' if sigma[j]>0 else '-') for j in range(N)])
-        #print ('{0} {1} h={2},E={3},N={4}'.format(k, spins, h, E, Ns[E+2*N]))
     return [(E,Ns[E]) for E in sorted(Ns.keys())]
 
 if __name__=='__main__':
-    #for i in range(9):
-        #print (i,Nbr(i,3,3))
-    #for i in range(16):
-        #print (i,Nbr(i,4,4,periodic=True))
     for E,Ns in enumerate_ising(6,6):
         print (E,Ns)
-    
-    #N=4
-    #tau = list(range(1,N+1+1))
-    #spins = '-'*N
- 
-    #for i in range(2**N):
-        #k,tau=gray_flip(tau,N)
-        #print (i+1,spins,k,tau)
-        #spins = ''.join([flip(spins[j]) if j==k-1 else spins[j] for j in range(N)])
