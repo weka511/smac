@@ -54,11 +54,13 @@ Code exercises from the textbook
 
 ## 5 Order and disorder in spin systems
 
+### Section 5.1 The Ising model - exact computations
+
+ * ising.py  Algorithm 5.3 enumerate-ising and 5.2 gray-flip. Tested against Table 5.2 4x4 case.
+ 
 ## Entropic Forces
 
 ## Dynamic Monte Carlo Methods
 
-### Section 5.1 The Ising model - exact computations
 
- * ising.py  Algorithm 5.3 enumerate-ising and 5.2 grey-flip. Tested against Table 5.2 4x4 case.
  
