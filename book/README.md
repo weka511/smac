@@ -37,12 +37,21 @@ Code exercises from the textbook
   * binomialconvolution.py
 
 ### Section 1.4 Computing
+
+ #### Section 1.4.2 Importance Sampling
+
  * 1.22 Importance sampling
    * direct-gamma.py  Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
    * direct-gamma-zeta.py
    * markov-zeta.py  Implement Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.
- * Stable Distribution
-  * levy-convolution.py
+   
+ #### Section 1.4.4 Stable Distribution
+  * levy-convolution.py  Implement Algorithm 1.32
+  
+##  2 Hard Disks and Spheres
+
+### Section 2.2 Boltzmann's Statistical Mechanics
+ * directDisksAny.py
   
 ##  2 Hard Disks and Spheres
 
