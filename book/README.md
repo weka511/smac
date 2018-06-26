@@ -41,7 +41,9 @@ Code exercises from the textbook
    * direct-gamma.py  Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
    * direct-gamma-zeta.py
    * markov-zeta.py  Implement Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.
-
+ * Stable Distribution
+  * levy-convolution.py
+  
 ##  2 Hard Disks and Spheres
 
 ### Section 2.2 Boltzmann's Statistical Mechanics
@@ -57,9 +59,9 @@ Code exercises from the textbook
 
  * ising.py  Algorithm 5.3 enumerate-ising and 5.2 gray-flip. Tested against Table 5.2 4x4 case.
  
-## Entropic Forces
+## 6 Entropic Forces
 
-## Dynamic Monte Carlo Methods
+## 7 Dynamic Monte Carlo Methods
 
 
  

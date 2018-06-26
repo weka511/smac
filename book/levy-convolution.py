@@ -1,4 +1,4 @@
-# binomialconvolution.py
+# levy-convolution.py
 
 # Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
 
@@ -17,18 +17,26 @@
 
 import math,matplotlib.pyplot as plt
 
-# Algorithm 1.25 from Krauth
-def binomial_convolution(theta,pi):
-    def calculate_row(pi):
-        return [theta*x + (1-theta)*y for (x,y) in zip(pi[:-1],pi[1:])]
-    return calculate_row([0]+pi+[0])
-    
+def levy(pi,A_Plus=1.25,alpha=1.25):
+    x0,_  = pi[0]
+    xK,_  = pi[-1]
+    K     = len(pi)
+    Delta = (xK-x0)/(K-1)
+    for k in range(K):
+        x = x0 + (K + k) * Delta
+        pik = A_Plus/x**(1+alpha)
+        pi.append((x,pik))
+    pi_dash=[]
+    for k in range(0,2*K):
+        x = (pi[0][0]+pi[k][0])/(2**(1/alpha))
+        pi_x = Delta * sum([pi[i][1]*pi[k-i][1] for i in range(k)])/2**(1/alpha)
+        pi_dash.append((x,pi_x))
+    norm = sum([p for (_,p) in pi_dash])
+    return [(x,p/norm) for (x,p) in pi_dash if x>= x0 and x0 <= xK]
 
-if __name__=="__main__":
-    pi=[1]
-    theta=math.pi/4
-    for i in range(8):
-        pi=binomial_convolution(theta,pi)
+if __name__=='__main__':
+    pi=[(x/10,0.1) for x in range(11)]
+    for i in range(10):
+        pi=levy(pi)
         plt.plot(pi)
     plt.show()
-    
