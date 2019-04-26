@@ -16,32 +16,20 @@ Code exercises from the textbook
 ||large-markov.pi||
 ||transfer.m|1.8 Eigenvalues of transfer matrix|
 ||sphere-test.py|1.13 Vectors within Uniform sphere|
-
-
-### Section 1.2 Basic Sampling
-* 1.9 Sample permutations
-  * permutation.py    Sample permutations using Alg. 1.11 and verify that it generate all 120 permutaions of 5 elements equally often.
-  * permutation-histogram.py
-
-* 1.12 Gauss
-  * naivegauss.py
-  * boxmuller.py
-
-### Section 1.3 Statistical data analysis
-* 1.18 Binomial Convolution
-  * binomialconvolution.py
-
-### Section 1.4 Computing
-
- #### Section 1.4.2 Importance Sampling
-
- * 1.22 Importance sampling
-   * direct-gamma.py  Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
-   * direct-gamma-zeta.py
-   * markov-zeta.py  Implement Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.
-   
- #### Section 1.4.4 Stable Distribution
-  * levy-convolution.py  Implement Algorithm 1.32
+|1.2||Basic Sampling|
+||permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutaions of 5 elements equally often|
+||permutation-histogram.py|
+||naivegauss.py|1.12 Gauss|
+||boxmuller.py||
+|1.3||Statistical data analysis|
+||binomialconvolution.py|1.18 Binomial Convolution|
+|1.4||Computing|
+|1.4.2||Importance Sampling|
+||direct-gamma.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
+||direct-gamma-zeta.py||
+||markov-zeta.py|Implement Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.|
+|1.4.4||Stable Distribution|
+||levy-convolution.py|  Implement Algorithm 1.32|
   
 ##  2 Hard Disks and Spheres
 
