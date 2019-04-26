@@ -30,31 +30,14 @@ Code exercises from the textbook
 ||markov-zeta.py|Implement Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.|
 |1.4.4||Stable Distribution|
 ||levy-convolution.py|  Implement Algorithm 1.32|
-  
-##  2 Hard Disks and Spheres
-
-### Section 2.2 Boltzmann's Statistical Mechanics
- * directDisksAny.py
-  
-##  2 Hard Disks and Spheres
-
-### Section 2.2 Boltzmann's Statistical Mechanics
- * directDisksAny.py
-
-## 3 Density Matrices and Path Integrals
-
-## 4 Bosons
-
-## 5 Order and disorder in spin systems
-
-### Section 5.1 The Ising model - exact computations
-
- * gray.py   Algorithm 5.2 gray-flip
- * ising.py  Algorithm 5.3 enumerate-ising. Tested against Table 5.2 4x4 case.
- 
-## 6 Entropic Forces
-
-## 7 Dynamic Monte Carlo Methods
-
-
- 
+| 2|| Hard Disks and Spheres|
+|2.2||Boltzmann's Statistical Mechanics|
+||directDisksAny.py||
+|3||Density Matrices and Path Integrals|
+|4|| Bosons|
+|5|| Order and disorder in spin systems|
+|5.1|| The Ising model - exact computations|
+||gray.py|Algorithm 5.2 gray-flip|
+||ising.py|Algorithm 5.3 enumerate-ising. Tested against Table 5.2 4x4 case.|
+|6||Entropic Forces|
+|7||Dynamic Monte Carlo Methods|
