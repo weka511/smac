@@ -3,10 +3,10 @@
 Code exercises from the textbook
 [*Statistical Mechanics: Algorithms and Computations*](http://blancopeck.net/Statistics.pdf) by *Werner Krauth*.
 
-|#|File|Remarks|
+|#|File|Problem/Algorithm/Description|
 |-----|--------------|---------------------------------------------------------------------------------------|
 |1||Monte Carlo Methods|
-||smac.c|Useful functions|
+||smac.c|Useful functions: BoxMuller, CircleThrowing, and SphereGenerator|
 |1.1||Popular Games in Monaco|
 ||direct-plot.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.|
 || markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.|
@@ -27,9 +27,9 @@ Code exercises from the textbook
 |1.4.2||Importance Sampling|
 ||direct-gamma.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
 ||direct-gamma-zeta.py||
-||markov-zeta.py|Implement Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.|
+||markov-zeta.py|Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.|
 |1.4.4||Stable Distribution|
-||levy-convolution.py|  Implement Algorithm 1.32|
+||levy-convolution.py|Algorithm 1.32|
 | 2|| Hard Disks and Spheres|
 |2.2||Boltzmann's Statistical Mechanics|
 ||directDisksAny.py||
@@ -38,6 +38,6 @@ Code exercises from the textbook
 |5|| Order and disorder in spin systems|
 |5.1|| The Ising model - exact computations|
 ||gray.py|Algorithm 5.2 gray-flip|
-||ising.py|Algorithm 5.3 enumerate-ising. Tested against Table 5.2 4x4 case.|
+||enumerate-ising.py|Algorithm 5.3 . Tested against Table 5.2 4x4 case.|
 |6||Entropic Forces|
 |7||Dynamic Monte Carlo Methods|
