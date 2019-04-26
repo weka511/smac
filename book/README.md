@@ -3,25 +3,20 @@
 Code exercises from the textbook
 [*Statistical Mechanics: Algorithms and Computations*](http://blancopeck.net/Statistics.pdf) by *Werner Krauth*.
 
-## 1 Monte Carlo Methods
+|#|File|Remarks|
+|-----|--------------|---------------------------------------------------------------------------------------|
+|1||Monte Carlo Methods|
+||smac.c|Useful functions|
+|1.1||Popular Games in Monaco|
+||direct-plot.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.|
+|| markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.|
+||direct.py|1.3 Store state in file|
+||smacfiletoken.py||
+||markov-discrete-pebble.py| 1.4 Use table|
+||large-markov.pi||
+||transfer.m|1.8 Eigenvalues of transfer matrix|
+||sphere-test.py|1.13 Vectors within Uniform sphere|
 
- * smac.c   Useful functions
-
-### Section 1.1 Popular Games in Monaco
-* 1.1 Implement Algorithm 1.1. Plot error and investigate relationship with N.
-  * direct-plot.py
-* 1.2 Implement Algorithm 1.2. Plot error and rejection rate.
-  * markov-pi.py
-* 1.3 Store state in file
-  * direct.py
-  * smacfiletoken.py
-* 1.4 Use table
-  * markov-discrete-pebble.py
-  * large-markov.pi
-* 1.8 Eigenvalues of transfer matrix
-  * transfer.m
-* 1.13 Vectors within Uniform sphere
-  * sphere-test.py
 
 ### Section 1.2 Basic Sampling
 * 1.9 Sample permutations
