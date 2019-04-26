@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
-import math
+
+from gray import gray
 
 # Nbr
 #
@@ -60,13 +61,7 @@ def Nbr(k,m,n,periodic=False):
         
     return neighbours
     
-def gray_flip(tau,N):
-    k = tau[0]
-    if k<N:
-        tau[k-1] = tau[k]
-        tau[k] = k+1
-        if (k != 1): tau[0] = 1
-    return k,tau
+
 
 def flip(ch):
     return '+' if ch =='-' else '-'
@@ -75,12 +70,10 @@ def enumerate_ising(m,n,periodic=True):
     N         = m * n
     Ns        = {}
     sigma     = [-1]  *N
-    tau       = list(range(1,(N+1)+1))
     E         = -2 * N
     Ns[E]     = 2
     spins     = ''.join([('+' if sigma[j]>0 else '-') for j in range(N)])
-    for i in range(2**(N-1)-1):
-        k,tau     = gray_flip(tau,N)
+    for k in gray(N):
         k         -= 1
         h         = sum(sigma[j] for j in Nbr(k,m,n,periodic=periodic))
         E         += (2*sigma[k] * h)
@@ -93,5 +86,5 @@ def enumerate_ising(m,n,periodic=True):
     return [(E,Ns[E]) for E in sorted(Ns.keys())]
 
 if __name__=='__main__':
-    for E,Ns in enumerate_ising(6,6):
+    for E,Ns in enumerate_ising(2,2):
         print (E,Ns)

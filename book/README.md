@@ -66,7 +66,8 @@ Code exercises from the textbook
 
 ### Section 5.1 The Ising model - exact computations
 
- * ising.py  Algorithm 5.3 enumerate-ising and 5.2 gray-flip. Tested against Table 5.2 4x4 case.
+ * gray.py   Algorithm 5.2 gray-flip
+ * ising.py  Algorithm 5.3 enumerate-ising. Tested against Table 5.2 4x4 case.
  
 ## 6 Entropic Forces
 
