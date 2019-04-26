@@ -1,7 +1,5 @@
-# smac.py
-
-# Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
-
+# Copyright (C) 2015-2019 Greenweaves Software Limited
+#
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -11,7 +9,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-
+#
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -37,7 +35,7 @@ class BoxMuller:
  
     def gauss(self,):
         if self.even:
-           (value,self.next_value)=self.box_muller()
+            (value,self.next_value)=self.box_muller()
         else:
             value=self.next_value
         self.even= not self.even
