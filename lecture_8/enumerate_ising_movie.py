@@ -29,12 +29,12 @@ def gray_flip(t, N):
     if k != 1: t[0] = 1
     return t, k
 
-L = 2
-N = L * L
+L        = 2
+N        = L * L
 site_dic = {(j // L, j - (j // L) * L) : j for j in range(N)}
-S = [-1] * N
+S        = [-1] * N
 plot_spin([[S[site_dic[(a, b)]] for a in range(L)] for b in range(L)], 'spin_config_%04i.png' % 0, L)
-tau = range(1, N + 2)
+tau      = list(range(1, N + 2))
 for i in range(1, 2 ** N):
     tau, k = gray_flip(tau, N)
     S[k - 1] *= -1
