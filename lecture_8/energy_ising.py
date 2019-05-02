@@ -7,4 +7,4 @@ def energy(S, N, nbr):
 L = 2
 nbr = [[1, 2], [3, 0], [3, 0], [2, 1]]
 S = [1, 1, -1, 1]
-print S, energy(S, L * L, nbr)
+print (S, energy(S, L * L, nbr))
