@@ -62,7 +62,7 @@ class Gray:
             raise StopIteration
    
     def __str__(self):
-        return '['+'.'.join(str(t) for t in self.tau)+']'
+        return '['+','.join(str(t) for t in self.tau)+']'
             
         
 if __name__=='__main__':
