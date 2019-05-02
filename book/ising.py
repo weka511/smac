@@ -14,7 +14,7 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
 
-from gray import gray
+from gray import Gray
 
 # Nbr
 #
@@ -66,25 +66,44 @@ def Nbr(k,m,n,periodic=False):
 def flip(ch):
     return '+' if ch =='-' else '-'
 
-def enumerate_ising(m,n,periodic=True):
+def enumerate_ising(m,n,periodic=True,gray = Gray(4)):
     N         = m * n
     Ns        = {}
     sigma     = [-1]  *N
-    E         = -2 * N
-    Ns[E]     = 2
+    E         = 2 * sum(sigma)
+    M         = - sum(sigma)    # Magnetization
+    Ns[(E,M)] = 2
     spins     = ''.join([('+' if sigma[j]>0 else '-') for j in range(N)])
-    for k in gray(N):
+    
+    for k in gray:
         k         -= 1
         h         = sum(sigma[j] for j in Nbr(k,m,n,periodic=periodic))
         E         += (2*sigma[k] * h)
-        if not E in Ns:
-            Ns[E] = 0
-        Ns[E] += 2
 
         sigma[k]  = -sigma[k]
+        M         = 2 * sigma[k]
+        if not (E,M) in Ns:
+            Ns[(E,M)] = 0        
+        Ns[(E,M)] += 2
         spins     = ''.join([('+' if sigma[j]>0 else '-') for j in range(N)])
     return [(E,Ns[E]) for E in sorted(Ns.keys())]
 
+
+
 if __name__=='__main__':
-    for E,Ns in enumerate_ising(2,2):
-        print (E,Ns)
+    import argparse,sys
+
+    parser = argparse.ArgumentParser(description='Compute statistics for Ising model')
+    parser.add_argument('-o', '--output',default='ising.csv',help='File to record results')
+    parser.add_argument('-m',type=int,default=4,help='Number of rows')
+    parser.add_argument('-n',type=int,default=4,help='Number of columns')
+    args = parser.parse_args()
+    
+    with open(args.output,'w') as f:
+        gray      = Gray(args.m*args.n)
+        counts = enumerate_ising(args.m,args.n,gray=gray)
+        f.write('{0}\n'.format(gray))
+        f.write('E,M,Ns\n')        
+        for key,Ns in counts:
+            E,M=key
+            f.write('{0},{1},{2}\n'.format(E,M,Ns))
