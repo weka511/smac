@@ -72,7 +72,7 @@ if __name__=='__main__':
         line_styles = ['--',':','-.']
         index       = 0
         for E in sorted(pi.keys()):
-            stats = sorted(pi[E])
+            stats         = sorted(pi[E])
             magnetization = [m for m,_ in stats]
             counts        = [n for _,n in stats]
             total         = sum(counts)
