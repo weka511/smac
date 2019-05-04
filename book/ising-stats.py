@@ -65,17 +65,25 @@ if __name__=='__main__':
         plt.axvline(x=2/log(1+sqrt(2)),color='r',linestyle='--')
         plt.xlabel('Temperature')
         plt.ylabel('Specific Heat Capacity')
+        plt.title('Thermodynamic quantities')
         
-        plt.figure()
-        cc=['r','g','b','m','y','c','k']
-        index=0
+        plt.figure(figsize=(10,10))
+        colours     = ['r','g','b','m','y','c','k']
+        line_styles = ['--',':','-.']
+        index       = 0
         for E in sorted(pi.keys()):
             stats = sorted(pi[E])
-            mm=[m for m,_ in stats]
-            nn=[n for _,n in stats]
-            nn=[n/sum(nn) for n in nn]
-            plt.plot(mm,nn,color=cc[index%len(cc)],label='{0}'.format(E))
+            magnetization = [m for m,_ in stats]
+            counts        = [n for _,n in stats]
+            total         = sum(counts)
+            frequency     = [n/total for n in counts]
+            plt.plot(magnetization,frequency,
+                     color=colours[index%len(colours)],
+                     label='{0}'.format(E),ls=line_styles[index//len(colours)])
             index+=1
-        plt.legend()
+        plt.xlabel('Magnetization')
+        plt.ylabel('Frequency')
+        plt.title('Frequency of Magnetization as a function of Energy')
+        plt.legend(title='Energy')
         plt.show()
         
