@@ -39,6 +39,8 @@ Code exercises from the textbook
 |5.1||The Ising model - exact computations|
 ||gray.py|Algorithm 5.2: Gray code for spine {1,...N}.|
 ||enumerate-ising.py|Algorithm 5.3: single flip enumeration for the Ising model.|
+||ising.py|Algorithm 5.3: driver for enumerate-ising.py|
+||ising-stats|Figure 6.6 - plot data from ising.py|
 |5.2||The Ising model - Monte-C|arlo algorithm|
 |5.3||Generalized Ising models| 
 |6||Entropic Forces|
