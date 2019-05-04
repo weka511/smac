@@ -41,7 +41,7 @@ Code exercises from the textbook
 ||enumerate-ising.py|Algorithm 5.3: single flip enumeration for the Ising model.|
 ||ising.py|Algorithm 5.3: driver for enumerate-ising.py|
 ||ising-stats|Figure 6.6 - plot data from ising.py|
-|5.2||The Ising model - Monte-C|arlo algorithm|
+|5.2||The Ising model - Monte-Carlo algorithm|
 |5.3||Generalized Ising models| 
 |6||Entropic Forces|
 |7||Dynamic Monte Carlo Methods|
