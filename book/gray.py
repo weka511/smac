@@ -45,13 +45,14 @@ class Gray:
         self.N   = N
         self.tau = list(range(1,(N+1)+1)) if tau==None else tau
         self.i   = i
-        self.max = 2**(N-1)-1-1
+        self.max = 2**(N-1)-1
         
     def __iter__(self):
         return self
     
     def __next__(self):
         if self.i<self.max:
+            self.i+=1
             k = self.tau[0]
             if k>self.N: raise StopIteration
             self.tau[k-1] = self.tau[k]

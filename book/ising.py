@@ -15,78 +15,29 @@
 
 
 from gray import Gray
+from enumerate_ising import enumerate_ising
 
-# Nbr
-#
-# Find neighbours in rectangular array indexed: 0, 1, ... m*n-1
-#
-def Nbr(k,m,n,periodic=False):
-    neighbours = []
-    def add_periodic(k,incr):
-        candidate = k + incr
-        if abs(incr)==1:
-            while candidate//n < k//n:
-                candidate += n
-            while candidate//n > k//n:
-                candidate -= n            
-        else:
-            while candidate<0:
-                candidate += m*n
-            while candidate>=m*n:
-                candidate -= m*n
-        if candidate != k and not candidate in neighbours:
-            neighbours.append(candidate)
-        
-    def add_if_possible(k,incr):
-        candidate = k + incr
-        if -1 < candidate and candidate < m*n:
-            if abs(incr)==1:
-                if candidate//n == k//n:   # Same row?
-                    neighbours.append(candidate)   
-            else:
-                if abs(incr)==n:   # Same column?
-                    neighbours.append(candidate)  
-     
-    def add(k,incr):
-        if periodic:
-            add_periodic(k,incr)
-        else:
-            add_if_possible(k,incr)
-            
-    if k<m*n and k>-1:
-        add(k,-n)
-        add(k,+n)
-        add(k,-1)
-        add(k,+1)
-        
-    return neighbours
-    
+#def enumerate_ising(m,n,periodic=True,gray = Gray(4)):
+    #N         = m * n
+    #Ns        = {}
+    #sigma     = [-1]  *N
+    #E         = 2 * sum(sigma)
+    #M         = - sum(sigma)    # Magnetization
+    #Ns[E] = 2  
+    #L         = m
+    #nbr = {i : ((i // L) * L + (i + 1) % L, (i + L) % N,
+                #(i // L) * L + (i - 1) % L, (i - L) % N)
+                                        #for i in range(N)}    
+    #for k in gray:
+        #h          = sum(sigma[j] for j in nbr[k-1])
+        #E         += (2*sigma[k] * h)
+        #sigma[k-1]  = -sigma[k-1]
+        #M         = - sum(sigma)    # Magnetization
+        #if not E in Ns:
+            #Ns[E] = 0        
+        #Ns[E] += 2
 
-
-def flip(ch):
-    return '+' if ch =='-' else '-'
-
-def enumerate_ising(m,n,periodic=True,gray = Gray(4)):
-    N         = m * n
-    Ns        = {}
-    sigma     = [-1]  *N
-    E         = 2 * sum(sigma)
-    M         = - sum(sigma)    # Magnetization
-    Ns[(E,M)] = 2
-    spins     = ''.join([('+' if sigma[j]>0 else '-') for j in range(N)])
-    
-    for k in gray:
-        k         -= 1
-        h         = sum(sigma[j] for j in Nbr(k,m,n,periodic=periodic))
-        E         += (2*sigma[k] * h)
-
-        sigma[k]  = -sigma[k]
-        M         = 2 * sigma[k]
-        if not (E,M) in Ns:
-            Ns[(E,M)] = 0        
-        Ns[(E,M)] += 2
-        spins     = ''.join([('+' if sigma[j]>0 else '-') for j in range(N)])
-    return [(E,Ns[E]) for E in sorted(Ns.keys())]
+    #return [(E,Ns[E]) for E in sorted(Ns.keys())]
 
 
 
@@ -104,6 +55,5 @@ if __name__=='__main__':
         counts = enumerate_ising(args.m,args.n,gray=gray)
         f.write('{0}\n'.format(gray))
         f.write('E,M,Ns\n')        
-        for key,Ns in counts:
-            E,M=key
-            f.write('{0},{1},{2}\n'.format(E,M,Ns))
+        for E,Ns in counts:
+            f.write('{0},{1}\n'.format(E,Ns))
