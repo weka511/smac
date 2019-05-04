@@ -17,30 +17,6 @@
 from gray import Gray
 from enumerate_ising import enumerate_ising
 
-#def enumerate_ising(m,n,periodic=True,gray = Gray(4)):
-    #N         = m * n
-    #Ns        = {}
-    #sigma     = [-1]  *N
-    #E         = 2 * sum(sigma)
-    #M         = - sum(sigma)    # Magnetization
-    #Ns[E] = 2  
-    #L         = m
-    #nbr = {i : ((i // L) * L + (i + 1) % L, (i + L) % N,
-                #(i // L) * L + (i - 1) % L, (i - L) % N)
-                                        #for i in range(N)}    
-    #for k in gray:
-        #h          = sum(sigma[j] for j in nbr[k-1])
-        #E         += (2*sigma[k] * h)
-        #sigma[k-1]  = -sigma[k-1]
-        #M         = - sum(sigma)    # Magnetization
-        #if not E in Ns:
-            #Ns[E] = 0        
-        #Ns[E] += 2
-
-    #return [(E,Ns[E]) for E in sorted(Ns.keys())]
-
-
-
 if __name__=='__main__':
     import argparse,sys
 
@@ -52,8 +28,8 @@ if __name__=='__main__':
     
     with open(args.output,'w') as f:
         gray      = Gray(args.m*args.n)
-        counts = enumerate_ising(args.m,args.n,gray=gray)
+        counts,pi = enumerate_ising(args.m,args.n,gray=gray)
         f.write('{0}\n'.format(gray))
         f.write('E,M,Ns\n')        
-        for E,Ns in counts:
-            f.write('{0},{1}\n'.format(E,Ns))
+        for E,M,Ns in sorted(pi):
+            f.write('{0},{1},{2}\n'.format(E,M,Ns))

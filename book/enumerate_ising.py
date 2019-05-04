@@ -26,9 +26,12 @@ from gray import Gray
 def enumerate_ising(m,n,periodic=True,gray = Gray(4)):
     N         = m * n
     Ns        = {}
+    pi        = {}    
     sigma     = [-1]  *N
     E         = 2 * sum(sigma)
+    M         = 1 * sum(sigma)              #magnetization 
     Ns[E]     = 2
+    pi[(E,M)] = 2
     L         = m
     nbr = {i : ((i // L) * L + (i + 1) % L, (i + L) % N,
                 (i // L) * L + (i - 1) % L, (i - L) % N)
@@ -41,19 +44,26 @@ def enumerate_ising(m,n,periodic=True,gray = Gray(4)):
             Ns[E] = 0
         Ns[E] += 2
         sigma[k]  = -sigma[k]
-
-    return [(E,Ns[E]) for E in sorted(Ns.keys())]
+        M += 2*sigma[k] 
+        if (E,M) in pi:
+            pi[(E,M)]+=2
+        else:
+            pi[(E,M)] = 2
+            
+    return [(E,Ns[E]) for E in sorted(Ns.keys())],[(E,M,pi[(E,M)]) for (E,M) in sorted(pi.keys())]
 
 if __name__=='__main__':
     import unittest
     class TestIsing(unittest.TestCase):
         def test2(self):
             expected = {0:12,8:2}
-            for E,Ns in enumerate_ising(2,2,gray = Gray(4)):
+            Energies,_=enumerate_ising(2,2,gray = Gray(4))
+            for E,Ns in Energies:
                 self.assertEqual(expected[abs(E)],Ns)
         def test4(self):
             expected = {0:20524, 4:13568, 8:6688, 12:1728, 16:424, 20:64, 24:32, 28:0, 32:2}
-            for E,Ns in enumerate_ising(4,4,gray = Gray(16)):
+            Energies,_=enumerate_ising(4,4,gray = Gray(16))
+            for E,Ns in Energies:
                 self.assertEqual(expected[abs(E)],Ns)        
     
                 
