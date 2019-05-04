@@ -39,6 +39,7 @@ if __name__=='__main__':
         Ms = []
         Ns = []
         N  = None
+        pi = {}
         for line in f:
             if i==0:
                 N = len(line.strip().split(','))-1
@@ -49,6 +50,9 @@ if __name__=='__main__':
                 Es.append(values[0])
                 Ms.append(values[1])
                 Ns.append(values[2])
+                if not values[0] in pi:
+                    pi[values[0]]=[]
+                pi[values[0]].append((values[1],values[2]))
             i+=1
         Ts  = []
         cvs = []
@@ -62,10 +66,16 @@ if __name__=='__main__':
         plt.xlabel('Temperature')
         plt.ylabel('Specific Heat Capacity')
         
-        mm = sorted(list(set(Ms)))
-
-        nn = [agg(m0) for m0 in mm]
         plt.figure()
-        plt.plot(mm,nn)
+        cc=['r','g','b','m','y','c','k']
+        index=0
+        for E in sorted(pi.keys()):
+            stats = sorted(pi[E])
+            mm=[m for m,_ in stats]
+            nn=[n for _,n in stats]
+            nn=[n/sum(nn) for n in nn]
+            plt.plot(mm,nn,color=cc[index%len(cc)],label='{0}'.format(E))
+            index+=1
+        plt.legend()
         plt.show()
         
