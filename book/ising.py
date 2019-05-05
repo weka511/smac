@@ -24,10 +24,11 @@ if __name__=='__main__':
     parser.add_argument('-o', '--output',default='ising.csv',help='File to record results')
     parser.add_argument('-m',type=int,default=4,help='Number of rows')
     parser.add_argument('-n',type=int,default=4,help='Number of columns')
+    parser.add_argument('-p','--progress',type=int,default=0,help='Record progress')
     args = parser.parse_args()
     
     with open(args.output,'w') as f:
-        gray      = Gray(args.m*args.n)
+        gray      = Gray(args.m*args.n,progress=args.progress)
         counts,pi = enumerate_ising(args.m,args.n,gray=gray)
         f.write('{0}\n'.format(gray))
         f.write('E,M,Ns\n')        

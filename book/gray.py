@@ -41,19 +41,22 @@ def gray(N):
 # Class for Gray code. Permits restarting
 
 class Gray:
-    def __init__(self,N,tau=None,i=0):
-        self.N   = N
-        self.tau = list(range(1,(N+1)+1)) if tau==None else tau
-        self.i   = i
-        self.max = 2**(N-1)-1
+    def __init__(self,N,tau=None,i=0,progress=0):
+        self.N        = N
+        self.tau      = list(range(1,(N+1)+1)) if tau==None else tau
+        self.i        = i
+        self.max      = 2**(N-1)-1
+        self.progress = progress
         
     def __iter__(self):
         return self
     
     def __next__(self):
         if self.i<self.max:
-            self.i+=1
-            k = self.tau[0]
+            self.i        += 1
+            k             = self.tau[0]
+            if self.progress>0 and self.i%self.progress==0:
+                print ('{0:.4f}%'.format(100*self.i/self.max))
             if k>self.N: raise StopIteration
             self.tau[k-1] = self.tau[k]
             self.tau[k]   = k+1
