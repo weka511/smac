@@ -19,11 +19,47 @@
 
 using namespace std;
 
+class Gray {
+  private:
+	const int         _n;
+	signed long long  _i;
+	signed long long  _max;
+	int*             _tau;
+	
+  public:
+	Gray(int n): _n(n),_i(0),_max(1) {
+		for (int i=0;i<n-1;i++)
+			_max*=2;
+		_max-=1;
+		_tau = new int[n+1];
+		for (int i=0;i<=n;)
+			_tau[i] = ++i;
+		cout << "i="<<_i <<",n=" << _n <<",max=" <<_max<<endl;
+	}
+	
+	int next() {
+		int k = _tau[0];
+		if (k>_N) return -1;
+		_tau[k-1]=_tau[k];
+		_tau[k] = k+1;
+		if (k != 1) _tau[0] = 1;
+		return k;
+	}
+	
+	~Gray() {
+		delete [] _tau;
+	}
+};
+
 /**
  * Main program. 
  */
 int main(int argc, char **argv) {
 	cout<<"Ising"<<endl;
+	Gray gray(4);
+	cout<<"Gray"<<endl;
+	for (int i=0;i<16;i++)
+		cout << gray.next() << endl;
 }
 
 
