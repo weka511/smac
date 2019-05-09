@@ -17,6 +17,7 @@
  
 #include <iostream>
 #include "gray.hpp"
+#include "nbr.hpp"
 
 using namespace std;
 
@@ -26,9 +27,19 @@ void enumerate_ising(int n);
  * Main program. 
  */
 int main(int argc, char **argv) {
-	int N=2;
-	cout<<"Enumerate Ising for N="<<N<<endl;
-	enumerate_ising(N);
+	int n=2;
+	cout<<"Enumerate Ising for N="<<n<<endl;
+	enumerate_ising(n);
+}
+
+int field(int* sigma,int k,int n){
+	int h=0;
+	for (int i=0;i<4;i++) {
+		const int j = nbr(k,i,n);
+		if (j>-1)
+			h+=sigma[j-1];
+	}
+	return h;
 }
 
 void enumerate_ising(int n){
@@ -43,13 +54,25 @@ void enumerate_ising(int n){
 	
 	int E = -N;
 	Ns[N+E]=2;
-	while (true) {
+ 	while (true) {
 		int k = gray.next();
 		cout << k << endl;
 		if (k==-1)
 			return;
+		int h = field(sigma,k,n);
+		cout << __LINE__ << endl;
+		E+=2+sigma[k-1]*h;
+			cout << __LINE__ << endl;
+		Ns[E+N]+=2;
+			cout << __LINE__ << endl;
+		sigma[k-1]*=(-1);
+		cout << __LINE__ << endl;
 	}
-	
+	for (int i=0;i<2*N+1;i++) {
+		int E = i-N;
+		if (Ns[i]>0)
+			cout << E << ", " << Ns[i] << endl;
+	} 
 }
 
 
