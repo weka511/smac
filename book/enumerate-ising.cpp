@@ -27,7 +27,7 @@ void enumerate_ising(int n);
  * Main program. 
  */
 int main(int argc, char **argv) {
-	int n=2;
+	int n=4;
 	cout<<"Enumerate Ising for N="<<n<<endl;
 	enumerate_ising(n);
 }
@@ -52,21 +52,16 @@ void enumerate_ising(int n){
 	for (int i=0;i<N;i++)
 		sigma[i]=0;
 	
-	int E = -N;
-	Ns[N+E]=2;
+	int E   = -N;
+	Ns[N+E] = 1;
  	while (true) {
 		int k = gray.next();
-		cout << k << endl;
 		if (k==-1)
-			return;
-		int h = field(sigma,k,n);
-		cout << __LINE__ << endl;
-		E+=2+sigma[k-1]*h;
-			cout << __LINE__ << endl;
-		Ns[E+N]+=2;
-			cout << __LINE__ << endl;
-		sigma[k-1]*=(-1);
-		cout << __LINE__ << endl;
+			break;
+		int        h = field(sigma,k,n);
+		E          += (sigma[k-1]*h);
+		Ns[E+N]    += 1;
+		sigma[k-1] *= -1;
 	}
 	for (int i=0;i<2*N+1;i++) {
 		int E = i-N;

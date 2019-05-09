@@ -15,7 +15,7 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
 
- 
+
 class Gray {
   private:
 	const int         _n;
@@ -42,7 +42,5 @@ class Gray {
 		return k;
 	}
 	
-	virtual ~Gray() {
-		delete [] _tau;
-	}
+	virtual ~Gray() {delete [] _tau;}
 };
