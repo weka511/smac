@@ -13,29 +13,38 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
+ *
+ * This file exercises the Verlet algorithm for some simple N-body cases
+ * without using the Barnes Hut approximations.
  */
  
-#include <iostream>
+#include "catch.hpp"
 #include "gray.hpp"
-
 using namespace std;
 
 
 
-/**
- * Main program. 
- */
-int main(int argc, char **argv) {
-	cout<<"Ising"<<endl;
-
+TEST_CASE( "Gray Tests", "[grey]" ) {
+	
+	SECTION("Iterate Gray"){
+		Gray gray(4);
+		REQUIRE(gray.next()==1);
+		REQUIRE(gray.next()==2);
+		REQUIRE(gray.next()==1);
+		REQUIRE(gray.next()==3);
+		REQUIRE(gray.next()==1);
+		REQUIRE(gray.next()==2);
+		REQUIRE(gray.next()==1);
+		REQUIRE(gray.next()==4);
+		REQUIRE(gray.next()==1);
+		REQUIRE(gray.next()==2);
+		REQUIRE(gray.next()==1);
+		REQUIRE(gray.next()==3);
+		REQUIRE(gray.next()==1);
+		REQUIRE(gray.next()==2);
+		REQUIRE(gray.next()==1);
+		REQUIRE(gray.next()==-1);
+	}
+	
+	
 }
-
-
-
-
-
-
-
-
-
-

@@ -22,9 +22,9 @@ CC=gcc
 CXX=g++
 RM=rm -f
 MKDIR=mkdir
-SRCS=	enumerate-ising.cpp	
+SRCS=		
 
-TESTS= 	
+TESTS= 	test-gray.cpp
 		
 OBJS1=$(subst .cpp,.o,$(SRCS)) 
 OBJS=$(subst .cc,.o,$(OBJS1)) 
@@ -64,7 +64,7 @@ install: rebuild
 	sed -i -e 's/\/home\/Weka\/smac\/book\///$g' .depend
 	
 $(MAIN): $(OBJS) enumerate-ising.o 
-	${CXX} $(LDFLAGS) -o $(MAIN) ${OBJS} ${LDLIBS}
+	${CXX} $(LDFLAGS) -o $(MAIN) enumerate-ising.o ${OBJS} ${LDLIBS}
 	
 $(TEST_MAIN): $(OBJS) tests.o $(TEST_OBJS)
 	${CXX} $(LDFLAGS) -o $(TEST_MAIN) tests.o ${OBJS} $(TEST_OBJS) ${LDLIBS}

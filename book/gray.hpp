@@ -14,28 +14,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
+
  
-#include <iostream>
-#include "gray.hpp"
-
-using namespace std;
-
-
-
-/**
- * Main program. 
- */
-int main(int argc, char **argv) {
-	cout<<"Ising"<<endl;
-
-}
-
-
-
-
-
-
-
-
-
-
+class Gray {
+  private:
+	const int         _n;
+	signed long long  _i;
+	signed long long  _max;
+	int*             _tau;
+	
+  public:
+	Gray(int n): _n(n),_i(0),_max(1) {
+		for (int i=0;i<n-1;i++)
+			_max*=2;
+		_max-=1;
+		_tau = new int[n+1];
+		for (int i=0;i<=n;)
+			_tau[i] = ++i;
+	}
+	
+	int next() {
+		int k = _tau[0];
+		if (k>_N) return -1;
+		_tau[k-1]=_tau[k];
+		_tau[k] = k+1;
+		if (k != 1) _tau[0] = 1;
+		return k;
+	}
+	
+	virtual ~Gray() {
+		delete [] _tau;
+	}
+};
