@@ -13,35 +13,21 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
- *
- * This file exercises the Verlet algorithm for some simple N-body cases
- * without using the Barnes Hut approximations.
  */
  
-#include "catch.hpp"
-#include "gray.hpp"
-
-TEST_CASE( "Gray Tests", "[grey]" ) {
-	
-	SECTION("Iterate Gray"){
-		Gray gray(4);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==2);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==3);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==2);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==4);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==2);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==3);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==2);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==-1);
-	}
-	
-	
-}
+ int force_into_range(int i,int n) {
+	 return i>0 and i<=n ? i : -1;
+ }
+ 
+ int nbr(int i, int j, int n) {
+	 switch (j) {
+		 case 0:
+			return force_into_range(i+1,n*n);
+		 case 1:
+			return force_into_range(i+n,n*n);
+		 case 2:
+			return force_into_range(i-1,n*n);
+		 case 3:
+			return force_into_range(i-n,n*n);
+	 }
+ }

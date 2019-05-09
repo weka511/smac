@@ -19,28 +19,16 @@
  */
  
 #include "catch.hpp"
-#include "gray.hpp"
+#include "nbr.hpp"
 
-TEST_CASE( "Gray Tests", "[grey]" ) {
+
+TEST_CASE( "NBR Tests", "[nbr]" ) {
 	
-	SECTION("Iterate Gray"){
-		Gray gray(4);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==2);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==3);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==2);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==4);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==2);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==3);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==2);
-		REQUIRE(gray.next()==1);
-		REQUIRE(gray.next()==-1);
+	SECTION("Iterate nbr"){
+		REQUIRE(nbr(5,0,3)==6);
+		REQUIRE(nbr(5,1,3)==8);
+		REQUIRE(nbr(5,2,3)==4);
+		REQUIRE(nbr(5,3,3)==2);
 	}
 	
 	

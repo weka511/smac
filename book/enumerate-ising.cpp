@@ -20,14 +20,36 @@
 
 using namespace std;
 
-
+void enumerate_ising(int n);
 
 /**
  * Main program. 
  */
 int main(int argc, char **argv) {
-	cout<<"Ising"<<endl;
+	int N=2;
+	cout<<"Enumerate Ising for N="<<N<<endl;
+	enumerate_ising(N);
+}
 
+void enumerate_ising(int n){
+	const int N = n*n;
+	Gray gray(N);
+	int Ns[2*N+1];
+	for (int i=0;i<2*N+1;i++)
+		Ns[i]=0;
+	int sigma[N];
+	for (int i=0;i<N;i++)
+		sigma[i]=0;
+	
+	int E = -N;
+	Ns[N+E]=2;
+	while (true) {
+		int k = gray.next();
+		cout << k << endl;
+		if (k==-1)
+			return;
+	}
+	
 }
 
 

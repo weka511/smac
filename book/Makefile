@@ -24,7 +24,8 @@ RM=rm -f
 MKDIR=mkdir
 SRCS=		
 
-TESTS= 	test-gray.cpp
+TESTS= 	test-gray.cpp	\
+		test-nbr.cpp
 		
 OBJS1=$(subst .cpp,.o,$(SRCS)) 
 OBJS=$(subst .cc,.o,$(OBJS1)) 
@@ -44,9 +45,6 @@ run : all
 	
 tests : $(TEST_MAIN)
 	./$(TEST_MAIN)
-
-	
-
 	
 clean :
 	${RM} *.o *.stackdump
