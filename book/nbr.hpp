@@ -15,19 +15,28 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
  
- int force_into_range(int i,int n) {
-	 return i>0 and i<=n ? i : -1;
- }
+
  
- int nbr(int i, int j, int n) {
-	 switch (j) {
-		 case 0:
-			return force_into_range(i+1,n*n);
+ int nbr(const int cell, const int seq, const int n) {
+	 int column = cell%n; if (column==0) column = n;
+	 int row = cell/n; if (column<n) row+=1;
+	 
+	 switch (seq) {
 		 case 1:
-			return force_into_range(i+n,n*n);
+			column++;
+			break;
 		 case 2:
-			return force_into_range(i-1,n*n);
+			row++;
+			break;
 		 case 3:
-			return force_into_range(i-n,n*n);
+			column--;
+			break;
+		 case 4:
+			row--;
+			break;
 	 }
+	 if (row<1 || row>n || column<1 ||column>n)
+		 return -1;
+	 else
+		 return (row-1)*n+column;
  }

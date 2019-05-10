@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  *
- * This file exercises the Verlet algorithm for some simple N-body cases
- * without using the Barnes Hut approximations.
+ * This file tests the neighbour function
  */
  
 #include "catch.hpp"
@@ -24,11 +23,43 @@
 
 TEST_CASE( "NBR Tests", "[nbr]" ) {
 	
-	SECTION("Iterate nbr"){
-		REQUIRE(nbr(5,0,3)==6);
-		REQUIRE(nbr(5,1,3)==8);
-		REQUIRE(nbr(5,2,3)==4);
-		REQUIRE(nbr(5,3,3)==2);
+	SECTION("Test nbr against SMAC fig 5-2"){
+		REQUIRE(nbr(1,1,3)==2);
+		REQUIRE(nbr(1,2,3)==4);
+		REQUIRE(nbr(1,3,3)==-1);
+		REQUIRE(nbr(1,4,3)==-1);
+		REQUIRE(nbr(2,1,3)==3);
+		REQUIRE(nbr(2,2,3)==5);
+		REQUIRE(nbr(2,3,3)==1);
+		REQUIRE(nbr(2,4,3)==-1);
+		REQUIRE(nbr(3,1,3)==-1);
+		REQUIRE(nbr(3,2,3)==6);
+		REQUIRE(nbr(3,3,3)==2);
+		REQUIRE(nbr(3,4,3)==-1);
+		REQUIRE(nbr(4,1,3)==5);
+		REQUIRE(nbr(4,2,3)==7);
+		REQUIRE(nbr(4,3,3)==-1);
+		REQUIRE(nbr(4,4,3)==1);
+		REQUIRE(nbr(5,1,3)==6);
+		REQUIRE(nbr(5,2,3)==8);
+		REQUIRE(nbr(5,3,3)==4);
+		REQUIRE(nbr(5,4,3)==2);
+		REQUIRE(nbr(6,1,3)==-1);
+		REQUIRE(nbr(6,2,3)==9);
+		REQUIRE(nbr(6,3,3)==5);
+		REQUIRE(nbr(6,4,3)==3);
+		REQUIRE(nbr(7,1,3)==8);
+		REQUIRE(nbr(7,2,3)==-1);
+		REQUIRE(nbr(7,3,3)==-1);
+		REQUIRE(nbr(7,4,3)==4);
+		REQUIRE(nbr(8,1,3)==9);
+		REQUIRE(nbr(8,2,3)==-1);
+		REQUIRE(nbr(8,3,3)==7);
+		REQUIRE(nbr(8,4,3)==5);
+		REQUIRE(nbr(9,1,3)==-1);
+		REQUIRE(nbr(9,2,3)==-1);
+		REQUIRE(nbr(9,3,3)==8);
+		REQUIRE(nbr(9,4,3)==6);
 	}
 	
 	
