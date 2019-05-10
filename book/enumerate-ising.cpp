@@ -30,9 +30,10 @@ using namespace std;
  */
 int main(int argc, char **argv) {
 	int c;
-	int n        = 4;
-	bool wrapped = false;
-	while ((c = getopt (argc, argv, "n:w")) != -1)
+	int n         = 4;
+	bool wrapped  = false;
+	bool progress = false;
+	while ((c = getopt (argc, argv, "n:wp")) != -1)
 		switch(c) {
 			case 'n':
 				n = atoi(optarg);
@@ -40,15 +41,22 @@ int main(int argc, char **argv) {
 			case 'w':
 				wrapped = true;
 				break;
+			case 'p':
+				progress = true;
+				break;
 			default:
 				abort();
 	}
 
 	cout<<"Enumerate Ising for n="<<n<<" "<<wrapped<<endl;
-	enumerate_ising(n,wrapped);
+	enumerate_ising(n,wrapped,progress);
 }
 
-int field(int sigma[],int k,int n,bool wrapped){
+/**
+ *  Compute molecular field at location k, i.e.
+ *  the total contribution of all neighbours
+ */
+int get_field(int sigma[],int k,int n,bool wrapped){
 	int h=0;
 	for (int i=1;i<=4;i++) {
 		const int j = nbr(k,i,n,wrapped);
@@ -59,11 +67,11 @@ int field(int sigma[],int k,int n,bool wrapped){
 	return h;
 }
 
-void enumerate_ising(int n,bool wrapped){
-	map<int, int> Ns;
+void enumerate_ising(int n,bool wrapped,bool progress){
+	map<int, long long int> Ns;
 	const int N = n*n;
 	cout<<"Enumerate Ising for N="<<N<<endl;
-	Gray gray(N);
+	Gray gray(N,progress ? 100000000LL : 0LL);
 
 	int sigma[N];
 	for (int i=0;i<N;i++)
@@ -74,7 +82,7 @@ void enumerate_ising(int n,bool wrapped){
  	while (true) {
 		int k = gray.next();
 		if (k==-1) break;
-		int        h = field(sigma,k,n,wrapped);
+		int        h = get_field(sigma,k,n,wrapped);
 		E          += 2* sigma[k-1]*h;
 		if (Ns.find(E)==Ns.end()) Ns[E]=0;
 		Ns[E]    += 2;
@@ -83,7 +91,7 @@ void enumerate_ising(int n,bool wrapped){
 	
 
 	cout << endl;
-	for (map<int, int>::iterator it = Ns.begin();it!=Ns.end();it++)
+	for (map<int, long long int>::iterator it = Ns.begin();it!=Ns.end();it++)
 			cout << it->first << ", " << it->second<< endl;
 	 
 }

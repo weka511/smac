@@ -18,9 +18,22 @@
 #ifndef _NBR_HPP_
 #define _NBR_HPP_
  
- int nbr(const int cell, const int seq, const int n, bool wrapped=false) {
+ /**
+  * Find neighbours of specified cell. Layout is shown in Figure 5-2.
+  * E.g. for 3x3 case:
+  *                   7-8-9
+  *                   | | |
+  *                   4-5-6
+  *                   | | |
+  *                   1-2-3
+  */
+ int nbr(	const int cell,
+			const int seq,
+			const int n,
+			bool wrapped=false) {
+				
 	 int column = cell%n; if (column==0) column = n;
-	 int row = cell/n; if (column<n) row+=1;
+	 int row = cell/n;    if (column<n) row+=1;
 	 
 	 switch (seq) {
 		 case 1:
@@ -36,16 +49,17 @@
 			row--;
 			break;
 	 }
+	 
 	 if (wrapped) {
-		 if (row<1) row=n;
-		 if (row>n) row=1;
-		 if (column<1) column=n;
-		 if (column>n) column=1;
-	 }
-	 if (row<1 || row>n || column<1 ||column>n)
-		 return -1;
-	 else
-		 return (row-1)*n+column;
+		 if (row<1) row       = n;
+		 if (row>n) row       = 1;
+		 if (column<1) column = n;
+		 if (column>n) column = 1;
+	 } else
+		if (row<1 || row>n || column<1 ||column>n)
+			return -1;
+	
+	return (row-1)*n+column;
  }
  
  #endif

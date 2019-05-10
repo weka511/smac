@@ -19,6 +19,7 @@
 #define _GRAY_HPP_
 
 #include <iostream>
+#include <iomanip>   
 
 using namespace std;
 
@@ -45,7 +46,7 @@ class Gray {
 	int next() {
 		if (_i++>_max) return -1;
 		if (_frequency>0 && _i%_frequency==0) 
-			cout << (100*(double)_i)/_max <<"%"<<endl;
+			cout << setprecision(2) <<(100*(double)_i)/_max <<"%"<<endl;
 		int k = _tau[0];
 		if (k>_n) return -1;
 		_tau[k-1]	=_tau[k];

@@ -48,7 +48,7 @@ Code exercises from the textbook
 ||Makefile|Makefile for enumerate-ising.cpp|
 ||nbr.hpp|Calculate neighbours for enumerate-ising.cpp|
 ||test-gray.cpp|Tests for gray.hpp|
-||test-nbr.cpp|Tests foe nbr.cpp|
+||test-nbr.cpp|Tests for nbr.cpp|
 ||tests.cpp|Test harness for enumerate-ising.cpp|
 |5.2||The Ising model - Monte-Carlo algorithm|
 |5.3||Generalized Ising models| 

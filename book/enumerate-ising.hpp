@@ -18,9 +18,21 @@
 #ifndef _ENUMERATE_ISING_HPP_
 #define _ENUMERATE_ISING_HPP_
 
-void enumerate_ising(int n,bool wrapped = false);
+/**
+ *  Enumerate energy levels
+ */
+void enumerate_ising(	int n,
+						bool wrapped = false,
+						bool progress = false);
 
-int field(int sigma[],int k,int n,bool wrapped = false);
+/**
+ *  Compute molecular field at location k,, i.e.
+ *  the total contribution of all neighbours
+ */					
+int get_field(	int sigma[],
+				int k,
+				int n,
+				bool wrapped = false);
 
 #endif
 
