@@ -17,6 +17,7 @@
  
 #include <iostream>
 #include <map>
+#include <utility>
 #include <getopt.h>
 #include "gray.hpp"
 #include "nbr.hpp"
@@ -68,7 +69,7 @@ int get_field(int sigma[],int k,int n,bool wrapped){
 }
 
 void enumerate_ising(int n,bool wrapped,bool progress){
-	map<int, long long int> Ns;
+	map<pair<int,int>, long long int> Ns;
 	const int N = n*n;
 	cout<<"Enumerate Ising for N="<<N<<endl;
 	Gray gray(N,progress ? 100000000LL : 0LL);
@@ -78,22 +79,29 @@ void enumerate_ising(int n,bool wrapped,bool progress){
 		sigma[i]=-1;
 	
 	int E = -2*N;
-	Ns[E] = 2;
+	int M = -N;
+	pair<int,int> key(E,M);
+	Ns[key] = 2;
  	while (true) {
 		int k = gray.next();
 		if (k==-1) break;
-		int        h = get_field(sigma,k,n,wrapped);
+		int h      = get_field(sigma,k,n,wrapped);
 		E          += 2* sigma[k-1]*h;
-		if (Ns.find(E)==Ns.end()) Ns[E]=0;
-		Ns[E]    += 2;
 		sigma[k-1] *= -1;
+		M          += 2*sigma[k - 1]; 
+		pair<int,int> key(E,M);
+		if (Ns.find(key)==Ns.end()) Ns[key]=0;
+		Ns[key]    += 2;
 	}
 	
 
 	cout << endl;
-	for (map<int, long long int>::iterator it = Ns.begin();it!=Ns.end();it++)
-			cout << it->first << ", " << it->second<< endl;
-	 
+	for (map<pair<int,int>, long long int>::iterator it = Ns.begin();it!=Ns.end();it++){
+		const pair<int,int> key = it->first;
+		const int E = key.first;
+		const int M = key.second;	
+		cout << E << ", " << M<< ", " << it->second<< endl;
+	}
 }
 
 
