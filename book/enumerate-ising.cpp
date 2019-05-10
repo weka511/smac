@@ -16,58 +16,72 @@
  */
  
 #include <iostream>
+#include <map>
+#include <getopt.h>
 #include "gray.hpp"
 #include "nbr.hpp"
+#include "enumerate-ising.hpp"
 
 using namespace std;
 
-void enumerate_ising(int n);
 
 /**
  * Main program. 
  */
 int main(int argc, char **argv) {
+	int c;
 	int n=4;
-	cout<<"Enumerate Ising for N="<<n<<endl;
+	while ((c = getopt (argc, argv, "n:")) != -1)
+		switch(c) {
+			case 'n':
+				n = atoi(optarg);
+				break;
+			default:
+				abort();
+	}
+
+	cout<<"Enumerate Ising for n="<<n<<endl;
 	enumerate_ising(n);
 }
 
 int field(int* sigma,int k,int n){
 	int h=0;
-	for (int i=0;i<4;i++) {
+	for (int i=1;i<=4;i++) {
 		const int j = nbr(k,i,n);
 		if (j>-1)
 			h+=sigma[j-1];
 	}
+
 	return h;
 }
 
 void enumerate_ising(int n){
+	map<int, int> Ns;
 	const int N = n*n;
+	cout<<"Enumerate Ising for N="<<N<<endl;
 	Gray gray(N);
-	int Ns[2*N+1];
-	for (int i=0;i<2*N+1;i++)
-		Ns[i]=0;
+
 	int sigma[N];
 	for (int i=0;i<N;i++)
-		sigma[i]=0;
+		sigma[i]=-1;
 	
-	int E   = -N;
-	Ns[N+E] = 1;
+	int E = -2*N;
+	Ns[E] = 2;
  	while (true) {
 		int k = gray.next();
-		if (k==-1)
-			break;
+		if (k==-1) break;
 		int        h = field(sigma,k,n);
-		E          += (sigma[k-1]*h);
-		Ns[E+N]    += 1;
+		E          += 2* sigma[k-1]*h;
+		if (Ns.find(E)==Ns.end()) Ns[E]=0;
+		Ns[E]    += 2;
 		sigma[k-1] *= -1;
 	}
-	for (int i=0;i<2*N+1;i++) {
-		int E = i-N;
-		if (Ns[i]>0)
-			cout << E << ", " << Ns[i] << endl;
-	} 
+	
+
+	cout << endl;
+	for (map<int, int>::iterator it = Ns.begin();it!=Ns.end();it++)
+			cout << it->first << ", " << it->second<< endl;
+	 
 }
 
 
