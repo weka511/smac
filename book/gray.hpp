@@ -15,30 +15,41 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
 
+#include <iostream>
+
+using namespace std;
 
 class Gray {
   private:
-	const int         _n;
-	signed long long  _i;
-	signed long long  _max;
-	int*             _tau;
+	const int         		_n;
+	signed long long  		_i;
+	signed long long  		_max;
+	int*					_tau;
+	const signed long long	_frequency;
 	
   public:
-	Gray(int n): _n(n),_i(0),_max(1) {
-		for (int i=0;i<n-1;i++)
+	Gray(const int n, 
+		const signed long long frequency=0LL):
+		_n(n),_i(0),_max(1),_frequency(frequency) {
+		for (int i=0;i<n;i++)
 			_max*=2;
 		_max-=1;
 		_tau = new int[n+1];
-		for (int i=0;i<=n;)
-			_tau[i] = ++i;
+		for (int i=0;i<=n;i++)
+			_tau[i] = i+1;
 	}
 	
 	int next() {
+		if (_i++>_max) return -1;
+		if (_frequency>0 && _i%_frequency==0) 
+			cout << (100*(double)_i)/_max <<"%"<<endl;
 		int k = _tau[0];
-		if (k>_N) return -1;
-		_tau[k-1]=_tau[k];
-		_tau[k] = k+1;
-		if (k != 1) _tau[0] = 1;
+		if (k>_n) return -1;
+		_tau[k-1]	=_tau[k];
+		_tau[k] 	= k+1;
+		if (k != 1) 
+			_tau[0] = 1;
+		
 		return k;
 	}
 	

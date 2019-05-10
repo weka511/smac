@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  *
- * This file exercises the Verlet algorithm for some simple N-body cases
- * without using the Barnes Hut approximations.
+ * This file tests the grey code class
  */
  
 #include "catch.hpp"
