@@ -15,6 +15,9 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
 
+#ifndef _GRAY_HPP_
+#define _GRAY_HPP_
+
 #include <iostream>
 
 using namespace std;
@@ -55,3 +58,5 @@ class Gray {
 	
 	virtual ~Gray() {delete [] _tau;}
 };
+
+#endif

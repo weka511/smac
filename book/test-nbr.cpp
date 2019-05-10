@@ -62,5 +62,42 @@ TEST_CASE( "NBR Tests", "[nbr]" ) {
 		REQUIRE(nbr(9,4,3)==6);
 	}
 	
-	
+	SECTION("Test nbr against SMAC fig 5-2, wrapped"){
+		REQUIRE(nbr(1,1,3,true)==2);
+		REQUIRE(nbr(1,2,3,true)==4);
+		REQUIRE(nbr(1,3,3,true)==3);
+		REQUIRE(nbr(1,4,3,true)==7);
+		REQUIRE(nbr(2,1,3,true)==3);
+		REQUIRE(nbr(2,2,3,true)==5);
+		REQUIRE(nbr(2,3,3,true)==1);
+		REQUIRE(nbr(2,4,3,true)==8);
+		REQUIRE(nbr(3,1,3,true)==1);
+		REQUIRE(nbr(3,2,3,true)==6);
+		REQUIRE(nbr(3,3,3,true)==2);
+		REQUIRE(nbr(3,4,3,true)==9);
+		REQUIRE(nbr(4,1,3,true)==5);
+		REQUIRE(nbr(4,2,3,true)==7);
+		REQUIRE(nbr(4,3,3,true)==6);
+		REQUIRE(nbr(4,4,3,true)==1);
+		REQUIRE(nbr(5,1,3,true)==6);
+		REQUIRE(nbr(5,2,3,true)==8);
+		REQUIRE(nbr(5,3,3,true)==4);
+		REQUIRE(nbr(5,4,3,true)==2);
+		REQUIRE(nbr(6,1,3,true)==4);
+		REQUIRE(nbr(6,2,3,true)==9);
+		REQUIRE(nbr(6,3,3,true)==5);
+		REQUIRE(nbr(6,4,3,true)==3);
+		REQUIRE(nbr(7,1,3,true)==8);
+		REQUIRE(nbr(7,2,3,true)==1);
+		REQUIRE(nbr(7,3,3,true)==9);
+		REQUIRE(nbr(7,4,3,true)==4);
+		REQUIRE(nbr(8,1,3,true)==9);
+		REQUIRE(nbr(8,2,3,true)==2);
+		REQUIRE(nbr(8,3,3,true)==7);
+		REQUIRE(nbr(8,4,3,true)==5);
+		REQUIRE(nbr(9,1,3,true)==7);
+		REQUIRE(nbr(9,2,3,true)==3);
+		REQUIRE(nbr(9,3,3,true)==8);
+		REQUIRE(nbr(9,4,3,true)==6);
+	}	
 }

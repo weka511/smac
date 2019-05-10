@@ -30,24 +30,28 @@ using namespace std;
  */
 int main(int argc, char **argv) {
 	int c;
-	int n=4;
-	while ((c = getopt (argc, argv, "n:")) != -1)
+	int n        = 4;
+	bool wrapped = false;
+	while ((c = getopt (argc, argv, "n:w")) != -1)
 		switch(c) {
 			case 'n':
 				n = atoi(optarg);
+				break;
+			case 'w':
+				wrapped = true;
 				break;
 			default:
 				abort();
 	}
 
-	cout<<"Enumerate Ising for n="<<n<<endl;
-	enumerate_ising(n);
+	cout<<"Enumerate Ising for n="<<n<<" "<<wrapped<<endl;
+	enumerate_ising(n,wrapped);
 }
 
-int field(int* sigma,int k,int n){
+int field(int sigma[],int k,int n,bool wrapped){
 	int h=0;
 	for (int i=1;i<=4;i++) {
-		const int j = nbr(k,i,n);
+		const int j = nbr(k,i,n,wrapped);
 		if (j>-1)
 			h+=sigma[j-1];
 	}
@@ -55,7 +59,7 @@ int field(int* sigma,int k,int n){
 	return h;
 }
 
-void enumerate_ising(int n){
+void enumerate_ising(int n,bool wrapped){
 	map<int, int> Ns;
 	const int N = n*n;
 	cout<<"Enumerate Ising for N="<<N<<endl;
@@ -70,7 +74,7 @@ void enumerate_ising(int n){
  	while (true) {
 		int k = gray.next();
 		if (k==-1) break;
-		int        h = field(sigma,k,n);
+		int        h = field(sigma,k,n,wrapped);
 		E          += 2* sigma[k-1]*h;
 		if (Ns.find(E)==Ns.end()) Ns[E]=0;
 		Ns[E]    += 2;

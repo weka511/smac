@@ -14,39 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
- 
-#ifndef _NBR_HPP_
-#define _NBR_HPP_
- 
- int nbr(const int cell, const int seq, const int n, bool wrapped=false) {
-	 int column = cell%n; if (column==0) column = n;
-	 int row = cell/n; if (column<n) row+=1;
-	 
-	 switch (seq) {
-		 case 1:
-			column++;
-			break;
-		 case 2:
-			row++;
-			break;
-		 case 3:
-			column--;
-			break;
-		 case 4:
-			row--;
-			break;
-	 }
-	 if (wrapped) {
-		 if (row<1) row=n;
-		 if (row>n) row=1;
-		 if (column<1) column=n;
-		 if (column>n) column=1;
-	 }
-	 if (row<1 || row>n || column<1 ||column>n)
-		 return -1;
-	 else
-		 return (row-1)*n+column;
- }
- 
- #endif
- 
+
+#ifndef _ENUMERATE_ISING_HPP_
+#define _ENUMERATE_ISING_HPP_
+
+void enumerate_ising(int n,bool wrapped = false);
+
+int field(int sigma[],int k,int n,bool wrapped = false);
+
+#endif
+
