@@ -19,6 +19,10 @@
 #include <map>
 #include <utility>
 #include <getopt.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+
 #include "gray.hpp"
 #include "nbr.hpp"
 #include "enumerate-ising.hpp"
@@ -34,10 +38,14 @@ int main(int argc, char **argv) {
 	int n         = 4;
 	bool wrapped  = false;
 	bool progress = false;
-	while ((c = getopt (argc, argv, "n:wp")) != -1)
+	string path   = "out.txt";
+	while ((c = getopt (argc, argv, "n:wpo:")) != -1)
 		switch(c) {
 			case 'n':
 				n = atoi(optarg);
+				break;
+			case 'o':
+				path = optarg;
 				break;
 			case 'w':
 				wrapped = true;
@@ -49,8 +57,12 @@ int main(int argc, char **argv) {
 				abort();
 	}
 
-	cout<<"Enumerate Ising for n="<<n<<" "<<wrapped<<endl;
-	enumerate_ising(n,wrapped,progress);
+	ofstream out;
+	out.open (path);
+	out<<"n="<<n<<endl;
+	enumerate_ising(n,out,wrapped,progress);
+	out.close();
+	return 0;
 }
 
 /**
@@ -68,10 +80,10 @@ int get_field(int sigma[],int k,int n,bool wrapped){
 	return h;
 }
 
-void enumerate_ising(int n,bool wrapped,bool progress){
+void enumerate_ising(int n,ofstream &out,bool wrapped,bool progress){
 	map<pair<int,int>, long long int> Ns;
 	const int N = n*n;
-	cout<<"Enumerate Ising for N="<<N<<endl;
+
 	Gray gray(N,progress ? 100000000LL : 0LL);
 
 	int sigma[N];
@@ -94,13 +106,12 @@ void enumerate_ising(int n,bool wrapped,bool progress){
 		Ns[key]    += 2;
 	}
 	
-
-	cout << endl;
+	out << "E,M,N" << endl;
 	for (map<pair<int,int>, long long int>::iterator it = Ns.begin();it!=Ns.end();it++){
 		const pair<int,int> key = it->first;
 		const int E = key.first;
 		const int M = key.second;	
-		cout << E << ", " << M<< ", " << it->second<< endl;
+		out << E << ", " << M<< ", " << it->second<< endl;
 	}
 }
 

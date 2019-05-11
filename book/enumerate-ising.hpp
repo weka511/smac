@@ -22,6 +22,7 @@
  *  Enumerate energy levels
  */
 void enumerate_ising(	int n,
+						ofstream &out,
 						bool wrapped = false,
 						bool progress = false);
 
