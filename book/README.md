@@ -37,10 +37,19 @@ Code exercises from the textbook
 |4|| Bosons|
 |5|| Order and disorder in spin systems|
 |5.1||The Ising model - exact computations|
+||catch.hpp|Support for Test harness for enumerate-ising.cpp|
 ||gray.py|Algorithm 5.2: Gray code for spine {1,...N}.|
 ||enumerate-ising.py|Algorithm 5.3: single flip enumeration for the Ising model.|
+||enumerate-ising.cpp|Algorithm 5.3: single flip enumeration for the Ising model.|
+||enumerate-ising.hpp|Algorithm 5.3: single flip enumeration for the Ising model.|
+||gray.hpp|Greycode for enumerate-ising.cpp|
 ||ising.py|Algorithm 5.3: driver for enumerate-ising.py|
 ||ising-stats|Figure 6.6 - plot data from ising.py|
+||Makefile|Makefile for enumerate-ising.cpp|
+||nbr.hpp|Calculate neighbours for enumerate-ising.cpp|
+||test-gray.cpp|Tests for gray.hpp|
+||test-nbr.cpp|Tests for nbr.cpp|
+||tests.cpp|Test harness for enumerate-ising.cpp|
 |5.2||The Ising model - Monte-Carlo algorithm|
 |5.3||Generalized Ising models| 
 |6||Entropic Forces|
