@@ -1,12 +1,15 @@
 # Plot solutions to Schroedinger's equation for Simple Harmonic Oscillator
+import sys
+sys.path.append('../')
 import math,  matplotlib.pyplot as plt
 
-n_states = 7
-n_steps=100
-step = 5.0/n_steps
+n_states = 17
+n_steps  = 100
+step     = 5.0/n_steps
 
-grid_x = [i * step for i in range(-n_steps, n_steps+1)]
-psi = {}
+grid_x   = [i * step for i in range(-n_steps, n_steps+1)]
+psi      = {}
+
 for x in grid_x:
     psi[x] = [math.exp(-x ** 2 / 2.0) / math.pi ** 0.25]  # ground state
     psi[x].append(math.sqrt(2.0) * x * psi[x][0])         # first excited state
@@ -23,3 +26,5 @@ plt.legend([str(n)for n in range(n_states) ])
 plt.xlabel('x')
 plt.ylabel(r'$\psi$')
 plt.title('Harmonic wave function')
+plt.savefig('harmonic.png')
+plt.show()
