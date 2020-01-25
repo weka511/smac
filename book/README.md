@@ -35,7 +35,7 @@ Code exercises from the textbook
 ||directDisksAny.py||
 |3||Density Matrices and Path Integrals|
 |3.1.1||The Quantum harmonic oscillator|
-||harmonic_wavefunction.py|Exercise 3.1|
+||harmonic_wavefunction.py|Exercise 3.1: Verify orthonormality of the solutions to Schroedinger's equation for Simple Harmonic Oscillator|
 |4|| Bosons|
 |5|| Order and disorder in spin systems|
 |5.1||The Ising model - exact computations|
