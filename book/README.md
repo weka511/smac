@@ -1,7 +1,7 @@
 # Statistical Mechanics and Computations - Book
 
 Code exercises from the textbook
-[*Statistical Mechanics: Algorithms and Computations*](http://blancopeck.net/Statistics.pdf) by *Werner Krauth*.
+[*Statistical Mechanics: Algorithms and Computations*](http://blancopeck.net/Statistics.pdf) by [*Werner Krauth*](http://www.lps.ens.fr/~krauth/index.php/Main_Page).
 
 |#|File|Problem/Algorithm/Description|
 |-----|--------------|---------------------------------------------------------------------------------------|
@@ -17,7 +17,7 @@ Code exercises from the textbook
 ||transfer.m|1.8 Eigenvalues of transfer matrix|
 ||sphere-test.py|1.13 Vectors within Uniform sphere|
 |1.2||Basic Sampling|
-||permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutaions of 5 elements equally often|
+||permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often|
 ||permutation-histogram.py|
 ||naivegauss.py|1.12 Gauss|
 ||boxmuller.py||
