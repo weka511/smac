@@ -38,6 +38,7 @@ Code exercises from the textbook
 ||harmonic_wavefunction.py|Exercise 3.1: verify orthonormality of the solutions to Schroedinger's equation for Simple Harmonic Oscillator|
 ||harmonic_density.py|Exercise 3.2: determine density matrix|
 |3.2||Matrix Squaring|
+|matrix-square.py||Exercise 3.4: implement Alg 3.3, matrix-square|
 |3.3||The Feynman path integral|
 |3.4||Pair density matrices|
 |3.5||Geometry of Paths|
