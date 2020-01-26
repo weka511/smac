@@ -37,6 +37,10 @@ Code exercises from the textbook
 |3.1||Density Matrices|
 ||harmonic_wavefunction.py|Exercise 3.1: verify orthonormality of the solutions to Schroedinger's equation for Simple Harmonic Oscillator|
 ||harmonic_density.py|Exercise 3.2: determine density matrix|
+|3.2||Matrix Squaring|
+|3.3||The Feynman path integral|
+|3.4||Pair density matrices|
+|3.5||Geometry of Paths|
 |4|| Bosons|
 |5|| Order and disorder in spin systems|
 |5.1||The Ising model - exact computations|
