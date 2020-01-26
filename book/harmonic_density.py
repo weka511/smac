@@ -21,17 +21,18 @@ import sys
 sys.path.append('../')
 import math,matplotlib.pyplot as plt,numpy as np
 from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-## for Palatino and other serif fonts use:
-#rc('font',**{'family':'serif','serif':['Palatino']})
-rc('text', usetex=True)
 
+# density
+#
+# Calculate values of density matrix
 @np.vectorize
 def density(a, b):
     psi_x       = psi[a]
     psi_x_prime = psi[b]
     return sum([psi_x[i] * psi_x_prime[i] * math.exp(- beta * (i+0.5)) for i in range(n_states)])
         
+rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
 
 n_states = 17
 n_steps  = 100
@@ -43,8 +44,8 @@ h        = 1
 beta     = 2
 M        = 4
 N        = 4
-
 grid_x   = [i * step for i in range(-n_steps, n_steps+1)]
+X,Y      = np.meshgrid(grid_x,grid_x)
 psi      = {}
 
 
@@ -56,18 +57,15 @@ for x in grid_x:
         psi[x].append(math.sqrt(2.0 / n) * x * psi[x][n - 1] -
                       math.sqrt((n - 1.0) / n) * psi[x][n - 2])
         
-X,Y      = np.meshgrid(grid_x,grid_x)
-
 plt.figure(figsize=(20,20))
 for i in range(M*N):
     plt.subplot(M,N,i+1)
-    Z = density(X,Y)
-    plt.pcolor(X,Y,Z)
+    plt.pcolor(X,Y,density(X,Y))
     plt.colorbar()
     plt.xlabel('$x$')
     plt.ylabel(r'$x^{\prime}$')
     plt.title(r'$\rho(x,x^{{\prime}},{0:.3f})$'.format(beta))
-    beta /= math.sqrt(2)
+    beta /= 2
 
 plt.savefig('harmonic-density.png')    
 plt.show()
