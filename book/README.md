@@ -40,6 +40,7 @@ Code exercises from the textbook
 ||harmonic_density.py|Exercise 3.2: determine density matrix|
 |3.2||Matrix Squaring|
 ||matrix-square.py|Exercise 3.4: implement Alg 3.3, matrix-square|
+||matrix-square-check.py|Exercise 3.4: check results of matrix squaring against exact solution.|
 |3.3||The Feynman path integral|
 |3.4||Pair density matrices|
 |3.5||Geometry of Paths|
