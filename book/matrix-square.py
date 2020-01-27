@@ -20,9 +20,23 @@
 import math,matplotlib.pyplot as plt,numpy as np,os
 from matplotlib import rc
 
+# Helper tables, which speed up calculation by caching exponentials 
 phi_helper = {}
 V          = {}
 
+# build_helpers
+#
+# Construct helper tables
+
+def build_helpers(n,phi_mult=1,m=1,h=1,beta=1,step=1,omega=1):
+   for i in range(-n,n+1):
+      for j in range(i,n+1):
+         if not (j-i) in phi_helper:
+            phi_helper[(j-i)] = phi_mult * math.exp(- (m * (step*(i-j))**2)/(2 * h**2 * beta))
+   for i in range(n+1):
+      V[i]= math.exp(-0.5 * beta * 0.5 * m * omega  **2 * (step * i)**2)
+
+# Calculate density matric from trotter decomposition
 
 @np.vectorize
 def trotter(i,j):
@@ -46,20 +60,19 @@ if __name__=='__main__':
 
    beta     = args.beta  
    step     = args.L / args.n
-   phi_mult = math.sqrt(args.m/(2*math.pi*args.h*args.h*beta))
-   grid_i   = [i for i in range(-args.n,args.n+1)]
+   grid_i   = [i for i in range(-args.n,args.n+1)]          # integer grid for calculation - allow lookup
    I,J      = np.meshgrid(grid_i,grid_i)
-   grid_x   = [i * step for i in range(-args.n,args.n+1)]
-   X,Y      = np.meshgrid(grid_x,grid_x)
+   grid_x   = [i * step for i in range(-args.n,args.n+1)]   # grid for plotting
+   X,Y      = np.meshgrid(grid_x,grid_x)                    # grid for plotting
    
-   for i in range(-args.n,args.n+1):
-      for j in range(i,args.n+1):
-         if not (j-i) in phi_helper:
-            phi_helper[(j-i)] = phi_mult * math.exp(- (args.m * (step*(i-j))**2)/(2 * args.h**2 * beta))
-            
-   for i in range(args.n+1):
-      V[i]= math.exp(-0.5 * beta * 0.5 * args.m * args.omega  **2 * (step * i)**2)
-      
+   build_helpers(args.n,
+                 phi_mult= math.sqrt(args.m/(2*math.pi*args.h*args.h*beta)),
+                 m=args.m,
+                 h=args.h,
+                 beta=args.beta,
+                 step=step,
+                 omega=args.omega)
+         
    rho = trotter(I,J)
 
    rc('font',**{'family':'serif','serif':['Palatino']})
@@ -71,7 +84,8 @@ if __name__=='__main__':
       plt.colorbar()
       plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
       beta *= 2      
-      rho  = np.dot(step,  np.dot(rho, rho))
+      rho  = step * rho * rho
+      
    plt.savefig('{0}.png'.format(os.path.splitext(os.path.basename(__file__))[0]))    
    if args.show:
       plt.show()        
