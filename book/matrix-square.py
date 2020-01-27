@@ -1,4 +1,4 @@
-# template.py
+# matrix-square.py
 
 # Copyright (C) 2020 Greenweaves Software Limited
 
@@ -25,7 +25,7 @@ h          = 1
 beta       = 1
 omega      = 1
 step       = 1
-phi_mult   = math.sqrt(m/(2*math.pi*h*h*beta)) #FIXME
+phi_mult   = 1
 phi_helper = {}
 V          = {}
 
@@ -41,8 +41,8 @@ def matrix_square(X,Y,beta=1,V=lambda x:0):
 if __name__=='__main__':
    import argparse
       
-   parser = argparse.ArgumentParser('Template')
-   parser.add_argument('--beta',default=0.1,type=float,help='Inverse temperature')
+   parser = argparse.ArgumentParser('Exercise 3.4: calculate density matrix by matrix squaring')
+   parser.add_argument('--beta',default=0.0001,type=float,help='Inverse temperature')
    parser.add_argument('--h',default=1,type=float,help='Planck\'s constant')
    parser.add_argument('-m','--m',default=1.0,type=float,help='Mass of particle')
    parser.add_argument('--omega',default=1.0,type=float,help='Frequency')
@@ -51,22 +51,26 @@ if __name__=='__main__':
    parser.add_argument('--show',action='store_true',help='Show plot')
    parser.add_argument('--rows',default=4,type=int,help='Number of rows to plot')
    parser.add_argument('--cols',default=4,type=int,help='Number of columns to plot')
-   args   = parser.parse_args()
-   m         = args.m
-   h         = args.h
-   beta      = args.beta
-   omega     = args.omega   
+   
+   args     = parser.parse_args()
+   m        = args.m
+   h        = args.h
+   beta     = args.beta
+   omega    = args.omega   
    step     = args.L / args.n
+   phi_mult = math.sqrt(m/(2*math.pi*h*h*beta))
    grid_i   = [i for i in range(-args.n,args.n+1)]
    I,J      = np.meshgrid(grid_i,grid_i)
    grid_x   = [i * step for i in range(-args.n,args.n+1)]
    X,Y      = np.meshgrid(grid_x,grid_x)
+   
    for i in range(-args.n,args.n+1):
       for j in range(i+1,args.n+1):
          if not (j-i) in phi_helper:
-            phi_helper[(j-i)] = math.exp(- (m *step*step*(i-j)*(i-j))/(2*h*h*beta))
+            phi_helper[(j-i)] = math.exp(- (m * (step*(i-j))**2)/(2*h**2*beta))
+            
    for i in range(args.n+1):
-      V[i]= math.exp(-0.5 * beta * 0.5 * m * omega * omega * step * step *i * i)
+      V[i]= math.exp(-0.5 * beta * 0.5 * m * omega **2 * (step * i)**2)
       
    rho = trotter(I,J)
 
@@ -77,9 +81,9 @@ if __name__=='__main__':
       plt.subplot(args.rows,args.cols,i+1)
       plt.pcolor(X,Y,rho)
       plt.colorbar()
-      plt.title(r'$\rho(x,x^{{\prime}},{0:.3f})$'.format(beta))
+      plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
       beta *= 2      
-      rho = step * rho * rho
+      rho = step * np.matmul(rho, rho)
 
    plt.savefig('{0}.png'.format(os.path.splitext(os.path.basename(__file__))[0]))    
    if args.show:
