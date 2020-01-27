@@ -43,14 +43,17 @@ if __name__=='__main__':
       
    parser = argparse.ArgumentParser('Template')
    parser.add_argument('--beta',default=0.1,type=float,help='Inverse temperature')
+   parser.add_argument('--h',default=1,type=float,help='Planck\'s constant')
    parser.add_argument('-m','--m',default=1.0,type=float,help='Mass of particle')
    parser.add_argument('--omega',default=1.0,type=float,help='Frequency')
    parser.add_argument('--n',default=100,type=int,help='Number of steps')
    parser.add_argument('--L',default=3,type=float,help='Length')
    parser.add_argument('--show',action='store_true',help='Show plot')
+   parser.add_argument('--rows',default=4,type=int,help='Number of rows to plot')
+   parser.add_argument('--cols',default=4,type=int,help='Number of columns to plot')
    args   = parser.parse_args()
    m         = args.m
-#   h         = 1
+   h         = args.h
    beta      = args.beta
    omega     = args.omega   
    step     = args.L / args.n
@@ -65,13 +68,19 @@ if __name__=='__main__':
    for i in range(args.n+1):
       V[i]= math.exp(-0.5 * beta * 0.5 * m * omega * omega * step * step *i * i)
       
-   rho_free = trotter(I,J)
-   #Z= matrix_square(X,Y,beta=args.beta,V=lambda x:0.5*args.m*args.omega*args.omega)
+   rho = trotter(I,J)
+
    rc('font',**{'family':'serif','serif':['Palatino']})
    rc('text', usetex=True)
    plt.figure(figsize=(5,5))
-   plt.pcolor(X,Y,rho_free)
-   plt.colorbar()
+   for i in range(args.rows*args.cols):
+      plt.subplot(args.rows,args.cols,i+1)
+      plt.pcolor(X,Y,rho)
+      plt.colorbar()
+      plt.title(r'$\rho(x,x^{{\prime}},{0:.3f})$'.format(beta))
+      beta *= 2      
+      rho = step * rho * rho
+
    plt.savefig('{0}.png'.format(os.path.splitext(os.path.basename(__file__))[0]))    
    if args.show:
       plt.show()        
