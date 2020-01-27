@@ -42,6 +42,16 @@ def build_helpers(n,phi_mult=1,m=1,h=1,beta=1,step=1,omega=1):
 def trotter(i,j):
    return V[abs(i)] * phi_helper[abs(i-j)] * V[abs(j)]
 
+# Determine plot file name
+
+def get_plot_file_name(plot):
+   if len(plot)==0:
+      return '{0}.png'.format(os.path.splitext(os.path.basename(__file__))[0])
+   base,ext = os.path.splitext(plot)
+   if len(ext)==0:
+      return '{0}.png'.format(plot)
+   return plot
+
 if __name__=='__main__':
    import argparse
       
@@ -55,9 +65,10 @@ if __name__=='__main__':
    parser.add_argument('--show',                            action='store_true', help='Show plot')
    parser.add_argument('--rows',   default=4,   type=int,                        help='Number of rows to plot')
    parser.add_argument('--cols',   default=4,   type=int,                        help='Number of columns to plot')
+   parser.add_argument('--plot',   default='',                                   help='Name of plot file')
    
    args     = parser.parse_args() 
-
+   
    beta     = args.beta  
    step     = args.L / args.n
    grid_i   = [i for i in range(-args.n,args.n+1)]          # integer grid for calculation - allow lookup
@@ -88,6 +99,6 @@ if __name__=='__main__':
       rho  = step * rho * rho
    
    plt.tight_layout()  
-   plt.savefig('{0}.png'.format(os.path.splitext(os.path.basename(__file__))[0]))    
+   plt.savefig(get_plot_file_name(args.plot))    
    if args.show:
       plt.show()        

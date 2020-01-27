@@ -20,16 +20,27 @@
 import math,matplotlib.pyplot as plt,numpy as np,os
 from matplotlib import rc
 
+# Determine plot file name
+
+def get_plot_file_name(plot):
+    if len(plot)==0:
+        return '{0}.png'.format(os.path.splitext(os.path.basename(__file__))[0])
+    base,ext = os.path.splitext(plot)
+    if len(ext)==0:
+        return '{0}.png'.format(plot)
+    return plot
+
 if __name__=='__main__':
     import argparse
     
     parser = argparse.ArgumentParser('Template')
-    parser.add_argument('--show',action='store_true',help='Show plot')
+    parser.add_argument('--show',                           action='store_true', help='Show plot')
+    parser.add_argument('--plot', default='',                                   help='Name of plot file')
     args   = parser.parse_args()
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     plt.figure(figsize=(20,20))
     plt.plot([1,2,3])
-    plt.savefig('{0}.png'.format(os.path.splitext(os.path.basename(__file__))[0]))    
+    plt.savefig(get_plot_file_name(args.plot))   
     if args.show:
         plt.show()    
