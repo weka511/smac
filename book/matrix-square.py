@@ -51,7 +51,7 @@ if __name__=='__main__':
    parser.add_argument('-m','--m', default=1.0, type=float,                      help='Mass of particle')
    parser.add_argument('--omega',  default=1.0, type=float,                      help='Frequency')
    parser.add_argument('--n',      default=100, type=int,                        help='Number of steps')
-   parser.add_argument('--L',      default=5,   type=float,                      help='Length')
+   parser.add_argument('--L',      default=2,   type=float,                      help='Length')
    parser.add_argument('--show',                            action='store_true', help='Show plot')
    parser.add_argument('--rows',   default=4,   type=int,                        help='Number of rows to plot')
    parser.add_argument('--cols',   default=4,   type=int,                        help='Number of columns to plot')
@@ -83,9 +83,11 @@ if __name__=='__main__':
       plt.pcolor(X,Y,rho)
       plt.colorbar()
       plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
+      if i ==args.rows*args.cols-1: break  # Avoid redundant squaring after final plot
       beta *= 2      
       rho  = step * rho * rho
-      
+   
+   plt.tight_layout()  
    plt.savefig('{0}.png'.format(os.path.splitext(os.path.basename(__file__))[0]))    
    if args.show:
       plt.show()        
