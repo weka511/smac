@@ -67,6 +67,7 @@ if __name__=='__main__':
    parser.add_argument('--cols',   default=4,   type=int,                        help='Number of columns to plot')
    parser.add_argument('--plot',   default='',                                   help='Name of plot file')
    parser.add_argument('--N',      default=None, type=int,                       help='Plot last step only (number of step)')
+   
    args     = parser.parse_args() 
    
    beta     = args.beta  
@@ -76,13 +77,13 @@ if __name__=='__main__':
    grid_x   = [i * step for i in range(-args.n,args.n+1)]   # grid for plotting
    X,Y      = np.meshgrid(grid_x,grid_x)                    # grid for plotting
    
-   build_helpers(args.n,
-                 phi_mult= math.sqrt(args.m/(2*math.pi*args.h*args.h*beta)),
-                 m=args.m,
-                 h=args.h,
-                 beta=args.beta,
-                 step=step,
-                 omega=args.omega)
+   build_helpers(n        = args.n,
+                 phi_mult = math.sqrt(args.m/(2*math.pi*args.h*args.h*beta)),
+                 m        = args.m,
+                 h        = args.h,
+                 beta     = args.beta,
+                 step     = step,
+                 omega    = args.omega)
          
    rho = trotter(I,J)
 
@@ -91,22 +92,23 @@ if __name__=='__main__':
    plt.figure(figsize=(5,5))
    N = args.rows*args.cols if args.N==None else args.N
    for i in range(N):
-      if args.N==None:
+      if args.N==None:  # i.e. plot for all values of beta
          plt.subplot(args.rows,args.cols,i+1)
          plt.pcolor(X,Y,rho)
          plt.colorbar()
          plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
       if i <N-1:  # Avoid redundant squaring after final plot
          beta *= 2      
-         rho  = step * rho * rho
-      
-   if args.N==None:
+         rho = np.dot(rho, rho)   # rho  = step * rho * rho gave wrong answer!
+         rho *= step     
+   if args.N==None:       # i.e. plot for all values of beta
       plt.tight_layout()
    else:
       plt.pcolor(X,Y,rho)
       plt.colorbar()
       plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
         
-   plt.savefig(get_plot_file_name(args.plot))    
+   plt.savefig(get_plot_file_name(args.plot))   
+   
    if args.show:
       plt.show()        

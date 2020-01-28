@@ -15,10 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-# Template for programs
+# Exercise 3.4: check Alg 3.3, matrix-squares
 
 import math,matplotlib.pyplot as plt,numpy as np,os
 from matplotlib import rc
+
+# Cache some values to speec up calculation
 
 sinh_factor = None
 tanh_factor = None
@@ -62,7 +64,7 @@ if __name__=='__main__':
 
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    plt.figure(figsize=(20,20))
+    plt.figure(figsize=(5,5))
     plt.pcolor(X,Y,density(X,Y))
     plt.colorbar()
     plt.xlabel('$x$')
