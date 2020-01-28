@@ -20,7 +20,7 @@
 import math,matplotlib.pyplot as plt,numpy as np,os
 from matplotlib import rc
 
-# Helper tables, which speed up calculation by caching exponentials 
+# Helper tables, which speed up calculation by caching exponentials. Index on i and j, not x and y. 
 phi_helper = {}
 V          = {}
 
@@ -28,13 +28,13 @@ V          = {}
 #
 # Construct helper tables
 
-def build_helpers(n,phi_mult=1,m=1,h=1,beta=1,step=1,omega=1):
+def build_helpers(n,phi_mult=1,m=1,h=1,beta=1,dx=1,omega=1):
    for i in range(-n,n+1):
       for j in range(i,n+1):
          if not (j-i) in phi_helper:
-            phi_helper[(j-i)] = phi_mult * math.exp(- (m * (step*(i-j))**2)/(2 * h**2 * beta))
+            phi_helper[(j-i)] = phi_mult * math.exp(- (m * (dx*(i-j))**2)/(2 * h**2 * beta))
    for i in range(n+1):
-      V[i]= math.exp(-0.5 * beta * 0.5 * m * omega  **2 * (step * i)**2)
+      V[i]= math.exp(-0.5 * beta * 0.5 * m * omega  **2 * (dx * i)**2)
 
 # Calculate density matric from trotter decomposition
 
@@ -52,6 +52,15 @@ def get_plot_file_name(plot):
       return '{0}.png'.format(plot)
    return plot
 
+# plot_density
+#
+# Plot density_matrix
+#
+def plot_density(X,Y,rho,beta):
+      plt.pcolor(X,Y,rho)
+      plt.colorbar()
+      plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
+      
 if __name__=='__main__':
    import argparse
       
@@ -60,53 +69,52 @@ if __name__=='__main__':
    parser.add_argument('--h',      default=1,   type=float,                      help='Planck\'s constant')
    parser.add_argument('-m','--m', default=1.0, type=float,                      help='Mass of particle')
    parser.add_argument('--omega',  default=1.0, type=float,                      help='Frequency')
-   parser.add_argument('--n',      default=100, type=int,                        help='Number of steps')
+   parser.add_argument('--n',      default=100, type=int,                        help='Number of dxs')
    parser.add_argument('--L',      default=5,   type=float,                      help='Length')
    parser.add_argument('--show',                            action='store_true', help='Show plot')
    parser.add_argument('--rows',   default=4,   type=int,                        help='Number of rows to plot')
    parser.add_argument('--cols',   default=4,   type=int,                        help='Number of columns to plot')
    parser.add_argument('--plot',   default='',                                   help='Name of plot file')
-   parser.add_argument('--N',      default=None, type=int,                       help='Plot last step only (number of step)')
+   parser.add_argument('--N',      default=None, type=int,                       help='Plot last dx only (number of dx)')
    
-   args     = parser.parse_args() 
+   args   = parser.parse_args() 
    
-   beta     = args.beta  
-   step     = args.L / args.n
-   grid_i   = [i for i in range(-args.n,args.n+1)]          # integer grid for calculation - allow lookup
-   I,J      = np.meshgrid(grid_i,grid_i)
-   grid_x   = [i * step for i in range(-args.n,args.n+1)]   # grid for plotting
-   X,Y      = np.meshgrid(grid_x,grid_x)                    # grid for plotting
+   beta   = args.beta  
+   dx     = args.L / args.n
+   grid_i = [i for i in range(-args.n,args.n+1)]          # integer grid for calculation - allow lookup
+   I,J    = np.meshgrid(grid_i,grid_i)
+   grid_x = [i * dx for i in range(-args.n,args.n+1)]     # grid for plotting
+   X,Y    = np.meshgrid(grid_x,grid_x)                    # grid for plotting
    
    build_helpers(n        = args.n,
                  phi_mult = math.sqrt(args.m/(2*math.pi*args.h*args.h*beta)),
                  m        = args.m,
                  h        = args.h,
                  beta     = args.beta,
-                 step     = step,
+                 dx       = dx,
                  omega    = args.omega)
          
-   rho = trotter(I,J)
+   rho = trotter(I,J) # Calculate starting value (good for small beta)
 
    rc('font',**{'family':'serif','serif':['Palatino']})
    rc('text', usetex=True)
    plt.figure(figsize=(5,5))
-   N = args.rows*args.cols if args.N==None else args.N
+   N = args.rows*args.cols if args.N==None else args.N  # Number of values to calculate
    for i in range(N):
       if args.N==None:  # i.e. plot for all values of beta
          plt.subplot(args.rows,args.cols,i+1)
-         plt.pcolor(X,Y,rho)
-         plt.colorbar()
-         plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
+         plot_density(X,Y,rho,beta)
+         
       if i <N-1:  # Avoid redundant squaring after final plot
          beta *= 2      
-         rho = np.dot(rho, rho)   # rho  = step * rho * rho gave wrong answer!
-         rho *= step     
+         rho = np.dot(rho, rho)   # We have to use .dot, as * does elementwise multiplication
+         rho *= dx                # we want an integral, not just a sum 
+         
    if args.N==None:       # i.e. plot for all values of beta
-      plt.tight_layout()
+      plt.tight_layout()  # Avoid scrunching plots
    else:
-      plt.pcolor(X,Y,rho)
-      plt.colorbar()
-      plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
+      plot_density(X,Y,rho,beta)
+
         
    plt.savefig(get_plot_file_name(args.plot))   
    
