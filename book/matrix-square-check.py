@@ -47,9 +47,9 @@ if __name__=='__main__':
     parser.add_argument('-m','--m', default=1.0, type=float,                      help='Mass of particle')
     parser.add_argument('--omega',  default=1.0, type=float,                      help='Frequency')
     parser.add_argument('--n',      default=100, type=int,                        help='Number of steps')
-    parser.add_argument('--L',      default=2,   type=float,                      help='Length')    
-    parser.add_argument('--show',                           action='store_true', help='Show plot')
-    parser.add_argument('--plot', default='',                                   help='Name of plot file')
+    parser.add_argument('--L',      default=5,   type=float,                      help='Length')    
+    parser.add_argument('--show',                           action='store_true',  help='Show plot')
+    parser.add_argument('--plot', default='',                                     help='Name of plot file')
     
     args        = parser.parse_args()
     beta        = args.beta  

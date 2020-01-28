@@ -96,9 +96,9 @@ if __name__=='__main__':
          plt.pcolor(X,Y,rho)
          plt.colorbar()
          plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
-      if i ==N-1: break  # Avoid redundant squaring after final plot
-      beta *= 2      
-      rho  = step * rho * rho
+      if i <N-1:  # Avoid redundant squaring after final plot
+         beta *= 2      
+         rho  = step * rho * rho
       
    if args.N==None:
       plt.tight_layout()
