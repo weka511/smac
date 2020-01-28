@@ -20,11 +20,7 @@
 import math,matplotlib.pyplot as plt,numpy as np,os
 from matplotlib import rc
 
-chi=0.5
-lambda0=0.5
-
-#@np.vectorize
-def V(x):
+def V(x,chi=1.1,lambda0=1.1):
     return 0.5 *(chi*(chi-1)/math.sin(x)**2) * (lambda0*(lambda0-1)/math.cos(x)**2)
 
 # Determine plot file name
@@ -42,17 +38,22 @@ if __name__=='__main__':
     
     parser = argparse.ArgumentParser('Template')
     parser.add_argument('--show',                           action='store_true', help='Show plot')
-    parser.add_argument('--plot', default='',                                   help='Name of plot file')
+    parser.add_argument('--plot', default='',                                    help='Name of plot file')
+    parser.add_argument('--dx',   default=0.01, type=float,                      help='Interval for plotting')
     args   = parser.parse_args()
     
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     
-    dx = 0.01
-    xs = np.arange(dx,math.pi/2,dx)[:-1]
+    xs = np.arange(args.dx,math.pi/2,args.dx)[:-1]
     
     plt.figure(figsize=(5,5))
-    plt.plot(xs,[V(x) for x in xs])
+    params=[(1.01,1.01),(1.1,1.1),(1.1,1.2),(1.2,1.2)]
+    for i in range(len(params)):
+        chi,lambda0=params[i]
+        plt.plot(xs,[V(x,chi,lambda0) for x in xs],label=r'$\chi={0},\lambda={1}$'.format(chi,lambda0))
+    plt.legend()
+    plt.title(r'P\"oschl-Teller Potential')
     plt.savefig(get_plot_file_name(args.plot))   
     if args.show:
         plt.show()    

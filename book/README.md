@@ -41,6 +41,7 @@ Code exercises from the textbook
 |3.2||Matrix Squaring|
 ||matrix-square.py|Exercise 3.4: implement Alg 3.3, matrix-square|
 ||matrix-square-check.py|Exercise 3.4: check results of matrix squaring against exact solution.|
+||poeschl-teller.py|Exercise 3.5: plot Poeschl-Teller potential and investigate density matrix and partition function|
 |3.3||The Feynman path integral|
 |3.4||Pair density matrices|
 |3.5||Geometry of Paths|
