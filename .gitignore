@@ -58,3 +58,6 @@ target/
 
 *.png
 *.txt
+*.exe
+.depend
+
