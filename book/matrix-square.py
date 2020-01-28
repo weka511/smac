@@ -61,12 +61,12 @@ if __name__=='__main__':
    parser.add_argument('-m','--m', default=1.0, type=float,                      help='Mass of particle')
    parser.add_argument('--omega',  default=1.0, type=float,                      help='Frequency')
    parser.add_argument('--n',      default=100, type=int,                        help='Number of steps')
-   parser.add_argument('--L',      default=2,   type=float,                      help='Length')
+   parser.add_argument('--L',      default=5,   type=float,                      help='Length')
    parser.add_argument('--show',                            action='store_true', help='Show plot')
    parser.add_argument('--rows',   default=4,   type=int,                        help='Number of rows to plot')
    parser.add_argument('--cols',   default=4,   type=int,                        help='Number of columns to plot')
    parser.add_argument('--plot',   default='',                                   help='Name of plot file')
-   
+   parser.add_argument('--N',      default=None, type=int,                       help='Plot last step only (number of step)')
    args     = parser.parse_args() 
    
    beta     = args.beta  
@@ -89,16 +89,24 @@ if __name__=='__main__':
    rc('font',**{'family':'serif','serif':['Palatino']})
    rc('text', usetex=True)
    plt.figure(figsize=(5,5))
-   for i in range(args.rows*args.cols):
-      plt.subplot(args.rows,args.cols,i+1)
+   N = args.rows*args.cols if args.N==None else args.N
+   for i in range(N):
+      if args.N==None:
+         plt.subplot(args.rows,args.cols,i+1)
+         plt.pcolor(X,Y,rho)
+         plt.colorbar()
+         plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
+      if i ==N-1: break  # Avoid redundant squaring after final plot
+      beta *= 2      
+      rho  = step * rho * rho
+      
+   if args.N==None:
+      plt.tight_layout()
+   else:
       plt.pcolor(X,Y,rho)
       plt.colorbar()
       plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
-      if i ==args.rows*args.cols-1: break  # Avoid redundant squaring after final plot
-      beta *= 2      
-      rho  = step * rho * rho
-   
-   plt.tight_layout()  
+        
    plt.savefig(get_plot_file_name(args.plot))    
    if args.show:
       plt.show()        
