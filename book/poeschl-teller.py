@@ -22,22 +22,29 @@ from matplotlib import rc
 
 # Helper tables, which speed up calculation by caching exponentials. Index on i and j, not x and y. 
 phi_helper = {}
+V          = {}
 
 # build_helpers
 #
 # Construct helper tables
 
-def build_helpers(n,phi_mult=1,m=1,h=1,beta=1,dx=1):
+def build_helpers(n,phi_mult=1,m=1,h=1,beta=1,dx=1,chi=1.1,lambda0=1.1):
     for i in range(n+1):
         for j in range(i,n+1):
             if not (j-i) in phi_helper:
                 phi_helper[(j-i)] = phi_mult * math.exp(- (m * (dx*(i-j))**2)/(2 * h**2 * beta))
+    for i in range(n):
+        V[i] = poeschl_teller((0.5+i)*dx, chi=chi, lambda0=lambda0)
                 
-def pt(x,chi=1.1,lambda0=1.1):
+def poeschl_teller(x,chi=1.1,lambda0=1.1):
     return 0.5 *(chi*(chi-1)/math.sin(x)**2) * (lambda0*(lambda0-1)/math.cos(x)**2)
 
 def E(n,chi=1.1,lambda0=1.1):
     return 0.5*(chi+lambda0+2*n)**2
+
+@np.vectorize
+def trotter(i,j):
+    return math.log(V[i] * phi_helper[abs(i-j)] * V[j]) # use log to compress plots
 
 # Determine plot file name
 
@@ -49,11 +56,20 @@ def get_plot_file_name(plot):
         return '{0}.png'.format(plot)
     return plot
 
+# plot_density
+#
+# Plot density_matrix
+#
+def plot_density(X,Y,rho,beta):
+    plt.pcolor(X,Y,rho)
+    plt.colorbar()
+    plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
+    
 if __name__=='__main__':
     import argparse
     
     parser = argparse.ArgumentParser('Plot Poeschl-Teller potential and investigate density matrix and partition function')
-    parser.add_argument('--beta',   default=0.1, type=float,                      help='Inverse temperature')
+    parser.add_argument('--beta',   default=0.01, type=float,                      help='Inverse temperature')
     parser.add_argument('--h',      default=1,   type=float,                      help='Planck\'s constant') 
     parser.add_argument('-m','--m', default=1.0, type=float,                      help='Mass of particle')
     parser.add_argument('--n',      default=100, type=int,                        help='Number of dxs')
@@ -73,19 +89,21 @@ if __name__=='__main__':
                  m        = args.m,
                  h        = args.h,
                  beta     = args.beta,
-                 dx       = dx)
+                 dx       = dx,
+                 chi      = 1.1,
+                 lambda0  = 1.1)
     
     rc('text', usetex=True)
-    plt.figure(figsize=(5,5))
-    plt.subplot(2,1,1)
+    plt.figure(figsize=(10,10))
+    plt.subplot(2,2,1)
     params=[(1.01,1.01),(1.1,1.1),(1.1,1.2),(1.2,1.2)]
     for i in range(len(params)):
         chi,lambda0=params[i]
-        plt.plot(xs,[pt(x,chi,lambda0) for x in xs],label=r'$\chi={0},\lambda={1}$'.format(chi,lambda0))
+        plt.plot(xs,[poeschl_teller(x,chi,lambda0) for x in xs],label=r'$\chi={0},\lambda={1}$'.format(chi,lambda0))
     plt.legend()
     plt.title(r'P\"oschl-Teller Potential')
     
-    plt.subplot(2,1,2)
+    plt.subplot(2,2,2)
     ns = range(25)
     markers = ['.', 'v', '^', '<', '>']
     for i in range(len(params)):
@@ -99,6 +117,11 @@ if __name__=='__main__':
     plt.ylabel('E')
     plt.legend()
     plt.title(r'Energy eigenvalues for P\"oschl-Teller potential')
+    
+    plt.subplot(2,2,3)
+    rho = trotter(I,J)
+    plot_density(X,Y,rho,args.beta)
+    
     plt.tight_layout()
     plt.savefig(get_plot_file_name(args.plot))   
     if args.show:
