@@ -20,7 +20,20 @@
 import math,matplotlib.pyplot as plt,numpy as np,os
 from matplotlib import rc
 
-def V(x,chi=1.1,lambda0=1.1):
+# Helper tables, which speed up calculation by caching exponentials. Index on i and j, not x and y. 
+phi_helper = {}
+
+# build_helpers
+#
+# Construct helper tables
+
+def build_helpers(n,phi_mult=1,m=1,h=1,beta=1,dx=1):
+    for i in range(n+1):
+        for j in range(i,n+1):
+            if not (j-i) in phi_helper:
+                phi_helper[(j-i)] = phi_mult * math.exp(- (m * (dx*(i-j))**2)/(2 * h**2 * beta))
+                
+def pt(x,chi=1.1,lambda0=1.1):
     return 0.5 *(chi*(chi-1)/math.sin(x)**2) * (lambda0*(lambda0-1)/math.cos(x)**2)
 
 def E(n,chi=1.1,lambda0=1.1):
@@ -40,21 +53,35 @@ if __name__=='__main__':
     import argparse
     
     parser = argparse.ArgumentParser('Plot Poeschl-Teller potential and investigate density matrix and partition function')
+    parser.add_argument('--beta',   default=0.1, type=float,                      help='Inverse temperature')
+    parser.add_argument('--h',      default=1,   type=float,                      help='Planck\'s constant') 
+    parser.add_argument('-m','--m', default=1.0, type=float,                      help='Mass of particle')
+    parser.add_argument('--n',      default=100, type=int,                        help='Number of dxs')
     parser.add_argument('--show',                           action='store_true', help='Show plot')
     parser.add_argument('--plot', default='',                                    help='Name of plot file')
-    parser.add_argument('--dx',   default=0.01, type=float,                      help='Interval for plotting')
+
     args   = parser.parse_args()
+    beta   = args.beta
+    dx     = math.pi/(2 * args.n)
+    grid_i = [i for i in range(0,args.n)]          # integer grid for calculation - allow lookup
+    I,J    = np.meshgrid(grid_i,grid_i)
+    xs     = [(0.5 + i) * dx for i in grid_i ]
+    X,Y    = np.meshgrid(xs,xs)                    # grid for plotting
+    
+    build_helpers(n        = args.n,
+                 phi_mult = math.sqrt(args.m/(2*math.pi*args.h*args.h*beta)),
+                 m        = args.m,
+                 h        = args.h,
+                 beta     = args.beta,
+                 dx       = dx)
     
     rc('text', usetex=True)
-    
-    xs = np.arange(args.dx,math.pi/2,args.dx)[:-1]
-    
     plt.figure(figsize=(5,5))
     plt.subplot(2,1,1)
     params=[(1.01,1.01),(1.1,1.1),(1.1,1.2),(1.2,1.2)]
     for i in range(len(params)):
         chi,lambda0=params[i]
-        plt.plot(xs,[V(x,chi,lambda0) for x in xs],label=r'$\chi={0},\lambda={1}$'.format(chi,lambda0))
+        plt.plot(xs,[pt(x,chi,lambda0) for x in xs],label=r'$\chi={0},\lambda={1}$'.format(chi,lambda0))
     plt.legend()
     plt.title(r'P\"oschl-Teller Potential')
     
