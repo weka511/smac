@@ -37,21 +37,21 @@ def build_helpers(n,phi_mult=1,m=1,h=1,beta=1,dx=1,chi=1.1,lambda0=1.1):
         V[i] = poeschl_teller((0.5+i)*dx, chi=chi, lambda0=lambda0)
                 
 def poeschl_teller(x,chi=1.1,lambda0=1.1):
-    return 0.5 *(chi*(chi-1)/math.sin(x)**2) * (lambda0*(lambda0-1)/math.cos(x)**2)
+    return 0.5 *chi*(chi-1)/math.sin(x)**2 * lambda0*(lambda0-1)/math.cos(x)**2
 
 def E(n,chi=1.1,lambda0=1.1):
     return 0.5*(chi+lambda0+2*n)**2
 
 @np.vectorize
 def trotter(i,j):
-    return math.log(V[i] * phi_helper[abs(i-j)] * V[j]) # use log to compress plots
+    return V[i] * phi_helper[abs(i-j)] * V[j]
 
 # Determine plot file name
 
 def get_plot_file_name(plot):
     if len(plot)==0:
         return '{0}.png'.format(os.path.splitext(os.path.basename(__file__))[0])
-    base,ext = os.path.splitext(plot)
+    _,ext = os.path.splitext(plot)
     if len(ext)==0:
         return '{0}.png'.format(plot)
     return plot
@@ -84,7 +84,7 @@ if __name__=='__main__':
     xs     = [(0.5 + i) * dx for i in grid_i ]
     X,Y    = np.meshgrid(xs,xs)                    # grid for plotting
     
-    build_helpers(n        = args.n,
+    build_helpers(n       = args.n,
                  phi_mult = math.sqrt(args.m/(2*math.pi*args.h*args.h*beta)),
                  m        = args.m,
                  h        = args.h,
@@ -95,7 +95,7 @@ if __name__=='__main__':
     
     rc('text', usetex=True)
     plt.figure(figsize=(10,10))
-    plt.subplot(2,2,1)
+    plt.subplot(3,3,1)
     params=[(1.01,1.01),(1.1,1.1),(1.1,1.2),(1.2,1.2)]
     for i in range(len(params)):
         chi,lambda0=params[i]
@@ -103,7 +103,7 @@ if __name__=='__main__':
     plt.legend()
     plt.title(r'P\"oschl-Teller Potential')
     
-    plt.subplot(2,2,2)
+    plt.subplot(3,3,2)
     ns = range(25)
     markers = ['.', 'v', '^', '<', '>']
     for i in range(len(params)):
@@ -118,9 +118,16 @@ if __name__=='__main__':
     plt.legend()
     plt.title(r'Energy eigenvalues for P\"oschl-Teller potential')
     
-    plt.subplot(2,2,3)
+    plt.subplot(3,3,3)
     rho = trotter(I,J)
-    plot_density(X,Y,rho,args.beta)
+    plot_density(X,Y,np.log(rho),beta)
+    
+    for i in range(6):
+        plt.subplot(3,3,i+4)
+        beta *= 2      
+        rho = np.dot(rho, rho)   # We have to use .dot, as * does elementwise multiplication
+        rho *= dx                # we want an integral, not just a sum 
+        plot_density(X,Y,np.log(rho),beta)
     
     plt.tight_layout()
     plt.savefig(get_plot_file_name(args.plot))   
