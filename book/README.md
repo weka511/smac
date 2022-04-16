@@ -22,7 +22,7 @@ Code exercises from the textbook
 |permutation-histogram.py
 |naivegauss.py|1.12 Gauss
 |boxmuller.py|
-|direct-surface.py|
+|direct-surface.py|Monte Carlo simulation of Exercise 2.11 of Chaosbook: in higher dimensions, any two vectors are nearly orthogonal
 1.3||Statistical data analysis
 |binomialconvolution.py|1.18 Binomial Convolution
 1.4||Computing
