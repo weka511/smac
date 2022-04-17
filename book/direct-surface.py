@@ -24,14 +24,17 @@ from numpy.random      import normal
 from scipy.stats       import norm as gaussian
 
 d     = 10000
-N     = 100000
+N     = 1000000
+bins  = 100
+
 x0    = zeros(d)
 x0[0] = 1
 sigma = 1/ sqrt(d)
 X0    = []
 Theta = []
 for i in range(N):
-    x          = normal(scale=sigma,size=d)
+    x          = normal(scale = sigma,
+                        size  = d)
     x          = x/norm(x)
     projection = dot(x,x0)
     X0.append(projection)
@@ -45,21 +48,23 @@ rv        = gaussian(scale=sigma)
 m_theta   = mean(Theta)
 std_theta = std(Theta)
 xs_theta  = linspace(min(Theta), max(Theta))
-rv_theta  = gaussian(loc=pi/2, scale=sigma)
+rv_theta  = gaussian(loc   = pi/2,
+                     scale = sigma)
 
 fig = figure(figsize=(12,12))
 axs = fig.subplots(nrows=2)
 
 fig.suptitle(f'd={d}, N= {N}')
-axs[0].hist(X0, bins=50, density=True,label=f'Observed: mean={m0:0.4f}, std={std0:0.4f}')
-axs[0].plot(xs,rv.pdf(xs),label=f'Gaussian: std={sigma}')
-axs[0].set_title(f'$x_1$')
+sqrt_d = r'$\sqrt{d}=$'
+axs[0].hist(X0, bins=bins, density=True,label=f'Observed: mean={m0:0.4f}, std={std0:0.4f}')
+axs[0].plot(xs,rv.pdf(xs),label=f'Gaussian: std={sqrt_d}{sigma}')
+axs[0].set_title(r'$\mathbf{x}_1^\intercal \mathbf{x}_2$')
 axs[0].legend()
 
-axs[1].hist(Theta, bins=50, density=True, label=f'Observed: mean={m_theta:0.4f}, std={std_theta:0.4f}')
-axs[1].plot(xs_theta,rv_theta.pdf(xs_theta), label=f'Gaussian: mean={pi/2:0.4f}, std={sigma}')
+axs[1].hist(Theta, bins=bins, density=True, label=f'Observed: mean={m_theta:0.4f}, std={std_theta:0.4f}')
+axs[1].plot(xs_theta,rv_theta.pdf(xs_theta), label=f'Gaussian: mean={pi/2:0.4f}, std={sqrt_d}{sigma}')
 axs[1].set_title(r'$\theta$')
 axs[1].legend()
 
-savefig('angles')
+savefig('direct-surface')
 show()
