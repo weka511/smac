@@ -32,6 +32,9 @@ x0[0] = 1
 sigma = 1/ sqrt(d)
 X0    = []
 Theta = []
+
+# Use Krauth, algorihm 1.23. Only the x1 is needed for our result, but we'll canculate all the sx
+
 for i in range(N):
     x          = normal(scale = sigma,
                         size  = d)
@@ -43,7 +46,7 @@ for i in range(N):
 m0        = mean(X0)
 std0      = std(X0)
 xs        = linspace(min(X0), max(X0))
-rv        = gaussian(scale=sigma)
+rv        = gaussian(scale = sigma)
 
 m_theta   = mean(Theta)
 std_theta = std(Theta)
@@ -55,14 +58,22 @@ fig = figure(figsize=(12,12))
 axs = fig.subplots(nrows=2)
 
 fig.suptitle(f'd={d}, N= {N}')
-sqrt_d = r'$\sqrt{d}=$'
-axs[0].hist(X0, bins=bins, density=True,label=f'Observed: mean={m0:0.4f}, std={std0:0.4f}')
-axs[0].plot(xs,rv.pdf(xs),label=f'Gaussian: std={sqrt_d}{sigma}')
-axs[0].set_title(r'$\mathbf{x}_1^\intercal \mathbf{x}_2$')
+sqrt_d = r'$\frac{1}{\sqrt{d}}=$'
+axs[0].hist(X0,
+            bins    = bins,
+            density = True,
+            label   = f'Observed: mean={m0:0.4f}, std={std0:0.4f}')
+axs[0].plot(xs,rv.pdf(xs),
+            label = f'Gaussian: std={sqrt_d}{sigma}')
+axs[0].set_title(r'Inner Product: $\mathbf{x}_1^\intercal \mathbf{x}_2$')
 axs[0].legend()
 
-axs[1].hist(Theta, bins=bins, density=True, label=f'Observed: mean={m_theta:0.4f}, std={std_theta:0.4f}')
-axs[1].plot(xs_theta,rv_theta.pdf(xs_theta), label=f'Gaussian: mean={pi/2:0.4f}, std={sqrt_d}{sigma}')
+axs[1].hist(Theta,
+            bins    = bins,
+            density = True,
+            label   = f'Observed: mean={m_theta:0.4f}, std={std_theta:0.4f}')
+axs[1].plot(xs_theta,rv_theta.pdf(xs_theta),
+            label = f'Gaussian: mean={pi/2:0.4f}, std={sqrt_d}{sigma}')
 axs[1].set_title(r'$\theta$')
 axs[1].legend()
 
