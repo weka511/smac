@@ -57,7 +57,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|direct_disks_multirun_movie.py|
 &nbsp;|&nbsp;|random_sequential_discrete.py|
 &nbsp;|&nbsp;|random_sequential_discrete_movie.py|
-3|||Intropic Interactions and Phase Transitions
+3|||Entropic Interactions and Phase Transitions
 &nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_3)|direct_pins.py|
 &nbsp;|&nbsp;|direct_pins_improved.py|
 &nbsp;|&nbsp;|direct_pins_movie.py|
