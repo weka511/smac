@@ -250,3 +250,21 @@ Code I have written for course: *Statistical Mechanics and Computations*
 5.3||Generalized Ising models
 6||Entropic Forces
 7||Dynamic Monte Carlo Methods
+
+## Exam
+
+File|Description
+------|-----------------------------------------------------------
+Q1.py|
+Q4-1.py|
+Q4-2.py|
+Q7.py|
+Q10.py|
+Q11.py|
+
+
+## Miscellaneous
+
+File|Description
+----------|---------------------------------------------------------------------------------------
+walker.py|Used to create README from file tree
