@@ -61,7 +61,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 
 #|File|Problem/Algorithm/Description
 -----|--------------|---------------------------------------------------------------------------------------
-|template.py|Template for python programs
+-|template.py|Template for python programs
 1|smac.c|Useful functions: BoxMuller, CircleThrowing, and SphereGenerator
 1.1|direct-plot.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.
 -| markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.
