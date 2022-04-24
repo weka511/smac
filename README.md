@@ -32,8 +32,16 @@ Code I have written for course: *Statistical Mechanics and Computations*
 |||naive_path_slice.py|
 |||naive_path_slice_movie.py |
 |||trivial_free_path.py|Generate a random walk, then pull back as described in Lecture 6, 20:12. Compare result with Lévy free path
--|Tutorial||
--|Homework||
+-|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_6)|naive_boson_trap.py|
+|||naive_single_particle.py |
+-|[Homework](https://github.com/weka511/smac/tree/master/homework_6)|a1.py|
+|||a2.py|
+|||a3.py|
+|||b1.py|
+|||b2.py|
+|||b3.py|
+|||c1.py|
+|||c2.py|
 7|Lectures||
 -|Tutorial||
 -|Homework||
