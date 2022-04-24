@@ -8,10 +8,6 @@ Code I have written for course: *Statistical Mechanics and Computations*
 
 #|Folder|File|Description
 --|---------|------------------|---------------------------------------------------------------
-1|[Homework](https://github.com/weka511/smac/tree/master/homework_1)|exerciseB.py|
-&nbsp;|&nbsp;|exerciseC.py|
-&nbsp;|&nbsp;|exerciseC1.py|
-&nbsp;|&nbsp;|exerciseC3.py|
 1|[Lecture](https://github.com/weka511/smac/tree/master/lecture_1)|direct_pi.py|
 &nbsp;|&nbsp;|direct_pi_multirun.py|
 &nbsp;|&nbsp;|exerciseB.py|
@@ -22,7 +18,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|markov_pi_multirun.py|
 &nbsp;|&nbsp;|pebble_basic.py|
 &nbsp;|&nbsp;|pebble_basic_inhomogeneous.py|
-1|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_1)|pebble_basic.py|
+&nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_1)|pebble_basic.py|
 &nbsp;|&nbsp;|pebble_basic_movie.py|
 &nbsp;|&nbsp;|pebble_basic_multirun.py|
 &nbsp;|&nbsp;|pebble_dual_eigen.py|
@@ -34,6 +30,10 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|pebble_transfer.py|
 &nbsp;|&nbsp;|pebble_transfer_eigen.py|
 &nbsp;|&nbsp;|pebble_transfer_sub.py|
+&nbsp;|[Homework](https://github.com/weka511/smac/tree/master/homework_1)|exerciseB.py|
+&nbsp;|&nbsp;|exerciseC.py|
+&nbsp;|&nbsp;|exerciseC1.py|
+&nbsp;|&nbsp;|exerciseC3.py|
 2|[Lecture](https://github.com/weka511/smac/tree/master/lecture_2)|direct_disks_box.py|
 &nbsp;|&nbsp;|direct_disks_box_a1.py|
 &nbsp;|&nbsp;|direct_disks_box_movie.py|
@@ -47,7 +47,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|markov_disks_box_a2.py|
 &nbsp;|&nbsp;|markov_disks_box_movie.py|
 &nbsp;|&nbsp;|markov_disks_box_multirun_b2.py|
-2|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_2)|direct_discrete.py|
+&nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_2)|direct_discrete.py|
 &nbsp;|&nbsp;|direct_disks_any.py|
 &nbsp;|&nbsp;|direct_disks_box.py|
 &nbsp;|&nbsp;|direct_disks_box_slow.py|
@@ -55,21 +55,21 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|direct_disks_multirun_movie.py|
 &nbsp;|&nbsp;|random_sequential_discrete.py|
 &nbsp;|&nbsp;|random_sequential_discrete_movie.py|
-3|[Homework](https://github.com/weka511/smac/tree/master/homework_3)|my_markov_disks.py|
-&nbsp;|&nbsp;|preparation1.py|
-&nbsp;|&nbsp;|preparation2.py|
 3|[Lecture](https://github.com/weka511/smac/tree/master/lecture_3)|direct_pins.py|
 &nbsp;|&nbsp;|direct_pins_improved.py|
 &nbsp;|&nbsp;|direct_pins_movie.py|
 &nbsp;|&nbsp;|direct_pins_noreject.py|
 &nbsp;|&nbsp;|direct_pins_noreject_movie.py|
-3|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_3)|direct_pins.py|
+&nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_3)|direct_pins.py|
 &nbsp;|&nbsp;|direct_pins_density.py|
 &nbsp;|&nbsp;|direct_pins_movie.py|
 &nbsp;|&nbsp;|direct_pins_noreject.py|
 &nbsp;|&nbsp;|direct_pins_noreject_movie.py|
 &nbsp;|&nbsp;|direct_pins_noreject_periodic.py|
 &nbsp;|&nbsp;|direct_pins_noreject_periodic_pair.py|
+&nbsp;|[Homework](https://github.com/weka511/smac/tree/master/homework_3)|my_markov_disks.py|
+&nbsp;|&nbsp;|preparation1.py|
+&nbsp;|&nbsp;|preparation2.py|
 4|[Homework](https://github.com/weka511/smac/tree/master/homework_4)|data-bunch.py|
 &nbsp;|&nbsp;|markov_hypersphere.py|
 &nbsp;|&nbsp;|markov_hypersphere_C2.py|
