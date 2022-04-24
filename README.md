@@ -8,7 +8,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 
 #|Folder|File|Description
 --|---------|------------------|---------------------------------------------------------------
-1|[Lecture](https://github.com/weka511/smac/tree/master/lecture_1)|direct_pi.py|
+1|||Monte Carlo Algorithms: Direct Sampling & Markov Chain sampling
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_1)|direct_pi.py|
 &nbsp;|&nbsp;|direct_pi_multirun.py|
 &nbsp;|&nbsp;|exerciseB.py|
 &nbsp;|&nbsp;|exerciseC.py|
@@ -34,7 +35,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|exerciseC.py|
 &nbsp;|&nbsp;|exerciseC1.py|
 &nbsp;|&nbsp;|exerciseC3.py|
-2|[Lecture](https://github.com/weka511/smac/tree/master/lecture_2)|direct_disks_box.py|
+2|||Hard Disks: from classical mechanics to statistical mechancs
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_2)|direct_disks_box.py|
 &nbsp;|&nbsp;|direct_disks_box_a1.py|
 &nbsp;|&nbsp;|direct_disks_box_movie.py|
 &nbsp;|&nbsp;|direct_disks_box_multirun.py|
@@ -55,7 +57,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|direct_disks_multirun_movie.py|
 &nbsp;|&nbsp;|random_sequential_discrete.py|
 &nbsp;|&nbsp;|random_sequential_discrete_movie.py|
-3|[Lecture](https://github.com/weka511/smac/tree/master/lecture_3)|direct_pins.py|
+3|||Intropic Interactions and Phase Transitions
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_3)|direct_pins.py|
 &nbsp;|&nbsp;|direct_pins_improved.py|
 &nbsp;|&nbsp;|direct_pins_movie.py|
 &nbsp;|&nbsp;|direct_pins_noreject.py|
@@ -70,7 +73,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|[Homework](https://github.com/weka511/smac/tree/master/homework_3)|my_markov_disks.py|
 &nbsp;|&nbsp;|preparation1.py|
 &nbsp;|&nbsp;|preparation2.py|
-4|[Lecture](https://github.com/weka511/smac/tree/master/lecture_4)|direct_sphere_3d.py|
+4|||Sampling and Integration
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_4)|direct_sphere_3d.py|
 &nbsp;|&nbsp;|direct_sphere_3d_movie.py|
 &nbsp;|&nbsp;|direct_surface.py|
 &nbsp;|&nbsp;|direct_surface_3d.py|
@@ -100,7 +104,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|markov_hypersphere_C2.py|
 &nbsp;|&nbsp;|markov_sphere_3D.py|
 &nbsp;|&nbsp;|markov_sphere_4D.py|
-5|[Lecture](https://github.com/weka511/smac/tree/master/lecture_5)|harmonic_wavefunction.py|
+5|||Quantum Statistical Mechancs 1/3: Density Matrices and Path Integrals
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_5)|harmonic_wavefunction.py|
 &nbsp;|&nbsp;|harmonic_wavefunction_check.py|
 &nbsp;|&nbsp;|harmonic_wavefunction_check_movie.py|
 &nbsp;|&nbsp;|harmonic_wavefunction_movie.py|
@@ -122,7 +127,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|matrix_square_harmonic_b1.py|
 &nbsp;|&nbsp;|path_Integral_b2.py|
 &nbsp;|&nbsp;|path_Integral_c2.py|
-6|[Lecture](https://github.com/weka511/smac/tree/master/lecture_6)|continuous_random_walk.py|
+6|||Quantum Statistical Mechancs 2/3: Lévy Quantum Paths
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_6)|continuous_random_walk.py|
 &nbsp;|&nbsp;|levy_free_path.py|
 &nbsp;|&nbsp;|levy_harmonic_path.py|
 &nbsp;|&nbsp;|levy_harmonic_path_3D.py|
@@ -141,7 +147,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|b3.py|
 &nbsp;|&nbsp;|c1.py|
 &nbsp;|&nbsp;|c2.py|
-7|[Lecture](https://github.com/weka511/smac/tree/master/lecture_7)|markov_harmonic_bosons.py|
+7|||Quantum Statistical Mechancs 3/3: Bose-Einstein Condensation
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_7)|markov_harmonic_bosons.py|
 &nbsp;|&nbsp;|markov_harmonic_bosons_movie.py|
 &nbsp;|&nbsp;|permutation_sample.py|
 &nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_7)|canonic_harmonic_recursion.py|
@@ -157,7 +164,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|b1.py|
 &nbsp;|&nbsp;|b2.py|
 &nbsp;|&nbsp;|c1.py|
-8|[Lecture](https://github.com/weka511/smac/tree/master/lecture_8)|cluster_ising.py|
+8|||Ising Model: Enumerations and Monte-Carlo Algorithms
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_8)|cluster_ising.py|
 &nbsp;|&nbsp;|cluster_ising_movie.py|
 &nbsp;|&nbsp;|energy_ising.py|
 &nbsp;|&nbsp;|enumerate_ising.py|
@@ -177,7 +185,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|B2.py|
 &nbsp;|&nbsp;|C1.py|
 &nbsp;|&nbsp;|C2.py|
-9|[Lecture](https://github.com/weka511/smac/tree/master/lecture_9)|dynamic_ising.py|
+9|||Dynamic Monte Carlo, Simulated Annealing
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_9)|dynamic_ising.py|
 &nbsp;|&nbsp;|dynamic_ising_patch.py|
 &nbsp;|&nbsp;|fast_spin_dynamics.py|
 &nbsp;|&nbsp;|fast_throw.py|
