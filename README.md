@@ -9,16 +9,12 @@ Code I have written for course: *Statistical Mechanics and Computations*
 #|Folder|File|Description
 --|---------|------------------|---------------------------------------------------------------
 1|||Monte Carlo Algorithms: Direct Sampling & Markov Chain sampling
-&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_1)|direct_pi.py|
-&nbsp;|&nbsp;|direct_pi_multirun.py|
-&nbsp;|&nbsp;|exerciseB.py|
-&nbsp;|&nbsp;|exerciseC.py|
-&nbsp;|&nbsp;|exerciseC1.py|
-&nbsp;|&nbsp;|exerciseC3.py|
-&nbsp;|&nbsp;|markov_pi.py|
-&nbsp;|&nbsp;|markov_pi_multirun.py|
-&nbsp;|&nbsp;|pebble_basic.py|
-&nbsp;|&nbsp;|pebble_basic_inhomogeneous.py|
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_1)|direct_pi.py|Algorithm 1.1 - compute pi using direct sampling
+&nbsp;|&nbsp;|direct_pi_multirun.py|Compute pi using multiple runs of direct sampling
+&nbsp;|&nbsp;|markov_pi.py|Calculate pi using Markov Chain Monte Carlo
+&nbsp;|&nbsp;|markov_pi_multirun.py|Calculate pi using multiple runs of Markov Chain Monte Carlo
+&nbsp;|&nbsp;|pebble_basic.py|Demonstrate neighbour table for MCMC-Algorithm 1.6
+&nbsp;|&nbsp;|pebble_basic_inhomogeneous.py|Demonstrate neighbour table for MCMC-Algorithm 1.6 with inhomogeneous probabilities
 &nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_1)|pebble_basic.py|
 &nbsp;|&nbsp;|pebble_basic_movie.py|
 &nbsp;|&nbsp;|pebble_basic_multirun.py|

@@ -1,6 +1,7 @@
+''''Calculate pi using multiple runs of Markov Chain Monte Carlo'''
 import random
 
-def markov_pi(N, delta): 
+def markov_pi(N, delta):
     x, y = 1.0, 1.0
     n_hits = 0
     for i in range(N):

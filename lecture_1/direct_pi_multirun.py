@@ -1,5 +1,6 @@
+'''Compute pi using multiple runs of direct sampling'''
 import random, math, pylab
- 
+
 def direct_pi(N):
     n_hits = 0
     for i in range(N):
@@ -7,7 +8,7 @@ def direct_pi(N):
         if x ** 2 + y ** 2 < 1.0:
             n_hits += 1
     return n_hits
- 
+
 n_runs = 500
 n_trials_list = []
 sigmasqs = []

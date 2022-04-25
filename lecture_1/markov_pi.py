@@ -1,3 +1,4 @@
+'''Calculate pi using Markov Chain Monte Carlo'''
 import random, math
 
 for delta in [0.062, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0]:
@@ -11,7 +12,7 @@ for delta in [0.062, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0]:
             x, y = x + del_x, y + del_y
             n_accepted+=1
         if x**2 + y**2 < 1.0: n_hits += 1
-      
+
     estimate=4.0 * n_hits / float(n_trials)
     error=abs(estimate-math.pi)
     acceptance_rate=n_accepted/ float(n_trials)
