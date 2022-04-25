@@ -1,3 +1,7 @@
+'''
+Simple eimplementation of Lévy Free Path Algorithm
+'''
+
 from math   import sqrt
 from random import gauss
 

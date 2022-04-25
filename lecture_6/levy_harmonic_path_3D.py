@@ -1,4 +1,8 @@
+'''
+Lévy flight in 3D
+'''
 from math   import sinh, sqrt, tanh
+from matplotlib.pyplot import figure, show
 from random import gauss
 
 def levy_harmonic_1d(start, end, dtau):
@@ -12,7 +16,7 @@ def levy_harmonic_1d(start, end, dtau):
     return x
 
 beta                     = 1.0
-N                        = 20
+N                        = 1024
 dtau                     = beta / float(N)
 [xstart, ystart, zstart] = [1.0, -2.0, 1.5]
 [xend, yend, zend]       = [-2.5, 0.0, -0.5]
@@ -20,5 +24,8 @@ dtau                     = beta / float(N)
 x = levy_harmonic_1d(xstart, xend, dtau)
 y = levy_harmonic_1d(ystart, yend, dtau)
 z = levy_harmonic_1d(zstart, zend, dtau)
-for i in range(N + 1):
-    print ('slice %2i:  ' % i, x[i], y[i], z[i])
+
+fig = figure(figsize=(12,12))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot(x,y,z)
+show()

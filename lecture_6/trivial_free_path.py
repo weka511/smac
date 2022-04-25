@@ -13,7 +13,7 @@ sigma        = sqrt(beta / N)
 dtau         = beta / N
 xstart, xend = 0.0, 1.0          # initial and final points
 seed_value   = 42                #Seed for random number generator, to ensure that random walk and
-                                 #Lévy free path see the same sequnce of random numbers
+                                 #Lévy free path see the same sequence of random numbers
 
 seed(seed_value)
 

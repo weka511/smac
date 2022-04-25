@@ -1,3 +1,6 @@
+'''
+Construct path using a simple random walk (endpoint is not held fixed)
+'''
 from math   import sqrt
 from random import gauss
 

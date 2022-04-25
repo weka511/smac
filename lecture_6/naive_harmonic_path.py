@@ -1,3 +1,6 @@
+'''
+Construct path using direct sanpling (inefficient)
+'''
 from math   import exp
 from random import randint, random, uniform
 

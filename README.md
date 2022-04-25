@@ -128,12 +128,12 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|path_Integral_b2.py|
 &nbsp;|&nbsp;|path_Integral_c2.py|
 6|||Quantum Statistical Mechancs 2/3: LÃ©vy Quantum Paths
-&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_6)|continuous_random_walk.py|
-&nbsp;|&nbsp;|levy_free_path.py|
-&nbsp;|&nbsp;|levy_harmonic_path.py|
-&nbsp;|&nbsp;|levy_harmonic_path_3D.py|
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_6)|continuous_random_walk.py|Construct path using a simple random walk (endpoint is not held fixed)
+&nbsp;|&nbsp;|levy_free_path.py|Simple simplementation of Levy Free Path Algorithm
+&nbsp;|&nbsp;|levy_harmonic_path.py||Simple Lévy path
+&nbsp;|&nbsp;|levy_harmonic_path_3D.py|Lévy flight in 3D
 &nbsp;|&nbsp;|levy_harmonic_path_movie.py|
-&nbsp;|&nbsp;|naive_harmonic_path.py|
+&nbsp;|&nbsp;|naive_harmonic_path.py|Construct path using direct sanpling (inefficient)
 &nbsp;|&nbsp;|naive_path_slice.py|
 &nbsp;|&nbsp;|naive_path_slice_movie.py|
 &nbsp;|&nbsp;|trivial_free_path.py|Generate a random walk, then pull back as described in Lecture 6, 20:12. Compare result with LÃ©vy free path
@@ -213,7 +213,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 #|File|Problem/Algorithm/Description
 -----|--------------|---------------------------------------------------------------------------------------
 -|template.py|Template for python programs
-1|smac.c|Useful functions: BoxMuller, CircleThrowing, and SphereGenerator
+1|smac.py|Useful functions: BoxMuller, CircleThrowing, and SphereGenerator
 1.1|direct-plot.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.
 -| markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.
 -|direct.py|1.3 Store state in file
@@ -225,7 +225,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 1.2|permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often
 -|permutation-histogram.py
 -|naivegauss.py|1.12 Gauss
--|boxmuller.py|
+-|boxmuller.py|Test for Box Muller algorithm
 -|direct-surface.py|Monte Carlo simulation of Exercise 2.11 of Chaosbook: in higher dimensions, any two vectors are nearly orthogonal
 1.3|binomialconvolution.py|1.18 Binomial Convolution
 1.4.2|direct-gamma.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.

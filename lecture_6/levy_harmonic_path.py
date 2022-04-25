@@ -1,3 +1,6 @@
+'''
+Simple Lévy path
+'''
 from math   import sinh, sqrt, tanh
 from random import gauss
 

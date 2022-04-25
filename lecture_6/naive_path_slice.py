@@ -17,16 +17,14 @@ Xs          = []
 
 for step in range(n_steps):
     xk_new      = xk + uniform(-delta, delta)
-    old_weight  = (rho_free(x_dprime, xk, dtau_dprime) *
-                   rho_free(xk, x_prime, dtau_prime))
-    new_weight  = (rho_free(x_dprime, xk_new, dtau_dprime) *
-                   rho_free(xk_new, x_prime, dtau_prime))
+    old_weight  = (rho_free(x_dprime, xk, dtau_dprime) *  rho_free(xk, x_prime, dtau_prime))
+    new_weight  = (rho_free(x_dprime, xk_new, dtau_dprime) * rho_free(xk_new, x_prime, dtau_prime))
     if random() < new_weight / old_weight:
         xk = xk_new
     Xs.append(xk)
 
 mu    = (dtau_dprime*x_prime + dtau_prime*x_dprime)/(dtau_dprime + dtau_prime) #mean(Xs)
-sigma = sqrt(1/(1/dtau_prime+1/dtau_dprime))
+sigma = sqrt(1 / (1/dtau_prime+1/dtau_dprime))
 dist  = norm(loc   = mu,
              scale = sigma)
 xs    = linspace(min(Xs), max(Xs))
