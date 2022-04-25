@@ -1,3 +1,5 @@
+'''Enumerate states for Bosons, i.e. indistinguisgable particles'''
+
 Emax   = 50
 
 States = [((E_x + E_y + E_z), (E_x, E_y, E_z)) for E_x in range(Emax) for E_y in range(Emax) for E_z in range(Emax)]

@@ -133,8 +133,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|naive_path_slice.py|
 &nbsp;|&nbsp;|naive_path_slice_movie.py|
 &nbsp;|&nbsp;|trivial_free_path.py|Generate a random walk, then pull back as described in Lecture 6, 20:12. Compare result with Lévy free path
-&nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_6)|naive_boson_trap.py|
-&nbsp;|&nbsp;|naive_single_particle.py|
+&nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_6)|naive_boson_trap.py|Enumerate energies in a simple harmonic trap
+&nbsp;|&nbsp;|naive_single_particle.py|Enumerate states for Bosons, i.e. indistinguisgable particles
 &nbsp;|[Homework](https://github.com/weka511/smac/tree/master/homework_6)|a1.py|
 &nbsp;|&nbsp;|a2.py|
 &nbsp;|&nbsp;|a3.py|

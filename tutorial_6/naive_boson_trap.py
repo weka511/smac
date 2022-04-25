@@ -1,3 +1,4 @@
+'''Enumerate energies in a simple harmonic trap'''
 from math import exp
 
 Energy   = [0.0] + [1.0] * 3 + [2.0] * 6 + [3.0] * 10 + [4.0] * 15
