@@ -32,8 +32,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|exerciseC1.py|
 &nbsp;|&nbsp;|exerciseC3.py|
 2|||Hard Disks: from classical mechanics to statistical mechancs
-&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_2)|direct_disks_box.py|
-&nbsp;|&nbsp;|direct_disks_box_a1.py|
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_2)|direct_disks_box.py|Direct sampling of disks in box, tabula rasa
+&nbsp;|&nbsp;|direct_disks_box_a1.py|Direct sampling of disks in box, tabula rasa: investigate success rate
 &nbsp;|&nbsp;|direct_disks_box_movie.py|
 &nbsp;|&nbsp;|direct_disks_box_multirun.py|
 &nbsp;|&nbsp;|direct_disks_box_multirun_b1.py|

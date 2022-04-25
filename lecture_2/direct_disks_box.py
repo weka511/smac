@@ -1,17 +1,22 @@
-import random, math
+'''Direct sampling of disks in box, tabula rasa'''
 
-N = 4
-sigma = 0.2
+from random import uniform
+from math   import sqrt
+
+N         = 4
+sigma     = 0.2
 condition = False
-while condition == False:
-    L = [(random.uniform(sigma, 1.0 - sigma), random.uniform(sigma, 1.0 - sigma))]
+
+while not generatedLegal:
+    L = [(uniform(sigma, 1.0 - sigma), uniform(sigma, 1.0 - sigma))]
     for k in range(1, N):
-        a = (random.uniform(sigma, 1.0 - sigma), random.uniform(sigma, 1.0 - sigma))
-        min_dist = min(math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) for b in L) 
-        if min_dist < 2.0 * sigma: 
-            condition = False
+        a        = (uniform(sigma, 1.0 - sigma), uniform(sigma, 1.0 - sigma))
+        min_dist = min(sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) for b in L)
+        if min_dist < 2.0 * sigma:
+            generatedLegal = False
             break
         else:
             L.append(a)
-            condition = True
+            generatedLegal = True
+
 print (L)
