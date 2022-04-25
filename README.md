@@ -126,8 +126,8 @@ Code I have written for course: *Statistical Mechanics and Computations*
 6|||Quantum Statistical Mechancs 2/3: LÃ©vy Quantum Paths
 &nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_6)|continuous_random_walk.py|Construct path using a simple random walk (endpoint is not held fixed)
 &nbsp;|&nbsp;|levy_free_path.py|Simple simplementation of Levy Free Path Algorithm
-&nbsp;|&nbsp;|levy_harmonic_path.py||Simple Lévy path
-&nbsp;|&nbsp;|levy_harmonic_path_3D.py|Lévy flight in 3D
+&nbsp;|&nbsp;|levy_harmonic_path.py||Simple LÃ©vy path
+&nbsp;|&nbsp;|levy_harmonic_path_3D.py|LÃ©vy flight in 3D
 &nbsp;|&nbsp;|levy_harmonic_path_movie.py|
 &nbsp;|&nbsp;|naive_harmonic_path.py|Construct path using direct sanpling (inefficient)
 &nbsp;|&nbsp;|naive_path_slice.py|
