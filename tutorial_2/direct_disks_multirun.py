@@ -1,6 +1,4 @@
-# $HeadURL: https://server/svn/sandbox/trunk/smac/tutorial_2/direct_disks_multirun.py $
-# $LastChangedDate: 2016-06-08 13:03:57 +1200 (Wed, 08 Jun 2016) $
-# $LastChangedRevision: 891 $
+'''Algorithm 2.1: event-driven molecular dynamics for hard disks in a box: multiple runs to collects stats '''
 
 import random, math
 
@@ -10,7 +8,7 @@ def dist(x,y):
     d_y = abs(x[1] - y[1]) % 1.0
     d_y = min(d_y, 1.0 - d_y)
     return  math.sqrt(d_x**2 + d_y**2)
-    
+
 def direct_disks(N, sigma):
     n_iter = 0
     condition = False
@@ -19,8 +17,8 @@ def direct_disks(N, sigma):
         L = [(random.random(), random.random())]
         for k in range(1, N):
             a = (random.random(), random.random())
-            min_dist = min(dist(a, b) for b in L) 
-            if min_dist < 2.0 * sigma: 
+            min_dist = min(dist(a, b) for b in L)
+            if min_dist < 2.0 * sigma:
                 condition = False
                 break
             else:

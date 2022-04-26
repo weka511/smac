@@ -37,22 +37,22 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|direct_disks_box_movie.py|Direct sampling of disks in box, tabula rasa, plotted as movie
 &nbsp;|&nbsp;|direct_disks_box_multirun.py|Direct sampling of disks in box, tabula rasa, multiple runs
 &nbsp;|&nbsp;|direct_disks_box_multirun_b1.py|Generate histogram of x positions by direct sampling of disks in box, tabula rasa
-&nbsp;|&nbsp;|event_disks_box.py|
-&nbsp;|&nbsp;|event_disks_box_a3.py|
-&nbsp;|&nbsp;|event_disks_box_b3.py|
-&nbsp;|&nbsp;|event_disks_box_movie.py|
-&nbsp;|&nbsp;|markov_disks_box.py|
-&nbsp;|&nbsp;|markov_disks_box_a2.py|
-&nbsp;|&nbsp;|markov_disks_box_movie.py|
-&nbsp;|&nbsp;|markov_disks_box_multirun_b2.py|
-&nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_2)|direct_discrete.py|
-&nbsp;|&nbsp;|direct_disks_any.py|
-&nbsp;|&nbsp;|direct_disks_box.py|
-&nbsp;|&nbsp;|direct_disks_box_slow.py|
-&nbsp;|&nbsp;|direct_disks_multirun.py|
-&nbsp;|&nbsp;|direct_disks_multirun_movie.py|
-&nbsp;|&nbsp;|random_sequential_discrete.py|
-&nbsp;|&nbsp;|random_sequential_discrete_movie.py|
+&nbsp;|&nbsp;|event_disks_box.py|Algorithm 2.1: event-driven molecular dynamics for hard disks in a box
+&nbsp;|&nbsp;|event_disks_box_a3.py|Algorithm 2.1: event-driven molecular dynamics for hard disks in a box. Repeat
+&nbsp;|&nbsp;|event_disks_box_b3.py|Algorithm 2.1: event-driven molecular dynamics for hard disks in a box. Repeat and generate histogram
+&nbsp;|&nbsp;|event_disks_box_movie.py|Algorithm 2.1: event-driven molecular dynamics for hard disks in a box. Repeat. Plotted as movie
+&nbsp;|&nbsp;|markov_disks_box.py|Algorithm 2.2: generating a hard disk configuration from another one using a Markov chain
+&nbsp;|&nbsp;|markov_disks_box_a2.py|Algorithm 2.2: generating a hard disk configuration from another one using a Markov chain
+&nbsp;|&nbsp;|markov_disks_box_movie.py|Algorithm 2.2: generating a hard disk configuration from another one using a Markov chain
+&nbsp;|&nbsp;|markov_disks_box_multirun_b2.py|Algorithm 2.2: generating a hard disk configuration from another one using a Markov chain
+&nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_2)|direct_discrete.py|Create configuration of rods using tabula rasa to give equiprobable distribution
+&nbsp;|&nbsp;|direct_disks_any.py|Compute acceptance probability for hard disks as a function of density
+&nbsp;|&nbsp;|direct_disks_box.py|Algorithm 2.1: event-driven molecular dynamics for hard disks in a box
+&nbsp;|&nbsp;|direct_disks_box_slow.py|Algorithm 2.1: event-driven molecular dynamics for hard disks in a box. Build full set of disks, including invalid, then cull.
+&nbsp;|&nbsp;|direct_disks_multirun.py|Algorithm 2.1: event-driven molecular dynamics for hard disks in a box with periodic boundary conditions: multiple runs to collects stats
+&nbsp;|&nbsp;|direct_disks_multirun_movie.py|Algorithm 2.1: event-driven molecular dynamics for hard disks in a box with periodic boundary conditions: multiple runs to collects stats
+&nbsp;|&nbsp;|random_sequential_discrete.py|Create configuration of rods without tabula rasa: does not give equiprobable distribution
+&nbsp;|&nbsp;|random_sequential_discrete_movie.py|Create configuration of rods without tabula rasa: does not give equiprobable distribution
 3|||Entropic Interactions and Phase Transitions
 &nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_3)|direct_pins.py|
 &nbsp;|&nbsp;|direct_pins_improved.py|
