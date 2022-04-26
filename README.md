@@ -7,7 +7,7 @@ Code I have written for course: *Statistical Mechanics and Computations*
 ## From the Course
 
 #|Folder|File|Description
---|---------|------------------|---------------------------------------------------------------
+--|---------|------------------|-----------------------------------------------------------------------------------------------------------------------
 1|||Monte Carlo Algorithms: Direct Sampling & Markov Chain sampling
 &nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_1)|direct_pi.py|Algorithm 1.1 - compute pi using direct sampling
 &nbsp;|&nbsp;|direct_pi_multirun.py|Compute pi using multiple runs of direct sampling
