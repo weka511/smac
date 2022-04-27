@@ -54,11 +54,11 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|random_sequential_discrete.py|Create configuration of rods without tabula rasa: does not give equiprobable distribution
 &nbsp;|&nbsp;|random_sequential_discrete_movie.py|Create configuration of rods without tabula rasa: does not give equiprobable distribution
 3|||Entropic Interactions and Phase Transitions
-&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_3)|direct_pins.py|
-&nbsp;|&nbsp;|direct_pins_improved.py|
-&nbsp;|&nbsp;|direct_pins_movie.py|
-&nbsp;|&nbsp;|direct_pins_noreject.py|
-&nbsp;|&nbsp;|direct_pins_noreject_movie.py|
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_3)|direct_pins.py|Algorithm 6.1: direct sampling
+&nbsp;|&nbsp;|direct_pins_improved.py|Algorithm 6.1: direct sampling
+&nbsp;|&nbsp;|direct_pins_movie.py|Algorithm 6.1:  direct sampling
+&nbsp;|&nbsp;|direct_pins_noreject.py|Algorithm 6.2: rejection free sampling
+&nbsp;|&nbsp;|direct_pins_noreject_movie.py|Algorithm 6.2: rejection free sampling
 &nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_3)|direct_pins.py|
 &nbsp;|&nbsp;|direct_pins_density.py|
 &nbsp;|&nbsp;|direct_pins_movie.py|
