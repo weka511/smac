@@ -1,3 +1,5 @@
+'''Used to create README.MD from file tree'''
+
 from os import walk
 from re import match
 
