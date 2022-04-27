@@ -2,10 +2,10 @@
 Direct sampling of disks in box, tabula rasa, plotted as movie
 '''
 
-from os.path          import exists, join
-from os               import makedirs
-from pylab            import subplots_adjust, gca, Circle,gcf, axis, setp, savefig, close
-from direct_disks_box import direct_disks_box
+from os.path           import exists, join
+from os                import makedirs
+from matplotlib.pyplot import subplots_adjust, gca, Circle,gcf, axis, setp, savefig, close
+from direct_disks_box  import direct_disks_box
 
 
 def snapshot(pos, colors, img,
