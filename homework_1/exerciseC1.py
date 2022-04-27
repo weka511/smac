@@ -1,3 +1,7 @@
+'''
+Bunching method: compute the error in markov_pi.py from a single
+run and without knowing the mathematical value of pi.
+'''
 import random, pylab, math
 
 def markov_pi_all_data(N, delta):

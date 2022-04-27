@@ -27,10 +27,13 @@ Code I have written for course: *Statistical Mechanics and Computations*
 &nbsp;|&nbsp;|pebble_transfer.py|
 &nbsp;|&nbsp;|pebble_transfer_eigen.py|
 &nbsp;|&nbsp;|pebble_transfer_sub.py|
-&nbsp;|[Homework](https://github.com/weka511/smac/tree/master/homework_1)|exerciseB.py|
-&nbsp;|&nbsp;|exerciseC.py|
-&nbsp;|&nbsp;|exerciseC1.py|
-&nbsp;|&nbsp;|exerciseC3.py|
+&nbsp;|[Homework](https://github.com/weka511/smac/tree/master/homework_1)|exerciseB.py|Shows that the error of markov_pi follows the law: const / sqrt(N_trials)for large N_trials. The constant is larger (sometimes much larger) than 1.642 and it depends on the stepsize delta.
+&nbsp;|&nbsp;|exerciseC.py|Bunching method: compute the error in markov_pi.py from a single
+run and without knowing the mathematical value of pi.
+&nbsp;|&nbsp;|exerciseC1.py|Bunching method: compute the error in markov_pi.py from a single
+run and without knowing the mathematical value of pi
+&nbsp;|&nbsp;|exerciseC3.py|Bunching method: compute the error in markov_pi.py from a single
+run and without knowing the mathematical value of pi
 2|||Hard Disks: from classical mechanics to statistical mechancs
 &nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_2)|direct_disks_box.py|Direct sampling of disks in box, tabula rasa
 &nbsp;|&nbsp;|direct_disks_box_a1.py|Direct sampling of disks in box, tabula rasa: investigate success rate

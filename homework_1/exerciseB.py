@@ -1,3 +1,9 @@
+'''
+Shows that the error of markov_pi follows the law:
+const / sqrt(N_trials)for large N_trials. The constant is larger
+(sometimes much larger) than 1.642 and it depends on the stepsize
+delta.
+'''
 import random, math, pylab
 
 def markov_pi(N, delta):
