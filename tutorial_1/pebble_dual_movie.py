@@ -1,12 +1,13 @@
-import random, pylab
+from random import seed, random, randint
+from matplotlib.pyplot import axis, Circle, close, figure, gca, plot, savefig, title, xticks, yticks
 
-random.seed('1234')
-sigma = 0.4
+seed('1234')
+sigma   = 0.4
 epsilon = 0.4  # probability to switch from red to blue pebble, and vice versa
-pylab.figure()
-s_map_red =  [(1.0, 1.0), (2.0, 1.0), (3.0, 1.0), 
-              (1.0, 2.0), (2.0, 2.0), (3.0, 2.0), 
-              (1.0, 3.0), (2.0, 3.0), (3.0, 3.0)] 
+
+s_map_red =  [(1.0, 1.0), (2.0, 1.0), (3.0, 1.0),
+              (1.0, 2.0), (2.0, 2.0), (3.0, 2.0),
+              (1.0, 3.0), (2.0, 3.0), (3.0, 3.0)]
 offset = 3.0
 s_map_blue = [(x+offset,y-offset) for (x,y) in s_map_red]
 neighbor =  [[1, 3, 0, 0], [2, 4, 0, 1], [2, 5, 1, 2],
@@ -15,49 +16,50 @@ neighbor =  [[1, 3, 0, 0], [2, 4, 0, 1], [2, 5, 1, 2],
 color = 'red'  #chose 'red' or 'blue'
 site = 8
 tmax = 240
+
+
 for iter in range(tmax):
     period = 4
     if (iter%period) == 0:
-	# Begin of graphical output
+        # Begin of graphical output
         maxlength = len(str(tmax-1))
         number_string = str(iter).zfill(maxlength)
-        if color == 'red':  cir = pylab.Circle(s_map_red[site],  radius=sigma, fc='r')
-        if color == 'blue': cir = pylab.Circle(s_map_blue[site], radius=sigma, fc='b')
-	pylab.figure()
-        pylab.gca().add_patch(cir)
-        pylab.plot([0.5, 3.5], [0.5, 0.5], 'r')
-        pylab.plot([0.5, 3.5], [1.5, 1.5], 'r')
-        pylab.plot([0.5, 3.5], [2.5, 2.5], 'r')
-        pylab.plot([1.5, 1.5], [0.5, 3.5], 'r')
-        pylab.plot([2.5, 2.5], [0.5, 3.5], 'r')
-        pylab.plot([3.5, 3.5], [0.5, 3.5], 'r')
-        pylab.plot([0.5+offset, 3.5+offset], [1.5-offset, 1.5-offset], 'b')
-        pylab.plot([0.5+offset, 3.5+offset], [2.5-offset, 2.5-offset], 'b')
-        pylab.plot([0.5+offset, 3.5+offset], [3.5-offset, 3.5-offset], 'b')
-        pylab.plot([0.5+offset, 0.5+offset], [0.5-offset, 3.5-offset], 'b')
-        pylab.plot([1.5+offset, 1.5+offset], [0.5-offset, 3.5-offset], 'b')
-        pylab.plot([2.5+offset, 2.5+offset], [0.5-offset, 3.5-offset], 'b')
-        pylab.title('t = '+ number_string)
-        pylab.axis('scaled')
-        pylab.axis([0.5, 6.5, -2.5, 3.5])
-        pylab.xticks([])
-        pylab.yticks([])
+        figure()
+        gca().add_patch(Circle(s_map_red[site] if color == 'red' else s_map_blue[site],
+                               radius = sigma,
+                               fc     = 'r' if color == 'red' else 'b'))
+        plot([0.5, 3.5], [0.5, 0.5], 'r')
+        plot([0.5, 3.5], [1.5, 1.5], 'r')
+        plot([0.5, 3.5], [2.5, 2.5], 'r')
+        plot([1.5, 1.5], [0.5, 3.5], 'r')
+        plot([2.5, 2.5], [0.5, 3.5], 'r')
+        plot([3.5, 3.5], [0.5, 3.5], 'r')
+        plot([0.5+offset, 3.5+offset], [1.5-offset, 1.5-offset], 'b')
+        plot([0.5+offset, 3.5+offset], [2.5-offset, 2.5-offset], 'b')
+        plot([0.5+offset, 3.5+offset], [3.5-offset, 3.5-offset], 'b')
+        plot([0.5+offset, 0.5+offset], [0.5-offset, 3.5-offset], 'b')
+        plot([1.5+offset, 1.5+offset], [0.5-offset, 3.5-offset], 'b')
+        plot([2.5+offset, 2.5+offset], [0.5-offset, 3.5-offset], 'b')
+        title('t = '+ number_string)
+        axis('scaled')
+        axis([0.5, 6.5, -2.5, 3.5])
+        xticks([])
+        yticks([])
         number_string_filename = str(iter/period).zfill(3)
-        pylab.savefig('pebble_dual_movie_epsilon_'+number_string_filename+'.png', transparent=True)
-        pylab.clf()
-        pylab.close()
-	# End of graphical output
-    newsite = neighbor[site][ random.randint(0, 3)]
+        savefig('pebble_dual_movie_epsilon_'+number_string_filename+'.png', transparent=True)
+        close()
+        # End of graphical output
+    newsite  = neighbor[site][ randint(0, 3)]
     newcolor = color
     if (color == 'red') and (site == 2) and (newsite == 2):
-        if random.random() < epsilon:
+        if random() < epsilon:
             newcolor = 'blue'
-            newsite = 6
-            print "transition red->blue at time = ", iter
+            newsite  = 6
+            print ("transition red->blue at time = ", iter)
     if (color == 'blue') and (site == 6) and (newsite == 6):
-        if random.random() < epsilon:
+        if random() < epsilon:
             newcolor = 'red'
-            newsite = 2
-            print "transition blue->red at time = ", iter
-    site = newsite
+            newsite  = 2
+            print ("transition blue->red at time = ", iter)
+    site  = newsite
     color = newcolor
