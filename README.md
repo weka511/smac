@@ -14,9 +14,9 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 &nbsp;|&nbsp;|markov_pi_multirun.py|Calculate pi using multiple runs of Markov Chain Monte Carlo
 &nbsp;|&nbsp;|pebble_basic.py|Demonstrate neighbour table for MCMC-Algorithm 1.6
 &nbsp;|&nbsp;|pebble_basic_inhomogeneous.py|Demonstrate neighbour table for MCMC-Algorithm 1.6 with inhomogeneous probabilities
-&nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_1)|pebble_basic.py|Move pebble using neighbour table from Table 1.3
-&nbsp;|&nbsp;|pebble_basic_movie.py|Move pebble using neighbour table from Table 1.3
-&nbsp;|&nbsp;|pebble_basic_multirun.py|Move pebble using neighbour table from Table 1.3
+&nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_1)|pebble_basic.py|Move pebble using neighbour Table 1.3
+&nbsp;|&nbsp;|pebble_basic_movie.py|Move pebble using neighbour Table 1.3
+&nbsp;|&nbsp;|pebble_basic_multirun.py|Move pebble using neighbour Table 1.3
 &nbsp;|&nbsp;|pebble_dual_eigen.py|
 &nbsp;|&nbsp;|pebble_dual_movie.py|
 &nbsp;|&nbsp;|pebble_multirun_all_histogram.py|
