@@ -17,15 +17,15 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 &nbsp;|[Tutorial](https://github.com/weka511/smac/tree/master/tutorial_1)|pebble_basic.py|Move pebble using neighbour Table 1.3
 &nbsp;|&nbsp;|pebble_basic_movie.py|Move pebble using neighbour Table 1.3
 &nbsp;|&nbsp;|pebble_basic_multirun.py|Move pebble using neighbour Table 1.3
-&nbsp;|&nbsp;|pebble_dual_eigen.py|
-&nbsp;|&nbsp;|pebble_dual_movie.py|
-&nbsp;|&nbsp;|pebble_multirun_all_histogram.py|
-&nbsp;|&nbsp;|pebble_multirun_histogram.py|
-&nbsp;|&nbsp;|pebble_recurrent_eigen.py|
-&nbsp;|&nbsp;|pebble_recurrent_movie.py|
-&nbsp;|&nbsp;|pebble_transfer.py|
-&nbsp;|&nbsp;|pebble_transfer_eigen.py|
-&nbsp;|&nbsp;|pebble_transfer_sub.py|
+&nbsp;|&nbsp;|pebble_dual_eigen.py|Two games: Illustrate conversion of reducible matrix to irreducible+aperiodic to make motion ergodic
+&nbsp;|&nbsp;|pebble_dual_movie.py|'''Two games: Illustrate conversion of reducible matrix to irreducible+aperiodic to make motion  ergodic'''
+&nbsp;|&nbsp;|pebble_multirun_all_histogram.py|Show probability for reaching other cells after 0, 1, 2, ... moves
+&nbsp;|&nbsp;|pebble_multirun_histogram.py|Show probability for reaching other cells after 0, 1, 2, ... moves
+&nbsp;|&nbsp;|pebble_recurrent_eigen.py|Dual pebble: make aperiodic
+&nbsp;|&nbsp;|pebble_recurrent_movie.py|Dual pebble: make aperiodic
+&nbsp;|&nbsp;|pebble_transfer.py|Model Monte Carlo simulation as a transfer matrix, illustrating speed of convergence
+&nbsp;|&nbsp;|pebble_transfer_eigen.py|Eigenvalues and eigenvectiors of transfer matrix, illustrating speed of convergence
+&nbsp;|&nbsp;|pebble_transfer_sub.py|Model Monte Carlo simulation as a transfer matrix, but subtract equailibtium value
 &nbsp;|[Homework](https://github.com/weka511/smac/tree/master/homework_1)|exerciseB.py|Shows that the error of markov_pi follows the law: const / sqrt(N_trials)for large N_trials. The constant is larger (sometimes much larger) than 1.642 and it depends on the stepsize delta.
 &nbsp;|&nbsp;|exerciseC.py|Bunching method: compute the error in markov_pi.py from a single run and without knowing the mathematical value of pi.
 &nbsp;|&nbsp;|exerciseC1.py|Bunching method: compute the error in markov_pi.py from a single run and without knowing the mathematical value of pi

@@ -1,3 +1,4 @@
+'''Two games: Illustrate conversion of reducible matrix to irreducible, aperiodoc to make motion ergodic'''
 from numpy        import zeros
 from numpy.linalg import eig
 neighbor =  [[1, 3, 0, 0], [2, 4, 0, 1], [2, 5, 1, 2],

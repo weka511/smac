@@ -1,9 +1,10 @@
+'''Dual pebble: make aperiodic'''
 import math, random, pylab
 
 sigma = 0.4
 epsilon = 0.1
 pylab.figure()
-s_map = [(1.0, 1.0), (2.0, 1.0)] 
+s_map = [(1.0, 1.0), (2.0, 1.0)]
 neighbor =  [[1], [0]]
 pos = 0
 tmax = 20

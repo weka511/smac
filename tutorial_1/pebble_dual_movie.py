@@ -1,3 +1,4 @@
+'''Two games: Illustrate conversion of reducible matrix to irreducible, aperiodic to make motion ergodic'''
 from random import seed, random, randint
 from matplotlib.pyplot import axis, Circle, close, figure, gca, plot, savefig, title, xticks, yticks
 
