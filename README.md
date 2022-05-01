@@ -24,8 +24,8 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 &nbsp;|&nbsp;|pebble_recurrent_eigen.py|Dual pebble: make aperiodic
 &nbsp;|&nbsp;|pebble_recurrent_movie.py|Dual pebble: make aperiodic
 &nbsp;|&nbsp;|pebble_transfer.py|Model Monte Carlo simulation as a transfer matrix, illustrating speed of convergence
-&nbsp;|&nbsp;|pebble_transfer_eigen.py|Eigenvalues and eigenvectiors of transfer matrix, illustrating speed of convergence
-&nbsp;|&nbsp;|pebble_transfer_sub.py|Model Monte Carlo simulation as a transfer matrix, but subtract equailibtium value
+&nbsp;|&nbsp;|pebble_transfer_eigen.py|Eigenvalues and eigenvectors of transfer matrix, illustrating speed of convergence
+&nbsp;|&nbsp;|pebble_transfer_sub.py|Model Monte Carlo simulation as a transfer matrix; subtract equilibrium value to show speed of convergence
 &nbsp;|[Homework](https://github.com/weka511/smac/tree/master/homework_1)|exerciseB.py|Shows that the error of markov_pi follows the law: const / sqrt(N_trials)for large N_trials. The constant is larger (sometimes much larger) than 1.642 and it depends on the stepsize delta.
 &nbsp;|&nbsp;|exerciseC.py|Bunching method: compute the error in markov_pi.py from a single run and without knowing the mathematical value of pi.
 &nbsp;|&nbsp;|exerciseC1.py|Bunching method: compute the error in markov_pi.py from a single run and without knowing the mathematical value of pi
