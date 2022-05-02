@@ -203,7 +203,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 &nbsp;|&nbsp;|C1.py|
 &nbsp;|&nbsp;|C2.py|
 10|||The Alpha and Omega of Monte Carlo
-&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_10)|direct_gamma.py|
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_10)|direct_gamma.py|Integral of x**gamma, illustrating need for importance sampling
 &nbsp;|&nbsp;|direct_gamma_average.py|Integral of x**gamma, illustrating need for importance sampling
 &nbsp;|&nbsp;|direct_gamma_average_movie.py|Histogram of Integral of x**gamma, illustrating need for importance sampling
 &nbsp;|&nbsp;|direct_gamma_average_rescaled.py|
