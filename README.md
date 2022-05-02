@@ -202,6 +202,16 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 &nbsp;|&nbsp;|B1.py|
 &nbsp;|&nbsp;|C1.py|
 &nbsp;|&nbsp;|C2.py|
+10|||The Alpha and Omega of Monte Carlo
+&nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_10)|direct_gamma.py|
+&nbsp;|&nbsp;|direct_gamma_average.py|
+&nbsp;|&nbsp;|direct_gamma_average_movie.py|
+&nbsp;|&nbsp;|direct_gamma_average_rescaled.py|
+&nbsp;|&nbsp;|direct_gamma_average_rescaled_movie.py|
+&nbsp;|&nbsp;|direct_gamma_running.py|
+&nbsp;|&nbsp;|direct_gamma_running_movie.py|
+&nbsp;|&nbsp;|direct_needle.py|Buffon's experiment (with cheat)
+&nbsp;|&nbsp;|direct_needle_patch.py|Buffon's experiment
 
 ## From the Book
 
