@@ -207,7 +207,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 &nbsp;|&nbsp;|direct_gamma_average.py|Integral of x**gamma, illustrating need for importance sampling
 &nbsp;|&nbsp;|direct_gamma_average_movie.py|Histogram of Integral of x**gamma, illustrating need for importance sampling
 &nbsp;|&nbsp;|direct_gamma_average_rescaled.py|
-&nbsp;|&nbsp;|direct_gamma_average_rescaled_movie.py|Integral of x**gamma: rescale, plot histograms, and compare with Levy
+&nbsp;|&nbsp;|direct_gamma_average_rescaled_movie.py|Integral of x**gamma: rescale, plot histograms, and compare with Lévy distribution
 &nbsp;|&nbsp;|direct_gamma_running.py|
 &nbsp;|&nbsp;|direct_gamma_running_movie.py|
 &nbsp;|&nbsp;|direct_needle.py|Buffon's experiment (with cheat)
