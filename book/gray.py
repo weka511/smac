@@ -15,7 +15,7 @@
 
 '''Algorithm 5.2: Gray code for spins {1,...N}.'''
 
-def gray(N, tau=None):
+def gray_flip(N, tau=None):
     '''
     Generator for Gray code
 
@@ -103,7 +103,7 @@ if __name__=='__main__':
 
         def testGrayGenerator(self):
             '''Test that the returned values are correct, and that there are enough iterations'''
-            for i,(k,_) in enumerate(gray(4)):
+            for i,(k,_) in enumerate(gray_flip(4)):
                 self.assertEqual(self.expected[i],k)
             self.assertEqual(2**4-2,i)
 

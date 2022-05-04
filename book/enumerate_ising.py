@@ -16,7 +16,7 @@
 '''Algorithm 5.3: single flip enumeration for the Ising model.'''
 
 from collections import defaultdict
-from gray        import gray, Nbr
+from gray        import gray_flip, Nbr
 
 
 def enumerate_ising(shape, periodic = True):
@@ -32,9 +32,10 @@ def enumerate_ising(shape, periodic = True):
     E         = 2 * sum(sigma)
     Ns[E]     = 2
 
-    for i, (k,_) in enumerate(gray(N)):
+    for i, (k,_) in enumerate(gray_flip(N)):
         if i>2**(N-1)-2:
             return [(E,Ns[E]) for E in sorted(Ns.keys())]
+
         k0         = k - 1 #1=based -> 0-based
         h          = sum(sigma[j] for j in Nbr(k0,
                                                shape    = shape,
@@ -47,23 +48,31 @@ if __name__=='__main__':
     import unittest
     class TestIsing(unittest.TestCase):
         def test2(self):
-            expected   = {0:12, 8:2}
+            Expected   = {  # From Table 5.2
+                0:12,
+                8:2
+            }
             Energies = enumerate_ising((2,2))
+            # Energies and Expected each contain one entry for zero energy. All other energies
+            # that have a non-zero count exist in pairs, positive and negative, in Energies,
+            # but appear only once in Expected. This is captured in the following comparison
+            self.assertEqual(2*len(Expected)-1, len(Energies))
             for E,Ns in Energies:
-                self.assertEqual(expected[abs(E)],Ns)
+                self.assertEqual(Expected[abs(E)],Ns)
         def test4(self):
-            expected   = {0:  20524,
-                          4:  13568,
-                          8:  6688,
-                          12: 1728,
-                          16: 424,
-                          20: 64,
-                          24: 32,
-                          28: 0,
-                          32: 2
-                          }
+            Expected   = {  # From Table 5.2
+                0:  20524,
+                4:  13568,
+                8:  6688,
+                12: 1728,
+                16: 424,
+                20: 64,
+                24: 32,
+                32: 2
+            }
             Energies = enumerate_ising((4,4))
+            self.assertEqual(2*len(Expected)-1, len(Energies))
             for E,Ns in Energies:
-                self.assertEqual(expected[abs(E)],Ns)
+                self.assertEqual(Expected[abs(E)],Ns)
 
     unittest.main()
