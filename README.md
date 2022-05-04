@@ -248,12 +248,12 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 3.5||Geometry of Paths
 4|| Bosons
 5.1|catch.hpp|Support for Test harness for enumerate-ising.cpp
--|gray.py|Algorithm 5.2: Gray code for spine {1,...N}.
+-|gray.py|Algorithm 5.2: Gray code for spins {1,...N}.
 -|enumerate-ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
 -|enumerate-ising.cpp|Algorithm 5.3: single flip enumeration for the Ising model.
 -|enumerate-ising.hpp|Algorithm 5.3: single flip enumeration for the Ising model.
--|gray.hpp|Greycode for enumerate-ising.cpp
--|ising.py|Algorithm 5.3: driver for enumerate-ising.py
+-|gray.hpp|Greycode for enumerate-ising.cpp, plus iterator for neighbours
+-|ising.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
 -|ising-stats|Figure 6.6 - plot data from ising.py
 -|Makefile|Makefile for enumerate-ising.cpp
 -|nbr.hpp|Calculate neighbours for enumerate-ising.cpp
