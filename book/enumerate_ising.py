@@ -32,8 +32,9 @@ def enumerate_ising(shape, periodic = True):
     E         = 2 * sum(sigma)
     Ns[E]     = 2
 
-    for i, k in enumerate(gray(N)):
-        if i>2**(N-1)-2: break
+    for i, (k,_) in enumerate(gray(N)):
+        if i>2**(N-1)-2:
+            return [(E,Ns[E]) for E in sorted(Ns.keys())]
         k0         = k - 1 #1=based -> 0-based
         h          = sum(sigma[j] for j in Nbr(k0,
                                                shape    = shape,
@@ -41,8 +42,6 @@ def enumerate_ising(shape, periodic = True):
         E          = E + 2 * sigma[k0] * h
         Ns[E]     += 2
         sigma[k0] *= -1
-
-    return [(E,Ns[E]) for E in sorted(Ns.keys())]
 
 if __name__=='__main__':
     import unittest
@@ -66,6 +65,5 @@ if __name__=='__main__':
             Energies = enumerate_ising((4,4))
             for E,Ns in Energies:
                 self.assertEqual(expected[abs(E)],Ns)
-
 
     unittest.main()

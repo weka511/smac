@@ -15,7 +15,7 @@
 
 '''Algorithm 5.2: Gray code for spins {1,...N}.'''
 
-def gray(N):
+def gray(N, tau=None):
     '''
     Generator for Gray code
 
@@ -28,7 +28,8 @@ def gray(N):
         for k in gray(N):
             ....
     '''
-    tau = list(range(1,(N+1)+1))
+    if tau==None:
+        tau = list(range(1,(N+1)+1))
 
     while True:
         k = tau[0]                   # The next spin to flip (1-based)
@@ -36,7 +37,7 @@ def gray(N):
         tau[k-1] = tau[k]
         tau[k]   = k+1
         if (k != 1): tau[0] = 1
-        yield k
+        yield k, tau
 
 class Gray:
     '''Class for Gray code. Permits restarting'''
@@ -102,7 +103,7 @@ if __name__=='__main__':
 
         def testGrayGenerator(self):
             '''Test that the returned values are correct, and that there are enough iterations'''
-            for i,k in enumerate(gray(4)):
+            for i,(k,_) in enumerate(gray(4)):
                 self.assertEqual(self.expected[i],k)
             self.assertEqual(2**4-2,i)
 
