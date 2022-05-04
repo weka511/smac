@@ -27,32 +27,40 @@ def enumerate_ising(shape, periodic = True):
             periodic Indicates whether to use periodic boundary conditions
     '''
     N         = shape[0] * shape[1]
-    Ns        = defaultdict(lambda: 0)
     sigma     = [-1]  *N
-    E         = 2 * sum(sigma)
+    M         = sum(sigma)
+    E         = 2 * M
+    Ns        = defaultdict(lambda: 0)
     Ns[E]     = 2
+    Ms        = defaultdict(lambda: 0)
+    Ms[M]     = 1
 
     for i, (k,_) in enumerate(gray_flip(N)):
         if i>2**(N-1)-2:
-            return [(E,Ns[E]) for E in sorted(Ns.keys())]
+            return [(E,Ns[E]) for E in sorted(Ns.keys())], [(M,Ms[M]) for M in sorted(Ns.keys())]
 
         k0         = k - 1 #1=based -> 0-based
         h          = sum(sigma[j] for j in Nbr(k0,
                                                shape    = shape,
                                                periodic = periodic))
-        E          = E + 2 * sigma[k0] * h
+        E         += 2 * sigma[k0] * h
         Ns[E]     += 2
+
+        M         -= 2 * sigma[k0]
+        Ms[M]     +=1
+
         sigma[k0] *= -1
 
 if __name__=='__main__':
-    import unittest
-    class TestIsing(unittest.TestCase):
+    from unittest import main, TestCase
+
+    class TestIsing(TestCase):
         def test2(self):
             Expected   = {  # From Table 5.2
                 0:12,
                 8:2
             }
-            Energies = enumerate_ising((2,2))
+            Energies,_ = enumerate_ising((2,2))
             # Energies and Expected each contain one entry for zero energy. All other energies
             # that have a non-zero count exist in pairs, positive and negative, in Energies,
             # but appear only once in Expected. This is captured in the following comparison
@@ -70,9 +78,9 @@ if __name__=='__main__':
                 24: 32,
                 32: 2
             }
-            Energies = enumerate_ising((4,4))
+            Energies,_ = enumerate_ising((4,4))
             self.assertEqual(2*len(Expected)-1, len(Energies))
             for E,Ns in Energies:
                 self.assertEqual(Expected[abs(E)],Ns)
 
-    unittest.main()
+    main()

@@ -15,14 +15,16 @@
 
 '''Algorithm 5.2: Gray code for spins {1,...N}.'''
 
-def gray_flip(N, tau=None):
+def gray_flip(N, tau = None):
     '''
     Generator for Gray code
 
     Inputs: N
+            tau   Used when we restart a long run
 
     Used to iterate through gray codes, returning
     the coordinate that gets flipped each time (1-based)
+    plus tau (to support restarting)
 
     Usage:
         for k in gray(N):
@@ -49,6 +51,7 @@ class Gray:
         return self
 
     def __next__(self):
+        '''The next spin to flip (1-based)'''
         k       = self.tau[0]
         if k>self.N: raise StopIteration
         self.tau[k-1] = self.tau[k]
@@ -56,9 +59,9 @@ class Gray:
         if (k != 1): self.tau[0] = 1
         return k
 
-
     def __str__(self):
-        return '['+','.join(str(t) for t in self.tau)+']'
+        '''Convert tau to string, so we can save and restart'''
+        return f'[{",".join(str(t) for t in self.tau)}]'
 
 def Nbr(k,
         shape    = (4,5),
@@ -67,8 +70,9 @@ def Nbr(k,
     A generator to iterate through neighbours of a spin
 
     Parameters:
-        k      index of spin (zero based)
-        shape  Number of rows, columns, etc.
+        k        Index of spin (zero based)
+        shape    Number of rows, columns, etc.
+        periodic Indicates whther or not spins live on a torus
 
     Test data correspond to
          15  16  17  18  19
@@ -94,9 +98,9 @@ def Nbr(k,
 
 
 if __name__=='__main__':
-    import unittest
+    from unittest import main, TestCase
 
-    class GrayTest(unittest.TestCase):
+    class GrayTest(TestCase):
         def setUp(self):
             flips         = [1,2,1,3,1,2,1]
             self.expected = flips + [1+max(flips)] + flips[::-1]
@@ -112,6 +116,8 @@ if __name__=='__main__':
             for i,k in enumerate(gray):
                 self.assertEqual(self.expected[i],k)
             self.assertEqual(2**4-2,i)
+            self.assertListEqual([5,2,3,4,5],gray.tau)
+            self.assertEqual('[5,2,3,4,5]',str(gray))
 
         def testNbr0(self):
             Nbrs = list(Nbr(8))
@@ -149,4 +155,4 @@ if __name__=='__main__':
             Nbrs = list(Nbr(4,periodic=True))
             self.assertListEqual([19,9,3,0], Nbrs)
 
-    unittest.main()
+    main()
