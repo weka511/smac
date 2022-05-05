@@ -13,12 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Template for programs--replace with description'''
+'''Exercise 2.1/algorithm 2.2 Pair Time. Pair collision timne for two particles.'''
 
 from argparse          import ArgumentParser
 from matplotlib.pyplot import figure, plot, savefig,show
 from os.path           import basename, splitext
 from matplotlib        import rc
+
 
 
 def get_plot_file_name(plot):
