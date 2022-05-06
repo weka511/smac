@@ -63,9 +63,13 @@ if __name__=='__main__':
     parser.add_argument('--plot',
                         default = None,
                         help    = 'Name of plot file')
+    parser.add_argument('--seed',
+                        type    = int,
+                        default = 42,
+                        help    = 'Seed for random number generator')
     args   = parser.parse_args()
 
-    rng    = default_rng(seed=42)
+    rng    = default_rng(seed = args.seed)
     for _ in range(1000):
         x1, x2, v1, v2 = sample(rng, sigma = sigma, L = L)
         DeltaT         = get_pair_time(x1,x2,v1,v2,sigma = sigma)
@@ -77,20 +81,14 @@ if __name__=='__main__':
     fig = figure(figsize=(5,5))
     ax = fig.add_subplot(111)
     ax.axis([-L,  L, -L, L])#, xlim=(-L,L), ylim=(-L,L))
-    # scatter(0,0, s=100**2)
-    # points_whole_ax = 5 * 2*L * 72 # https://stackoverflow.com/questions/33094509/correct-sizing-of-markers-in-scatter-plot-to-a-radius-r-in-matplotlib
-    # points_radius = 2 * sigma / 11.0 * points_whole_ax # ah-hoc fudge factor
-    r_ = ax.transData.transform([sigma,0])[0] - ax.transData.transform([0,0])[0] # https://stackoverflow.com/questions/65174418/how-to-adjust-the-marker-size-of-a-scatter-plot-so-that-it-matches-a-given-radi
-    marker_size = 0.5*(2*r_)**2 # fudge factor
-    # scatter(0,0,label='O',s=points_radius**2)
-    scatter(x1[0],x1[1],label='x1',s=marker_size)#points_radius**2)
-    # scatter(x1[0]+2*sigma,x1[1],label='x1a',s=marker_size)#points_radius**2)
-    # scatter(x1[0],x1[1]+sigma,label='x1b',s=marker_size)#points_radius**2)
-    scatter(x2[0],x2[1],label='x2',s=marker_size)#points_radius**2)
+    r_display_coordinates = ax.transData.transform([sigma,0])[0] - ax.transData.transform([0,0])[0] # https://stackoverflow.com/questions/65174418/how-to-adjust-the-marker-size-of-a-scatter-plot-so-that-it-matches-a-given-radi
+    marker_size            = 0.5*(2*r_display_coordinates)**2 # fudge factor
+    scatter(x1[0],x1[1],label='x1',s=marker_size)
+    scatter(x2[0],x2[1],label='x2',s=marker_size)
     x1_prime = x1 + DeltaT *v1
     x2_prime = x2 + DeltaT *v2
-    scatter(x1_prime[0],x1_prime[1],label='x1"',s=marker_size)#points_radius**2)
-    scatter(x2_prime[0],x2_prime[1],label='x2"',s=marker_size)#points_radius**2)
+    scatter(x1_prime[0],x1_prime[1],label='x1"',s=marker_size)
+    scatter(x2_prime[0],x2_prime[1],label='x2"',s=marker_size)
     grid()
     legend()
     savefig(get_plot_file_name(args.plot))
