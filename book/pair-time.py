@@ -13,23 +13,28 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Exercise 2.1/algorithm 2.2 Pair Time. Pair collision timne for two particles.'''
+'''Exercise 2.1/algorithm 2.2 Pair Time. Pair collision time for two particles.'''
 
 from argparse          import ArgumentParser
 from matplotlib        import rc
-from matplotlib.pyplot import arrow, axis, figure, grid, hist, legend, scatter, savefig, show, title
-from numpy             import dot, sqrt
+from matplotlib.pyplot import arrow, axis, figure, grid, hist, legend, scatter, savefig, show, title, xlim
+from numpy             import dot, sqrt, std
 from numpy.linalg      import norm
 from numpy.random      import default_rng
 from os.path           import basename, splitext
 from sys               import maxsize
 
 def get_pair_time(x1, x2, v1, v2, sigma=0.01):
-    '''Algorithm 2.2 Pair Time. Pair collision timne for two particles'''
+    '''Algorithm 2.2 Pair Time. Pair collision time for two particles'''
     Delta_x = x1 - x2
     Delta_v = v1 - v2
     Upsilon = dot(Delta_x,Delta_v)**2 - dot(Delta_v,Delta_v)*(dot(Delta_x,Delta_x)-4*sigma**2)
     return - (dot(Delta_x,Delta_v)+sqrt(Upsilon))/dot(Delta_v,Delta_v) if Upsilon>0 and dot(Delta_x,Delta_v) <0 else float('inf')
+
+def get_time_of_closest_approach(x1, x2, v1, v2):
+    Delta_x = x1 - x2
+    Delta_v = v1 - v2
+    return -dot(Delta_v,Delta_x)/dot(Delta_v,Delta_v)
 
 def sample(rng,
            L      = 1,
@@ -44,22 +49,33 @@ def sample(rng,
         if dot(x1-x2,x1-x2) > 4 * sigma**2 and dot(x1 - x2,v1 - v2)<0:
             return x1,x2, v1, v2
 
-def get_plot_file_name(plot):
-    '''Determine plot file name'''
+def get_plot_file_name(plot=None):
+    '''Determine plot file name from source file name or command line arguments'''
     if plot==None:
         return f'{splitext(basename(__file__))[0]}.png'
     base,ext = splitext(plot)
     return f'{plot}.png' if len(ext)==0 else plot
 
 def create_rng(seed0):
-    '''Make sure run is reproducible by displaying seed'''
+    '''
+    Make sure run is reproducible by displaying seed
+
+    Parameters:
+         seed0 is seed supplied by user
+
+    Returns: Default random number generator, seedes with seed0 or newly generated seed
+    If seed0 is not Mone, use it
+
+    If seed0 is None (no seed supplied),
+    generate a new seed using random number generator and print it so user can reuse.
+
+    '''
     rng    = default_rng(seed = seed0)
     if seed0==None:
         seed = rng.integers(0,maxsize)
         print (f'Setting seed to {seed}')
         return default_rng(seed = seed)
     else:
-        print (f'seed={seed0}')
         return rng
 
 def parse_arguments():
@@ -100,6 +116,7 @@ if __name__=='__main__':
 
     if args.action == 'run':
         Distances = []
+        Dots      = []
         for _ in range(args.N):
             x1, x2, v1, v2 = sample(rng, sigma = args.sigma, L = L)
             DeltaT         = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
@@ -108,11 +125,22 @@ if __name__=='__main__':
                 x2_prime = x2 + DeltaT *v2
                 Distances.append((norm(x1_prime-x2_prime)-2*args.sigma)/2*args.sigma)
             else:
-                pass
-        figure(figsize=(10,10))
-        hist(Distances,bins=250)
-        title(f'Distances of centres compared to $2\\sigma$ for N={args.N}')
+                t0            = min(get_time_of_closest_approach(x1,x2,v1,v2),0)
+                Delta_x       = x1 - x2
+                Delta_v       = v1 - v2
+                Delta_x_prime = Delta_x + t0*Delta_v
+                Dots.append(dot(Delta_x_prime, Delta_v))
 
+        s   = std(Distances)
+        fig = figure(figsize=(12,6))
+        fig.suptitle(f'Number of samples: {args.N}')
+        axs = fig.subplots(1,2)
+        axs[0].hist(Distances,
+                    bins=250 if args.N>9999 else 25)
+        axs[0].set_xlim(-10*s, 10*s)
+        axs[0].set_title(f'Deviations of centres. Standard deviation = {s:.2g}')
+        axs[1].hist(Dots)
+        axs[1].set_title(f'$\Delta_x\cdot\Delta_v$')
     if args.action=='test':
         for _ in range(1000):
             x1, x2, v1, v2 = sample(rng, sigma = args.sigma, L = L)
