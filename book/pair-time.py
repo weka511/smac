@@ -73,7 +73,7 @@ def parse_arguments():
 
 if __name__=='__main__':
     args   = parse_arguments()
-    L      = 1
+    L      = [1]*args.d
     rng    = create_rng(args.seed)
 
     if args.action == 'run':
@@ -95,7 +95,7 @@ if __name__=='__main__':
 
         s   = std(Distances)
         fig = figure(figsize=(12,6))
-        fig.suptitle(f'Number of samples: {args.N}')
+        fig.suptitle(f'Number of samples: {args.N:,}')
         axs = fig.subplots(1,2)
         axs[0].hist(Distances,
                     bins=250 if args.N>9999 else 25)

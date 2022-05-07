@@ -17,7 +17,7 @@
 
 from argparse          import ArgumentParser
 from matplotlib.pyplot import figure, hist, plot, savefig, show, title
-from numpy             import dot, sqrt
+from numpy             import dot, multiply, sqrt
 from numpy.linalg      import norm
 from numpy.random      import default_rng
 from os.path           import basename, splitext
@@ -31,6 +31,11 @@ def get_pair_time(x1, x2, v1, v2, sigma=0.01):
     Upsilon = dot(Delta_x,Delta_v)**2 - dot(Delta_v,Delta_v)*(dot(Delta_x,Delta_x)-4*sigma**2)
     return - (dot(Delta_x,Delta_v)+sqrt(Upsilon))/dot(Delta_v,Delta_v) if Upsilon>0 and dot(Delta_x,Delta_v) <0 else float('inf')
 
+def get_wall_time(x1, x2, v1, v2, sigma=0.01, d=2, L=[1,1,1]):
+    t = float('inf')
+    for i in range(d):
+        pass
+
 def collide_pair(x1, x2, v1, v2):
     '''Algorithm 2.3 Pair collision'''
     Delta_x      = x1 - x2
@@ -38,6 +43,8 @@ def collide_pair(x1, x2, v1, v2):
     Delta_v      = v1 - v2
     Delta_v_perp = dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
+
+
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -75,8 +82,8 @@ def sample(rng,
            d      = 2):
     '''Find one sample where points admissable'''
     while True:
-        x1 = -L + 2 * L * rng.random((d,))
-        x2 = -L + 2 * L * rng.random((d,))
+        x1 =  2 * multiply(L, rng.random((d,))) - L
+        x2 =  2 * multiply(L, rng.random((d,))) - L
         v1 = -V + 2 * V * rng.random((d,))
         v2 = -V + 2 * V * rng.random((d,))
         if dot(x1-x2,x1-x2) > 4 * sigma**2 and dot(x1 - x2,v1 - v2)<0:
@@ -84,6 +91,10 @@ def sample(rng,
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
+    parser.add_argument('--action',
+                        default = 'run',
+                        choices = ['test',
+                                   'run'])
     parser.add_argument('--show',
                         action = 'store_true',
                         help   = 'Show plot')
@@ -102,16 +113,24 @@ def parse_arguments():
                         type = int,
                         default = 10000000,
                         help = 'Number of iterations')
+    parser.add_argument('--d',
+                        type    = int,
+                        default = 2,
+                        choices = [2,3],
+                        help    = 'Dimension of space')
     return parser.parse_args()
 
 if __name__=='__main__':
     args = parse_arguments()
     rng    = create_rng(args.seed)
-    L      = 1
+    L      = [1] * args.d
     n      = 0
     Diffs  = []
     while True:
-        x1, x2, v1, v2 = sample(rng, sigma = args.sigma, L = L)
+        x1, x2, v1, v2 = sample(rng,
+                                sigma = args.sigma,
+                                L     = L,
+                                d     = args.d)
         DeltaT         = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
         if DeltaT<float('inf'):
             n += 1
@@ -128,7 +147,7 @@ if __name__=='__main__':
     figure(figsize=(12,12))
     hist(Diffs,
          bins=250 if args.N>9999 else 25)
-    title (f'Discrepancy in energies for {args.N} trials')
+    title (f'Discrepancy in energies for {args.N:,} trials')
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
