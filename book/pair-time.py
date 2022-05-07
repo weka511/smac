@@ -18,12 +18,10 @@
 from argparse          import ArgumentParser
 from matplotlib        import rc
 from matplotlib.pyplot import arrow, axis, figure, grid, hist, legend, scatter, savefig, show, title, xlim
-from md                import get_pair_time
+from md                import create_rng, get_pair_time, sample
 from numpy             import dot, sqrt, std
 from numpy.linalg      import norm
-from numpy.random      import default_rng
 from os.path           import basename, splitext
-from sys               import maxsize
 
 
 def get_time_of_closest_approach(x1, x2, v1, v2):
@@ -31,18 +29,7 @@ def get_time_of_closest_approach(x1, x2, v1, v2):
     Delta_v = v1 - v2
     return -dot(Delta_v,Delta_x)/dot(Delta_v,Delta_v)
 
-def sample(rng,
-           L      = 1,
-           V      = 1,
-           sigma  = 0.1):
-    '''Find one sample where points admissable'''
-    while True:
-        x1 = -L + 2 * L * rng.random((args.d,))
-        x2 = -L + 2 * L * rng.random((args.d,))
-        v1 = -V + 2 * V * rng.random((args.d,))
-        v2 = -V + 2 * V * rng.random((args.d,))
-        if dot(x1-x2,x1-x2) > 4 * sigma**2 and dot(x1 - x2,v1 - v2)<0:
-            return x1,x2, v1, v2
+
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -51,27 +38,7 @@ def get_plot_file_name(plot=None):
     base,ext = splitext(plot)
     return f'{plot}.png' if len(ext)==0 else plot
 
-def create_rng(seed0):
-    '''
-    Make sure run is reproducible by displaying seed
 
-    Parameters:
-         seed0 is seed supplied by user
-
-    Returns: Default random number generator, seedes with seed0 or newly generated seed
-    If seed0 is not Mone, use it
-
-    If seed0 is None (no seed supplied),
-    generate a new seed using random number generator and print it so user can reuse.
-
-    '''
-    rng    = default_rng(seed = seed0)
-    if seed0==None:
-        seed = rng.integers(0,maxsize)
-        print (f'Setting seed to {seed}')
-        return default_rng(seed = seed)
-    else:
-        return rng
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)

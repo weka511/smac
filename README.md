@@ -238,6 +238,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -|markov-zeta.py|Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.
 1.4.4|levy-convolution.py|Algorithm 1.32
 2.2.1|pair-time.py|Algorithm 2.2 Pair collision time for two particles
+-|md.py|Algorithm 2.3 Pair collision
 2.2|directDisksAny.py|
 3.1|harmonic_wavefunction.py|Exercise 3.1: verify orthonormality of the solutions to Schroedinger's equation for Simple Harmonic Oscillator
 -|harmonic_density.py|Exercise 3.2: determine density matrix
