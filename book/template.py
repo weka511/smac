@@ -21,14 +21,14 @@ from os.path           import basename, splitext
 from matplotlib        import rc
 
 
-def get_plot_file_name(plot):
-    '''Determine plot file name'''
+def get_plot_file_name(plot=None):
+    '''Determine plot file name from source file name or command line arguments'''
     if plot==None:
         return f'{splitext(basename(__file__))[0]}.png'
     base,ext = splitext(plot)
     return f'{plot}.png' if len(ext)==0 else plot
 
-if __name__=='__main__':
+def parse_arguments():
     parser = ArgumentParser(description = __doc__)
     parser.add_argument('--show',
                         action = 'store_true',
@@ -36,7 +36,11 @@ if __name__=='__main__':
     parser.add_argument('--plot',
                         default = None,
                         help    = 'Name of plot file')
-    args   = parser.parse_args()
+    return parser.parse_args()
+
+if __name__=='__main__':
+    args = parse_arguments()
+
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     figure(figsize=(12,12))
