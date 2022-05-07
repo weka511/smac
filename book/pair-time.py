@@ -139,7 +139,8 @@ if __name__=='__main__':
                     bins=250 if args.N>9999 else 25)
         axs[0].set_xlim(-10*s, 10*s)
         axs[0].set_title(f'Deviations of centres. Standard deviation = {s:.2g}')
-        axs[1].hist(Dots)
+        axs[1].hist(Dots,
+                    bins=250 if args.N>9999 else 25)
         axs[1].set_title(r'$\Delta_x\cdot\Delta_v$ for $t_{pair}=\infty$')
     if args.action=='test':
         for _ in range(1000):
