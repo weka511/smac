@@ -18,18 +18,13 @@
 from argparse          import ArgumentParser
 from matplotlib        import rc
 from matplotlib.pyplot import arrow, axis, figure, grid, hist, legend, scatter, savefig, show, title, xlim
+from md                import get_pair_time
 from numpy             import dot, sqrt, std
 from numpy.linalg      import norm
 from numpy.random      import default_rng
 from os.path           import basename, splitext
 from sys               import maxsize
 
-def get_pair_time(x1, x2, v1, v2, sigma=0.01):
-    '''Algorithm 2.2 Pair Time. Pair collision time for two particles'''
-    Delta_x = x1 - x2
-    Delta_v = v1 - v2
-    Upsilon = dot(Delta_x,Delta_v)**2 - dot(Delta_v,Delta_v)*(dot(Delta_x,Delta_x)-4*sigma**2)
-    return - (dot(Delta_x,Delta_v)+sqrt(Upsilon))/dot(Delta_v,Delta_v) if Upsilon>0 and dot(Delta_x,Delta_v) <0 else float('inf')
 
 def get_time_of_closest_approach(x1, x2, v1, v2):
     Delta_x = x1 - x2
