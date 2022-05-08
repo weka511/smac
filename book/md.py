@@ -17,7 +17,7 @@
 
 from argparse          import ArgumentParser
 from matplotlib.pyplot import figure, hist, plot, savefig, show, title
-from numpy             import dot, multiply, sqrt
+from numpy             import argmin, dot, multiply, sign, sqrt
 from numpy.linalg      import norm
 from numpy.random      import default_rng
 from os.path           import basename, splitext
@@ -31,10 +31,11 @@ def get_pair_time(x1, x2, v1, v2, sigma=0.01):
     Upsilon = dot(Delta_x,Delta_v)**2 - dot(Delta_v,Delta_v)*(dot(Delta_x,Delta_x)-4*sigma**2)
     return - (dot(Delta_x,Delta_v)+sqrt(Upsilon))/dot(Delta_v,Delta_v) if Upsilon>0 and dot(Delta_x,Delta_v) <0 else float('inf')
 
-def get_wall_time(x1, x2, v1, v2, sigma=0.01, d=2, L=[1,1,1]):
-    t = float('inf')
-    for i in range(d):
-        pass
+def get_wall_time(x, v, sigma=0.01, d=2, L=[1,1]):
+    '''Fig 2.3'''
+    times = [(sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
+    wall  = argmin(times)
+    return wall, times[wall]
 
 def collide_pair(x1, x2, v1, v2):
     '''Algorithm 2.3 Pair collision'''
@@ -44,7 +45,36 @@ def collide_pair(x1, x2, v1, v2):
     Delta_v_perp = dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
 
+def event_disks(Xs,Vs,
+                sigma = 0.01,
+                d     = 2,
+                L     = [1,1,1]):
+    '''Algorithm 2.1'''
+    next_pair = (float('inf'), None, None)
+    for k in range(len(Xs)):
+        for l in range(k+1,len(Xs)):
+            t = get_pair_time(Xs[k], Xs[l], Vs[k], Vs[l],
+                              sigma = sigma)
+            if t<next_pair[0]:
+                next_pair=(t,k,l)
 
+    next_wall = (float('inf'), None, None)
+    for j in range(len(Xs)):
+        wall,t = get_wall_time(Xs[i], Vs[i],
+                               sigma = sigma,
+                               d     = d,
+                               L     = L)
+        if t<next_wall[0]:
+            next_wall = (t,wall,j)
+
+    t_wall,wall,j = next_wall
+    t_pair, k, l  = next_pair
+    if t_wall<t_pair:
+        Xs         += t_wall * Vs
+        Vs[j][wall] = - Vs[j][wall]
+    else:
+        Xs += t_pair * Vs
+        collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -92,9 +122,9 @@ def sample(rng,
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
     parser.add_argument('--action',
-                        default = 'run',
-                        choices = ['test',
-                                   'run'])
+                        default = '2.3',
+                        choices = ['2.2',
+                                   '2.3'])
     parser.add_argument('--show',
                         action = 'store_true',
                         help   = 'Show plot')
@@ -113,6 +143,15 @@ def parse_arguments():
                         type = int,
                         default = 10000000,
                         help = 'Number of iterations')
+    parser.add_argument('--n',
+                        type = int,
+                        default = 5,
+                        help = 'Number of hard disks')
+    parser.add_argument('--L',
+                        type    = float,
+                        nargs   = '+',
+                        default = [1],
+                        help    = 'Lengths of box walls')
     parser.add_argument('--d',
                         type    = int,
                         default = 2,
@@ -120,34 +159,62 @@ def parse_arguments():
                         help    = 'Dimension of space')
     return parser.parse_args()
 
+def get_L(L,d):
+    '''Verify that specified vector of lengths matches dimension of space. If only one value specified, replicate as needed.'''
+    if len(L)==1:
+        return L * d
+    if len(L)==d:
+        return L
+    raise Exception(f'Length of L is {len(L)}: should be 1 or {d}')
+
 if __name__=='__main__':
     args = parse_arguments()
     rng    = create_rng(args.seed)
-    L      = [1] * args.d
-    n      = 0
-    Diffs  = []
-    while True:
-        x1, x2, v1, v2 = sample(rng,
-                                sigma = args.sigma,
-                                L     = L,
-                                d     = args.d)
-        DeltaT         = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
-        if DeltaT<float('inf'):
-            n += 1
-            x1_prime = x1 + DeltaT *v1
-            x2_prime = x2 + DeltaT *v2
-            v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
-            E = dot(v1,v1) + dot(v2,v2)
-            E_prime = dot(v1_prime,v1_prime) + dot(v2_prime,v2_prime)
-            Diffs.append((E-E_prime)/(E+E_prime))
-        if n>args.N: break
+    L      = get_L(args.L, args.d)
 
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
-    figure(figsize=(12,12))
-    hist(Diffs,
-         bins=250 if args.N>9999 else 25)
-    title (f'Discrepancy in energies for {args.N:,} trials')
-    savefig(get_plot_file_name(args.plot))
+    if args.action=='2.2':
+        n      = 0
+        Diffs  = []
+        while True:
+            x1, x2, v1, v2 = sample(rng,
+                                    sigma = args.sigma,
+                                    L     = L,
+                                    d     = args.d)
+            DeltaT         = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
+            if DeltaT<float('inf'):
+                n += 1
+                x1_prime           = x1 + DeltaT *v1
+                x2_prime           = x2 + DeltaT *v2
+                v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
+                E                  = dot(v1,v1) + dot(v2,v2)
+                E_prime            = dot(v1_prime,v1_prime) + dot(v2_prime,v2_prime)
+                Diffs.append((E-E_prime)/(E+E_prime))
+            if n>args.N: break
+
+        rc('font',**{'family':'serif','serif':['Palatino']})
+        rc('text', usetex=True)
+        figure(figsize=(12,12))
+        hist(Diffs,
+             bins=250 if args.N>9999 else 25)
+        title (f'Discrepancy in energies for {args.N:,} trials')
+
+    if args.action=='2.3':
+        V  =  1
+        while True:
+            Xs =  2 * multiply(L, rng.random((args.n,args.d))) - L
+            reject = False
+            for i in range(args.n):
+                for j in range(i):
+                    reject = dot(Xs[i] - Xs[j],Xs[i] - Xs[j])< 4 * args.sigma**2
+                    if reject: break
+            if not reject:
+                Vs = -V + 2 * V * rng.random((args.n,args.d,))
+                break
+        event_disks(Xs,Vs,
+                    sigma = args.sigma,
+                    d     = args.d,
+                    L     = L)
+
+    # savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
