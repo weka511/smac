@@ -16,22 +16,29 @@
 '''Algorithm 2.3 Pair collision'''
 
 from argparse          import ArgumentParser
+from glob              import glob
 from matplotlib.pyplot import figure, hist, plot, savefig, show, title
-from numpy             import argmin, dot, multiply, sign, sqrt
+from numpy             import argmin, dot, multiply, savez, sign, sqrt
 from numpy.linalg      import norm
 from numpy.random      import default_rng
+from os                import remove
 from os.path           import basename, splitext
 from matplotlib        import rc
+from re                import search
 from sys               import maxsize
 
-def get_pair_time(x1, x2, v1, v2, sigma=0.01):
+def get_pair_time(x1, x2, v1, v2,
+                  sigma = 0.01):
     '''Algorithm 2.2 Pair Time. Pair collision time for two particles'''
     Delta_x = x1 - x2
     Delta_v = v1 - v2
     Upsilon = dot(Delta_x,Delta_v)**2 - dot(Delta_v,Delta_v)*(dot(Delta_x,Delta_x)-4*sigma**2)
     return - (dot(Delta_x,Delta_v)+sqrt(Upsilon))/dot(Delta_v,Delta_v) if Upsilon>0 and dot(Delta_x,Delta_v) <0 else float('inf')
 
-def get_wall_time(x, v, sigma=0.01, d=2, L=[1,1]):
+def get_wall_time(x, v,
+                  sigma = 0.01,
+                  d     = 2,
+                  L     = [1,1]):
     '''Fig 2.3'''
     times = [(sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
     wall  = argmin(times)
@@ -45,7 +52,7 @@ def collide_pair(x1, x2, v1, v2):
     Delta_v_perp = dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
 
-def event_disks(Xs,Vs,
+def event_disks(Xs, Vs,
                 sigma = 0.01,
                 d     = 2,
                 L     = [1,1,1]):
@@ -60,7 +67,7 @@ def event_disks(Xs,Vs,
 
     next_wall = (float('inf'), None, None)
     for j in range(len(Xs)):
-        wall,t = get_wall_time(Xs[i], Vs[i],
+        wall,t = get_wall_time(Xs[j], Vs[j],
                                sigma = sigma,
                                d     = d,
                                L     = L)
@@ -101,9 +108,9 @@ def create_rng(seed0):
     if seed0==None:
         seed = rng.integers(0,maxsize)
         print (f'Setting seed to {seed}')
-        return default_rng(seed = seed)
+        return default_rng(seed = seed),seed
     else:
-        return rng
+        return rng,seed0
 
 def sample(rng,
            L      = 1,
@@ -137,16 +144,20 @@ def parse_arguments():
                         help    = 'Seed for random number generator')
     parser.add_argument('--sigma',
                         type    = float,
-                        default = 0.1,
+                        default = 0.01,
                         help    = 'Radius of spheres')
     parser.add_argument('--N',
-                        type = int,
+                        type    = int,
                         default = 10000000,
-                        help = 'Number of iterations')
+                        help    = 'Number of iterations')
     parser.add_argument('--n',
-                        type = int,
+                        type    = int,
                         default = 5,
-                        help = 'Number of hard disks')
+                        help    = 'Number of hard disks')
+    parser.add_argument('--M',
+                        type    = int,
+                        default = 1000,
+                        help    = 'Number of attempts to create configuration')
     parser.add_argument('--L',
                         type    = float,
                         nargs   = '+',
@@ -157,6 +168,18 @@ def parse_arguments():
                         default = 2,
                         choices = [2,3],
                         help    = 'Dimension of space')
+    parser.add_argument('--freq',
+                        type    = int,
+                        default = 25,
+                        help    = 'For saving configuration')
+    parser.add_argument('--retention',
+                        type    = int,
+                        default = 3,
+                        help    = 'For saving configuration')
+    parser.add_argument('--save',
+                        default = f'{splitext(basename(__file__))[0]}.npz',
+                        help    = 'For saving configuration')
+
     return parser.parse_args()
 
 def get_L(L,d):
@@ -167,10 +190,54 @@ def get_L(L,d):
         return L
     raise Exception(f'Length of L is {len(L)}: should be 1 or {d}')
 
+def create_config(n     = 5,
+                  d     = 2,
+                  L     = [1,1],
+                  sigma = 0.1,
+                  V     = 1,
+                  rng   = None,
+                  M     = 25):
+    for _ in range(M):
+        Xs     =  2 * multiply(L, rng.random((n,d))) - L
+        reject = False
+        for i in range(args.n):
+            for j in range(i):
+                reject = dot(Xs[i] - Xs[j],Xs[i] - Xs[j])< 4 * sigma**2
+                if reject: break
+        if not reject:
+            Vs = -V + 2 * V * rng.random((n,d))
+            return Xs, Vs
+    raise Exception(f'Failed to create configuration in {M} attempts: n={n}, d={d}, l={L}, sigma={sigma}')
+
+def save_configuration(file_patterns = 'md.npz',
+                       epoch         = 0,
+                       retention     = 3,
+                       seed          = None,
+                       args          = None):
+    def get_sequence(saved_files):
+        if len(saved_files)==0:
+            return 1
+        else:
+            saved_files.sort(reverse=True)
+            last_file = splitext(saved_files[0])
+            digits    = search(r'\d+',last_file[0]).group(0)
+            return int(digits)+1
+
+    pattern      = splitext(file_patterns)
+    saved_files  = glob(f'./{pattern[0]}[0-9]*{pattern[1]}')
+
+    savez(f'./{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
+          args = args,
+          seed = seed,
+          Xs   = Xs,
+          Vs   = Vs)
+    while len(saved_files) >= retention:
+        remove(saved_files.pop())
+
 if __name__=='__main__':
-    args = parse_arguments()
-    rng    = create_rng(args.seed)
-    L      = get_L(args.L, args.d)
+    args     = parse_arguments()
+    rng,seed = create_rng(args.seed)
+    L        = get_L(args.L, args.d)
 
     if args.action=='2.2':
         n      = 0
@@ -199,21 +266,27 @@ if __name__=='__main__':
         title (f'Discrepancy in energies for {args.N:,} trials')
 
     if args.action=='2.3':
-        V  =  1
-        while True:
-            Xs =  2 * multiply(L, rng.random((args.n,args.d))) - L
-            reject = False
-            for i in range(args.n):
-                for j in range(i):
-                    reject = dot(Xs[i] - Xs[j],Xs[i] - Xs[j])< 4 * args.sigma**2
-                    if reject: break
-            if not reject:
-                Vs = -V + 2 * V * rng.random((args.n,args.d,))
-                break
-        event_disks(Xs,Vs,
-                    sigma = args.sigma,
-                    d     = args.d,
-                    L     = L)
+        Xs,Vs = create_config(n     = args.n,
+                              d     = args.d,
+                              L     = L,
+                              sigma = args.sigma,
+                              rng   = rng,
+                              M     = args.M)
+        print ('Created configuration')
+        for epoch in range(args.N):
+            event_disks(Xs,Vs,
+                        sigma = args.sigma,
+                        d     = args.d,
+                        L     = L)
+            if epoch%args.freq==0:
+                print (f'Epoch = {epoch}')
+                save_configuration(file_patterns = args.save,
+                                   epoch         = epoch,
+                                   retention     = args.retention,
+                                   seed          = seed,
+                                   args          = args)
+
+
 
     # savefig(get_plot_file_name(args.plot))
     if args.show:
