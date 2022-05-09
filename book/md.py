@@ -229,6 +229,7 @@ def save_configuration(file_patterns = 'md.npz',
     savez(f'./{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
           args = args,
           seed = seed,
+          epoch = epoch,
           Xs   = Xs,
           Vs   = Vs)
     while len(saved_files) >= retention:

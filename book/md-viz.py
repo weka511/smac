@@ -16,7 +16,7 @@
 '''Template for programs--replace with description'''
 
 from argparse          import ArgumentParser
-from matplotlib.pyplot import figure, hist, savefig,show
+from matplotlib.pyplot import figure, hist, savefig, show, title
 from numpy             import load
 from os.path           import basename, splitext
 from matplotlib        import rc
@@ -31,6 +31,8 @@ def get_plot_file_name(plot=None):
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
+    parser.add_argument('file',
+                        help    = 'Name of saved file')
     parser.add_argument('--show',
                         action = 'store_true',
                         help   = 'Show plot')
@@ -39,16 +41,19 @@ def parse_arguments():
                         help    = 'Name of plot file')
     return parser.parse_args()
 
+def reload(file):
+    restored = load(file, allow_pickle=True)
+    return restored['Xs'], restored['Vs'], restored['args'], restored['seed'], restored['epoch']
+
 if __name__=='__main__':
-    args     = parse_arguments()
-    restored = load('md000113.npz', allow_pickle=True)
-    Xs       = restored['Xs']
-    Vs       = restored['Vs']
+    args                      = parse_arguments()
+    Xs, Vs, _, seed, epoch = reload(args.file)
     Es       = [u**2 + v**2 for u,v in Vs]
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     figure(figsize=(12,12))
     hist(Es,bins=25)
+    title(f'Epoch={epoch}')
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
