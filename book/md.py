@@ -18,14 +18,19 @@
 from argparse          import ArgumentParser
 from glob              import glob
 from matplotlib.pyplot import figure, hist, plot, savefig, show, title
-from numpy             import argmin, dot, multiply, savez, sign, sqrt
+from numpy             import argmin, dot, multiply, pi, savez, sign, sqrt
 from numpy.linalg      import norm
 from numpy.random      import default_rng
 from os                import remove
 from os.path           import basename, splitext
 from matplotlib        import rc
 from re                import search
+from smacfiletoken     import Registry
 from sys               import maxsize
+
+WALL_COLLISION = 0
+PAIR_COLLISION = 1
+TOLERANCE      = 1e-12
 
 def get_pair_time(x1, x2, v1, v2,
                   sigma = 0.01):
@@ -39,10 +44,11 @@ def get_wall_time(x, v,
                   sigma = 0.01,
                   d     = 2,
                   L     = [1,1]):
-    '''Fig 2.3'''
-    times = [(sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
-    wall  = argmin(times)
-    return wall, times[wall]
+    '''Fig 2.3 Calculate the time for the first collision with a wall'''
+    time_to_collide_with_each_wall = [(sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
+    assert ([abs(abs(x[i]+time_to_collide_with_each_wall[i] * v[i])-sigma)==0 for i in range(d)])
+    wall  = argmin(time_to_collide_with_each_wall)
+    return wall, time_to_collide_with_each_wall[wall]
 
 def collide_pair(x1, x2, v1, v2):
     '''Algorithm 2.3 Pair collision'''
@@ -56,7 +62,14 @@ def event_disks(Xs, Vs,
                 sigma = 0.01,
                 d     = 2,
                 L     = [1,1,1]):
-    '''Algorithm 2.1'''
+    '''
+    Algorithm 2.1: event driven molecular dynamics for particles in a box.
+    Calculate time to next collision of a sphere with another sphere or
+    with a wall, run time fprward until collision, then adjust velocities
+    to immediately after.
+    '''
+
+    # Calculate time to next pair collision
     next_pair = (float('inf'), None, None)
     for k in range(len(Xs)):
         for l in range(k+1,len(Xs)):
@@ -65,6 +78,7 @@ def event_disks(Xs, Vs,
             if t<next_pair[0]:
                 next_pair=(t,k,l)
 
+    # Calculate time to next wall collision
     next_wall = (float('inf'), None, None)
     for j in range(len(Xs)):
         wall,t = get_wall_time(Xs[j], Vs[j],
@@ -74,14 +88,22 @@ def event_disks(Xs, Vs,
         if t<next_wall[0]:
             next_wall = (t,wall,j)
 
+    # Work out which collision is next, wall or pair
     t_wall,wall,j = next_wall
     t_pair, k, l  = next_pair
+
     if t_wall<t_pair:
-        Xs         += t_wall * Vs
+        Xs         += t_wall * Vs     # Update to new position
+        assert(abs(abs(Xs[j,wall])-(L[wall]-sigma))<TOLERANCE)
         Vs[j][wall] = - Vs[j][wall]
+        return WALL_COLLISION, j, wall
     else:
         Xs += t_pair * Vs
+        E_before = dot(Vs[k],Vs[k]) + dot(Vs[l],Vs[l])
         collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
+        E_after = dot(Vs[k],Vs[k]) + dot(Vs[l],Vs[l])
+        assert (E_before==E_after)
+        return PAIR_COLLISION, k, l
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -197,6 +219,14 @@ def create_config(n     = 5,
                   V     = 1,
                   rng   = None,
                   M     = 25):
+    Volume = 1
+    VolumeDisk = pi if d==2 else 4*pi/3
+    for l in L:
+        Volume     *= 2*l*Volume
+        VolumeDisk *= sigma
+    density = n * VolumeDisk/Volume
+
+    print (f'Trying to create configuration: n={n}, d={d}, l={L}, sigma={sigma}, density ={density:2g}')
     for _ in range(M):
         Xs     =  2 * multiply(L, rng.random((n,d))) - L
         reject = False
@@ -210,10 +240,13 @@ def create_config(n     = 5,
     raise Exception(f'Failed to create configuration in {M} attempts: n={n}, d={d}, l={L}, sigma={sigma}')
 
 def save_configuration(file_patterns = 'md.npz',
-                       epoch         = 0,
-                       retention     = 3,
-                       seed          = None,
-                       args          = None):
+                       epoch          = 0,
+                       retention      = 3,
+                       seed           = None,
+                       args           = None,
+                       collision_type = None,
+                       k              = None,
+                       l              = None):
     def get_sequence(saved_files):
         if len(saved_files)==0:
             return 1
@@ -228,10 +261,13 @@ def save_configuration(file_patterns = 'md.npz',
 
     savez(f'./{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
           args = args,
-          seed = seed,
-          epoch = epoch,
-          Xs   = Xs,
-          Vs   = Vs)
+          seed           = seed,
+          epoch          = epoch,
+          Xs             = Xs,
+          Vs             = Vs,
+          collision_type = collision_type,
+          k              = k,
+          l              = l)
     while len(saved_files) >= retention:
         remove(saved_files.pop())
 
@@ -267,6 +303,8 @@ if __name__=='__main__':
         title (f'Discrepancy in energies for {args.N:,} trials')
 
     if args.action=='2.3':
+        registry = Registry()
+        registry.register_all("md%d.txt")
         Xs,Vs = create_config(n     = args.n,
                               d     = args.d,
                               L     = L,
@@ -274,18 +312,28 @@ if __name__=='__main__':
                               rng   = rng,
                               M     = args.M)
         print ('Created configuration')
+        n_wall_collisions = 0
+        n_pair_collisions = 0
         for epoch in range(args.N):
-            event_disks(Xs,Vs,
-                        sigma = args.sigma,
-                        d     = args.d,
-                        L     = L)
+            if registry.is_kill_token_present(): break
+            collision_type, k, l = event_disks(Xs,Vs,
+                                               sigma = args.sigma,
+                                               d     = args.d,
+                                               L     = L)
+            if collision_type==WALL_COLLISION:
+                n_wall_collisions += 1
+            else:
+                n_pair_collisions += 1
             if epoch%args.freq==0:
-                print (f'Epoch = {epoch}')
+                print (f'Epoch = {epoch}, Wall collisions={n_wall_collisions}, Pair collisions={n_pair_collisions} {100*n_pair_collisions/(n_pair_collisions+n_wall_collisions):.2f}%')
                 save_configuration(file_patterns = args.save,
-                                   epoch         = epoch,
-                                   retention     = args.retention,
-                                   seed          = seed,
-                                   args          = args)
+                                   epoch          = epoch,
+                                   retention      = args.retention,
+                                   seed           = seed,
+                                   args           = args,
+                                   collision_type = collision_type,
+                                   k              = k,
+                                   l              = l)
 
 
 
