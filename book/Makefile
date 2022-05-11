@@ -56,7 +56,7 @@ depend: .depend
 install: rebuild
 	cp $(MAIN) /usr/local/bin
 	
-.depend: $(SRCS)  enumerate-ising.cpp $(TESTS) tests.cpp
+.depend: $(SRCS)  enumerate-ising.cpp $(TESTS) tests.cpp md.cpp
 	$(RM) ./.depend
 	$(CXX) $(CPPFLAGS) -MM $^>>./.depend;
 	sed -i -e 's/\/home\/Weka\/smac\/book\///$g' .depend

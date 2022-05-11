@@ -18,7 +18,75 @@
 #ifndef _MD_HPP_
 #define _MD_HPP_
 
+const int SUCCESS                = 0;
+const int FAIL_DISKS_TOO_CLOSE   = SUCCESS + 1;
+const int FAIL_BUILD_CONFIG      = FAIL_DISKS_TOO_CLOSE + 1;
 
+class Particle{
+	double* X;
+	double* V;
+	const int    _d;
+  public:
+	Particle(const int d): _d(d) {
+		X = new double [d];
+		V = new double[d];
+	}
+	
+	double get_dist_sq(Particle* other){
+		double result = 0;
+		for (int i;i<_d;i++)
+			result += (X[i]-other->X[i]) * (X[i]-other->X[i]);
+		return result;	
+	}
 
+	void randomizeX(std::uniform_real_distribution<double> & distr,
+					std::default_random_engine& eng,
+					double scale[3]) {
+		for (int i=0;i<_d;i++)
+			X[i] = scale[i] * distr(eng);
+	}
+	
+	void randomizeV(std::uniform_real_distribution<double> & distr,
+					std::default_random_engine& eng,
+					double scale[3]) {
+	for (int i=0;i<_d;i++)
+		V[i] = scale[i] * distr(eng);
+	}
+	
+	virtual ~Particle() {
+		delete this->X;
+		delete this->V;
+	}
+};
+
+class Configuration{
+	std::vector<Particle*> _particles;
+	const int _n;
+	const int _d;
+	const double _sigma;
+	double L[3];
+	double V[3];
+  public:
+	Configuration(	const int n,
+					const int d,
+					const double sigma) : _n(n), _d(d), _sigma(sigma)  {
+	    L[0] = L[1] = L[2] = 1;
+		V[0] = V[1] = V[2] = 1;
+		for (int i=0;i<n;i++)
+			_particles.push_back(new Particle(d));
+	}
+	
+	int build_config(std::uniform_real_distribution<double> & distr,
+					std::default_random_engine& eng);
+	
+	int initialize(int n);
+	
+	virtual ~Configuration() {
+		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
+			delete  *particle;
+	}
+	
+	int event_disks();
+};
 #endif
 
