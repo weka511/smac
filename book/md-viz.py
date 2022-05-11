@@ -46,13 +46,13 @@ def reload(file):
     return restored['Xs'], restored['Vs'], restored['args'], restored['seed'], restored['epoch']
 
 if __name__=='__main__':
-    args                      = parse_arguments()
-    Xs, Vs, _, seed, epoch = reload(args.file)
+    args                       = parse_arguments()
+    Xs, Vs, args0, seed, epoch = reload(args.file)
     Es       = [u**2 + v**2 for u,v in Vs]
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    figure(figsize=(12,12))
-    hist(Es,bins=25)
+    figure(figsize = (12,12))
+    hist(Es)
     title(f'Epoch={epoch}')
     savefig(get_plot_file_name(args.plot))
     if args.show:

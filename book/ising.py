@@ -1,4 +1,4 @@
-# Copyright (C) 2018 Greenweaves Software Limited
+# Copyright (C) 2018-2022 Greenweaves Software Limited
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,24 +13,29 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
+'''Algorithm 5.3: Single spin-slip enumeration for Ising model'''
 
-from gray import Gray
 from enumerate_ising import enumerate_ising
+from argparse        import ArgumentParser
 
-if __name__=='__main__':
-    import argparse,sys
+parser = ArgumentParser(description='Compute statistics for Ising model')
+parser.add_argument('-o', '--output',
+                    default = 'ising.csv',
+                    help    = 'File to record results')
+parser.add_argument('-m',
+                    type    = int,
+                    default = 4,
+                    help    = 'Number of rows')
+parser.add_argument('-n',
+                    type    = int,
+                    default = 4,
+                    help    = 'Number of columns')
+args = parser.parse_args()
 
-    parser = argparse.ArgumentParser(description='Compute statistics for Ising model')
-    parser.add_argument('-o', '--output',default='ising.csv',help='File to record results')
-    parser.add_argument('-m',type=int,default=4,help='Number of rows')
-    parser.add_argument('-n',type=int,default=4,help='Number of columns')
-    parser.add_argument('-p','--progress',type=int,default=0,help='Record progress')
-    args = parser.parse_args()
-    
-    with open(args.output,'w') as f:
-        gray      = Gray(args.m*args.n,progress=args.progress)
-        counts,pi = enumerate_ising(args.m,args.n,gray=gray)
-        f.write('{0}\n'.format(gray))
-        f.write('E,M,Ns\n')        
-        for E,M,Ns in sorted(pi):
-            f.write('{0},{1},{2}\n'.format(E,M,Ns))
+with open(args.output,'w') as f:
+
+    counts = enumerate_ising((args.m, args.n))
+    Z = sum(N for _,N in counts)
+    f.write('E,M,Ns\n')
+    for E,N in counts:
+        f.write(f'{E},{N},{N/Z}\n')
