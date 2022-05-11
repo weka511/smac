@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Greenweaves Software Limited
+# Copyright (C) 2019-2022 Greenweaves Software Limited
 #
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ CC=gcc
 CXX=g++
 RM=rm -f
 MKDIR=mkdir
-SRCS=		
+SRCS=
 
 TESTS= 	test-gray.cpp	\
 		test-nbr.cpp
@@ -35,7 +35,7 @@ THREADING=threading.exe
 
 MAIN=enumerate-ising.exe
 TEST_MAIN=tests.exe
-
+MD       = md.exe
 TARGETS=$(MAIN) 
 
 all : $(TARGETS) $(TEST_OBJS)
@@ -67,7 +67,8 @@ $(MAIN): $(OBJS) enumerate-ising.o
 $(TEST_MAIN): $(OBJS) tests.o $(TEST_OBJS)
 	${CXX} $(LDFLAGS) -o $(TEST_MAIN) tests.o ${OBJS} $(TEST_OBJS) ${LDLIBS}
 
-
+$(MD): $(OBJS) md.o 
+	${CXX} $(LDFLAGS) -o $(MD) md.o ${OBJS} ${LDLIBS}
 	
 distclean: clean
 	$(RM) *~ .depend
