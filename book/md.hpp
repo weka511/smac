@@ -23,10 +23,11 @@ const int FAIL_DISKS_TOO_CLOSE   = SUCCESS + 1;
 const int FAIL_BUILD_CONFIG      = FAIL_DISKS_TOO_CLOSE + 1;
 
 class Particle{
-	double* X;
-	double* V;
+	double*      X;
+	double*      V;
 	const int    _d;
   public:
+
 	Particle(const int d): _d(d) {
 		X = new double [d];
 		V = new double[d];
@@ -53,10 +54,42 @@ class Particle{
 		V[i] = scale[i] * distr(eng);
 	}
 	
+	double get_time_to_wall(int wall, double free_space) {
+		return (free_space - X[wall] * copysign(1.0, V[wall])) /fabs(V[wall]); // abs was given int!!
+	}
+	
+	double get_time_to_particle(Particle* other, double sigma) {
+		return std::numeric_limits<double>::infinity();   // FIXME
+	}
+	
+	void evolve (double t) {
+		for (int i=0;i<_d;i++)
+			X[i] += V[i] * t;
+	};
+	
+	void wall_collide(int wall) {
+		V[wall] *= -1;
+	}
 	virtual ~Particle() {
 		delete this->X;
 		delete this->V;
 	}
+};
+
+class WallCollision{
+  public:
+	const double _time;
+	const int    _j;
+	const int    _wall;
+	WallCollision(const double time, const int j, const int wall) : _time(time), _j(j), _wall(wall){}
+};
+
+class ParticleCollision{
+  public:
+  	const double _time;
+	const int _k;
+	const int _l;
+	ParticleCollision(const double time, const int k, const int l): _time(time), _k(k), _l(l){}
 };
 
 class Configuration{
@@ -87,6 +120,21 @@ class Configuration{
 	}
 	
 	int event_disks();
+	
+	WallCollision get_next_wall_collision();
+	
+	ParticleCollision get_next_particle_collision();
+	
+	
+	
+	void wall_collide(WallCollision collision){
+ 	/* 	int j = collision._j;
+		int wall = collision._wall; */
+		_particles[collision._j]->wall_collide(collision._wall);
+	}
+	
+	void pair_collide(ParticleCollision collision) {};
+	
 };
 #endif
 
