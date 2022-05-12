@@ -23,11 +23,11 @@ const int FAIL_DISKS_TOO_CLOSE   = SUCCESS + 1;
 const int FAIL_BUILD_CONFIG      = FAIL_DISKS_TOO_CLOSE + 1;
 
 class Particle{
-	double*      X;
-	double*      V;
+
 	const int    _d;
   public:
-
+	double*      X;  //FIXME
+	double*      V;  //FIXME
 	Particle(const int d): _d(d) {
 		X = new double [d];
 		V = new double[d];
@@ -77,6 +77,8 @@ class Particle{
 	}
 };
 
+std::ostream & operator<<(std::ostream & stream, const Particle * particle);
+	
 class WallCollision{
   public:
 	const double _time;
@@ -94,13 +96,14 @@ class ParticleCollision{
 };
 
 class Configuration{
-	std::vector<Particle*> _particles;
+
 	const int _n;
 	const int _d;
 	const double _sigma;
 	double L[3];
 	double V[3];
   public:
+  	std::vector<Particle*> _particles; // FIXME
 	Configuration(	const int n,
 					const int d,
 					const double sigma) : _n(n), _d(d), _sigma(sigma)  {

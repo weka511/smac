@@ -15,15 +15,15 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include <vector>
+
 #include <cstdlib> 
-#include <iostream>
+#include <fstream>
 #include <getopt.h>
 #include <iostream>
-#include <fstream>
-#include <string>
-#include <random>
 #include <limits>
+#include <random>
+#include <string>
+#include <vector>
 #include "md.hpp"
 
 using namespace std;
@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
 	int c;
 	
-	while ((c = getopt (argc, argv, "N:n:s:f:")) != -1)
+	while ((c = getopt (argc, argv, "N:n:s:f:M:")) != -1)
 		switch(c) {
 			case 'N':
 				N = atoi(optarg);
@@ -73,10 +73,13 @@ int main(int argc, char **argv) {
 	int status = configuration.initialize(M);
 	for  (int i=0; SUCCESS==status &&i<N;i++) {
 		if (i%freq ==0)
-			std::cout << "Epoch " << i << std::endl;
+			std::cout << "Epoch " << (i+1) << std::endl;
 		status = configuration.event_disks();
 	}
-		
+	ofstream output("md.csv");
+	for (int i=0;i<n;i++)
+		output << configuration._particles[i] << std::endl;
+	output.close();
 	return status;
 }
 
@@ -111,7 +114,7 @@ void Particle::pair_collide(Particle* other) {
 		DeltaV[i] = V[i] - other->V[i];
 	double DeltaX2 = 0;
 	for (int i=0;i<_d;i++)
-		DeltaX2 += X[i]*X[i];
+		DeltaX2 += DeltaX[i]*DeltaX[i];
 	double e_perpendicular[_d];
 	for (int i=0;i<_d;i++)
 		e_perpendicular[i] = DeltaX[i]/sqrt(DeltaX2);
@@ -119,11 +122,15 @@ void Particle::pair_collide(Particle* other) {
 	for (int i=0;i<_d;i++)
 		DeltaV_e += DeltaV[i]*e_perpendicular[i];
 	for (int i=0;i<_d;i++){
-		V[i] -= DeltaV_e * e_perpendicular[i];
+		V[i]        -= DeltaV_e * e_perpendicular[i];
 		other->V[i] += DeltaV_e * e_perpendicular[i];
 	}
 }
 
+std::ostream & operator<<(std::ostream & stream, const Particle * particle) {
+    stream << particle->X[0] << ", " << particle->X[1]<< ", " << particle->V[0] << ", " << particle->V[1];
+    return stream;
+}
 
 int Configuration::build_config(std::uniform_real_distribution<double> & distr,
 								std::default_random_engine& eng){
@@ -149,12 +156,12 @@ int Configuration::initialize(int n){
 	std::random_device rd;
 	std::default_random_engine eng(rd());
 	std::uniform_real_distribution<double> distr(-1, 1);
-	for (int i=0;i<n;i++){
+	for (int i=0;i<n;i++)
 		if (SUCCESS == build_config(distr,eng)){
 			std::cout << "Built configuration after " << (i+1) << " attempts" << std::endl;
 			return SUCCESS;
 		}
-	}
+	
 	std::cout << "Failed to build configuration after " << n << " attempts" << std::endl;
 	return FAIL_BUILD_CONFIG;
 }
@@ -193,18 +200,19 @@ ParticleCollision Configuration::get_next_particle_collision(){
 }
 	
 int Configuration::event_disks(){
-	WallCollision next_wall_collision = get_next_wall_collision();
+	WallCollision next_wall_collision         = get_next_wall_collision();
 	ParticleCollision next_particle_collision = get_next_particle_collision();
 	
 	if (next_wall_collision._time<next_particle_collision._time) {
 		for (int i=0;i<_n;i++)
 			_particles[i]->evolve(next_wall_collision._time);
+		
 		_particles[next_wall_collision._j]->wall_collide(next_wall_collision._wall);
 	} else {
 		for (int i=0;i<_n;i++)
 			_particles[i]->evolve(next_particle_collision._time);
+		
 		_particles[next_particle_collision._k]->pair_collide(_particles[next_particle_collision._l]);
-	//	pair_collide(next_particle_collision);
 	}
 	return SUCCESS;
 }
