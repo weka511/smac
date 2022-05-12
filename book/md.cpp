@@ -33,16 +33,18 @@ using namespace std;
  * Main program. 
  */
 int main(int argc, char **argv) {
-	int N = 100;
-	int n = 100;
-	int d = 2;
-	int M = 100;
-	int c;
-	double L = 1;
-	double V = 1;
+	int    N     = 10000;
+	int    n     = 100;
+	int    d     = 2;
+	int    M     = 100;
+	int    freq  = 100;
+	double L     = 1;
+	double V     = 1;
 	double sigma = 0.01;
 
-	while ((c = getopt (argc, argv, "N:n:s:")) != -1)
+	int c;
+	
+	while ((c = getopt (argc, argv, "N:n:s:f:")) != -1)
 		switch(c) {
 			case 'N':
 				N = atoi(optarg);
@@ -59,6 +61,9 @@ int main(int argc, char **argv) {
 			case 'M':
 				M = atoi(optarg);
 				break;
+			case 'f':
+				freq = atoi(optarg);
+				break;
 			default:
 				abort();
 	}
@@ -66,11 +71,59 @@ int main(int argc, char **argv) {
  
 	Configuration configuration(n,d,sigma);
 	int status = configuration.initialize(M);
-	for  (int i=0; SUCCESS==status &&i<N;i++)
+	for  (int i=0; SUCCESS==status &&i<N;i++) {
+		if (i%freq ==0)
+			std::cout << "Epoch " << i << std::endl;
 		status = configuration.event_disks();
+	}
 		
 	return status;
 }
+
+
+double Particle::get_time_to_particle(Particle* other, double sigma) {
+	double DeltaX[3], DeltaV[3];
+	for (int i=0;i<_d;i++)
+		DeltaX[i] = X[i] - other->X[i];
+	for (int i=0;i<_d;i++)
+		DeltaV[i] = V[i] - other->V[i];
+	double DeltaVX = 0;
+	double DeltaV2 = 0;
+	double DeltaX2 = 0;
+	for (int i=0;i<_d;i++){
+		DeltaVX += X[i]*V[i];
+		DeltaX2 += X[i]*X[i];
+		DeltaV2 += V[i]*V[i];
+	}
+	
+	const double Upsilon = DeltaVX*DeltaVX - DeltaV2*(DeltaX2-4*sigma*sigma);
+	if (Upsilon>0 && DeltaVX<0)
+		return -(DeltaVX + sqrt(Upsilon))/DeltaV2;
+	else
+		return std::numeric_limits<double>::infinity(); 
+	}
+
+void Particle::pair_collide(Particle* other) {
+	double DeltaX[_d], DeltaV[_d];
+	for (int i=0;i<_d;i++)
+		DeltaX[i] = X[i] - other->X[i];
+	for (int i=0;i<_d;i++)
+		DeltaV[i] = V[i] - other->V[i];
+	double DeltaX2 = 0;
+	for (int i=0;i<_d;i++)
+		DeltaX2 += X[i]*X[i];
+	double e_perpendicular[_d];
+	for (int i=0;i<_d;i++)
+		e_perpendicular[i] = DeltaX[i]/sqrt(DeltaX2);
+	double DeltaV_e = 0;
+	for (int i=0;i<_d;i++)
+		DeltaV_e += DeltaV[i]*e_perpendicular[i];
+	for (int i=0;i<_d;i++){
+		V[i] -= DeltaV_e * e_perpendicular[i];
+		other->V[i] += DeltaV_e * e_perpendicular[i];
+	}
+}
+
 
 int Configuration::build_config(std::uniform_real_distribution<double> & distr,
 								std::default_random_engine& eng){
@@ -122,6 +175,7 @@ WallCollision Configuration::get_next_wall_collision(){
 	return WallCollision(t,j,wall);
 }
 
+
 ParticleCollision Configuration::get_next_particle_collision(){
 	double t = std::numeric_limits<double>::infinity();
 	double k = -1;
@@ -145,11 +199,12 @@ int Configuration::event_disks(){
 	if (next_wall_collision._time<next_particle_collision._time) {
 		for (int i=0;i<_n;i++)
 			_particles[i]->evolve(next_wall_collision._time);
-		wall_collide(next_wall_collision);
+		_particles[next_wall_collision._j]->wall_collide(next_wall_collision._wall);
 	} else {
 		for (int i=0;i<_n;i++)
 			_particles[i]->evolve(next_particle_collision._time);
-		pair_collide(next_particle_collision);
+		_particles[next_particle_collision._k]->pair_collide(_particles[next_particle_collision._l]);
+	//	pair_collide(next_particle_collision);
 	}
 	return SUCCESS;
 }

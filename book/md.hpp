@@ -55,12 +55,10 @@ class Particle{
 	}
 	
 	double get_time_to_wall(int wall, double free_space) {
-		return (free_space - X[wall] * copysign(1.0, V[wall])) /fabs(V[wall]); // abs was given int!!
+		return (free_space - X[wall] * copysign(1.0, V[wall])) /fabs(V[wall]); // abs was returning int!!
 	}
 	
-	double get_time_to_particle(Particle* other, double sigma) {
-		return std::numeric_limits<double>::infinity();   // FIXME
-	}
+	double get_time_to_particle(Particle* other, double sigma);
 	
 	void evolve (double t) {
 		for (int i=0;i<_d;i++)
@@ -70,6 +68,9 @@ class Particle{
 	void wall_collide(int wall) {
 		V[wall] *= -1;
 	}
+	
+	void pair_collide(Particle* other);
+	
 	virtual ~Particle() {
 		delete this->X;
 		delete this->V;
@@ -124,16 +125,6 @@ class Configuration{
 	WallCollision get_next_wall_collision();
 	
 	ParticleCollision get_next_particle_collision();
-	
-	
-	
-	void wall_collide(WallCollision collision){
- 	/* 	int j = collision._j;
-		int wall = collision._wall; */
-		_particles[collision._j]->wall_collide(collision._wall);
-	}
-	
-	void pair_collide(ParticleCollision collision) {};
 	
 };
 #endif
