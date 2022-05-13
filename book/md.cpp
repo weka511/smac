@@ -23,6 +23,7 @@
 #include <limits>
 #include <random>
 #include <string>
+#include <sys/stat.h> 
 #include <vector>
 #include "md.hpp"
 
@@ -93,7 +94,7 @@ int main(int argc, char **argv) {
 	}
 	Configuration configuration(n,d,sigma);
 	int status = configuration.initialize(M);
-	for  (int i=0; SUCCESS==status &&i<N;i++) {
+	for  (int i=0; SUCCESS==status && i<N && !killed();i++) {
 		if (i%freq ==0)
 			std::cout << "Epoch " << (i+1) << std::endl;
 		status = configuration.event_disks();
@@ -243,6 +244,15 @@ int Configuration::event_disks(){
 		_particles[next_particle_collision._k]->pair_collide(_particles[next_particle_collision._l]);
 	}
 	return SUCCESS;
+}
+
+bool killed(std::string kill_file){
+	bool kill = file_exists(kill_file.c_str());
+	if (kill) {
+		std::cout << "Killed" << std::endl;
+		remove(kill_file.c_str());
+	}
+	return kill;
 }
 
 

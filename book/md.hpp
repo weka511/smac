@@ -22,6 +22,13 @@ const int SUCCESS                = 0;
 const int FAIL_DISKS_TOO_CLOSE   = SUCCESS + 1;
 const int FAIL_BUILD_CONFIG      = FAIL_DISKS_TOO_CLOSE + 1;
 
+bool killed(std::string kill_file="kill.txt");
+
+bool file_exists (const char *filename) {
+  struct stat   buffer;   
+  return (stat (filename, &buffer) == 0);
+}
+
 class Particle{
 
 	const int    _d;
