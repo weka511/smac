@@ -160,6 +160,9 @@ class Configuration{
 		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
 			output << *particle << std::endl;
 	}
+	
+	int n_wall_collisions = 0;
+	int n_pair_collisions = 0;
 };
 
 

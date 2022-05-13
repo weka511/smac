@@ -165,9 +165,12 @@ int main(int argc, char **argv) {
 
 int evolve(Configuration& configuration,int N, int n,int d, int M, 
 		double L, double V, double sigma, std::string output_path, int status, int freq) {
+	
 		for  (int i=0; SUCCESS==status && i<N && !killed();i++) {
 		if (i%freq ==0)
-			std::cout << "Epoch " << (i+1) << std::endl;
+			std::cout << "Epoch " << (i+1) << ", "<<
+		    configuration.n_pair_collisions << " pair collisions, " <<
+			configuration.n_wall_collisions << " wall collisions, " << std::endl;
 		status = configuration.event_disks();
 	}
 	ofstream output(output_path);
@@ -297,7 +300,7 @@ ParticleCollision Configuration::get_next_particle_collision(){
 		}
 	return ParticleCollision(t,k,l);
 }
-	
+
 int Configuration::event_disks(){
 	WallCollision next_wall_collision         = get_next_wall_collision();
 	ParticleCollision next_particle_collision = get_next_particle_collision();
@@ -307,11 +310,13 @@ int Configuration::event_disks(){
 			_particles[i]->evolve(next_wall_collision._time);
 		
 		_particles[next_wall_collision._j]->wall_collide(next_wall_collision._wall);
+		n_wall_collisions++;
 	} else {
 		for (int i=0;i<_n;i++)
 			_particles[i]->evolve(next_particle_collision._time);
 		
 		_particles[next_particle_collision._k]->pair_collide(_particles[next_particle_collision._l]);
+		n_pair_collisions++;
 	}
 	return SUCCESS;
 }
