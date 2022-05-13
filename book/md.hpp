@@ -40,6 +40,15 @@ class Particle{
 		V = new double[d];
 	}
 	
+	Particle(const int d,double values[4]): _d(d) {
+		X    = new double [d];
+		X[0] = values[0];
+		X[1] = values[1];
+		V    = new double[d];
+		V[0] = values[2];
+		V[1] = values[3];
+	}
+	
 	double get_dist_sq(Particle* other){
 		double result = 0;
 		for (int i;i<_d;i++)
@@ -121,6 +130,15 @@ class Configuration{
 			_particles.push_back(new Particle(d));
 	}
 	
+	Configuration(	const int n,
+					const int d,
+					const double sigma,
+					std::vector<Particle*> particles) : _n(n), _d(d), _sigma(sigma)  {
+	    L[0] = L[1] = L[2] = 1;
+		V[0] = V[1] = V[2] = 1;
+		_particles = particles;
+	}
+	
 	int build_config(std::uniform_real_distribution<double> & distr,
 					std::default_random_engine& eng);
 	
@@ -143,5 +161,10 @@ class Configuration{
 			output << *particle << std::endl;
 	}
 };
+
+
+int evolve(Configuration& configuration,int N, int n,int d, int M, 
+		double L, double V, double sigma, std::string output_path, int status, int freq);
+		
 #endif
 

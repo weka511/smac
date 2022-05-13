@@ -34,15 +34,17 @@ using namespace std;
  * Main program. 
  */
 int main(int argc, char **argv) {
-	std::string output_path = "./foo.csv";
 	int         N           = 10000;
 	int         n           = 100;
 	int         d           = 2;
 	int         M           = 100;
 	int         freq        = 100;
+	bool        restart     = false;
 	double      L           = 1;
 	double      V           = 1;
 	double      sigma       = 0.01;
+	std::string output_path = "./foo.csv";
+	std::string restart_path;
 	
 	struct option long_options[] = {
 			{"epochs",    required_argument,	0, 	'N'},
@@ -55,13 +57,14 @@ int main(int argc, char **argv) {
 			{"Velocity",  required_argument, 	0, 	'V'},
 			{"sigma",  	  required_argument, 	0, 	's'},
 			{"output",    required_argument,    0,  'o'},
+			{"restart",   required_argument,    0,  'r'},
 			{0, 				0, 				0, 	0}
 	};	
 	
 	
 	int c;
 	int option_index = 0;
-	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:",long_options, &option_index)) != -1)
+	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:r:",long_options, &option_index)) != -1)
 		switch(c) {
 			case 'N':
 				N = atoi(optarg);
@@ -84,6 +87,10 @@ int main(int argc, char **argv) {
 			case 'o':
 				output_path = optarg;
 				break;
+			case 'r':
+				restart      = true;
+				restart_path = optarg;
+				break;
 			default:
 				abort();
 	}
@@ -92,9 +99,73 @@ int main(int argc, char **argv) {
 		std::cerr << "Output file " << output_path << " already exists" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	Configuration configuration(n,d,sigma);
-	int status = configuration.initialize(M);
-	for  (int i=0; SUCCESS==status && i<N && !killed();i++) {
+	
+	int status;
+	if (restart) {
+		ifstream restart_stream(restart_path);
+		string line;
+		int line_number = 0;
+		std::vector<Particle*> particles;
+		while (getline(restart_stream,line)){
+			if (line_number<7){
+				std::string delimiter = "=";
+				int pos = line.find(delimiter);
+				std::string token = line.substr(0, pos);
+				std::string value = line.substr(pos+1);
+				std::cout<<token<<" :: "<< value << std::endl;
+				switch (line_number){
+					case 0:
+						N = std::stoi(value);
+						break;
+					case 1:
+	 					n =std::stoi(value);
+						break;
+					case 2:
+						d=std::stoi(value);
+						break;
+					case 3:
+						M = std::stoi(value);
+						break;
+					case 4:
+						L = std::stoi(value);
+						break;
+					case 5:
+						V = std::stoi(value);
+						break;
+					case 6:
+						sigma = std::stod(value);
+				}
+			}
+			if (line_number>7){
+				double values[4];
+				std::string delimiter = ",";
+				int start = 0;
+				for (int i=0; i<4;i++) {
+					int pos = line.find(delimiter, pos=start);
+					std::string token = line.substr(start, pos-start);
+					start = pos+1;
+					values[i] = stod(token);
+				}
+				Particle* p = new Particle(d,values);
+				particles.push_back(p);
+			}
+			line_number++;
+		}
+		Configuration configuration(n,d,sigma,particles);
+		status = evolve(configuration, N,  n, d,  M, L,  V,  sigma,  output_path,  status, freq);
+	} else {
+		Configuration configuration(n,d,sigma);
+		status = configuration.initialize(M);
+		status = evolve(configuration, N,  n, d,  M, L,  V,  sigma,  output_path,  status, freq);
+	}
+
+
+	return status;
+}
+
+int evolve(Configuration& configuration,int N, int n,int d, int M, 
+		double L, double V, double sigma, std::string output_path, int status, int freq) {
+		for  (int i=0; SUCCESS==status && i<N && !killed();i++) {
 		if (i%freq ==0)
 			std::cout << "Epoch " << (i+1) << std::endl;
 		status = configuration.event_disks();
@@ -111,7 +182,6 @@ int main(int argc, char **argv) {
 	output.close();
 	return status;
 }
-
 
 double Particle::get_time_to_particle(Particle* other, double sigma) {
 	double DeltaX[3], DeltaV[3];
