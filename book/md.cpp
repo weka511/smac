@@ -33,18 +33,34 @@ using namespace std;
  * Main program. 
  */
 int main(int argc, char **argv) {
-	int    N     = 10000;
-	int    n     = 100;
-	int    d     = 2;
-	int    M     = 100;
-	int    freq  = 100;
-	double L     = 1;
-	double V     = 1;
-	double sigma = 0.01;
-
-	int c;
+	std::string output_path = "./foo.csv";
+	int         N           = 10000;
+	int         n           = 100;
+	int         d           = 2;
+	int         M           = 100;
+	int         freq        = 100;
+	double      L           = 1;
+	double      V           = 1;
+	double      sigma       = 0.01;
 	
-	while ((c = getopt (argc, argv, "N:n:s:f:M:")) != -1)
+	struct option long_options[] = {
+			{"epochs",    required_argument,	0, 	'N'},
+			{"particles", required_argument,	0, 	'n'},
+			{"help",  	  no_argument, 		    0, 	'h'},
+			{"dimension", required_argument, 	0, 	'd'},
+			{"attempts",  required_argument, 	0, 	'M'},
+			{"freq",  	  required_argument, 	0, 	'f'},
+			{"length",    required_argument, 	0, 	'L'},
+			{"Velocity",  required_argument, 	0, 	'V'},
+			{"sigma",  	  required_argument, 	0, 	's'},
+			{"output",    required_argument,    0,  'o'},
+			{0, 				0, 				0, 	0}
+	};	
+	
+	
+	int c;
+	int option_index = 0;
+	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:",long_options, &option_index)) != -1)
 		switch(c) {
 			case 'N':
 				N = atoi(optarg);
@@ -64,11 +80,17 @@ int main(int argc, char **argv) {
 			case 'f':
 				freq = atoi(optarg);
 				break;
+			case 'o':
+				output_path = optarg;
+				break;
 			default:
 				abort();
 	}
 
- 
+	if (std::ifstream(output_path)){
+		std::cerr << "Output file " << output_path << " already exists" << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	Configuration configuration(n,d,sigma);
 	int status = configuration.initialize(M);
 	for  (int i=0; SUCCESS==status &&i<N;i++) {
@@ -76,9 +98,15 @@ int main(int argc, char **argv) {
 			std::cout << "Epoch " << (i+1) << std::endl;
 		status = configuration.event_disks();
 	}
-	ofstream output("md.csv");
-	for (int i=0;i<n;i++)
-		output << configuration._particles[i] << std::endl;
+	ofstream output(output_path);
+	output << "N="<<N         << std::endl;
+	output << "n="<<n         << std::endl;
+	output << "d="<<d         << std::endl;
+	output << "M="<<M         << std::endl;
+	output << "L="<<L         << std::endl;
+	output << "V="<<V         << std::endl;
+	output << "sigma="<<sigma << std::endl;
+	configuration.dump(output);
 	output.close();
 	return status;
 }

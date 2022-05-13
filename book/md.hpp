@@ -102,8 +102,9 @@ class Configuration{
 	const double _sigma;
 	double L[3];
 	double V[3];
+	std::vector<Particle*> _particles; 
   public:
-  	std::vector<Particle*> _particles; // FIXME
+ 
 	Configuration(	const int n,
 					const int d,
 					const double sigma) : _n(n), _d(d), _sigma(sigma)  {
@@ -129,6 +130,11 @@ class Configuration{
 	
 	ParticleCollision get_next_particle_collision();
 	
+	void dump(std::ofstream& output) {
+		output << "X1,X2,V1,V2"   << std::endl;
+		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
+			output << *particle << std::endl;
+	}
 };
 #endif
 
