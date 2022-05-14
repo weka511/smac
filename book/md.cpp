@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 	}
 
 	if (std::ifstream(output_path)){
-		std::cerr << "Output file " << output_path << " already exists" << std::endl;
+		std::cerr << "Output file " << output_path << " already exists" << endl;
 		exit(EXIT_FAILURE);
 	}
 	
@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
 				int pos = line.find(delimiter);
 				std::string token = line.substr(0, pos);
 				std::string value = line.substr(pos+1);
-				std::cout<<token<<" :: "<< value << std::endl;
+				cout<<token<<" :: "<< value << endl;
 				switch (line_number){
 					case 0:
 						N = std::stoi(value);
@@ -171,19 +171,19 @@ int evolve(Configuration& configuration,int N, int n,int d, int M,
 	
 		for  (int i=0; SUCCESS==status && i<N && !killed();i++) {
 		if (i%freq ==0)
-			std::cout << "Epoch " << (i+1) << ", "<<
+			cout << "Epoch " << (i+1) << ", "<<
 		    configuration.n_pair_collisions << " pair collisions, " <<
-			configuration.n_wall_collisions << " wall collisions, " << std::endl;
+			configuration.n_wall_collisions << " wall collisions, " << endl;
 		status = configuration.event_disks();
 	}
 	ofstream output(output_path);
-	output << "N="<<N         << std::endl;
-	output << "n="<<n         << std::endl;
-	output << "d="<<d         << std::endl;
-	output << "M="<<M         << std::endl;
-	output << "L="<<L         << std::endl;
-	output << "V="<<V         << std::endl;
-	output << "sigma="<<sigma << std::endl;
+	output << "N="<<N         << endl;
+	output << "n="<<n         << endl;
+	output << "d="<<d         << endl;
+	output << "M="<<M         << endl;
+	output << "L="<<L         << endl;
+	output << "V="<<V         << endl;
+	output << "sigma="<<sigma << endl;
 	configuration.dump(output);
 	output.close();
 	return status;
@@ -263,11 +263,11 @@ int Configuration::initialize(int n){
 	std::uniform_real_distribution<double> distr(-1, 1);
 	for (int i=0;i<n;i++)
 		if (SUCCESS == build_config(distr,eng)){
-			std::cout << "Built configuration after " << (i+1) << " attempts" << std::endl;
+			cout << "Built configuration after " << (i+1) << " attempts" << endl;
 			return SUCCESS;
 		}
 	
-	std::cout << "Failed to build configuration after " << n << " attempts" << std::endl;
+	cout << "Failed to build configuration after " << n << " attempts" << endl;
 	return FAIL_BUILD_CONFIG;
 }
 
@@ -327,7 +327,7 @@ int Configuration::event_disks(){
 bool killed(std::string kill_file){
 	bool kill = file_exists(kill_file.c_str());
 	if (kill) {
-		std::cout << "Killed" << std::endl;
+		cout << "Killed" << endl;
 		remove(kill_file.c_str());
 	}
 	return kill;
@@ -337,17 +337,17 @@ void help(int N, int n,	int d ,	int M ,	int freq, bool restart,
 			double L, double V,	double sigma,  std::string output_path, std::string restart_path) {
 
 
-	cout << "Molecular Dynamics"          <<endl<<endl;
-	cout << "    Parameters"              << endl;
-	cout << "\tN\tNumber of iterations\t\t\t\t" << N<<endl;
-	cout << "\tn\tNumber of spheres\t\t\t\t"    <<n <<endl;
-	cout << "\td\tDimension of box\t\t\t\t"     <<d <<endl;
-	cout << "\tM\tNumber of attempts to build configuration\t" <<M<<endl;
-	cout << "\tfreq\tFrequency for indicating progress\t\t" <<freq<<endl;
+	cout << "Molecular Dynamics"                                 <<endl<<endl;
+	cout << "    Parameters"                                     << endl;
+	cout << "\tN\tNumber of iterations\t\t\t\t"                  << N<<endl;
+	cout << "\tn\tNumber of spheres\t\t\t\t"                     <<n <<endl;
+	cout << "\td\tDimension of box\t\t\t\t"                      <<d <<endl;
+	cout << "\tM\tNumber of attempts to build configuration\t"   <<M<<endl;
+	cout << "\tfreq\tFrequency for indicating progress\t\t"      <<freq<<endl;
 	cout << "\trestart\tSet if Configuration is to be restarted" <<endl;
-	cout << "\tL\tLength of side of box\t\t\t\t" <<L<<endl;
-	cout << "\tV\tNormalizer of initial velocity\t\t\t" <<V<<endl;
-	cout << "\tsigma\tRadius of sphere\t\t\t\t" <<sigma<<endl;
+	cout << "\tL\tLength of side of box\t\t\t\t"                 <<L<<endl;
+	cout << "\tV\tNormalizer of initial velocity\t\t\t"          <<V<<endl;
+	cout << "\tsigma\tRadius of sphere\t\t\t\t"                  <<sigma<<endl;
 	cout << "\toutput_path" <<endl;
 	cout << "\trestart_path" <<endl;
 }

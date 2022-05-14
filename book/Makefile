@@ -15,30 +15,30 @@
 #
 # Makefile snarfed from https://stackoverflow.com/questions/2481269/how-to-make-a-simple-c-makefile
 
-CPPFLAGS=-g -O3  -D_RUNTIME_CHECKS -pthread -I/sw/include/root  -std=gnu++11
-LDFLAGS=-g -O3
-LDLIBS=
-CC=gcc
-CXX=g++
-RM=rm -f
-MKDIR=mkdir
-SRCS=
+CPPFLAGS  = -g -O3  -D_RUNTIME_CHECKS -pthread -I/sw/include/root  -std=gnu++11
+LDFLAGS   = -g -O3
+LDLIBS    =
+CC        = gcc
+CXX       = g++
+RM        = rm -f
+MKDIR     = mkdir
+SRCS      =
 
-TESTS= 	test-gray.cpp	\
-		test-nbr.cpp
+TESTS     = 	test-gray.cpp	\
+		        test-nbr.cpp
 		
-OBJS1=$(subst .cpp,.o,$(SRCS)) 
-OBJS=$(subst .cc,.o,$(OBJS1)) 
-TEST_OBJS=$(subst .cpp,.o,$(TESTS))
+OBJS1     = $(subst .cpp,.o,$(SRCS)) 
+OBJS      = $(subst .cc,.o,$(OBJS1)) 
+TEST_OBJS = $(subst .cpp,.o,$(TESTS))
 
-THREADING=threading.exe
+THREADING = threading.exe
 
-MAIN=enumerate-ising.exe
-TEST_MAIN=tests.exe
-MD       = md.exe
-TARGETS=$(MAIN) 
+MAIN      = enumerate-ising.exe
+TEST_MAIN = tests.exe
+MD        = md.exe
+TARGETS   = $(MAIN) 
 
-all : $(TARGETS) $(TEST_OBJS)
+all : $(TARGETS) $(TEST_OBJS) $(MD)
 
 run : all
 	./$(MAIN)
