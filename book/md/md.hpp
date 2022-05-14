@@ -18,6 +18,8 @@
 #ifndef _MD_HPP_
 #define _MD_HPP_
 
+#include "particle.hpp"
+
 const int SUCCESS                = 0;
 const int FAIL_DISKS_TOO_CLOSE   = SUCCESS + 1;
 const int FAIL_BUILD_CONFIG      = FAIL_DISKS_TOO_CLOSE + 1;
@@ -29,71 +31,7 @@ bool file_exists (const char *filename) {
   return (stat (filename, &buffer) == 0);
 }
 
-class Particle{
 
-	const int    _d;
-  public:
-	double*      X;  //FIXME
-	double*      V;  //FIXME
-	Particle(const int d): _d(d) {
-		X = new double [d];
-		V = new double[d];
-	}
-	
-	Particle(const int d,double values[4]): _d(d) {
-		X    = new double [d];
-		X[0] = values[0];
-		X[1] = values[1];
-		V    = new double[d];
-		V[0] = values[2];
-		V[1] = values[3];
-	}
-	
-	double get_dist_sq(Particle* other){
-		double result = 0;
-		for (int i;i<_d;i++)
-			result += (X[i]-other->X[i]) * (X[i]-other->X[i]);
-		return result;	
-	}
-
-	void randomizeX(std::uniform_real_distribution<double> & distr,
-					std::default_random_engine& eng,
-					double scale[3]) {
-		for (int i=0;i<_d;i++)
-			X[i] = scale[i] * distr(eng);
-	}
-	
-	void randomizeV(std::uniform_real_distribution<double> & distr,
-					std::default_random_engine& eng,
-					double scale[3]) {
-	for (int i=0;i<_d;i++)
-		V[i] = scale[i] * distr(eng);
-	}
-	
-	double get_time_to_wall(int wall, double free_space) {
-		return (free_space - X[wall] * copysign(1.0, V[wall])) /fabs(V[wall]); // abs was returning int!!
-	}
-	
-	double get_time_to_particle(Particle* other, double sigma);
-	
-	void evolve (double t) {
-		for (int i=0;i<_d;i++)
-			X[i] += V[i] * t;
-	};
-	
-	void wall_collide(int wall) {
-		V[wall] *= -1;
-	}
-	
-	void pair_collide(Particle* other);
-	
-	virtual ~Particle() {
-		delete this->X;
-		delete this->V;
-	}
-};
-
-std::ostream & operator<<(std::ostream & stream, const Particle * particle);
 	
 class WallCollision{
   public:

@@ -22,7 +22,7 @@ CC        = gcc
 CXX       = g++
 RM        = rm -f
 MKDIR     = mkdir
-SRCS      =
+SRCS      = particle.cpp
 
 TESTS     = 	
 		
@@ -48,7 +48,7 @@ clean :
 
 rebuild: clean all
 
-depend: .depend
+depend: Makefile .depend
 
 install: rebuild
 	cp $(MAIN) /usr/local/bin
