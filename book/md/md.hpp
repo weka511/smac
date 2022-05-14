@@ -19,10 +19,9 @@
 #define _MD_HPP_
 
 #include "particle.hpp"
+#include "configuration.hpp"
 
-const int SUCCESS                = 0;
-const int FAIL_DISKS_TOO_CLOSE   = SUCCESS + 1;
-const int FAIL_BUILD_CONFIG      = FAIL_DISKS_TOO_CLOSE + 1;
+
 
 bool killed(std::string kill_file="kill.txt");
 
@@ -32,77 +31,6 @@ bool file_exists (const char *filename) {
 }
 
 
-	
-class WallCollision{
-  public:
-	const double _time;
-	const int    _j;
-	const int    _wall;
-	WallCollision(const double time, const int j, const int wall) : _time(time), _j(j), _wall(wall){}
-};
-
-class ParticleCollision{
-  public:
-  	const double _time;
-	const int _k;
-	const int _l;
-	ParticleCollision(const double time, const int k, const int l): _time(time), _k(k), _l(l){}
-};
-
-class Configuration{
-
-	const int _n;
-	const int _d;
-	const double _sigma;
-	double L[3];
-	double V[3];
-	std::vector<Particle*> _particles; 
-  public:
- 
-	Configuration(	const int n,
-					const int d,
-					const double sigma) : _n(n), _d(d), _sigma(sigma)  {
-	    L[0] = L[1] = L[2] = 1;
-		V[0] = V[1] = V[2] = 1;
-		for (int i=0;i<n;i++)
-			_particles.push_back(new Particle(d));
-	}
-	
-	Configuration(	const int n,
-					const int d,
-					const double sigma,
-					std::vector<Particle*> particles) : _n(n), _d(d), _sigma(sigma)  {
-	    L[0] = L[1] = L[2] = 1;
-		V[0] = V[1] = V[2] = 1;
-		_particles = particles;
-	}
-	
-	int build_config(std::uniform_real_distribution<double> & distr,
-					std::default_random_engine& eng);
-	
-	int initialize(int n);
-	
-	virtual ~Configuration() {
-		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
-			delete  *particle;
-	}
-	
-	int event_disks();
-	
-	WallCollision get_next_wall_collision();
-	
-	ParticleCollision get_next_particle_collision();
-	
-	void dump(std::ofstream& output) {
-		output << "X1,X2,V1,V2"   << std::endl;
-		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
-			output << *particle << std::endl;
-	}
-	
-	void save(std::string output_path);
-	int n_wall_collisions = 0;
-	int n_pair_collisions = 0;
-};
 
 
 int evolve(Configuration& configuration,int N, int n,int d, int M, 

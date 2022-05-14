@@ -22,7 +22,7 @@ CC        = gcc
 CXX       = g++
 RM        = rm -f
 MKDIR     = mkdir
-SRCS      = particle.cpp
+SRCS      = configuration.cpp particle.cpp
 
 TESTS     = 	
 		
