@@ -189,6 +189,8 @@ int evolve(Configuration& configuration,int N, int n,int d, int M,
 	return status;
 }
 
+void Configuration::save(std::string output_path){}
+
 double Particle::get_time_to_particle(Particle* other, double sigma) {
 	double DeltaX[3], DeltaV[3];
 	for (int i=0;i<_d;i++)

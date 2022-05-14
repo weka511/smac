@@ -161,6 +161,7 @@ class Configuration{
 			output << *particle << std::endl;
 	}
 	
+	void save(std::string output_path);
 	int n_wall_collisions = 0;
 	int n_pair_collisions = 0;
 };
