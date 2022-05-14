@@ -91,6 +91,9 @@ int main(int argc, char **argv) {
 				restart      = true;
 				restart_path = optarg;
 				break;
+			case 'h':
+				help( N,  n,	 d ,	 M ,	 freq,  restart, L,  V,	 sigma ,  output_path, restart_path);
+				exit(SUCCESS);
 			default:
 				abort();
 	}
@@ -330,7 +333,24 @@ bool killed(std::string kill_file){
 	return kill;
 }
 
+void help(int N, int n,	int d ,	int M ,	int freq, bool restart,
+			double L, double V,	double sigma,  std::string output_path, std::string restart_path) {
 
+
+	cout << "Molecular Dynamics"          <<endl<<endl;
+	cout << "    Parameters"              << endl;
+	cout << "\tN\tNumber of iterations\t\t\t\t" << N<<endl;
+	cout << "\tn\tNumber of spheres\t\t\t\t"    <<n <<endl;
+	cout << "\td\tDimension of box\t\t\t\t"     <<d <<endl;
+	cout << "\tM\tNumber of attempts to build configuration\t" <<M<<endl;
+	cout << "\tfreq\tFrequency for indicating progress\t\t" <<freq<<endl;
+	cout << "\trestart\tSet if Configuration is to be restarted" <<endl;
+	cout << "\tL\tLength of side of box\t\t\t\t" <<L<<endl;
+	cout << "\tV\tNormalizer of initial velocity\t\t\t" <<V<<endl;
+	cout << "\tsigma\tRadius of sphere\t\t\t\t" <<sigma<<endl;
+	cout << "\toutput_path" <<endl;
+	cout << "\trestart_path" <<endl;
+}
 
 
 

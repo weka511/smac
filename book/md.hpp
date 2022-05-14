@@ -168,6 +168,9 @@ class Configuration{
 
 int evolve(Configuration& configuration,int N, int n,int d, int M, 
 		double L, double V, double sigma, std::string output_path, int status, int freq);
-		
+
+void help(int N, int n,	int d ,	int M ,	int freq, bool restart,
+			double L, double V,	double sigma,  std::string output_path, std::string restart_path);		
+
 #endif
 
