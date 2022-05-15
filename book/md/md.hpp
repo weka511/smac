@@ -21,17 +21,12 @@
 #include "particle.hpp"
 #include "configuration.hpp"
 
-
-
 bool killed(std::string kill_file="kill.txt");
 
 bool file_exists (const char *filename) {
   struct stat   buffer;   
   return (stat (filename, &buffer) == 0);
 }
-
-
-
 
 int evolve(Configuration& configuration,int N, int n,int d, int M, 
 		double L, double V, double sigma, std::string output_path, int status, int freq);

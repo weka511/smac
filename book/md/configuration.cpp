@@ -31,8 +31,6 @@ using namespace std;
 
 void Configuration::save(std::string output_path){}
 
-
-
 int Configuration::build_config(std::uniform_real_distribution<double> & distr,
 								std::default_random_engine& eng){
 	double L_reduced[3];

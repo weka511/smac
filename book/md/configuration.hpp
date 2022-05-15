@@ -48,6 +48,8 @@ class Configuration{
 	double L[3];
 	double V[3];
 	std::vector<Particle*> _particles; 
+	int n_wall_collisions = 0;
+	int n_pair_collisions = 0;
   public:
  
 	Configuration(	const int n,
@@ -91,8 +93,9 @@ class Configuration{
 	}
 	
 	void save(std::string output_path);
-	int n_wall_collisions = 0;
-	int n_pair_collisions = 0;
+
+	int get_n_wall_collisions() {return n_wall_collisions;}
+	int get_n_pair_collisions() {return n_pair_collisions;}
 };
 
 #endif

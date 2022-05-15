@@ -172,8 +172,8 @@ int evolve(Configuration& configuration,int N, int n,int d, int M,
 		for  (int i=0; SUCCESS==status && i<N && !killed();i++) {
 		if (i%freq ==0)
 			cout << "Epoch " << (i+1) << ", "<<
-		    configuration.n_pair_collisions << " pair collisions, " <<
-			configuration.n_wall_collisions << " wall collisions, " << endl;
+		    configuration.get_n_pair_collisions() << " pair collisions, " <<
+			configuration.get_n_wall_collisions() << " wall collisions, " << endl;
 		status = configuration.event_disks();
 	}
 	ofstream output(output_path);
