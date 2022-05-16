@@ -37,7 +37,8 @@ TARGETS   = $(MAIN)
 
 all : $(MAIN)
 
-run : all
+run : all 
+	${RM} foo.csv
 	./$(MAIN)
 	
 tests : $(TEST_MAIN)
