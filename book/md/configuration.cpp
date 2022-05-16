@@ -29,11 +29,10 @@
 
 using namespace std;
 
-void Configuration::save(std::string output_path){}
 
-int Configuration::build_config(std::uniform_real_distribution<double> & distr,
+int Configuration::_build_config(std::uniform_real_distribution<double> & distr,
 								std::default_random_engine& eng){
-	double L_reduced[3];
+	double L_reduced[_d];
 	
 	for (int i=0;i<_d;i++)
 		L_reduced[i] = L[i]-_sigma;
@@ -52,11 +51,11 @@ int Configuration::build_config(std::uniform_real_distribution<double> & distr,
 }
 	
 int Configuration::initialize(int n){
-	std::random_device rd;
-	std::default_random_engine eng(rd());
+	std::random_device                     rd;
+	std::default_random_engine             eng(rd());
 	std::uniform_real_distribution<double> distr(-1, 1);
 	for (int i=0;i<n;i++)
-		if (SUCCESS == build_config(distr,eng)){
+		if (SUCCESS == _build_config(distr,eng)){
 			cout << "Built configuration after " << (i+1) << " attempts" << endl;
 			return SUCCESS;
 		}
@@ -65,7 +64,7 @@ int Configuration::initialize(int n){
 	return FAIL_BUILD_CONFIG;
 }
 
-WallCollision Configuration::get_next_wall_collision(){
+WallCollision Configuration::_get_next_wall_collision(){
 	double t    = std::numeric_limits<double>::infinity();
 	double j    = -1;
 	double wall = -1;
@@ -82,7 +81,7 @@ WallCollision Configuration::get_next_wall_collision(){
 }
 
 
-ParticleCollision Configuration::get_next_particle_collision(){
+ParticleCollision Configuration::_get_next_particle_collision(){
 	double t = std::numeric_limits<double>::infinity();
 	double k = -1;
 	double l = -1;
@@ -99,8 +98,8 @@ ParticleCollision Configuration::get_next_particle_collision(){
 }
 
 int Configuration::event_disks(){
-	WallCollision next_wall_collision         = get_next_wall_collision();
-	ParticleCollision next_particle_collision = get_next_particle_collision();
+	WallCollision next_wall_collision         = _get_next_wall_collision();
+	ParticleCollision next_particle_collision = _get_next_particle_collision();
 	
 	if (next_wall_collision._time<next_particle_collision._time) {
 		for (int i=0;i<_n;i++)

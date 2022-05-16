@@ -23,7 +23,8 @@
 const int SUCCESS                = 0;
 const int FAIL_DISKS_TOO_CLOSE   = SUCCESS + 1;
 const int FAIL_BUILD_CONFIG      = FAIL_DISKS_TOO_CLOSE + 1;
-	
+const int UNDEFINED              = std::numeric_limits<int>::max();	
+
 class WallCollision{
   public:
 	const double _time;
@@ -40,51 +41,70 @@ class ParticleCollision{
 	ParticleCollision(const double time, const int k, const int l): _time(time), _k(k), _l(l){}
 };
 
+/**
+ * This class represents a box containing particles.
+ */
 class Configuration{
 
-	const int _n;
-	const int _d;
-	const double _sigma;
-	double L[3];
-	double V[3];
+	const int _n;           // Number of particles
+	const int _d;           // Dimension of box
+	const double _sigma;    // Radius of a particle
+	double *L;
+	double *V;
 	std::vector<Particle*> _particles; 
-	int n_wall_collisions = 0;
-	int n_pair_collisions = 0;
+	int n_wall_collisions;
+	int n_pair_collisions;
+
   public:
  
+	/**
+	 * Create a new configuration of n particles
+	 */
 	Configuration(	const int n,
 					const int d,
-					const double sigma) : _n(n), _d(d), _sigma(sigma)  {
-	    L[0] = L[1] = L[2] = 1;
-		V[0] = V[1] = V[2] = 1;
+					const double sigma) : _n(n), _d(d), _sigma(sigma), n_wall_collisions(0), n_pair_collisions(0)  {
+		L = new double(d);
+		V = new double(d);
+	    L[0] = L[1] = 1;
+		V[0] = V[1] = 1;
+		if (d>2){
+			L[2] = 1;
+			V[2] = 1;
+		}
 		for (int i=0;i<n;i++)
 			_particles.push_back(new Particle(d));
 	}
 	
+	/**
+	 * Create a  configuration from an existing set of particles
+	 */
 	Configuration(	const int n,
 					const int d,
 					const double sigma,
-					std::vector<Particle*> particles) : _n(n), _d(d), _sigma(sigma)  {
-	    L[0] = L[1] = L[2] = 1;
-		V[0] = V[1] = V[2] = 1;
-		_particles = particles;
-	}
+					std::vector<Particle*> particles) : _n(n), _d(d), _sigma(sigma), 
+														n_wall_collisions(0), n_pair_collisions(0)  {
+	   	L = new double(d);
+		V = new double(d);
+	    L[0] = L[1] = 1;
+		V[0] = V[1] = 1;
+		if (d>2){
+			L[2] = 1;
+			V[2] = 1;
+		}
+		for (std::vector<Particle*>::iterator it = particles.begin() ; it != particles.end(); ++it) {
+			_particles.push_back(*it);
+		}
+	}	
 	
-	int build_config(std::uniform_real_distribution<double> & distr,
-					std::default_random_engine& eng);
-	
+	/**
+	 * Attempt to populate a configuration with a set up admissable particles.
+	 *
+	 * Parameters:
+	 *     n       Number of attenpts
+	 */
 	int initialize(int n);
 	
-	virtual ~Configuration() {
-		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
-			delete  *particle;
-	}
-	
 	int event_disks();
-	
-	WallCollision get_next_wall_collision();
-	
-	ParticleCollision get_next_particle_collision();
 	
 	void dump(std::ofstream& output) {
 		output << "X1,X2,V1,V2"   << std::endl;
@@ -92,10 +112,25 @@ class Configuration{
 			output << *particle << std::endl;
 	}
 	
-	void save(std::string output_path);
+
 
 	int get_n_wall_collisions() {return n_wall_collisions;}
+	
 	int get_n_pair_collisions() {return n_pair_collisions;}
+	
+	virtual ~Configuration() {
+		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
+			delete  *particle;
+	}
+  private:
+  
+  	int _build_config(  std::uniform_real_distribution<double> & distr,
+						std::default_random_engine& eng);
+						
+	WallCollision     _get_next_wall_collision();
+	
+	ParticleCollision _get_next_particle_collision();
+	
 };
 
 #endif

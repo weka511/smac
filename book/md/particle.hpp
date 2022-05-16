@@ -25,7 +25,7 @@ class Particle{
 	
   public:
 	Particle(const int d): _d(d) {
-		_x = new double [d];
+		_x = new double[d];
 		_v = new double[d];
 	}
 	

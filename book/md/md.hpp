@@ -21,16 +21,40 @@
 #include "particle.hpp"
 #include "configuration.hpp"
 
+/**
+ *   Check to see whether user wants to terminate program.
+ */
 bool killed(std::string kill_file="kill.txt");
 
-bool file_exists (const char *filename) {
-  struct stat   buffer;   
-  return (stat (filename, &buffer) == 0);
-}
+/**
+ *   Check to see whether a file exists
+ */
+bool file_exists (const char *filename);
 
-int evolve(Configuration& configuration,int N, int n,int d, int M, 
-		double L, double V, double sigma, std::string output_path, int status, int freq);
+/**
+ *  Drive configuration forward a specified number of epochs
+ */
+int evolve( Configuration& configuration,
+			int            N,
+			int            n,
+			int            d, 
+			int            M, 
+			double         L, 
+			double         V, 
+			double         sigma,
+			std::string    output_path, 
+			int            status, 
+			int            freq,
+			std::string    check_path = "check.csv",
+			int            epoch = 0);
 
+void save(  std::string    output_path,
+			Configuration& configuration,
+			int            epoch);
+
+/**
+ * Display help text.
+ */
 void help(int N, int n,	int d ,	int M ,	int freq, bool restart,
 			double L, double V,	double sigma,  std::string output_path, std::string restart_path);		
 

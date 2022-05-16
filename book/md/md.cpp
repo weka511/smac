@@ -29,20 +29,22 @@
 
 using namespace std;
 
+int         N           = 10000;
+int         n           = 100;
+int         d           = 2;
+int         M           = 100;
+int         freq        = 100;
 
+double      L           = 1;
+double      V           = 1;
+double      sigma       = 0.01;
+	
 /**
  * Main program. 
  */
 int main(int argc, char **argv) {
-	int         N           = 10000;
-	int         n           = 100;
-	int         d           = 2;
-	int         M           = 100;
-	int         freq        = 100;
+
 	bool        restart     = false;
-	double      L           = 1;
-	double      V           = 1;
-	double      sigma       = 0.01;
 	std::string output_path = "./foo.csv";
 	std::string restart_path;
 	
@@ -103,8 +105,10 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	
-	int status;
+	int status = UNDEFINED;
+
 	if (restart) {
+		int epoch0  = 0;
 		ifstream restart_stream(restart_path);
 		string line;
 		int line_number = 0;
@@ -118,7 +122,7 @@ int main(int argc, char **argv) {
 				cout<<token<<" :: "<< value << endl;
 				switch (line_number){
 					case 0:
-						N = std::stoi(value);
+						epoch0 = std::stoi(value);
 						break;
 					case 1:
 	 					n =std::stoi(value);
@@ -154,8 +158,10 @@ int main(int argc, char **argv) {
 			}
 			line_number++;
 		}
+		cout << "Restarting from Epoch " <<epoch0 <<", max=" << N<< endl;
 		Configuration configuration(n,d,sigma,particles);
-		status = evolve(configuration, N,  n, d,  M, L,  V,  sigma,  output_path,  status, freq);
+		status = SUCCESS;
+		status = evolve(configuration, N,  n, d,  M, L,  V,  sigma,  output_path,  status, freq, "check.csv", epoch0);
 	} else {
 		Configuration configuration(n,d,sigma);
 		status = configuration.initialize(M);
@@ -166,55 +172,71 @@ int main(int argc, char **argv) {
 	return status;
 }
 
+
+
 int evolve(Configuration& configuration,int N, int n,int d, int M, 
-		double L, double V, double sigma, std::string output_path, int status, int freq) {
+	double L, double V, double sigma, std::string output_path, int status, int freq, std::string check_path, int epoch) {
 	
-		for  (int i=0; SUCCESS==status && i<N && !killed();i++) {
-		if (i%freq ==0)
+	for  (int i=epoch; SUCCESS==status && i<N && !killed();i++) {
+		if (i%freq ==0) {
 			cout << "Epoch " << (i+1) << ", "<<
 		    configuration.get_n_pair_collisions() << " pair collisions, " <<
 			configuration.get_n_wall_collisions() << " wall collisions, " << endl;
+			if (file_exists(check_path.c_str())){
+				std:string cp = "cp " + check_path + " " + check_path+"~";
+				system (cp.c_str());
+			}
+			save(check_path, configuration,i);
+		}
+			
 		status = configuration.event_disks();
 	}
-	ofstream output(output_path);
-	output << "N="<<N         << endl;
-	output << "n="<<n         << endl;
-	output << "d="<<d         << endl;
-	output << "M="<<M         << endl;
-	output << "L="<<L         << endl;
-	output << "V="<<V         << endl;
-	output << "sigma="<<sigma << endl;
-	configuration.dump(output);
-	output.close();
+
+	save(output_path, configuration,N);
+	
 	return status;
 }
 
+void save(std::string output_path,Configuration& configuration,int epoch) {
+	ofstream output(output_path);
+	output << "N="     <<epoch     << endl;
+	output << "n="     <<n     << endl;
+	output << "d="     <<d     << endl;
+	output << "M="     <<M     << endl;
+	output << "L="     <<L     << endl;
+	output << "V="     <<V     << endl;
+	output << "sigma=" <<sigma << endl;
+	configuration.dump(output);
+	output.close();
+}
 
+bool file_exists (const char *filename) {
+  struct stat   buffer;   
+  return (stat (filename, &buffer) == 0);
+}
 
 bool killed(std::string kill_file){
-	bool kill = file_exists(kill_file.c_str());
-	if (kill) {
-		cout << "Killed" << endl;
+	const bool kill_file_found = file_exists(kill_file.c_str());
+	if (kill_file_found) {
+		cout << "File " <<kill_file << " found. Terminating program." << endl;
 		remove(kill_file.c_str());
 	}
-	return kill;
+	return kill_file_found;
 }
 
 void help(int N, int n,	int d ,	int M ,	int freq, bool restart,
 			double L, double V,	double sigma,  std::string output_path, std::string restart_path) {
-
-
-	cout << "Molecular Dynamics"                                 <<endl<<endl;
+	cout << "Molecular Dynamics"                                 << endl  << endl;
 	cout << "    Parameters"                                     << endl;
-	cout << "\tN\tNumber of iterations\t\t\t\t"                  << N<<endl;
-	cout << "\tn\tNumber of spheres\t\t\t\t"                     <<n <<endl;
-	cout << "\td\tDimension of box\t\t\t\t"                      <<d <<endl;
-	cout << "\tM\tNumber of attempts to build configuration\t"   <<M<<endl;
-	cout << "\tfreq\tFrequency for indicating progress\t\t"      <<freq<<endl;
-	cout << "\trestart\tSet if Configuration is to be restarted" <<endl;
-	cout << "\tL\tLength of side of box\t\t\t\t"                 <<L<<endl;
-	cout << "\tV\tNormalizer of initial velocity\t\t\t"          <<V<<endl;
-	cout << "\tsigma\tRadius of sphere\t\t\t\t"                  <<sigma<<endl;
+	cout << "\tN\tNumber of iterations\t\t\t\t"                  << N     << endl;
+	cout << "\tn\tNumber of spheres\t\t\t\t"                     << n     << endl;
+	cout << "\td\tDimension of box\t\t\t\t"                      << d     << endl;
+	cout << "\tM\tNumber of attempts to build configuration\t"   << M     << endl;
+	cout << "\tfreq\tFrequency for indicating progress\t\t"      << freq  << endl;
+	cout << "\trestart\tSet if Configuration is to be restarted" << endl;
+	cout << "\tL\tLength of side of box\t\t\t\t"                 << L     << endl;
+	cout << "\tV\tNormalizer of initial velocity\t\t\t"          << V     << endl;
+	cout << "\tsigma\tRadius of sphere\t\t\t\t"                  << sigma << endl;
 	cout << "\toutput_path" <<endl;
 	cout << "\trestart_path" <<endl;
 }
