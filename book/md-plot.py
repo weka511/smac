@@ -16,7 +16,7 @@
 '''Visualize output from md.cpp'''
 
 from argparse          import ArgumentParser
-from matplotlib.pyplot import figure,  legend,  show, subplot
+from matplotlib.pyplot import figure, show, subplot
 from numpy             import array, exp, log
 from os.path           import basename, splitext
 from matplotlib        import rc
@@ -52,7 +52,7 @@ def fit_boltzmann(n,bins):
     xs_non_empty = [x for x,_ in non_empty]
     n_non_empty  = [n for _,n in non_empty]
     fitted       = linregress(xs_non_empty,log(n_non_empty))
-    return -fitted.slope,xs_non_empty,[exp(fitted.intercept+fitted.slope*x) for x in xs_non_empty]
+    return -fitted.slope,fitted.rvalue,fitted.stderr,xs_non_empty,[exp(fitted.intercept+fitted.slope*x) for x in xs_non_empty]
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -118,10 +118,10 @@ if __name__=='__main__':
                            density = True,
                            color   = 'xkcd:blue',
                            label   = f'Observed after {N:,} collisions')
-    beta,xs,ys  = fit_boltzmann(n,bins)
+    beta,r,sd,xs,ys  = fit_boltzmann(n,bins)
     ax4.plot(xs,ys,
          color = 'xkcd:red',
-         label = f'Bolzmann $\\beta T=${beta:.4f}')
+         label = f'Bolzmann $\\beta T=${beta:.4f}, $r^2$={r**2:.4f}, std err={sd:.3f}')
     ax4.legend()
     ax4.set_title('Energies')
     ax4.set_xlabel('E')
