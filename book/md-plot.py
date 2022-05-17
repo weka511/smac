@@ -43,11 +43,11 @@ def read_input(file_name='md.csv'):
             Vs.append(float(v))
     return N,Xs,Ys,Us,Vs
 
-def get_curve(n,bins):
+def get_curve(n,bins,offset=1):
     xs     = array([0.5*(bins[i] + bins[i+1]) for i in range(n.shape[0])])
-    fitted = linregress(xs,log(n))
+    fitted = linregress(xs,log(n+offset))
     beta   = -fitted.slope
-    return beta,xs,exp(fitted.intercept+fitted.slope*xs)
+    return beta,xs,exp(fitted.intercept+fitted.slope*xs-offset)
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
