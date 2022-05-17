@@ -29,6 +29,8 @@ def read_input(file_name='md.csv'):
     Vs=[]
     with open(file_name) as input_file:
         for line in input_file:
+            if '=' in line: continue
+            if 'X1' in line: continue
             x,y,u,v = line.strip().split(",")
             Xs.append(float(x))
             Ys.append(float(y))
@@ -58,7 +60,7 @@ def parse_arguments():
                         default = None,
                         help    = 'Name of plot file')
     parser.add_argument('--input',
-                        default = 'md.csv',
+                        default = 'md/check.csv',
                         help    = 'Name of file produced by md.cpp')
     return parser.parse_args()
 
