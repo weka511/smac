@@ -16,27 +16,33 @@
 '''Visualize output from md.cpp'''
 
 from argparse          import ArgumentParser
-from matplotlib.pyplot import arrow, colorbar, figure, hist, hist2d, legend, plot, savefig, scatter,  show, subplot, tight_layout, title, xlabel, ylabel
+from matplotlib.pyplot import arrow, colorbar, figure, hist, hist2d, legend, plot, savefig, scatter,  show, subplot, \
+                                suptitle, tight_layout, title, xlabel, ylabel
 from numpy             import array, exp, log
 from os.path           import basename, splitext
 from matplotlib        import rc
 from scipy.stats       import linregress
 
 def read_input(file_name='md.csv'):
-    Xs=[]
-    Ys=[]
-    Us=[]
-    Vs=[]
+    Xs = []
+    Ys = []
+    Us = []
+    Vs = []
+    N  = None
     with open(file_name) as input_file:
         for line in input_file:
-            if '=' in line: continue
+            if '=' in line:
+                a,b = line.strip().split('=')
+                if a=='N':
+                    N = int(b)
+                continue
             if 'X1' in line: continue
             x,y,u,v = line.strip().split(",")
             Xs.append(float(x))
             Ys.append(float(y))
             Us.append(float(u))
             Vs.append(float(v))
-    return Xs,Ys,Us,Vs
+    return N,Xs,Ys,Us,Vs
 
 def get_curve(n,bins):
     xs     = array([0.5*(bins[i] + bins[i+1]) for i in range(n.shape[0])])
@@ -66,7 +72,7 @@ def parse_arguments():
 
 if __name__=='__main__':
     args = parse_arguments()
-    Xs,Ys,Us,Vs = read_input(file_name=args.input)
+    N,Xs,Ys,Us,Vs = read_input(file_name=args.input)
     Es          = [0.5*(u**2 + v**2) for u,v in zip(Us,Vs)]
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -111,6 +117,7 @@ if __name__=='__main__':
     title('Energies')
     xlabel('E')
 
+    suptitle(f'Configuration after {N:,} collisions')
     tight_layout()
 
     savefig(get_plot_file_name(args.plot))
