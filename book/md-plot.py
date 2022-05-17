@@ -21,8 +21,10 @@ from numpy             import array, exp, log
 from os.path           import basename, splitext
 from matplotlib        import rc
 from scipy.stats       import linregress
+from seaborn           import histplot
 
 def read_input(file_name='md.csv'):
+    '''Extract positions and velocities of each particle from input file'''
     Xs = []
     Ys = []
     Us = []
@@ -100,10 +102,12 @@ if __name__=='__main__':
     ax2.set_title('Velocities')
 
     ax3    = subplot(2,2,3)
-    hist2d = ax3.hist2d(Xs,Ys,
-                        bins  = 25,
-                        range = [[-1,1],[-1,1]])
-    fig.colorbar(hist2d[3],ax=ax3)
+    histplot(x        = Xs,
+             y        = Ys,
+             ax       = ax3,
+             cbar     = True,
+             bins     = 25,
+             binrange = ((-1,1),(-1,1)))
     ax3.set_xlabel('X')
     ax3.set_ylabel('Y')
     ax3.set_title('Density')
