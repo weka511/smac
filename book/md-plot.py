@@ -43,11 +43,14 @@ def read_input(file_name='md.csv'):
             Vs.append(float(v))
     return N,Xs,Ys,Us,Vs
 
-def get_curve(n,bins,offset=1):
-    xs     = array([0.5*(bins[i] + bins[i+1]) for i in range(n.shape[0])])
-    fitted = linregress(xs,log(n+offset))
-    beta   = -fitted.slope
-    return beta,xs,exp(fitted.intercept+fitted.slope*xs-offset)
+def fit_boltzmann(n,bins):
+    '''Fit an exponential to the counts in the non-empty bins'''
+    xs           = array([0.5*(bins[i] + bins[i+1]) for i in range(n.shape[0])])
+    non_empty    = [(x,count) for x,count in zip(xs,n) if count>0 ]
+    xs_non_empty = [x for x,_ in non_empty]
+    n_non_empty  = [n for _,n in non_empty]
+    fitted       = linregress(xs_non_empty,log(n_non_empty))
+    return -fitted.slope,xs_non_empty,[exp(fitted.intercept+fitted.slope*x) for x in xs_non_empty]
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -110,8 +113,8 @@ if __name__=='__main__':
                            bins    = 25,
                            density = True,
                            color   = 'xkcd:blue',
-                           label   = 'Observed after {N:,} collisions')
-    beta,xs,ys  = get_curve(n,bins)
+                           label   = f'Observed after {N:,} collisions')
+    beta,xs,ys  = fit_boltzmann(n,bins)
     ax4.plot(xs,ys,
          color = 'xkcd:red',
          label = f'Bolzmann $\\beta T=${beta:.4f}')
