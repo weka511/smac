@@ -81,6 +81,18 @@ class Particle{
 		delete this->_v;
 	}
 	
+	double delta(double * x, double * y, double * Delta){
+		for (int i=0;i<_d;i++)
+			Delta[i] = x[i] - y[i];
+	}
+	
+	double get_inner_product(double *x, double * y){
+		double result = 0;
+		for (int i=0;i<_d;i++)
+			result += x[i]*y[i];
+		return result;
+	}
+	
 	friend std::ostream & operator<<(std::ostream & stream, const Particle * particle);
 };
 

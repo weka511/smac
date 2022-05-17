@@ -22,34 +22,27 @@
 #include <random>
 #include "particle.hpp"
 
-double Particle::get_time_to_particle(Particle* other, double sigma) {
-	double DeltaX[_d], DeltaV[_d];
-	for (int i=0;i<_d;i++)
-		DeltaX[i] = _x[i] - other->_x[i];
-	for (int i=0;i<_d;i++)
-		DeltaV[i] = _v[i] - other->_v[i];
-	double DeltaVX = 0;
-	double DeltaV2 = 0;
-	double DeltaX2 = 0;
-	for (int i=0;i<_d;i++){
-		DeltaVX += _x[i]*_v[i];
-		DeltaX2 += _x[i]*_x[i];
-		DeltaV2 += _v[i]*_v[i];
-	}
-	
+
+
+double Particle::get_time_to_particle(	Particle* other,
+										double sigma) {
+	double DeltaX[_d];
+	delta(_x, other->_x,DeltaX);
+	double DeltaV[_d];
+	delta(_v, other->_v,DeltaV);
+	const double DeltaVX = get_inner_product(DeltaX,DeltaV);
+	const double DeltaV2 = get_inner_product(DeltaV,DeltaV);
+	const double DeltaX2 = get_inner_product(DeltaX,DeltaX);
 	const double Upsilon = DeltaVX*DeltaVX - DeltaV2*(DeltaX2-4*sigma*sigma);
 	return (Upsilon>0 && DeltaVX<0) ? -(DeltaVX + sqrt(Upsilon))/DeltaV2: std::numeric_limits<double>::infinity(); 
 }
 
 void Particle::pair_collide(Particle* other) {
-	double DeltaX[_d], DeltaV[_d];
-	for (int i=0;i<_d;i++)
-		DeltaX[i] = _x[i] - other->_x[i];
-	for (int i=0;i<_d;i++)
-		DeltaV[i] = _v[i] - other->_v[i];
-	double DeltaX2 = 0;
-	for (int i=0;i<_d;i++)
-		DeltaX2 += DeltaX[i]*DeltaX[i];
+	double DeltaX[_d];
+	delta(_x, other->_x,DeltaX);
+	double DeltaV[_d];
+	delta(_v, other->_v,DeltaV);
+	const double DeltaX2 = get_inner_product(DeltaX,DeltaX);
 	double e_perpendicular[_d];
 	for (int i=0;i<_d;i++)
 		e_perpendicular[i] = DeltaX[i]/sqrt(DeltaX2);
