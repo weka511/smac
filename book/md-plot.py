@@ -16,8 +16,7 @@
 '''Visualize output from md.cpp'''
 
 from argparse          import ArgumentParser
-from matplotlib.pyplot import arrow, colorbar, figure, hist, hist2d, legend, plot, savefig, scatter,  show, subplot, \
-                                suptitle, tight_layout, title, xlabel, ylabel
+from matplotlib.pyplot import figure,  legend,  show, subplot
 from numpy             import array, exp, log
 from os.path           import basename, splitext
 from matplotlib        import rc
@@ -32,9 +31,9 @@ def read_input(file_name='md.csv'):
     with open(file_name) as input_file:
         for line in input_file:
             if '=' in line:
-                a,b = line.strip().split('=')
-                if a=='N':
-                    N = int(b)
+                key,value = line.strip().split('=')
+                if key=='N':
+                    N = int(value)
                 continue
             if 'X1' in line: continue
             x,y,u,v = line.strip().split(",")
@@ -73,53 +72,55 @@ def parse_arguments():
 if __name__=='__main__':
     args = parse_arguments()
     N,Xs,Ys,Us,Vs = read_input(file_name=args.input)
-    Es          = [0.5*(u**2 + v**2) for u,v in zip(Us,Vs)]
+    Es           = [0.5*(u**2 + v**2) for u,v in zip(Us,Vs)]
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    figure(figsize=(12,12))
-    subplot(2,2,1)
-    scatter(Xs,Ys,
-            color = 'xkcd:blue')
-    xlabel('X')
-    ylabel('Y')
-    title('Positions')
+    fig = figure(figsize=(12,12))
 
-    subplot(2,2,2)
+    ax1 = subplot(2,2,1)
+    ax1.scatter(Xs,Ys,
+            color = 'xkcd:blue')
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
+    ax1.set_title('Positions')
+    ax1.set_xlim(-1,1)
+    ax1.set_ylim(-1,1)
+
+    ax2 = subplot(2,2,2)
     scale = 0.01
     for x,y,u,v in zip(Xs,Ys,Us,Vs):
-        arrow(x,y,scale*u,scale*v,
+        ax2.arrow(x,y,scale*u,scale*v,
               color      = 'xkcd:blue',
               head_width = 0.05)
-    xlabel('X')
-    ylabel('Y')
-    title('Velocities')
+    ax2.set_xlabel('X')
+    ax2.set_ylabel('Y')
+    ax2.set_title('Velocities')
 
-    subplot(2,2,3)
-    hist2d(Xs,Ys,
-           bins  = 25,
-           range = [[-1,1],[-1,1]])
-    colorbar()
-    xlabel('X')
-    ylabel('Y')
-    title('Density')
+    ax3    = subplot(2,2,3)
+    hist2d = ax3.hist2d(Xs,Ys,
+                        bins  = 25,
+                        range = [[-1,1],[-1,1]])
+    fig.colorbar(hist2d[3],ax=ax3)
+    ax3.set_xlabel('X')
+    ax3.set_ylabel('Y')
+    ax3.set_title('Density')
 
-    subplot(2,2,4)
-    n,bins,_    = hist(Es,
-                       bins    = 25,
-                       density = True,
-                       color   = 'xkcd:blue',
-                       label   = 'Observed')
+    ax4 = subplot(2,2,4)
+    n,bins,_    = ax4.hist(Es,
+                           bins    = 25,
+                           density = True,
+                           color   = 'xkcd:blue',
+                           label   = 'Observed after {N:,} collisions')
     beta,xs,ys  = get_curve(n,bins)
-    plot(xs,ys,
+    ax4.plot(xs,ys,
          color = 'xkcd:red',
          label = f'Bolzmann $\\beta T=${beta:.4f}')
-    legend()
-    title('Energies')
-    xlabel('E')
+    ax4.legend()
+    ax4.set_title('Energies')
+    ax4.set_xlabel('E')
 
-    suptitle(f'Configuration after {N:,} collisions')
-    tight_layout()
+    fig.tight_layout()
 
-    savefig(get_plot_file_name(args.plot))
+    fig.savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
