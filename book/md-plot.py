@@ -16,12 +16,14 @@
 '''Visualize output from md.cpp'''
 
 from argparse          import ArgumentParser
-from matplotlib.pyplot import figure, show, subplot
-from numpy             import array, exp, log
+from matplotlib.pyplot import colorbar, figure, show, subplot
+from numpy             import array, exp, log, sqrt
 from os.path           import basename, splitext
-from matplotlib        import rc
+from matplotlib        import rc, colors
+from matplotlib.cm     import jet, ScalarMappable
+from matplotlib.colors import Normalize
+from matplotlib.colorbar import ColorbarBase
 from scipy.stats       import linregress
-from seaborn           import histplot
 
 def read_input(file_name='md.csv'):
     '''Extract positions and velocities of each particle from input file'''
@@ -74,6 +76,32 @@ def parse_arguments():
                         help    = 'Name of file produced by md.cpp')
     return parser.parse_args()
 
+def get_density_by_shells(h):
+    n               = len(h)
+    cell_counts     = [4*(n-2*i-1) for i in range(n//2)]
+    assert sum(cell_counts)==n**2
+    particle_counts = []
+    n0              = 0
+    n1              = n
+    while n0<n1:
+        total = 0
+        total += sum([h[n0][j] for j in range(n0,n1-1)])
+        total += sum([h[n1-1][j] for j in range(n0,n1-1)])
+        total += sum([h[i][n0] for i in range(n0,n1-1)])
+        total += sum([h[i][n1-1] for i in range(n0,n1-1)])
+        particle_counts.append(total)
+        check_total = 0
+        check_total += sum([1 for j in range(n0,n1-1)])
+        check_total += sum([1 for j in range(n0,n1-1)])
+        check_total += sum([1 for i in range(n0,n1-1)])
+        check_total += sum([1 for i in range(n0,n1-1)])
+        assert cell_counts[n0]==check_total
+        n0 += 1
+        n1 -= 1
+
+    density = [p/c for c,p in zip(cell_counts,particle_counts)]
+    return range(len(density)),density
+
 if __name__=='__main__':
     args = parse_arguments()
     N,Xs,Ys,Us,Vs = read_input(file_name=args.input)
@@ -82,7 +110,7 @@ if __name__=='__main__':
     rc('text', usetex=True)
     fig = figure(figsize=(12,12))
 
-    ax1 = subplot(2,2,1)
+    ax1 = subplot(2,3,1)
     ax1.scatter(Xs,Ys,
             color = 'xkcd:blue')
     ax1.set_xlabel('X')
@@ -91,40 +119,58 @@ if __name__=='__main__':
     ax1.set_xlim(-1,1)
     ax1.set_ylim(-1,1)
 
-    ax2 = subplot(2,2,2)
-    scale = 0.01
+    ax2       = subplot(2,3,2)
+    scale     = 0.01
+    speeds    = [sqrt(u**2 + v**2) for u,v in zip(Us,Vs)]
+    cmap      = jet
+    cNorm     = colors.Normalize(vmin = min(speeds),
+                                 vmax = max(speeds))
+    scalarMap = ScalarMappable(norm=cNorm,cmap=cmap)
     for x,y,u,v in zip(Xs,Ys,Us,Vs):
         ax2.arrow(x,y,scale*u,scale*v,
-              color      = 'xkcd:blue',
+              color      = scalarMap.to_rgba(sqrt(u**2 + v**2)),
               head_width = 0.05)
+
+    ax2a       = subplot(2,3,3)
+    ColorbarBase(ax2a,
+                cmap        = cmap,
+                norm        = cNorm,
+                orientation = 'vertical')
     ax2.set_xlabel('X')
     ax2.set_ylabel('Y')
     ax2.set_title('Velocities')
 
-    ax3    = subplot(2,2,3)
-    histplot(x        = Xs,
-             y        = Ys,
-             ax       = ax3,
-             cbar     = True,
-             bins     = 25,
-             binrange = ((-1,1),(-1,1)))
+    ax3         = subplot(2,3,4)
+    h,_,_,image = ax3.hist2d(x       = Xs,
+                             y       = Ys,
+                             bins    = 50,
+                             density = False)
+    colorbar(image)
     ax3.set_xlabel('X')
     ax3.set_ylabel('Y')
     ax3.set_title('Density')
 
-    ax4 = subplot(2,2,4)
-    n,bins,_    = ax4.hist(Es,
-                           bins    = 25,
-                           density = True,
-                           color   = 'xkcd:blue',
-                           label   = f'Observed after {N:,} collisions')
+    shells,density = get_density_by_shells(h)
+    ax4            = subplot(2,3,5)
+    ax4.plot(shells,density)
+    ax4.set_xlabel('Depth')
+    ax4.set_ylabel('Density')
+    ax4.set_title('Density by shells')
+    ax4.set_ylim((0,max(density)))
+
+    ax5              = subplot(2,3,6)
+    n,bins,_         = ax5.hist(Es,
+                                bins    = 25,
+                                density = True,
+                                color   = 'xkcd:blue',
+                                label   = f'Observed: {N:,} collisions')
     beta,r,sd,xs,ys  = fit_boltzmann(n,bins)
-    ax4.plot(xs,ys,
+    ax5.plot(xs,ys,
          color = 'xkcd:red',
-         label = f'Bolzmann $\\beta T=${beta:.4f}, $r^2$={r**2:.4f}, std err={sd:.3f}')
-    ax4.legend()
-    ax4.set_title('Energies')
-    ax4.set_xlabel('E')
+         label = f'Bolzmann $\\beta T=${beta:.2f}, $r^2$={r**2:.2f}, std err={sd:.2f}')
+    ax5.legend()
+    ax5.set_title('Energies')
+    ax5.set_xlabel('E')
 
     fig.tight_layout()
 
