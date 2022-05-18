@@ -17,12 +17,9 @@
 
 from argparse          import ArgumentParser
 from matplotlib.pyplot import colorbar, figure, show, subplot
-from numpy             import array, exp, log, sqrt
+from numpy             import array, exp, log
 from os.path           import basename, splitext
-from matplotlib        import rc, colors
-from matplotlib.cm     import jet, ScalarMappable
-from matplotlib.colors import Normalize
-from matplotlib.colorbar import ColorbarBase
+from matplotlib        import rc
 from scipy.stats       import linregress
 
 def read_input(file_name='md.csv'):
@@ -110,7 +107,7 @@ if __name__=='__main__':
     rc('text', usetex=True)
     fig = figure(figsize=(12,12))
 
-    ax1 = subplot(2,3,1)
+    ax1 = subplot(2,2,1)
     ax1.scatter(Xs,Ys,
             color = 'xkcd:blue')
     ax1.set_xlabel('X')
@@ -119,28 +116,9 @@ if __name__=='__main__':
     ax1.set_xlim(-1,1)
     ax1.set_ylim(-1,1)
 
-    ax2       = subplot(2,3,2)
-    scale     = 0.01
-    speeds    = [sqrt(u**2 + v**2) for u,v in zip(Us,Vs)]
-    cmap      = jet
-    cNorm     = colors.Normalize(vmin = min(speeds),
-                                 vmax = max(speeds))
-    scalarMap = ScalarMappable(norm=cNorm,cmap=cmap)
-    for x,y,u,v in zip(Xs,Ys,Us,Vs):
-        ax2.arrow(x,y,scale*u,scale*v,
-              color      = scalarMap.to_rgba(sqrt(u**2 + v**2)),
-              head_width = 0.05)
 
-    ax2a       = subplot(2,3,3)
-    ColorbarBase(ax2a,
-                cmap        = cmap,
-                norm        = cNorm,
-                orientation = 'vertical')
-    ax2.set_xlabel('X')
-    ax2.set_ylabel('Y')
-    ax2.set_title('Velocities')
 
-    ax3         = subplot(2,3,4)
+    ax3         = subplot(2,2,2)
     h,_,_,image = ax3.hist2d(x       = Xs,
                              y       = Ys,
                              bins    = 50,
@@ -151,14 +129,14 @@ if __name__=='__main__':
     ax3.set_title('Density')
 
     shells,density = get_density_by_shells(h)
-    ax4            = subplot(2,3,5)
+    ax4            = subplot(2,2,3)
     ax4.plot(shells,density)
     ax4.set_xlabel('Depth')
     ax4.set_ylabel('Density')
     ax4.set_title('Density by shells')
     ax4.set_ylim((0,max(density)))
 
-    ax5              = subplot(2,3,6)
+    ax5              = subplot(2,2,4)
     n,bins,_         = ax5.hist(Es,
                                 bins    = 25,
                                 density = True,
