@@ -18,14 +18,35 @@
 
 #include <cstdlib> 
 #include <fstream>
-#include <iostream>
 #include <random>
 #include "particle.hpp"
 
 
+/**
+ *   Place particle in a random position.
+ */
+void Particle::randomizeX(uniform_real_distribution<double> & distr,
+							default_random_engine& eng,
+							const  double scale[3]) {
+	for (int i=0;i<_d;i++)
+		_x[i] = scale[i] * distr(eng);
+}
+	
+/**
+ *   Assign random velicities to a particle
+ */
+void Particle::randomizeV(uniform_real_distribution<double> & distr,
+							default_random_engine& eng,
+							const double scale[3]) {
+for (int i=0;i<_d;i++)
+	_v[i] = scale[i] * distr(eng);
+}
 
+/**
+ * Find time for this particle to collide with a specified other particle
+ */
 double Particle::get_time_to_particle(	Particle* other,
-										double sigma) {
+										const double sigma) {
 	double DeltaX[_d];
 	delta(_x, other->_x,DeltaX);
 	double DeltaV[_d];
@@ -37,6 +58,9 @@ double Particle::get_time_to_particle(	Particle* other,
 	return (Upsilon>0 && DeltaVX<0) ? -(DeltaVX + sqrt(Upsilon))/DeltaV2: std::numeric_limits<double>::infinity(); 
 }
 
+/**
+ *  Collide particle with another
+ */
 void Particle::pair_collide(Particle* other) {
 	double DeltaX[_d];
 	delta(_x, other->_x,DeltaX);
@@ -55,7 +79,16 @@ void Particle::pair_collide(Particle* other) {
 	}
 }
 
-std::ostream & operator<<(std::ostream & stream, const Particle * particle) {
-    stream << particle->_x[0] << ", " << particle->_x[1]<< ", " << particle->_v[0] << ", " << particle->_v[1];
+/**
+ *  Used to outout position and velocity of particle
+ */
+ostream & operator<<(ostream & stream,
+					const Particle * particle) {
+    stream << particle->_x[0] << ", " << particle->_x[1]<< ", ";
+	if (particle->_d==3)
+		stream<<particle->_x[2] << ", ";
+	stream  << particle->_v[0] << ", " << particle->_v[1]<< ", ";
+	if (particle->_d==3)
+		stream<<particle->_v[2] ;
     return stream;
 }

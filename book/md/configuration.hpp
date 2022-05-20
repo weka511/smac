@@ -20,11 +20,16 @@
 
 #include "particle.hpp"
 
+using namespace std;
+
 const int SUCCESS                = 0;
 const int FAIL_DISKS_TOO_CLOSE   = SUCCESS + 1;
 const int FAIL_BUILD_CONFIG      = FAIL_DISKS_TOO_CLOSE + 1;
 const int UNDEFINED              = std::numeric_limits<int>::max();	
 
+/**
+ * This class represents a collision with a wall
+ */
 class WallCollision{
   public:
 	const double _time;
@@ -33,6 +38,9 @@ class WallCollision{
 	WallCollision(const double time, const int j, const int wall) : _time(time), _j(j), _wall(wall){}
 };
 
+/**
+ * This class represents a collision with a pair of particles
+ */
 class ParticleCollision{
   public:
   	const double _time;
@@ -46,14 +54,14 @@ class ParticleCollision{
  */
 class Configuration{
 
-	const int _n;           // Number of particles
-	const int _d;           // Dimension of box
-	const double _sigma;    // Radius of a particle
-	double *L;
-	double *V;
-	std::vector<Particle*> _particles; 
-	int n_wall_collisions;
-	int n_pair_collisions;
+	const int         _n;           // Number of particles
+	const int         _d;           // Dimension of box
+	const double      _sigma;    // Radius of a particle
+	double *          L;
+	double *          V;
+	vector<Particle*> _particles; 
+	int               n_wall_collisions;
+	int               n_pair_collisions;
 
   public:
  
@@ -81,7 +89,7 @@ class Configuration{
 	Configuration(	const int n,
 					const int d,
 					const double sigma,
-					std::vector<Particle*> particles) : _n(n), _d(d), _sigma(sigma), 
+					vector<Particle*> particles) : _n(n), _d(d), _sigma(sigma), 
 														n_wall_collisions(0), n_pair_collisions(0)  {
 	   	L = new double(d);
 		V = new double(d);
@@ -91,32 +99,33 @@ class Configuration{
 			L[2] = 1;
 			V[2] = 1;
 		}
-		for (std::vector<Particle*>::iterator it = particles.begin() ; it != particles.end(); ++it) {
+		for (vector<Particle*>::iterator it = particles.begin() ; it != particles.end(); ++it)
 			_particles.push_back(*it);
-		}
+
 	}	
 	
 	/**
-	 * Attempt to populate a configuration with a set up admissable particles.
+	 * Attempt to populate a configuration with a set of admissable particles.
 	 *
 	 * Parameters:
 	 *     n       Number of attenpts
 	 */
 	int initialize(int n);
 	
+	/**
+     *  Algorithm 2.1 from SMAC. Work out when the next collision will occur,
+     *  then make the collision happen.
+     */
 	int event_disks();
 	
-	void dump(std::ofstream& output) {
-		output << "X1,X2,V1,V2"   << std::endl;
-		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
-			output << *particle << std::endl;
-	}
-	
-
-
 	int get_n_wall_collisions() {return n_wall_collisions;}
 	
 	int get_n_pair_collisions() {return n_pair_collisions;}
+	
+	/**
+	 *  Output configuration and velocities to specified stream
+	 */
+	void dump(ofstream& output);
 	
 	virtual ~Configuration() {
 		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
@@ -124,8 +133,8 @@ class Configuration{
 	}
   private:
   
-  	int _build_config(  std::uniform_real_distribution<double> & distr,
-						std::default_random_engine& eng);
+  	int _build_config(  uniform_real_distribution<double> & distr,
+						default_random_engine& eng);
 						
 	WallCollision     _get_next_wall_collision();
 	

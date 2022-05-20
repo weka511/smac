@@ -26,12 +26,10 @@
 #include <sys/stat.h> 
 #include <vector>
 #include "configuration.hpp"
-
 using namespace std;
 
-
-int Configuration::_build_config(std::uniform_real_distribution<double> & distr,
-								std::default_random_engine& eng){
+int Configuration::_build_config(uniform_real_distribution<double> & distr,
+								default_random_engine& eng){
 	double L_reduced[_d];
 	
 	for (int i=0;i<_d;i++)
@@ -50,10 +48,16 @@ int Configuration::_build_config(std::uniform_real_distribution<double> & distr,
 	return SUCCESS;
 }
 	
+/**
+  * Attempt to populate a configuration with a set of admissable particles.
+  *
+  * Parameters:
+  *     n       Number of attenpts
+  */
 int Configuration::initialize(int n){
-	std::random_device                     rd;
-	std::default_random_engine             eng(rd());
-	std::uniform_real_distribution<double> distr(-1, 1);
+	random_device                     rd;
+	default_random_engine             eng(rd());
+	uniform_real_distribution<double> distr(-1, 1);
 	for (int i=0;i<n;i++)
 		if (SUCCESS == _build_config(distr,eng)){
 			cout << "Built configuration after " << (i+1) << " attempts" << endl;
@@ -64,39 +68,10 @@ int Configuration::initialize(int n){
 	return FAIL_BUILD_CONFIG;
 }
 
-WallCollision Configuration::_get_next_wall_collision(){
-	double t    = std::numeric_limits<double>::infinity();
-	double j    = -1;
-	double wall = -1;
-	for (int i=0;i<_n;i++)
-		for (int k=0;k<_d;k++){
-			double t0 = _particles[i]->get_time_to_wall(k, L[k]-_sigma);
-			if (t0<t) {
-				t    = t0;
-				j    = i;
-				wall = k;
-			}
-		}			
-	return WallCollision(t,j,wall);
-}
-
-
-ParticleCollision Configuration::_get_next_particle_collision(){
-	double t = std::numeric_limits<double>::infinity();
-	double k = -1;
-	double l = -1;
-	for (int i=0;i<_n;i++)
-		for (int j=0;j<i;j++){
-			double t0 = _particles[i]->get_time_to_particle(_particles[j], _sigma);
-			if (t0<t) {
-				t = t0;
-				k = i;
-				l = j;
-			}
-		}
-	return ParticleCollision(t,k,l);
-}
-
+/**
+ *  Algorithm 2.1 from SMAC. Work out when the next collision will occur,
+ *  then make the collision happen.
+ */
 int Configuration::event_disks(){
 	WallCollision next_wall_collision         = _get_next_wall_collision();
 	ParticleCollision next_particle_collision = _get_next_particle_collision();
@@ -116,3 +91,49 @@ int Configuration::event_disks(){
 	}
 	return SUCCESS;
 }
+
+WallCollision Configuration::_get_next_wall_collision(){
+	double t    = numeric_limits<double>::infinity();
+	double j    = -1;
+	double wall = -1;
+	for (int i=0;i<_n;i++)
+		for (int k=0;k<_d;k++){
+			double t0 = _particles[i]->get_time_to_wall(k, L[k]-_sigma);
+			if (t0<t) {
+				t    = t0;
+				j    = i;
+				wall = k;
+			}
+		}			
+	return WallCollision(t,j,wall);
+}
+
+
+ParticleCollision Configuration::_get_next_particle_collision(){
+	double t = numeric_limits<double>::infinity();
+	double k = -1;
+	double l = -1;
+	for (int i=0;i<_n;i++)
+		for (int j=0;j<i;j++){
+			double t0 = _particles[i]->get_time_to_particle(_particles[j], _sigma);
+			if (t0<t) {
+				t = t0;
+				k = i;
+				l = j;
+			}
+		}
+	return ParticleCollision(t,k,l);
+}
+
+	/**
+	 *  Output configuration and velocities to specified stream
+	 */
+	void Configuration::dump(ofstream& output) {
+		if (_d==2)
+			output << "X1,X2,V1,V2"   << endl;
+		else
+			output << "X1,X2,X3,V1,V2,V3"   << endl;
+		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
+			output << *particle << std::endl;
+	}
+
