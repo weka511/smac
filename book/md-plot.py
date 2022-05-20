@@ -24,19 +24,19 @@ from scipy.stats       import linregress
 
 def read_input(file_name='md.csv'):
     '''Extract positions and velocities of each particle from input file'''
-    Xs    = []
-    Ys    = []
-    Zs    = []
-    Us    = []
-    Vs    = []
-    Ws    = []
-    N     = None
-    n     = None
-    d     = None
-    M     = None
-    L     = None
-    V     = None
-    sigma = None
+    Xs                = []
+    Ys                = []
+    Zs                = []
+    Us                = []
+    Vs                = []
+    Ws                = []
+    N                 = None
+    n                 = None
+    d                 = None
+    M                 = None
+    L                 = None
+    V                 = None
+    sigma             = None
     n_wall_collisions = 0
     n_pair_collisions = 0
     with open(file_name) as input_file:
@@ -57,6 +57,10 @@ def read_input(file_name='md.csv'):
                     n_pair_collisions = int(value)
                 if key=='sigma':
                     sigma = float(value)
+                if key=='L':
+                    L = float(value)
+                if key=='V':
+                    V = float(value)
             elif 'X1' in line:
                 continue
             else:
@@ -147,25 +151,44 @@ if __name__=='__main__':
         ax1.set_zlabel('Z')
         ax1.set_zlim(-1,1)
 
-    if d==2:
-        ax3         = subplot(2,2,2)
-        h,_,_,image = ax3.hist2d(x       = Xs,
-                                 y       = Ys,
-                                 bins    = 50,
-                                 density = False)
-        colorbar(image)
-        ax3.set_xlabel('X')
-        ax3.set_ylabel('Y')
-        ax3.set_title('Density')
+    ax3         = subplot(2,2,2)
+    ax3.hist(Xs,
+             bins  = n//10,
+             color = 'xkcd:blue',
+             alpha = 0.5,
+             label = 'X')
+    ax3.hist(Ys,
+             bins  = n//10,
+             color = 'xkcd:red',
+             alpha = 0.5,
+             label = 'Y')
+    if d==3:
+        ax3.hist(Zs,
+                 bins  = n//10,
+                 color = 'xkcd:green',
+                 alpha = 0.5,
+                 label = 'Z')
+    ax3.legend()
+    ax3.set_title('Distribution of positions')
+    # if d==2:
+        # ax3         = subplot(2,2,2)
+        # h,_,_,image = ax3.hist2d(x       = Xs,
+                                 # y       = Ys,
+                                 # bins    = 50,
+                                 # density = False)
+        # colorbar(image)
+        # ax3.set_xlabel('X')
+        # ax3.set_ylabel('Y')
+        # ax3.set_title('Density')
 
-    if d==2:
-        shells,density = get_density_by_shells(h)
-        ax4            = subplot(2,2,3)
-        ax4.plot(shells,density)
-        ax4.set_xlabel('Depth')
-        ax4.set_ylabel('Density')
-        ax4.set_title('Density by shells')
-        ax4.set_ylim((0,max(density)))
+    # if d==2:
+        # shells,density = get_density_by_shells(h)
+        # ax4            = subplot(2,2,3)
+        # ax4.plot(shells,density)
+        # ax4.set_xlabel('Depth')
+        # ax4.set_ylabel('Density')
+        # ax4.set_title('Density by shells')
+        # ax4.set_ylim((0,max(density)))
 
     ax5              = subplot(2,2,4)
     n,bins,_         = ax5.hist(Es,
