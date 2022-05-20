@@ -45,7 +45,7 @@ def read_input(file_name='md.csv'):
                 if key=='N':
                     N = int(value)
                 if key=='n':
-                    N = int(value)
+                    n = int(value)
                 if key=='d':
                     d = int(value)
                 if key=='M':
@@ -55,9 +55,7 @@ def read_input(file_name='md.csv'):
             elif 'X1' in line:
                 continue
             else:
-                values = line.strip().split(",")
-                assert 2*d == len(values)
-                value_iterator = iter(values)
+                value_iterator = iter(line.strip().split(","))
                 Xs.append(float(next(value_iterator)))
                 Ys.append(float(next(value_iterator)))
                 Zs.append(float(next(value_iterator)) if d==3 else 0.0)
@@ -123,10 +121,10 @@ def get_density_by_shells(h):
     return range(len(density)),density
 
 if __name__=='__main__':
-    args = parse_arguments()
+    args                     = parse_arguments()
     Params,Xs,Ys,Zs,Us,Vs,Ws = read_input(file_name=args.input)
     N,n,d,M,L,V,sigma        = Params
-    Es           = [0.5*(u**2 + v**2* + w**2) for u,v,w in zip(Us,Vs,Ws)]
+    Es                       = [0.5*(u**2 + v**2* + w**2) for u,v,w in zip(Us,Vs,Ws)]
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     fig = figure(figsize=(12,12))
@@ -168,7 +166,7 @@ if __name__=='__main__':
                                 bins    = 25,
                                 density = True,
                                 color   = 'xkcd:blue',
-                                label   = f'Observed: {N:,} collisions')
+                                label   = f'Observed: {N:,} Epochs')
     beta,r,sd,xs,ys  = fit_boltzmann(n,bins)
     ax5.plot(xs,ys,
          color = 'xkcd:red',
