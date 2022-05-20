@@ -15,7 +15,7 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
 
-
+#include <cassert>
 #include <cstdlib> 
 #include <fstream>
 #include <getopt.h>
@@ -29,6 +29,10 @@
 
 using namespace std;
 
+enum ParserState {
+	START     = 0, 
+	PARTICLES = 2
+};
 int         N           = 10000;
 int         n           = 100;
 int         d           = 2;
@@ -44,9 +48,9 @@ double      sigma       = 0.01;
  */
 int main(int argc, char **argv) {
 
-	bool        restart     = false;
-	std::string output_path = "./foo.csv";
-	std::string restart_path;
+	bool        restart = false;
+	string output_path  = "./foo.csv";
+	string restart_path;
 	
 	struct option long_options[] = {
 			{"epochs",    required_argument,	0, 	'N'},
@@ -62,8 +66,7 @@ int main(int argc, char **argv) {
 			{"restart",   required_argument,    0,  'r'},
 			{0, 				0, 				0, 	0}
 	};	
-	
-	
+
 	int c;
 	int option_index = 0;
 	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:r:",long_options, &option_index)) != -1)
@@ -108,74 +111,84 @@ int main(int argc, char **argv) {
 	int status = UNDEFINED;
 
 	if (restart) {
-		int epoch0  = 0;
+		ParserState parser_state = START;
+		int epoch  = 0;
 		ifstream restart_stream(restart_path);
 		string line;
-		int line_number = 0;
-		std::vector<Particle*> particles;
+		vector<Particle*> particles;
 		while (getline(restart_stream,line)){
-			if (line_number<7){
-				std::string delimiter = "=";
-				int pos = line.find(delimiter);
-				std::string token = line.substr(0, pos);
-				std::string value = line.substr(pos+1);
-				cout<<token<<" :: "<< value << endl;
-				switch (line_number){
-					case 0:
-						epoch0 = std::stoi(value);
-						break;
-					case 1:
-	 					n =std::stoi(value);
-						break;
-					case 2:
-						d=std::stoi(value);
-						break;
-					case 3:
-						M = std::stoi(value);
-						break;
-					case 4:
-						L = std::stoi(value);
-						break;
-					case 5:
-						V = std::stoi(value);
-						break;
-					case 6:
-						sigma = std::stod(value);
-				}
+			int pos;
+			switch(parser_state){
+				case START:
+					pos = line.find("=");
+					if (pos>-1) {
+						string key = line.substr(0,pos);
+						string value = line.substr(pos+1);
+						
+						if (key=="N")
+							epoch = stoi(value);
+						else if (key=="n")
+							n = stoi(value);
+						else if (key=="d")
+							d = stoi(value);
+						else if (key=="M")
+							M = stoi(value);
+						else if (key=="L")
+							L = stoi(value);
+						else if (key=="V")
+							V = stoi(value);
+						else if (key=="sigma")
+							sigma = stod(value);
+					} else
+						parser_state = PARTICLES;
+					break;
+				case PARTICLES:{
+						double values[2*d];
+						string delimiter = ",";
+						int start = 0;
+						for (int i=0; i<2*d;i++) {
+							int pos = line.find(delimiter, pos=start);
+							string token = line.substr(start, pos-start);
+							start = pos+1;
+							values[i] = stod(token);
+						}
+			
+						particles.push_back(new Particle(d,values));
+				}	
+				break;
 			}
-			if (line_number>7){
-				double values[4];
-				std::string delimiter = ",";
-				int start = 0;
-				for (int i=0; i<4;i++) {
-					int pos = line.find(delimiter, pos=start);
-					std::string token = line.substr(start, pos-start);
-					start = pos+1;
-					values[i] = stod(token);
-				}
-				Particle* p = new Particle(d,values);
-				particles.push_back(p);
-			}
-			line_number++;
 		}
-		cout << "Restarting from Epoch " <<epoch0 <<", max=" << N<< endl;
+		assert(n==particles.size());
+		cout << "Restarting from Epoch " <<epoch <<", max=" << N<< endl;
 		Configuration configuration(n,d,sigma,particles);
 		status = SUCCESS;
-		status = evolve(configuration, N,  n, d,  M, L,  V,  sigma,  output_path,  status, freq, "check.csv", epoch0);
+		status = evolve(configuration, N,  n, d,  M, L,  V,  sigma,  output_path,  status, freq, "check.csv", epoch);
 	} else {
 		Configuration configuration(n,d,sigma);
 		status = configuration.initialize(M);
 		status = evolve(configuration, N,  n, d,  M, L,  V,  sigma,  output_path,  status, freq);
 	}
 
-
 	return status;
 }
 
 
-
-int evolve(Configuration& configuration,int N, int n,int d, int M, 
-	double L, double V, double sigma, std::string output_path, int status, int freq, std::string check_path, int epoch) {
+/**
+ *  Drive configuration forward a specified number of epochs
+ */
+int evolve(Configuration& configuration,
+			int N,
+			int n,
+			int d,
+			int M, 
+			double L,
+			double V,
+			double sigma,
+			string output_path,
+			int status,
+			int freq,
+			string check_path, 
+			int epoch) {
 	
 	for  (int i=epoch; SUCCESS==status && i<N && !killed();i++) {
 		if (i%freq ==0) {
@@ -197,7 +210,12 @@ int evolve(Configuration& configuration,int N, int n,int d, int M,
 	return status;
 }
 
-void save(std::string output_path,Configuration& configuration,int epoch) {
+/**
+ *    Save configuration to specified file
+ */
+void save(string output_path,
+		Configuration& configuration,
+		const int epoch) {
 	ofstream output(output_path);
 	output << "N="     <<epoch     << endl;
 	output << "n="     <<n     << endl;
@@ -210,12 +228,18 @@ void save(std::string output_path,Configuration& configuration,int epoch) {
 	output.close();
 }
 
+/**
+ *   Check to see whether a specified file exists
+ */
 bool file_exists (const char *filename) {
   struct stat   buffer;   
   return (stat (filename, &buffer) == 0);
 }
 
-bool killed(std::string kill_file){
+/**
+ *   Check to see whether user wants to terminate program.
+ */
+bool killed(string kill_file){
 	const bool kill_file_found = file_exists(kill_file.c_str());
 	if (kill_file_found) {
 		cout << "File " <<kill_file << " found. Terminating program." << endl;
@@ -224,8 +248,20 @@ bool killed(std::string kill_file){
 	return kill_file_found;
 }
 
-void help(int N, int n,	int d ,	int M ,	int freq, bool restart,
-			double L, double V,	double sigma,  std::string output_path, std::string restart_path) {
+/**
+ * Display help text.
+ */
+void help(	int    N, 
+			int    n,	
+			int    d,
+			int    M,
+			int    freq,
+			bool   restart,
+			double L, 
+			double V,
+			double sigma,
+			string output_path,
+			string restart_path) {
 	cout << "Molecular Dynamics"                                 << endl        << endl;
 	cout << "    Parameters"                                                    << endl;
 	cout << "\tN\tNumber of iterations\t\t\t\t"                  << N           << endl;

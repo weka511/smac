@@ -24,10 +24,10 @@
 /**
  *   Check to see whether user wants to terminate program.
  */
-bool killed(std::string kill_file="kill.txt");
+bool killed(string kill_file="kill.txt");
 
 /**
- *   Check to see whether a file exists
+ *   Check to see whether a specified file exists
  */
 bool file_exists (const char *filename);
 
@@ -42,21 +42,32 @@ int evolve( Configuration& configuration,
 			double         L, 
 			double         V, 
 			double         sigma,
-			std::string    output_path, 
+			string         output_path, 
 			int            status, 
 			int            freq,
-			std::string    check_path = "check.csv",
-			int            epoch = 0);
+			string         check_path = "check.csv",
+			const int      epoch = 0);
 
-void save(  std::string    output_path,
+/**
+ *    Save configuration to specified file
+ */
+void save(  string    output_path,
 			Configuration& configuration,
 			int            epoch);
 
 /**
  * Display help text.
  */
-void help(int N, int n,	int d ,	int M ,	int freq, bool restart,
-			double L, double V,	double sigma,  std::string output_path, std::string restart_path);		
-
+void help(	int    N, 
+			int    n,	
+			int    d,
+			int    M,
+			int    freq,
+			bool   restart,
+			double L, 
+			double V,
+			double sigma,
+			string output_path,
+			string restart_path);
 #endif
 
