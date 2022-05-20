@@ -37,7 +37,8 @@ def read_input(file_name='md.csv'):
     L     = None
     V     = None
     sigma = None
-
+    n_wall_collisions = 0
+    n_pair_collisions = 0
     with open(file_name) as input_file:
         for line in input_file:
             if '=' in line:
@@ -50,6 +51,10 @@ def read_input(file_name='md.csv'):
                     d = int(value)
                 if key=='M':
                     M = int(value)
+                if key=='wall_collisions':
+                    n_wall_collisions = int(value)
+                if key=='pair_collisions':
+                    n_pair_collisions = int(value)
                 if key=='sigma':
                     sigma = float(value)
             elif 'X1' in line:
@@ -63,7 +68,7 @@ def read_input(file_name='md.csv'):
                 Vs.append(float(next(value_iterator)))
                 Ws.append(float(next(value_iterator)) if d==3 else 0.0)
 
-    return (N,n,d,M,L,V,sigma),Xs,Ys,Zs,Us,Vs,Ws
+    return (N,n,d,M,L,V,sigma,n_wall_collisions,n_pair_collisions),Xs,Ys,Zs,Us,Vs,Ws
 
 def fit_boltzmann(n,bins):
     '''Fit an exponential to the counts in the non-empty bins'''
@@ -121,10 +126,11 @@ def get_density_by_shells(h):
     return range(len(density)),density
 
 if __name__=='__main__':
-    args                     = parse_arguments()
-    Params,Xs,Ys,Zs,Us,Vs,Ws = read_input(file_name=args.input)
-    N,n,d,M,L,V,sigma        = Params
-    Es                       = [0.5*(u**2 + v**2* + w**2) for u,v,w in zip(Us,Vs,Ws)]
+    args                                                  = parse_arguments()
+    Params,Xs,Ys,Zs,Us,Vs,Ws                              = read_input(file_name=args.input)
+    N,n,d,M,L,V,sigma,n_wall_collisions,n_pair_collisions = Params
+    Es                                                    = [0.5*(u**2 + v**2* + w**2) for u,v,w in zip(Us,Vs,Ws)]
+    pair_collision_ratio                                  = n_pair_collisions/(n_wall_collisions+n_pair_collisions)
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     fig = figure(figsize=(12,12))
@@ -166,7 +172,7 @@ if __name__=='__main__':
                                 bins    = 25,
                                 density = True,
                                 color   = 'xkcd:blue',
-                                label   = f'Observed: {N:,} Epochs')
+                                label   = f'Observed: {N:,} Epochs, with {100*pair_collision_ratio:.1f}\% pair collisions')
     beta,r,sd,xs,ys  = fit_boltzmann(n,bins)
     ax5.plot(xs,ys,
          color = 'xkcd:red',

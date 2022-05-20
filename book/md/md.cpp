@@ -209,13 +209,15 @@ void save(string output_path,
 		Configuration& configuration,
 		const int epoch) {
 	ofstream output(output_path);
-	output << "N="     <<epoch     << endl;
-	output << "n="     <<n     << endl;
-	output << "d="     <<d     << endl;
-	output << "M="     <<M     << endl;
-	output << "L="     <<L     << endl;
-	output << "V="     <<V     << endl;
-	output << "sigma=" <<sigma << endl;
+	output << "N="               <<epoch                                   << endl;
+	output << "n="               <<n                                       << endl;
+	output << "d="               <<d                                       << endl;
+	output << "M="               <<M                                       << endl;
+	output << "L="               <<L                                       << endl;
+	output << "V="               <<V                                       << endl;
+	output << "sigma="           <<sigma                                   << endl;
+	output << "wall_collisions=" <<  configuration.get_n_wall_collisions() << endl;
+	output << "pair_collisions=" <<  configuration.get_n_pair_collisions() << endl;
 	configuration.dump(output);
 	output.close();
 }
