@@ -35,16 +35,8 @@ bool file_exists (const char *filename);
  *  Drive configuration forward a specified number of epochs
  */
 int evolve( Configuration& configuration,
-			int            N,
-			int            n,
-			int            d, 
-			int            M, 
-			double         L, 
-			double         V, 
-			double         sigma,
 			string         output_path, 
 			int            status, 
-			int            freq,
 			string         check_path = "check.csv",
 			const int      epoch = 0);
 
@@ -58,15 +50,7 @@ void save(  string    output_path,
 /**
  * Display help text.
  */
-void help(	int    N, 
-			int    n,	
-			int    d,
-			int    M,
-			int    freq,
-			bool   restart,
-			double L, 
-			double V,
-			double sigma,
+void help(	bool   restart,
 			string output_path,
 			string restart_path);
 #endif

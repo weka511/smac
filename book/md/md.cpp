@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 				restart_path = optarg;
 				break;
 			case 'h':
-				help( N,  n,	 d ,	 M ,	 freq,  restart, L,  V,	 sigma ,  output_path, restart_path);
+				help( restart, output_path, restart_path);
 				exit(SUCCESS);
 			default:
 				abort();
@@ -162,11 +162,11 @@ int main(int argc, char **argv) {
 		cout << "Restarting from Epoch " <<epoch <<", max=" << N<< endl;
 		Configuration configuration(n,d,sigma,particles);
 		status = SUCCESS;
-		status = evolve(configuration, N,  n, d,  M, L,  V,  sigma,  output_path,  status, freq, "check.csv", epoch);
+		status = evolve(configuration, output_path,  status,  "check.csv", epoch);
 	} else {
 		Configuration configuration(n,d,sigma);
 		status = configuration.initialize(M);
-		status = evolve(configuration, N,  n, d,  M, L,  V,  sigma,  output_path,  status, freq);
+		status = evolve(configuration,  output_path,  status);
 	}
 
 	return status;
@@ -177,18 +177,10 @@ int main(int argc, char **argv) {
  *  Drive configuration forward a specified number of epochs
  */
 int evolve(Configuration& configuration,
-			int N,
-			int n,
-			int d,
-			int M, 
-			double L,
-			double V,
-			double sigma,
-			string output_path,
-			int status,
-			int freq,
-			string check_path, 
-			int epoch) {
+			string         output_path, 
+			int            status, 
+			string         check_path,
+			const int      epoch) {
 	
 	for  (int i=epoch; SUCCESS==status && i<N && !killed();i++) {
 		if (i%freq ==0) {
@@ -251,15 +243,7 @@ bool killed(string kill_file){
 /**
  * Display help text.
  */
-void help(	int    N, 
-			int    n,	
-			int    d,
-			int    M,
-			int    freq,
-			bool   restart,
-			double L, 
-			double V,
-			double sigma,
+void help(	bool   restart,
 			string output_path,
 			string restart_path) {
 	cout << "Molecular Dynamics"                                 << endl        << endl;
