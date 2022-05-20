@@ -24,25 +24,48 @@ from scipy.stats       import linregress
 
 def read_input(file_name='md.csv'):
     '''Extract positions and velocities of each particle from input file'''
-    Xs = []
-    Ys = []
-    Us = []
-    Vs = []
-    N  = None
+    Xs    = []
+    Ys    = []
+    Zs    = []
+    Us    = []
+    Vs    = []
+    Ws    = []
+    N     = None
+    n     = None
+    d     = None
+    M     = None
+    L     = None
+    V     = None
+    sigma = None
+
     with open(file_name) as input_file:
         for line in input_file:
             if '=' in line:
                 key,value = line.strip().split('=')
                 if key=='N':
                     N = int(value)
+                if key=='n':
+                    N = int(value)
+                if key=='d':
+                    d = int(value)
+                if key=='M':
+                    M = int(value)
+                if key=='sigma':
+                    sigma = float(value)
+            elif 'X1' in line:
                 continue
-            if 'X1' in line: continue
-            x,y,u,v = line.strip().split(",")
-            Xs.append(float(x))
-            Ys.append(float(y))
-            Us.append(float(u))
-            Vs.append(float(v))
-    return N,Xs,Ys,Us,Vs
+            else:
+                values = line.strip().split(",")
+                assert 2*d == len(values)
+                value_iterator = iter(values)
+                Xs.append(float(next(value_iterator)))
+                Ys.append(float(next(value_iterator)))
+                Zs.append(float(next(value_iterator)) if d==3 else 0.0)
+                Us.append(float(next(value_iterator)))
+                Vs.append(float(next(value_iterator)))
+                Ws.append(float(next(value_iterator)) if d==3 else 0.0)
+
+    return (N,n,d,M,L,V,sigma),Xs,Ys,Zs,Us,Vs,Ws
 
 def fit_boltzmann(n,bins):
     '''Fit an exponential to the counts in the non-empty bins'''
@@ -101,40 +124,44 @@ def get_density_by_shells(h):
 
 if __name__=='__main__':
     args = parse_arguments()
-    N,Xs,Ys,Us,Vs = read_input(file_name=args.input)
-    Es           = [0.5*(u**2 + v**2) for u,v in zip(Us,Vs)]
+    Params,Xs,Ys,Zs,Us,Vs,Ws = read_input(file_name=args.input)
+    N,n,d,M,L,V,sigma        = Params
+    Es           = [0.5*(u**2 + v**2* + w**2) for u,v,w in zip(Us,Vs,Ws)]
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     fig = figure(figsize=(12,12))
 
-    ax1 = subplot(2,2,1)
-    ax1.scatter(Xs,Ys,
+    ax1 = fig.add_subplot(2,2,1, projection='3d' if d==3 else None)
+    ax1.scatter(Xs,Ys,Zs,
             color = 'xkcd:blue')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
     ax1.set_title('Positions')
     ax1.set_xlim(-1,1)
     ax1.set_ylim(-1,1)
+    if d==3:
+        ax1.set_zlabel('Z')
+        ax1.set_zlim(-1,1)
 
+    if d==2:
+        ax3         = subplot(2,2,2)
+        h,_,_,image = ax3.hist2d(x       = Xs,
+                                 y       = Ys,
+                                 bins    = 50,
+                                 density = False)
+        colorbar(image)
+        ax3.set_xlabel('X')
+        ax3.set_ylabel('Y')
+        ax3.set_title('Density')
 
-
-    ax3         = subplot(2,2,2)
-    h,_,_,image = ax3.hist2d(x       = Xs,
-                             y       = Ys,
-                             bins    = 50,
-                             density = False)
-    colorbar(image)
-    ax3.set_xlabel('X')
-    ax3.set_ylabel('Y')
-    ax3.set_title('Density')
-
-    shells,density = get_density_by_shells(h)
-    ax4            = subplot(2,2,3)
-    ax4.plot(shells,density)
-    ax4.set_xlabel('Depth')
-    ax4.set_ylabel('Density')
-    ax4.set_title('Density by shells')
-    ax4.set_ylim((0,max(density)))
+    if d==2:
+        shells,density = get_density_by_shells(h)
+        ax4            = subplot(2,2,3)
+        ax4.plot(shells,density)
+        ax4.set_xlabel('Depth')
+        ax4.set_ylabel('Density')
+        ax4.set_title('Density by shells')
+        ax4.set_ylim((0,max(density)))
 
     ax5              = subplot(2,2,4)
     n,bins,_         = ax5.hist(Es,
@@ -147,7 +174,7 @@ if __name__=='__main__':
          color = 'xkcd:red',
          label = f'Bolzmann $\\beta T=${beta:.2f}, $r^2$={r**2:.2f}, std err={sd:.2f}')
     ax5.legend()
-    ax5.set_title('Energies')
+    ax5.set_title(f'Energies: dimension = {d}')
     ax5.set_xlabel('E')
 
     fig.tight_layout()
