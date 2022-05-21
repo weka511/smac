@@ -103,8 +103,8 @@ int evolve(Configuration& configuration,
 		    configuration.get_n_pair_collisions() << " pair collisions, " <<
 			configuration.get_n_wall_collisions() << " wall collisions, " << endl;
 			if (file_exists(check_path.c_str())){
-				string cp = "cp " + check_path + " " + check_path+"~";
-				system (cp.c_str());
+				const string copy_command = "cp " + check_path + " " + check_path+"~";
+				system (copy_command.c_str());
 			}
 			save(check_path, configuration,i,params);
 		}
@@ -124,7 +124,7 @@ void save(string           output_path,
 			Configuration& configuration,
 			const int      epoch,
 			ParameterSet & params) {
-	ofstream output(params.output_path);
+	ofstream output(output_path);
 	params.epoch = epoch;
 	params.save(output,configuration);
 	configuration.dump(output);
