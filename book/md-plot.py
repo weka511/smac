@@ -21,6 +21,7 @@ from numpy             import array, exp, log
 from os.path           import basename, splitext
 from matplotlib        import rc
 from scipy.stats       import linregress
+from seaborn           import kdeplot
 
 def read_input(file_name='md.csv'):
     '''Extract positions and velocities of each particle from input file'''
@@ -103,31 +104,7 @@ def parse_arguments():
                         help    = 'Name of file produced by md.cpp')
     return parser.parse_args()
 
-def get_density_by_shells(h):
-    n               = len(h)
-    cell_counts     = [4*(n-2*i-1) for i in range(n//2)]
-    assert sum(cell_counts)==n**2
-    particle_counts = []
-    n0              = 0
-    n1              = n
-    while n0<n1:
-        total = 0
-        total += sum([h[n0][j] for j in range(n0,n1-1)])
-        total += sum([h[n1-1][j] for j in range(n0,n1-1)])
-        total += sum([h[i][n0] for i in range(n0,n1-1)])
-        total += sum([h[i][n1-1] for i in range(n0,n1-1)])
-        particle_counts.append(total)
-        check_total = 0
-        check_total += sum([1 for j in range(n0,n1-1)])
-        check_total += sum([1 for j in range(n0,n1-1)])
-        check_total += sum([1 for i in range(n0,n1-1)])
-        check_total += sum([1 for i in range(n0,n1-1)])
-        assert cell_counts[n0]==check_total
-        n0 += 1
-        n1 -= 1
 
-    density = [p/c for c,p in zip(cell_counts,particle_counts)]
-    return range(len(density)),density
 
 if __name__=='__main__':
     args                                                  = parse_arguments()
@@ -152,43 +129,22 @@ if __name__=='__main__':
         ax1.set_zlim(-1,1)
 
     ax3         = subplot(2,2,2)
-    ax3.hist(Xs,
-             bins  = n//10,
-             color = 'xkcd:blue',
-             alpha = 0.5,
-             label = 'X')
-    ax3.hist(Ys,
-             bins  = n//10,
-             color = 'xkcd:red',
-             alpha = 0.5,
-             label = 'Y')
+    kdeplot(Xs,
+            ax    = ax3,
+            color = 'xkcd:blue',
+            label = 'X')
+    kdeplot(Ys,
+            ax    = ax3,
+            color = 'xkcd:red',
+            label = 'Y')
     if d==3:
-        ax3.hist(Zs,
-                 bins  = n//10,
-                 color = 'xkcd:green',
-                 alpha = 0.5,
-                 label = 'Z')
+        kdeplot(Zs,
+                ax    = ax3,
+                color = 'xkcd:green',
+                label = 'Z')
+
     ax3.legend(loc='lower center')
     ax3.set_title('Distribution of positions')
-    # if d==2:
-        # ax3         = subplot(2,2,2)
-        # h,_,_,image = ax3.hist2d(x       = Xs,
-                                 # y       = Ys,
-                                 # bins    = 50,
-                                 # density = False)
-        # colorbar(image)
-        # ax3.set_xlabel('X')
-        # ax3.set_ylabel('Y')
-        # ax3.set_title('Density')
-
-    # if d==2:
-        # shells,density = get_density_by_shells(h)
-        # ax4            = subplot(2,2,3)
-        # ax4.plot(shells,density)
-        # ax4.set_xlabel('Depth')
-        # ax4.set_ylabel('Density')
-        # ax4.set_title('Density by shells')
-        # ax4.set_ylim((0,max(density)))
 
     ax5              = subplot(2,2,4)
     n,bins,_         = ax5.hist(Es,
