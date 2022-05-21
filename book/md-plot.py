@@ -93,6 +93,10 @@ def get_plot_file_name(plot=None):
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
+    parser.add_argument('--bw_adjust',
+                        type    = float,
+                        default = 1.0,
+                        help    = 'Bandwidth adjustment for kdeplot')
     parser.add_argument('--show',
                         action = 'store_true',
                         help   = 'Show plot')
@@ -104,8 +108,6 @@ def parse_arguments():
                         help    = 'Name of file produced by md.cpp')
     return parser.parse_args()
 
-
-
 if __name__=='__main__':
     args                                                  = parse_arguments()
     Params,Xs,Ys,Zs,Us,Vs,Ws                              = read_input(file_name=args.input)
@@ -114,39 +116,30 @@ if __name__=='__main__':
     pair_collision_ratio                                  = n_pair_collisions/(n_wall_collisions+n_pair_collisions)
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    fig = figure(figsize=(12,12))
+    fig = figure(figsize=(12,6))
 
-    ax1 = fig.add_subplot(2,2,1, projection='3d' if d==3 else None)
-    ax1.scatter(Xs,Ys,Zs,
-            color = 'xkcd:blue')
-    ax1.set_xlabel('X')
-    ax1.set_ylabel('Y')
-    ax1.set_title('Positions')
-    ax1.set_xlim(-1,1)
-    ax1.set_ylim(-1,1)
-    if d==3:
-        ax1.set_zlabel('Z')
-        ax1.set_zlim(-1,1)
-
-    ax3         = subplot(2,2,2)
+    ax3         = subplot(1,2,1)
     kdeplot(Xs,
-            ax    = ax3,
-            color = 'xkcd:blue',
-            label = 'X')
+            ax        = ax3,
+            bw_adjust = args.bw_adjust,
+            color     = 'xkcd:blue',
+            label     = 'X')
     kdeplot(Ys,
-            ax    = ax3,
-            color = 'xkcd:red',
-            label = 'Y')
+            ax        = ax3,
+            bw_adjust = args.bw_adjust,
+            color     = 'xkcd:red',
+            label     = 'Y')
     if d==3:
         kdeplot(Zs,
-                ax    = ax3,
-                color = 'xkcd:green',
-                label = 'Z')
+                ax        = ax3,
+                bw_adjust = args.bw_adjust,
+                color     = 'xkcd:green',
+                label     = 'Z')
 
     ax3.legend(loc='lower center')
-    ax3.set_title('Distribution of positions')
+    ax3.set_title(f'Distribution of positions: bandwidth adjust={args.bw_adjust}.')
 
-    ax5              = subplot(2,2,4)
+    ax5              = subplot(1,2,2)
     n,bins,_         = ax5.hist(Es,
                                 bins    = 25,
                                 density = True,
