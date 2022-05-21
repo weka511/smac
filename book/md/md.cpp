@@ -29,28 +29,11 @@
 
 using namespace std;
 
-enum ParserState {
-	START     = 0, 
-	PARTICLES = 2
-};
-int         N           = 10000;
-int         n           = 100;
-int         d           = 2;
-int         M           = 100;
-int         freq        = 100;
-
-double      L           = 1;
-double      V           = 1;
-double      sigma       = 0.01;
-	
 /**
  * Main program. 
  */
 int main(int argc, char **argv) {
-
-	bool        restart = false;
-	string output_path  = "./foo.csv";
-	string restart_path;
+	ParameterSet params;
 	
 	struct option long_options[] = {
 			{"epochs",    required_argument,	0, 	'N'},
@@ -70,109 +53,56 @@ int main(int argc, char **argv) {
 	int c;
 	int option_index = 0;
 	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:r:",long_options, &option_index)) != -1)
-		switch(c) {
-			case 'N':
-				N = atoi(optarg);
-				break;
-			case 'n':
-				n = atoi(optarg);
-				break;
-			case 'd':
-				d = atoi(optarg);
-				break;
-			case 's':
-				sigma = atof(optarg);
-				break;
-			case 'M':
-				M = atoi(optarg);
-				break;
-			case 'f':
-				freq = atoi(optarg);
-				break;
-			case 'o':
-				output_path = optarg;
-				break;
-			case 'r':
-				restart      = true;
-				restart_path = optarg;
-				break;
-			case 'h':
-				help( restart, output_path, restart_path);
-				exit(SUCCESS);
-			default:
-				abort();
-	}
+		params.extract(c);
 
-	if (std::ifstream(output_path)){
-		std::cerr << "Output file " << output_path << " already exists" << endl;
+	if (ifstream(params.output_path)){
+		cerr << "Output file " << params.output_path << " already exists" << endl;
 		exit(EXIT_FAILURE);
 	}
 	
 	int status = UNDEFINED;
 
-	if (restart) {
+	if (params.restart) {
 		ParserState       parser_state = START;
-		int epoch         = 0;
-		ifstream          restart_stream(restart_path);
+		ifstream          restart_stream(params.restart_path);
 		string            line;
 		vector<Particle*> particles;
-		int               wall_collisions = 0;
-		int               pair_collisions = 0;
+
 		while (getline(restart_stream,line)){
-			int pos;
+			int    pos;
+			double values[2*params.d];
+			int    start = 0;
 			switch(parser_state){
 				case START:
 					pos = line.find("=");
-					if (pos>-1) {
-						string key = line.substr(0,pos);
-						string value = line.substr(pos+1);
-						
-						if (key=="N")
-							epoch = stoi(value);
-						else if (key=="n")
-							n = stoi(value);
-						else if (key=="d")
-							d = stoi(value);
-						else if (key=="M")
-							M = stoi(value);
-						else if (key=="L")
-							L = stoi(value);
-						else if (key=="V")
-							V = stoi(value);
-						else if (key=="sigma")
-							sigma = stod(value);
-						else if (key=="wall_collisions")
-							wall_collisions = stoi(value);
-						else if (key=="pair_collisions")
-							pair_collisions = stoi(value);
-					} else
+					if (pos>-1)
+						params.load(line.substr(0,pos),line.substr(pos+1));
+					else
 						parser_state = PARTICLES;
 					break;
-				case PARTICLES: {
-						double values[2*d];
-						string delimiter = ",";
-						int start = 0;
-						for (int i=0; i<2*d;i++) {
-							int pos = line.find(delimiter, pos=start);
-							string token = line.substr(start, pos-start);
-							start = pos+1;
-							values[i] = stod(token);
-						}
-						particles.push_back(new Particle(d,values));
-				}	
+				case PARTICLES: 
+					start = 0;
+					for (int i=0; i<2*params.d;i++) {
+						int pos      = line.find(",", pos=start);
+						string token = line.substr(start, pos-start);
+						start        = pos+1;
+						values[i]    = stod(token);
+					}
+					particles.push_back(new Particle(params.d,values));
+					
 				break;
 			}
 		}
 
-		assert(n==particles.size());
-		cout << "Restarting from Epoch " <<epoch <<", max=" << N<< endl;
-		Configuration configuration(n,d,sigma,particles,wall_collisions,pair_collisions);
+		assert(params.n==particles.size());
+		cout << "Restarting from Epoch " <<params.epoch <<", max=" << params.N<< endl;
+		Configuration configuration(params.n,params.d,params.sigma,particles,params.wall_collisions,params.pair_collisions);
 		status = SUCCESS;
-		status = evolve(configuration, output_path,  status,  "check.csv", epoch);
+		status = evolve(configuration, params.output_path,  status,  params, "check.csv", params.epoch);
 	} else {
-		Configuration configuration(n,d,sigma);
-		status = configuration.initialize(M);
-		status = evolve(configuration,  output_path,  status);
+		Configuration configuration(params.n,params.d,params.sigma);
+		status = configuration.initialize(params.M);
+		status = evolve(configuration,  params.output_path,  status, params);
 	}
 
 	return status;
@@ -184,26 +114,27 @@ int main(int argc, char **argv) {
  */
 int evolve(Configuration& configuration,
 			string         output_path, 
-			int            status, 
+			int            status,
+			ParameterSet   params,
 			string         check_path,
 			const int      epoch) {
 	
-	for  (int i=epoch; SUCCESS==status && i<N && !killed();i++) {
-		if (i%freq ==0) {
+	for  (int i=params.epoch; SUCCESS==status && i<params.N && !killed();i++) {
+		if (i%params.freq ==0) {
 			cout << "Epoch " << (i+1) << ", "<<
 		    configuration.get_n_pair_collisions() << " pair collisions, " <<
 			configuration.get_n_wall_collisions() << " wall collisions, " << endl;
 			if (file_exists(check_path.c_str())){
-				std:string cp = "cp " + check_path + " " + check_path+"~";
+				string cp = "cp " + check_path + " " + check_path+"~";
 				system (cp.c_str());
 			}
-			save(check_path, configuration,i);
+			save(check_path, configuration,i,params);
 		}
 			
 		status = configuration.event_disks();
 	}
 
-	save(output_path, configuration,N);
+	save(output_path, configuration,params.N,params);
 	
 	return status;
 }
@@ -211,19 +142,13 @@ int evolve(Configuration& configuration,
 /**
  *    Save configuration to specified file
  */
-void save(string output_path,
-		Configuration& configuration,
-		const int epoch) {
-	ofstream output(output_path);
-	output << "N="               <<epoch                                   << endl;
-	output << "n="               <<n                                       << endl;
-	output << "d="               <<d                                       << endl;
-	output << "M="               <<M                                       << endl;
-	output << "L="               <<L                                       << endl;
-	output << "V="               <<V                                       << endl;
-	output << "sigma="           <<sigma                                   << endl;
-	output << "wall_collisions=" <<  configuration.get_n_wall_collisions() << endl;
-	output << "pair_collisions=" <<  configuration.get_n_pair_collisions() << endl;
+void save(string           output_path,
+			Configuration& configuration,
+			const int      epoch,
+			ParameterSet & params) {
+	ofstream output(params.output_path);
+	params.epoch = epoch;
+	params.save(output,configuration);
 	configuration.dump(output);
 	output.close();
 }
@@ -248,12 +173,79 @@ bool killed(string kill_file){
 	return kill_file_found;
 }
 
+
+void ParameterSet::extract(int c) {
+	switch(c) {
+		case 'N':
+			N = atoi(optarg);
+			break;
+		case 'n':
+			n = atoi(optarg);
+			break;
+		case 'd':
+			d = atoi(optarg);
+			break;
+		case 's':
+			sigma = atof(optarg);
+			break;
+		case 'M':
+			M = atoi(optarg);
+			break;
+		case 'f':
+			freq = atoi(optarg);
+			break;
+		case 'o':
+			output_path = optarg;
+			break;
+		case 'r':
+			restart      = true;
+			restart_path = optarg;
+			break;
+		case 'h':
+			help();
+			exit(SUCCESS);
+		default:
+			abort();
+	}
+}
+
+void ParameterSet::load(string key, string value) {
+	if (key=="N")
+		epoch = stoi(value);
+	else if (key=="n")
+		n = stoi(value);
+	else if (key=="d")
+		d = stoi(value);
+	else if (key=="M")
+		M = stoi(value);
+	else if (key=="L")
+		L = stoi(value);
+	else if (key=="V")
+		V = stoi(value);
+	else if (key=="sigma")
+		sigma = stod(value);
+	else if (key=="wall_collisions")
+		wall_collisions = stoi(value);
+	else if (key=="pair_collisions")
+		pair_collisions = stoi(value);
+}
+
+void ParameterSet::save(ofstream& output,Configuration& configuration) {
+	output << "N="               <<epoch                                   << endl;
+	output << "n="               <<n                                       << endl;
+	output << "d="               <<d                                       << endl;
+	output << "M="               <<M                                       << endl;
+	output << "L="               <<L                                       << endl;
+	output << "V="               <<V                                       << endl;
+	output << "sigma="           <<sigma                                   << endl;
+	output << "wall_collisions=" <<  configuration.get_n_wall_collisions() << endl;
+	output << "pair_collisions=" <<  configuration.get_n_pair_collisions() << endl;
+}
+
 /**
  * Display help text.
  */
-void help(	bool   restart,
-			string output_path,
-			string restart_path) {
+void ParameterSet::help() {
 	cout << "Molecular Dynamics"                                 << endl        << endl;
 	cout << "    Parameters"                                                    << endl;
 	cout << "\tN\tNumber of iterations\t\t\t\t"                  << N           << endl;

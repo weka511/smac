@@ -22,10 +22,12 @@
 
 using namespace std;
 
-const int SUCCESS                = 0;
-const int FAIL_DISKS_TOO_CLOSE   = SUCCESS + 1;
-const int FAIL_BUILD_CONFIG      = FAIL_DISKS_TOO_CLOSE + 1;
-const int UNDEFINED              = std::numeric_limits<int>::max();	
+enum Status {
+	SUCCESS              = 0,
+	FAIL_DISKS_TOO_CLOSE = SUCCESS + 1,
+	FAIL_BUILD_CONFIG    = FAIL_DISKS_TOO_CLOSE + 1,
+	UNDEFINED            = std::numeric_limits<int>::max()
+};
 
 /**
  * This class represents a collision with a wall
