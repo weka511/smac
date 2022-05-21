@@ -19,13 +19,14 @@
 #include <fstream>
 #include <getopt.h>
 #include <iostream>
-#include <limits>
-#include <random>
 #include <string>
 
  using namespace std;
  #include "params.hpp"
  
+ /**
+  * Create ParameterSet from command line parameters
+  */
  ParameterSet::ParameterSet(int argc, char **argv){
 	 struct option long_options[] = {
 			{"epochs",    required_argument,	0, 	'N'},
@@ -45,14 +46,14 @@
 	int c;
 	int option_index = 0;
 	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:r:",long_options, &option_index)) != -1)
-		extract(c);
+		_extract(c);
 	 
  }
  
 /**
  *   Used to extract one command line parameter and store in Parameter Set
  */
- void ParameterSet::extract(const int c) {
+ void ParameterSet::_extract(const int c) {
 	switch(c) {
 		case 'N':
 			N = atoi(optarg);
@@ -80,18 +81,28 @@
 			restart_path = optarg;
 			break;
 		case 'h':
-			help();
+			_help();
 			exit(SUCCESS);
 		default:
 			abort();
 	}
 }
 
+ 	/**
+	 *  Used to extract one command line parameter and store in Parameter Set
+	 */
+int ParameterSet::load(const string line){
+	const int pos = line.find("=");
+	if (pos>-1)
+		_load(line.substr(0,pos),line.substr(pos+1));
+	return pos;
+}
+	
 /**
  * Used to load one command line parameter from stored file
  */
 	 
-void ParameterSet::load(const string key, const string value) {
+void ParameterSet::_load(const string key, const string value) {
 	if (key=="N")
 		epoch = stoi(value);
 	else if (key=="n")
@@ -130,7 +141,7 @@ void ParameterSet::save(ofstream& output,Configuration& configuration) {
 /**
  * Display help text.
  */
-void ParameterSet::help() {
+void ParameterSet::_help() {
 	cout << "Molecular Dynamics"                                 << endl        << endl;
 	cout << "    Parameters"                                                    << endl;
 	cout << "\tN\tNumber of iterations\t\t\t\t"                  << N           << endl;

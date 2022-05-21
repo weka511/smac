@@ -18,7 +18,6 @@
 #include <cassert>
 #include <cstdlib> 
 #include <fstream>
-//#include <getopt.h>
 #include <iostream>
 #include <limits>
 #include <random>
@@ -56,10 +55,7 @@ int main(int argc, char **argv) {
 			int    start = 0;
 			switch(parser_state){
 				case START:
-					pos = line.find("=");
-					if (pos>-1)
-						params.load(line.substr(0,pos),line.substr(pos+1));
-					else
+					if (params.load(line)==-1)
 						parser_state = PARTICLES;
 					break;
 				case PARTICLES: 

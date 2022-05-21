@@ -17,7 +17,7 @@
 
 #ifndef _CONFIGURATION_HPP_
 #define _CONFIGURATION_HPP_
-
+#include <random>
 #include "particle.hpp"
 
 using namespace std;
