@@ -111,11 +111,13 @@ int main(int argc, char **argv) {
 	int status = UNDEFINED;
 
 	if (restart) {
-		ParserState parser_state = START;
-		int epoch  = 0;
-		ifstream restart_stream(restart_path);
-		string line;
+		ParserState       parser_state = START;
+		int epoch         = 0;
+		ifstream          restart_stream(restart_path);
+		string            line;
 		vector<Particle*> particles;
+		int               wall_collisions = 0;
+		int               pair_collisions = 0;
 		while (getline(restart_stream,line)){
 			int pos;
 			switch(parser_state){
@@ -139,10 +141,14 @@ int main(int argc, char **argv) {
 							V = stoi(value);
 						else if (key=="sigma")
 							sigma = stod(value);
+						else if (key=="wall_collisions")
+							wall_collisions = stoi(value);
+						else if (key=="pair_collisions")
+							pair_collisions = stoi(value);
 					} else
 						parser_state = PARTICLES;
 					break;
-				case PARTICLES:{
+				case PARTICLES: {
 						double values[2*d];
 						string delimiter = ",";
 						int start = 0;
@@ -152,15 +158,15 @@ int main(int argc, char **argv) {
 							start = pos+1;
 							values[i] = stod(token);
 						}
-			
 						particles.push_back(new Particle(d,values));
 				}	
 				break;
 			}
 		}
+
 		assert(n==particles.size());
 		cout << "Restarting from Epoch " <<epoch <<", max=" << N<< endl;
-		Configuration configuration(n,d,sigma,particles);
+		Configuration configuration(n,d,sigma,particles,wall_collisions,pair_collisions);
 		status = SUCCESS;
 		status = evolve(configuration, output_path,  status,  "check.csv", epoch);
 	} else {

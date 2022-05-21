@@ -86,11 +86,16 @@ class Configuration{
 	/**
 	 * Create a  configuration from an existing set of particles
 	 */
-	Configuration(	const int n,
-					const int d,
-					const double sigma,
-					vector<Particle*> particles) : _n(n), _d(d), _sigma(sigma), 
-														n_wall_collisions(0), n_pair_collisions(0)  {
+	Configuration(	const int         n,
+					const int         d,
+					const double      sigma,
+					vector<Particle*> particles,
+					const int         wall_collisions = 0,
+					const int         pair_collisions = 0) : _n(n), 
+										_d(d),
+										_sigma(sigma), 
+										n_wall_collisions(wall_collisions), 
+										n_pair_collisions(pair_collisions)  {
 	   	L = new double(d);
 		V = new double(d);
 	    L[0] = L[1] = 1;
