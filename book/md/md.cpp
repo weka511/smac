@@ -18,7 +18,7 @@
 #include <cassert>
 #include <cstdlib> 
 #include <fstream>
-#include <getopt.h>
+//#include <getopt.h>
 #include <iostream>
 #include <limits>
 #include <random>
@@ -35,28 +35,8 @@ using namespace std;
  * Main program. 
  */
 int main(int argc, char **argv) {
-	ParameterSet params;
+	ParameterSet params(argc, argv);
 	
-	struct option long_options[] = {
-			{"epochs",    required_argument,	0, 	'N'},
-			{"particles", required_argument,	0, 	'n'},
-			{"help",  	  no_argument, 		    0, 	'h'},
-			{"dimension", required_argument, 	0, 	'd'},
-			{"attempts",  required_argument, 	0, 	'M'},
-			{"freq",  	  required_argument, 	0, 	'f'},
-			{"length",    required_argument, 	0, 	'L'},
-			{"Velocity",  required_argument, 	0, 	'V'},
-			{"sigma",  	  required_argument, 	0, 	's'},
-			{"output",    required_argument,    0,  'o'},
-			{"restart",   required_argument,    0,  'r'},
-			{0, 				0, 				0, 	0}
-	};	
-
-	int c;
-	int option_index = 0;
-	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:r:",long_options, &option_index)) != -1)
-		params.extract(c);
-
 	if (ifstream(params.output_path)){
 		cerr << "Output file " << params.output_path << " already exists" << endl;
 		exit(EXIT_FAILURE);

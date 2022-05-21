@@ -26,7 +26,33 @@
  using namespace std;
  #include "params.hpp"
  
- void ParameterSet::extract(int c) {
+ ParameterSet::ParameterSet(int argc, char **argv){
+	 struct option long_options[] = {
+			{"epochs",    required_argument,	0, 	'N'},
+			{"particles", required_argument,	0, 	'n'},
+			{"help",  	  no_argument, 		    0, 	'h'},
+			{"dimension", required_argument, 	0, 	'd'},
+			{"attempts",  required_argument, 	0, 	'M'},
+			{"freq",  	  required_argument, 	0, 	'f'},
+			{"length",    required_argument, 	0, 	'L'},
+			{"Velocity",  required_argument, 	0, 	'V'},
+			{"sigma",  	  required_argument, 	0, 	's'},
+			{"output",    required_argument,    0,  'o'},
+			{"restart",   required_argument,    0,  'r'},
+			{0, 				0, 				0, 	0}
+	};	
+
+	int c;
+	int option_index = 0;
+	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:r:",long_options, &option_index)) != -1)
+		extract(c);
+	 
+ }
+ 
+/**
+ *   Used to extract one command line parameter and store in Parameter Set
+ */
+ void ParameterSet::extract(const int c) {
 	switch(c) {
 		case 'N':
 			N = atoi(optarg);
@@ -61,7 +87,11 @@
 	}
 }
 
-void ParameterSet::load(string key, string value) {
+/**
+ * Used to load one command line parameter from stored file
+ */
+	 
+void ParameterSet::load(const string key, const string value) {
 	if (key=="N")
 		epoch = stoi(value);
 	else if (key=="n")
@@ -82,6 +112,9 @@ void ParameterSet::load(string key, string value) {
 		pair_collisions = stoi(value);
 }
 
+/**
+ *  Used to save all parameters
+ */
 void ParameterSet::save(ofstream& output,Configuration& configuration) {
 	output << "N="               <<epoch                                   << endl;
 	output << "n="               <<n                                       << endl;

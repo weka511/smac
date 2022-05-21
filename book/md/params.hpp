@@ -40,15 +40,30 @@ class ParameterSet {
 	int    pair_collisions = 0;
 	int    epoch           = 0;	
 	
-	void extract(int c);
 	
-	void load(string key, string value);
+	ParameterSet(int argc, char **argv);
 	
+	
+	
+	/**
+	 *  Used to extract one command line parameter and store in Parameter Set
+	 */
+	void load(const string key, const string value);
+	
+	/**
+	 *
+	 */
 	void save(ofstream& output,Configuration& configuration);
+  private:
 	/**
 	 * Display help text.
 	 */
 	void help();
+	
+	/**
+	 *  Used to extract one command line parameter and store in Parameter Set
+	 */
+	void extract(const int c);
 };
 
 #endif
