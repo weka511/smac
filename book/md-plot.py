@@ -168,7 +168,7 @@ if __name__=='__main__':
                  color = 'xkcd:green',
                  alpha = 0.5,
                  label = 'Z')
-    ax3.legend()
+    ax3.legend(loc='lower center')
     ax3.set_title('Distribution of positions')
     # if d==2:
         # ax3         = subplot(2,2,2)
