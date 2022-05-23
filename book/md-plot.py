@@ -13,11 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Visualize output from md.cpp'''
+'''
+   Visualize output from md.cpp. Plot distribution of distances from wall,
+   and compare energy histogram with Bolzmann distribution.
+'''
 
 from argparse          import ArgumentParser
 from matplotlib.pyplot import colorbar, figure, show, subplot
-from numpy             import array, exp, log
+from numpy             import array, exp, log, pi
 from os.path           import basename, splitext
 from matplotlib        import rc
 from scipy.stats       import linregress
@@ -106,14 +109,30 @@ def parse_arguments():
     parser.add_argument('--input',
                         default = 'md/check.csv',
                         help    = 'Name of file produced by md.cpp')
+    parser.add_argument('--bins',
+                        choices = ['auto', 'fd', 'doane', 'scott', 'stone', 'rice', 'sturges', 'sqrt'],
+                        default = 'auto',
+                        help    = 'Strategy for assigning bin edges')
     return parser.parse_args()
+
+def get_density(L     = 1,
+                d     = 2,
+                sigma = 0.01,
+                n     = 1):
+    '''Calculate density of particles in box'''
+    volume_box    = (2*L)**d
+    volume_sphere = pi*sigma**2 if d==2 else (4/3)*pi*sigma**3
+    return n*volume_sphere/volume_box
 
 if __name__=='__main__':
     args                                                  = parse_arguments()
     Params,Xs,Ys,Zs,Us,Vs,Ws                              = read_input(file_name=args.input)
     N,n,d,M,L,V,sigma,n_wall_collisions,n_pair_collisions = Params
     Es                                                    = [0.5*(u**2 + v**2* + w**2) for u,v,w in zip(Us,Vs,Ws)]
-    pair_collision_ratio                                  = n_pair_collisions/(n_wall_collisions+n_pair_collisions)
+    eta                                                   = get_density(  L     = L,
+                                                                          d     = d,
+                                                                          sigma = sigma,
+                                                                          n     =n)
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     fig = figure(figsize=(12,6))
@@ -137,14 +156,14 @@ if __name__=='__main__':
                 label     = 'Z')
 
     ax3.legend(loc='lower center')
-    ax3.set_title(f'Distribution of positions: bandwidth adjust={args.bw_adjust}.')
+    ax3.set_title(f'Positions: n={n}, $\\sigma=${sigma}, $\\eta=$ {eta:.3e}, bandwidth adjust={args.bw_adjust}.')
 
     ax5              = subplot(1,2,2)
     n,bins,_         = ax5.hist(Es,
-                                bins    = 25,
+                                bins    = args.bins,
                                 density = True,
                                 color   = 'xkcd:blue',
-                                label   = f'Observed: {N:,} Epochs, with {100*pair_collision_ratio:.1f}\% pair collisions')
+                                label   = f'Observed: {n_pair_collisions:,} pair collisions, {n_wall_collisions:,} wall collisions')
     beta,r,sd,xs,ys  = fit_boltzmann(n,bins)
     ax5.plot(xs,ys,
          color = 'xkcd:red',
