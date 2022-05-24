@@ -13,6 +13,11 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
+ *
+ * Molecular dynamics simulation for hard disks or hard spheres, as described
+ * in Statistical Mechanics: Algorithms and Computations, by Werner Krauth,
+ * ISBN 978-0-19-851535-7. This program performs the calculations, and the data
+ * in the outout files are analyzed by md-plot.py.
  */
 
 #include <cassert>
@@ -41,7 +46,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	
-	int status = UNDEFINED;
+	int status = UNDEFINED;   // Return code when program executed from shell
 
 	if (params.restart) {
 		ParserState       parser_state = START;

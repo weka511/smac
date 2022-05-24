@@ -21,23 +21,22 @@
 #include <random>
 #include "particle.hpp"
 
-
 /**
  *   Place particle in a random position.
  */
-void Particle::randomizeX(uniform_real_distribution<double> & distr,
-							default_random_engine& eng,
-							const  double scale[3]) {
+void Particle::randomizeX(  uniform_real_distribution<double> & distr,
+							default_random_engine             & eng,
+							const  double                       scale[3]) {
 	for (int i=0;i<_d;i++)
 		_x[i] = scale[i] * distr(eng);
 }
 	
 /**
- *   Assign random velicities to a particle
+ *   Assign random velocity to a particle
  */
-void Particle::randomizeV(uniform_real_distribution<double> & distr,
-							default_random_engine& eng,
-							const double scale[3]) {
+void Particle::randomizeV(  uniform_real_distribution<double> & distr,
+							default_random_engine             & eng,
+							const double                        scale[3]) {
 for (int i=0;i<_d;i++)
 	_v[i] = scale[i] * distr(eng);
 }
@@ -59,7 +58,7 @@ double Particle::get_time_to_particle(	Particle* other,
 }
 
 /**
- *  Collide particle with another
+ *  Collide particle with a specified other particle
  */
 void Particle::pair_collide(Particle* other) {
 	double DeltaX[_d];
@@ -80,7 +79,7 @@ void Particle::pair_collide(Particle* other) {
 }
 
 /**
- *  Used to outout position and velocity of particle
+ *  Used to output position and velocity of particle
  */
 ostream & operator<<(ostream & stream,
 					const Particle * particle) {

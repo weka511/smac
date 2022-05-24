@@ -20,9 +20,11 @@
 
 #include <cassert>
 #include <iostream>
+
 using namespace std;
+
 /**
- * This class represents a particled, either a hard disk or hard sphere.
+ * This class represents a particle, either a hard disk (2d_ or hard sphere (3d).
  */
 class Particle{
 	double*      _v;     // Velocity vector
@@ -32,16 +34,21 @@ class Particle{
   public:
   
   /**
-   *   Create a particle for a new configuration(still need to be initialized)
+   *   Create a particle for a new configuration (still need to be initialized)
    */
 	Particle(const int d): _d(d) {
-		assert(1< d && d<4);
+		assert(d==2 or d ==3);
 		_x = new double[d];
 		_v = new double[d];
 	}
 	
 	/**
-	 *  Create a particle from a saved configuration
+	 *  Create a particle from a saved configuration.
+	 *
+	 *  Parameters:
+	 *     d         Dimension of space  
+	 *     values    A vector whose first 'd' entries are posiion,
+     *            	 and the second 'd' the velocity
 	 */
 	Particle(const int d,double * values): _d(d) {
 		int  i=0;
@@ -75,7 +82,7 @@ class Particle{
 					const  double scale[3]);
 	
 	/**
-	 *   Assign random velicities to a particle
+	 *   Assign random velocity to a particle
 	 */
 	void randomizeV(uniform_real_distribution<double> & distr,
 					default_random_engine& eng,
@@ -110,10 +117,13 @@ class Particle{
 	}
 	
 	/**
-	 *  Collide particle with another
+	 *  Collide particle with a specified other particle
 	 */
 	void pair_collide(Particle* other);
 	
+	/**
+	 *  When patticles destroyed, free up position and velocity
+	 */
 	virtual ~Particle() {
 		delete this->_x;
 		delete this->_v;
@@ -138,7 +148,7 @@ class Particle{
 	}
 	
 	/**
-	 *  Used to outout position and velocity of particle
+	 *  Used to output position and velocity of particle
 	 */
 	friend ostream & operator<<(ostream & stream, const Particle * particle);
 };
