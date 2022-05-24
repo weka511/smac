@@ -56,14 +56,19 @@ class ParticleCollision{
  */
 class Configuration{
 
-	const int         _n;           // Number of particles
-	const int         _d;           // Dimension of box
-	const double      _sigma;    // Radius of a particle
-	double *          L;
-	double *          V;
-	vector<Particle*> _particles; 
-	int               n_wall_collisions;
-	int               n_pair_collisions;
+	const int         _n;          // Number of particles
+	const int         _d;          // Dimension of box
+	const double      _sigma;      // Radius of a particle
+	double *          L;           // Dimensions of space
+	double *          V;           // Used to scale velocities
+	
+	/**
+	 * We need a place to store the particles. Initially they will be unitinitialized,
+	 * but initialize(...) and _build_config(...) will assign valid positions and velocities.
+	 */
+	vector<Particle*> _particles;
+	int               n_wall_collisions;    // Number of collisions
+	int               n_pair_collisions;    // Number of collisions
 
   public:
  
