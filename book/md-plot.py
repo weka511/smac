@@ -165,9 +165,10 @@ if __name__=='__main__':
                                 color   = 'xkcd:blue',
                                 label   = f'Observed: {n_pair_collisions:,} pair collisions, {n_wall_collisions:,} wall collisions')
     beta,r,sd,xs,ys  = fit_boltzmann(n,bins)
+    Boltzmann = r'P(E)=$e^{-\beta E}$'
     ax5.plot(xs,ys,
          color = 'xkcd:red',
-         label = f'Bolzmann $\\beta T=${beta:.2f}, $r^2$={r**2:.2f}, std err={sd:.2f}')
+         label = f'Bolzmann {Boltzmann}, where $\\beta=${beta:.2f}; $r^2$={r**2:.2f}, std err={sd:.2f}')
     ax5.legend()
     ax5.set_title(f'Energies: dimension = {d}')
     ax5.set_xlabel('E')
