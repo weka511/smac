@@ -18,7 +18,7 @@
 from argparse          import ArgumentParser
 from math              import sqrt
 from matplotlib        import rc
-from matplotlib.pyplot import figure, plot, savefig,show
+from matplotlib.pyplot import colorbar, figure, hist2d, savefig,show
 from numpy             import argmin
 from os.path           import basename, splitext
 from random            import random, seed
@@ -31,6 +31,10 @@ class HardDisk:
         self.u = u
         self.v = v
 
+    def move(self,dt):
+        self.x += self.u * dt
+        self.y += self.v * dt
+
 class Collision:
     '''Compute time to next collision of spheres and consequnces of collision'''
     def __init__(self,L,sigma,V):
@@ -39,6 +43,7 @@ class Collision:
         self.a     = V**2
 
     def get_delta(self,disk):
+        '''Compute time to next collision of spheres'''
         b     = disk.x * disk.v + disk.y * disk.u
         c     = disk.x**2 + disk.y**2 - self.sigma**2
         delta = b**2 - self.a *c
@@ -46,31 +51,37 @@ class Collision:
             return (-b - sqrt(delta))/self.a
         return float('inf')
 
+    '''Collide spheres - update velocties'''
     def exec(self,disk,dt,sample):
         # TODO
         sample.synchronize(dt)
 
 class Wrap:
-    '''Compute time to next collision with and consequnces of collision'''
+    '''Compute time to next collision with Wall and consequnces of collision'''
     def __init__(self,L):
         self.L = L
 
     def get_delta(self,disk):
-        Deltas = [self.get_one_delta(disk.x,disk.u),
-                  self.get_one_delta(disk.y,disk.v)]
+        '''
+           Compute time to next collision with Wall.
+           Store the number of the wall that gives next collision
+        '''
+        Deltas    = [self.get_one_delta(disk.x,disk.u),
+                    self.get_one_delta(disk.y,disk.v)]
         self.axis = argmin(Deltas)
         return Deltas[self.axis]
 
     def exec(self,disk,dt,sample):
+        '''Move disk to wall, and wrap position around.'''
+        disk.move(dt)
         if self.axis==0:
-            disk.x += dt * disk.u
             disk.x *= -1
         else:
-            disk.y += dt * disk.v
             disk.y *= -1
         sample.synchronize(dt)
 
     def get_one_delta(self,x,u):
+        '''Compute time to next collision with specified Wall'''
         if x*u > 0:
             return (self.L-abs(x))/abs(u)
         else:
@@ -80,7 +91,7 @@ class Sample:
     '''Keep track of Time, and sample state at regular intervals. '''
     def __init__(self,N,dt):
         self.N      = N
-        self.n      = 0
+        self.n      = -1
         self.dt     = dt
         self.t_acc  = 0
         self.xs     = []
@@ -91,37 +102,51 @@ class Sample:
         return self.dt - self.t_acc
 
     def exec(self,disk,dt,sample):
-        print (self.n)
+        '''Sample position'''
+        disk.move(dt)
         self.xs.append(disk.x)
         self.ys.append(disk.y)
         self.t_acc  = 0
 
     def should_continue(self):
+        '''Are we there yet?'''
         self.n += 1
         return self.n<self.N
 
     def synchronize(self,dt):
-        '''Accumulkate time from Collisions and Wraps'''
+        '''Accumulate time from Collisions and Wraps'''
         self.t_acc += dt
 
-def create_disk(L,V):
-    x,y = 0,0
-    while x**2+y**2 < args.sigma**2:
-        x= L * ( 2*random()-1)
-        y =L * ( 2*random()-1)
+def create_disk(L,V,sigma):
+    '''
+       Set up one disk that is in a valid position, i.e. outside reference disk,
+       but otherwise has a random position and direction.
 
-    u = 2*random()-1
-    v = 2*random()-1
+       Parameters:
+         L     Half length of box
+         V     Magnitude of velocity
+         sigma Radius of sphere
+    '''
+    x,y = 0,0
+    while x**2 + y**2 < sigma**2:
+        x = L * (2 * random()-1)
+        y = L * (2 * random()-1)
+
+    u    = 2*random()-1
+    v    = 2*random()-1
     norm = sqrt(u**2 + v**2)
     return HardDisk(x, y, u*V/norm, v*V/norm)
 
-def get_next_event(collision, wrap, sample,disk):
+def get_next_event(collision, wrap, sample, disk):
+    '''
+       Generator that handles evolution in time. Repeatedly determine which type of event will happen next,
+       then perform event.
+    '''
     events = [collision, wrap, sample]
-    while True:
+    while sample.should_continue():
         dts    = [event.get_delta(disk) for event in events]
         index  = argmin(dts)
         yield events[index],dts[index]
-        if not sample.should_continue(): break
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -166,7 +191,7 @@ if __name__=='__main__':
 
     seed(args.seed)
 
-    disk   = create_disk(args.L, args.V)
+    disk   = create_disk(args.L, args.V, args.sigma)
     sample = Sample(args.N,args.dt)
     for event,dt in get_next_event(collision = Collision(args.L,args.sigma,args.V),
                                    wrap      = Wrap(args.L),
@@ -174,8 +199,9 @@ if __name__=='__main__':
                                    disk      = disk):
         event.exec(disk,dt,sample)
 
-    # figure(figsize=(12,12))
-    # plot([1,2,3])
-    # savefig(get_plot_file_name(args.plot))
-    # if args.show:
-        # show()
+    figure(figsize=(12,12))
+    hist2d(sample.xs, sample.ys)
+    colorbar()
+    savefig(get_plot_file_name(args.plot))
+    if args.show:
+        show()
