@@ -144,9 +144,9 @@ def get_next_event(collision, wrap, sample, disk):
     '''
     events = [collision, wrap, sample]
     while sample.should_continue():
-        dts    = [event.get_delta(disk) for event in events]
-        index  = argmin(dts)
-        yield events[index],dts[index]
+        next_event_times = [event.get_delta(disk) for event in events]
+        first_index      = argmin(next_event_times)
+        yield events[first_index],next_event_times[first_index]
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -185,12 +185,7 @@ def parse_arguments():
 
 if __name__=='__main__':
     args = parse_arguments()
-
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
-
     seed(args.seed)
-
     disk   = create_disk(args.L, args.V, args.sigma)
     sample = Sample(args.N,args.dt)
     for event,dt in get_next_event(collision = Collision(args.L,args.sigma,args.V),
@@ -199,6 +194,8 @@ if __name__=='__main__':
                                    disk      = disk):
         event.exec(disk,dt,sample)
 
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
     figure(figsize=(12,12))
     hist2d(sample.xs, sample.ys)
     colorbar()
