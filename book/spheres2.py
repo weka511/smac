@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Template for programs--replace with description'''
+'''Sinai's system of two large sphere in a box'''
 
 from argparse          import ArgumentParser
 from math              import sqrt
@@ -37,18 +37,11 @@ class Collision:
         self.a     = V**2
 
     def get_delta(self,disk):
-        b = disk.x *disk.u + disk.y *disk.v
-        c = disk.x**2 + disk.y**2 - self.sigma**2
+        b     = disk.x * disk.v + disk.y * disk.u
+        c     = disk.x**2 + disk.y**2 - self.sigma**2
         delta = b**2 - self.a *c
-        if delta<0: return float('inf')
-        sqrt_delta = sqrt(delta)
-        if b<0:
-            pass
-        else:
-            pass
-        t0 = (-b - sqrt_delta)/self.a
-        t1 = (-b + sqrt_delta)/self.a
-        t=0
+        if delta>0 and b<0:
+            return (-b - sqrt(delta))/self.a
         return float('inf')
 
     def exec(self,disk,dt):
