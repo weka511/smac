@@ -24,6 +24,7 @@ from os.path           import basename, splitext
 from random            import random, seed
 
 class HardDisk:
+    '''Keeps track of position and velocity of disk'''
     def __init__(self,x,y,u,v):
         self.x = x
         self.y = y
@@ -31,6 +32,7 @@ class HardDisk:
         self.v = v
 
 class Collision:
+    '''Compute time to next collision of spheres and consequnces of collision'''
     def __init__(self,L,sigma,V):
         self.L     = L
         self.sigma = sigma
@@ -44,10 +46,12 @@ class Collision:
             return (-b - sqrt(delta))/self.a
         return float('inf')
 
-    def exec(self,disk,dt):
-        pass
+    def exec(self,disk,dt,sample):
+        # TODO
+        sample.synchronize(dt)
 
 class Wrap:
+    '''Compute time to next collision with and consequnces of collision'''
     def __init__(self,L):
         self.L = L
 
@@ -57,13 +61,14 @@ class Wrap:
         self.axis = argmin(Deltas)
         return Deltas[self.axis]
 
-    def exec(self,disk,dt):
+    def exec(self,disk,dt,sample):
         if self.axis==0:
             disk.x += dt * disk.u
             disk.x *= -1
         else:
             disk.y += dt * disk.v
             disk.y *= -1
+        sample.synchronize(dt)
 
     def get_one_delta(self,x,u):
         if x*u > 0:
@@ -72,20 +77,32 @@ class Wrap:
             return (self.L+abs(x))/abs(u)
 
 class Sample:
+    '''Keep track of Time, and sample state at regular intervals. '''
     def __init__(self,N,dt):
-        self.N = N
-        self.n = 0
-        self.dt = dt
+        self.N      = N
+        self.n      = 0
+        self.dt     = dt
+        self.t_acc  = 0
+        self.xs     = []
+        self.ys     = []
 
     def get_delta(self,disk):
-        return self.dt
+        '''Calculate time to next sample'''
+        return self.dt - self.t_acc
 
-    def exec(self,disk,dt):
+    def exec(self,disk,dt,sample):
         print (self.n)
+        self.xs.append(disk.x)
+        self.ys.append(disk.y)
+        self.t_acc  = 0
 
     def should_continue(self):
         self.n += 1
         return self.n<self.N
+
+    def synchronize(self,dt):
+        '''Accumulkate time from Collisions and Wraps'''
+        self.t_acc += dt
 
 def create_disk(L,V):
     x,y = 0,0
@@ -149,12 +166,13 @@ if __name__=='__main__':
 
     seed(args.seed)
 
-    disk = create_disk(args.L, args.V)
+    disk   = create_disk(args.L, args.V)
+    sample = Sample(args.N,args.dt)
     for event,dt in get_next_event(collision = Collision(args.L,args.sigma,args.V),
-                                wrap      = Wrap(args.L),
-                                sample    = Sample(args.N,args.dt),
-                                disk      = disk):
-        event.exec(disk,dt)
+                                   wrap      = Wrap(args.L),
+                                   sample    = sample,
+                                   disk      = disk):
+        event.exec(disk,dt,sample)
 
     # figure(figsize=(12,12))
     # plot([1,2,3])
