@@ -13,13 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Sinai's system of two large sphere in a box'''
+'''Exercose 2-4. Sinai's system of two large sphere in a box. Show histogram of positions'''
 
 from argparse          import ArgumentParser
 from math              import sqrt
 from matplotlib        import rc
-from matplotlib.pyplot import colorbar, figure, hist2d, savefig,show
-from numpy             import argmin
+from matplotlib.pyplot import colorbar, figure, hist2d, savefig, show, title
+from numpy             import argmin, linspace
 from os.path           import basename, splitext
 from random            import random, seed
 
@@ -34,6 +34,9 @@ class HardDisk:
     def move(self,dt):
         self.x += self.u * dt
         self.y += self.v * dt
+
+    def get_norm(self):
+        return sqrt(self.x**2 + self.y**2)
 
 class Collision:
     '''Compute time to next collision of spheres and consequnces of collision'''
@@ -51,9 +54,17 @@ class Collision:
             return (-b - sqrt(delta))/self.a
         return float('inf')
 
-    '''Collide spheres - update velocties'''
+    '''Collide spheres. We need to reverse the radial component of velocity, while preserving theta component.'''
     def exec(self,disk,dt,sample):
-        # TODO
+        disk.move(dt)
+        norm     = disk.get_norm()
+        x        = disk.x/norm
+        y        = disk.y/norm
+        v_r      =   x * disk.u + y * disk.v
+        v_theta  = - y * disk.u + x * disk.v
+        v_theta -= 1
+        disk.v   = v_theta * x + v_r * y
+        disk.u   = v_r * x     - v_theta * y
         sample.synchronize(dt)
 
 class Wrap:
@@ -166,6 +177,9 @@ def parse_arguments():
     parser.add_argument('--N',
                         type    = int,
                         default = 100)
+    parser.add_argument('--m',
+                        type    = int,
+                        default = 10)
     parser.add_argument('--seed',
                         type    = int,
                         default = None)
@@ -194,10 +208,12 @@ if __name__=='__main__':
                                    disk      = disk):
         event.exec(disk,dt,sample)
 
+    bins = linspace(-args.L, args.L,
+                    num = args.m)
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     figure(figsize=(12,12))
-    hist2d(sample.xs, sample.ys)
+    hist2d(sample.xs, sample.ys,bins=[bins,bins])
     colorbar()
     savefig(get_plot_file_name(args.plot))
     if args.show:
