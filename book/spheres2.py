@@ -18,7 +18,7 @@
 from argparse          import ArgumentParser
 from math              import sqrt
 from matplotlib        import rc
-from matplotlib.pyplot import colorbar, figure, hist2d, savefig, show, title
+from matplotlib.pyplot import axis, colorbar, figure, hist2d, savefig, show, title, xlabel, ylabel
 from numpy             import allclose, argmin, linspace
 from os.path           import basename, splitext
 from random            import random, seed
@@ -189,20 +189,24 @@ def parse_arguments():
                         help    = 'Radius of sphere')
     parser.add_argument('--N',
                         type    = int,
-                        default = 100,
+                        default = 100000,
                         help    = 'Number of steps to evolve configuration')
     parser.add_argument('--m',
                         type    = int,
-                        default = 10)
+                        default = 100,
+                        help    = 'Number of bins for histogram')
     parser.add_argument('--seed',
                         type    = int,
-                        default = None)
+                        default = None,
+                        help    = 'Seed for random number generator')
     parser.add_argument('--dt',
                         type    = float,
-                        default = 0.1)
+                        default = 0.1,
+                        help    = 'Time step for sampling')
     parser.add_argument('--V',
                         type    = float,
-                        default = 1.0)
+                        default = 1.0,
+                        help    = 'Magnitude of velocity')
     parser.add_argument('--show',
                         action = 'store_true',
                         help   = 'Show plot')
@@ -227,8 +231,12 @@ if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     figure(figsize=(12,12))
-    hist2d(sample.xs, sample.ys,bins=[bins,bins])
+    axis('scaled')
+    hist2d(sample.xs, sample.ys,
+           bins    = [bins,bins],
+           density = True)
     colorbar()
+    title(fr'L={args.L}, $\sigma=${args.sigma}, N={args.N:,d}, dt={args.dt}, V={args.V}')
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
