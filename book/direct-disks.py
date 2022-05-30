@@ -17,26 +17,36 @@
 
 from argparse          import ArgumentParser
 from matplotlib        import rc
-from matplotlib.pyplot import figure, plot, savefig,show
-from numpy             import array
+from matplotlib.pyplot import figure, hist, savefig, show
+from numpy             import array, reshape
 from numpy.linalg      import norm
 from os.path           import basename, splitext
 from numpy.random      import random
 
-def direct_disks(sigma=0.25,x0=-1,x1=1,y0=-1,y1=1,N=4,M=25):
-    def is_overlapped(config):
+def direct_disks(sigma = 0.25,
+                 x0      = -1,
+                 x1      = 1,
+                 N       = 4,
+                 NTrials = 25,
+                 d       = 2):
+    def is_overlapped(X):
         for i in range(N):
             for j in range(i+1,N):
-                if norm(config[i,:]-config[j,:])<2*sigma:
+                if norm(X[i,:]-X[j,:])<2*sigma:
                     return True
         return False
-    for k in range(M):
-        X = x0 + (x1-x0) * random(N)
-        Y = y0 + (y1-y0) * random(N)
-        config = array(list(zip(X,Y)))
-        if not is_overlapped(config):
-            return config
-    raise Exception(f'Failed to place {N} spheres within {M} attempts for sigma={sigma}')
+
+    for k in range(NTrials):
+        X = x0 + (x1-x0) * random(size=(N,d))
+        if not is_overlapped(X):
+            return X
+
+    raise Exception(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
+
+def sample(config):
+    Xs = config[:,0]
+    x=0
+
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -47,6 +57,18 @@ def get_plot_file_name(plot=None):
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
+    parser.add_argument('--N',
+                        type    = int,
+                        default =10000)
+    parser.add_argument('--Disks',
+                        type    = int,
+                        default =4)
+    parser.add_argument('--sigma',
+                        type = float,
+                        default=0.25)
+    parser.add_argument('--d',
+                        type    = int,
+                        default =2)
     parser.add_argument('--show',
                         action = 'store_true',
                         help   = 'Show plot')
@@ -57,13 +79,16 @@ def parse_arguments():
 
 if __name__=='__main__':
     args = parse_arguments()
+    Xs   = reshape([direct_disks(sigma = args.sigma,
+                                N       = args.Disks,
+                                NTrials = 2000,
+                                d       = args.d)[:,0] for _ in range(args.N)],
+                   args.N*args.Disks)
 
-    d=direct_disks()
-    print (d)
-    # rc('font',**{'family':'serif','serif':['Palatino']})
-    # rc('text', usetex=True)
-    # figure(figsize=(12,12))
-    # plot([1,2,3])
-    # savefig(get_plot_file_name(args.plot))
-    # if args.show:
-        # show()
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
+    figure(figsize=(12,12))
+    hist(Xs, bins=100)
+    savefig(get_plot_file_name(args.plot))
+    if args.show:
+        show()
