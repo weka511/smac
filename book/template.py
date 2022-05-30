@@ -16,10 +16,9 @@
 '''Template for programs--replace with description'''
 
 from argparse          import ArgumentParser
+from matplotlib        import rc
 from matplotlib.pyplot import figure, plot, savefig,show
 from os.path           import basename, splitext
-from matplotlib        import rc
-
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
