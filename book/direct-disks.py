@@ -13,12 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Exercise 2.6'''
+'''
+    Exercise 2.6: directly sample the positions of 4 disks ina square box without
+    periodic boundary conditions, for different covering densities.
+'''
 
 from argparse          import ArgumentParser
 from matplotlib        import rc
-from matplotlib.pyplot import figure, hist, savefig, show
-from numpy             import array, reshape
+from matplotlib.pyplot import figure, legend, plot, savefig, show, title, xlabel, ylabel, ylim
+from numpy             import array, histogram, pi, reshape
 from numpy.linalg      import norm
 from os.path           import basename, splitext
 from numpy.random      import random
@@ -27,8 +30,9 @@ def direct_disks(sigma = 0.25,
                  x0      = -1,
                  x1      = 1,
                  N       = 4,
-                 NTrials = 25,
+                 NTrials = None,
                  d       = 2):
+    '''Prepare one admissable configuration of disks'''
     def is_overlapped(X):
         for i in range(N):
             for j in range(i+1,N):
@@ -36,17 +40,20 @@ def direct_disks(sigma = 0.25,
                     return True
         return False
 
-    for k in range(NTrials):
-        X = x0 + (x1-x0) * random(size=(N,d))
-        if not is_overlapped(X):
+    k = 0
+    while True:
+        X = x0 + sigma + (x1 - x0 - 2*sigma) * random(size=(N,d))
+        if is_overlapped(X):
+            k += 1
+            if NTrials != None and k>=NTrials:
+                break
+        else:
             return X
 
     raise Exception(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
 
-def sample(config):
-    Xs = config[:,0]
-    x=0
-
+def get_density(sigma=0.25,L=1,N=4):
+    return N*pi*sigma**2/(4*L**2)
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -64,8 +71,9 @@ def parse_arguments():
                         type    = int,
                         default =4)
     parser.add_argument('--sigma',
-                        type = float,
-                        default=0.25)
+                        type    = float,
+                        nargs   = '+',
+                        default = [0.25])
     parser.add_argument('--d',
                         type    = int,
                         default =2)
@@ -79,16 +87,25 @@ def parse_arguments():
 
 if __name__=='__main__':
     args = parse_arguments()
-    Xs   = reshape([direct_disks(sigma = args.sigma,
-                                N       = args.Disks,
-                                NTrials = 2000,
-                                d       = args.d)[:,0] for _ in range(args.N)],
-                   args.N*args.Disks)
-
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     figure(figsize=(12,12))
-    hist(Xs, bins=100)
+    for sigma in args.sigma:
+        print (f'sigma={sigma}')
+        hist,bin_edges = histogram(reshape([direct_disks( sigma   = sigma,
+                                                          N       = args.Disks,
+                                                          d       = args.d)[:,0] for _ in range(args.N)],
+                       args.N*args.Disks),
+             bins    = 'auto',
+             density = True)
+        plot([0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)], hist,
+             label = fr'$\sigma=${sigma}, $\eta=$ {get_density(sigma=sigma,L=1,N=4):.3}')
+
+    title(fr'{args.N:,} Trials, {args.Disks} Disks')
+    legend()
+    ylim([0,1])
+    xlabel('Position')
+    ylabel('Frequency')
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
