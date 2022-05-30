@@ -13,13 +13,13 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Exercose 2-4. Sinai's system of two large sphere in a box. Show histogram of positions'''
+'''Exercose 2-4. Sinai's system of two large sphere in a box. Show histogram of positions.'''
 
 from argparse          import ArgumentParser
 from math              import sqrt
 from matplotlib        import rc
-from matplotlib.pyplot import axis, colorbar, figure, hist2d, savefig, show, title, xlabel, ylabel
-from numpy             import allclose, argmin, linspace
+from matplotlib.pyplot import axis, colorbar, figure, grid, hist, hist2d, savefig, show, subplot, suptitle, title, xlabel, ylabel
+from numpy             import allclose, argmin, linspace, pi
 from os.path           import basename, splitext
 from random            import random, seed
 
@@ -162,7 +162,7 @@ def create_disk(L,V,sigma):
 def get_next_event(collision, wrap, sample, disk):
     '''
        Generator that handles evolution in time. Repeatedly determine which type of event will happen next,
-       then perform event.
+       and when it will occur (relative to current time).
     '''
     events = [collision, wrap, sample]
     while sample.should_continue():
@@ -189,7 +189,7 @@ def parse_arguments():
                         help    = 'Radius of sphere')
     parser.add_argument('--N',
                         type    = int,
-                        default = 100000,
+                        default = 1000000,
                         help    = 'Number of steps to evolve configuration')
     parser.add_argument('--m',
                         type    = int,
@@ -215,6 +215,10 @@ def parse_arguments():
                         help    = 'Name of plot file')
     return parser.parse_args()
 
+def flatten(Xss):
+    '''Convert a list of lists into a single list'''
+    return [x for Xs in Xss for x in Xs]
+
 if __name__=='__main__':
     args = parse_arguments()
     seed(args.seed)
@@ -230,13 +234,32 @@ if __name__=='__main__':
                     num = args.m)
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    figure(figsize=(12,12))
+    figure(figsize=(12,6))
+    suptitle('Sinai two-disk system')
+
+    # Plot 2d histogram showing time spent at each position
+
+    subplot(1,2,1)
     axis('scaled')
-    hist2d(sample.xs, sample.ys,
-           bins    = [bins,bins],
-           density = True)
+    h,_,_,_ = hist2d(sample.xs, sample.ys,
+                     bins    = [bins,bins],
+                     density = True)
     colorbar()
     title(fr'L={args.L}, $\sigma=${args.sigma}, N={args.N:,d}, dt={args.dt}, V={args.V}')
+    xlabel('X')
+    ylabel('Y')
+
+    # Show distribution of frequencies
+
+    subplot(1,2,2)
+    hist (flatten(h),
+          density = True,
+          color = 'xkcd:blue')
+    title(fr'Projected Densities $\eta=${pi*args.sigma**2/(4*args.L**2):.3f}')
+    xlabel('Density')
+    ylabel('Frequency')
+    grid(True)
+
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
