@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Exercose 2-4. Sinai's system of two large sphere in a box. Show histogram of positions.'''
+'''Exercise 2-4. Sinai's system of two large sphere in a box. Show histogram of positions.'''
 
 from argparse          import ArgumentParser
 from math              import sqrt
@@ -182,7 +182,7 @@ def parse_arguments():
     parser.add_argument('--L',
                         type    = float,
                         default = 1.0,
-                        help    = 'Half lenghth of box')
+                        help    = 'Half length of box')
     parser.add_argument('--sigma',
                         type    = float,
                         default = 0.365,
