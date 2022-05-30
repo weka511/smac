@@ -19,24 +19,31 @@ from argparse          import ArgumentParser
 from math              import sqrt
 from matplotlib        import rc
 from matplotlib.pyplot import colorbar, figure, hist2d, savefig, show, title
-from numpy             import argmin, linspace
+from numpy             import allclose, argmin, linspace
 from os.path           import basename, splitext
 from random            import random, seed
 
 class HardDisk:
     '''Keeps track of position and velocity of disk'''
-    def __init__(self,x,y,u,v):
-        self.x = x
-        self.y = y
-        self.u = u
-        self.v = v
+    def __init__(self,x,y,u,v,sigma):
+        self.x     = x
+        self.y     = y
+        self.u     = u
+        self.v     = v
+        self.sigma = sigma
 
     def move(self,dt):
+        '''Update position, assuming constant velocity for time dt'''
         self.x += self.u * dt
         self.y += self.v * dt
 
-    def get_norm(self):
-        return sqrt(self.x**2 + self.y**2)
+    def get_direction_cosines(self):
+        '''Find direction of centre, ralative to origin'''
+        radius = sqrt(self.x**2 + self.y**2)
+        assert allclose(2*self.sigma, radius,
+                        rtol = 1e-5,
+                        atol = 0),f'{2*self.sigma} {radius}'
+        return self.x/radius, self.y/radius
 
 class Collision:
     '''Compute time to next collision of spheres and consequnces of collision'''
@@ -47,8 +54,8 @@ class Collision:
 
     def get_delta(self,disk):
         '''Compute time to next collision of spheres'''
-        b     = disk.x * disk.v + disk.y * disk.u
-        c     = disk.x**2 + disk.y**2 - self.sigma**2
+        b     = disk.x * disk.u + disk.y * disk.v
+        c     = disk.x**2 + disk.y**2 - 4*self.sigma**2
         delta = b**2 - self.a *c
         if delta>0 and b<0:
             return (-b - sqrt(delta))/self.a
@@ -57,14 +64,18 @@ class Collision:
     '''Collide spheres. We need to reverse the radial component of velocity, while preserving theta component.'''
     def exec(self,disk,dt,sample):
         disk.move(dt)
-        norm     = disk.get_norm()
-        x        = disk.x/norm
-        y        = disk.y/norm
+        x, y     = disk.get_direction_cosines()
+        assert allclose(1,x**2 + y**2,
+                        rtol = 1e-5,
+                        atol = 0),f'{1} not = {x**2 + y**2}'
         v_r      =   x * disk.u + y * disk.v
         v_theta  = - y * disk.u + x * disk.v
-        v_theta -= 1
+        v_r     *= -1
         disk.v   = v_theta * x + v_r * y
         disk.u   = v_r * x     - v_theta * y
+        assert allclose(self.a, disk.u**2+disk.v**2,
+                        rtol = 1e-5,
+                        atol = 0),f'{self.a} not = {disk.u**2+disk.v**2}'
         sample.synchronize(dt)
 
 class Wrap:
@@ -146,7 +157,7 @@ def create_disk(L,V,sigma):
     u    = 2*random()-1
     v    = 2*random()-1
     norm = sqrt(u**2 + v**2)
-    return HardDisk(x, y, u*V/norm, v*V/norm)
+    return HardDisk(x, y, u*V/norm, v*V/norm,sigma)
 
 def get_next_event(collision, wrap, sample, disk):
     '''
@@ -170,13 +181,16 @@ def parse_arguments():
     parser = ArgumentParser(description = __doc__)
     parser.add_argument('--L',
                         type    = float,
-                        default = 1.0)
+                        default = 1.0,
+                        help    = 'Half lenghth of box')
     parser.add_argument('--sigma',
                         type    = float,
-                        default = 0.365)
+                        default = 0.365,
+                        help    = 'Radius of sphere')
     parser.add_argument('--N',
                         type    = int,
-                        default = 100)
+                        default = 100,
+                        help    = 'Number of steps to evolve configuration')
     parser.add_argument('--m',
                         type    = int,
                         default = 10)
