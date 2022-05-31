@@ -66,10 +66,10 @@ def parse_arguments():
     parser = ArgumentParser(description = __doc__)
     parser.add_argument('--N',
                         type    = int,
-                        default =10000)
+                        default = 10000)
     parser.add_argument('--Disks',
                         type    = int,
-                        default =4)
+                        default = 4)
     parser.add_argument('--sigma',
                         type    = float,
                         nargs   = '+',
@@ -83,6 +83,10 @@ def parse_arguments():
     parser.add_argument('--plot',
                         default = None,
                         help    = 'Name of plot file')
+    parser.add_argument('--bins',
+                        type    = int,
+                        default = 1000,
+                        help    = 'Number of bins for histogram')
     return parser.parse_args()
 
 if __name__=='__main__':
@@ -95,9 +99,9 @@ if __name__=='__main__':
         hist,bin_edges = histogram(reshape([direct_disks( sigma   = sigma,
                                                           N       = args.Disks,
                                                           d       = args.d)[:,0] for _ in range(args.N)],
-                       args.N*args.Disks),
-             bins    = 'auto',
-             density = True)
+                                           args.N*args.Disks),
+                                   bins    = args.bins,
+                                   density = True)
         plot([0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)], hist,
              label = fr'$\sigma=${sigma}, $\eta=$ {get_density(sigma=sigma,L=1,N=4):.3}')
 

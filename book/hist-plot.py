@@ -44,15 +44,15 @@ def parse_arguments():
     parser = ArgumentParser(description = __doc__)
     parser.add_argument('--input',
                         default = 'md/history.csv',
-						help    = 'Path to history file')
+                        help    = 'Path to history file')
     parser.add_argument('--burn',
                         type    = int,
                         default = 100000,
-						help    = 'Number of records to skip at beginning')
+                        help    = 'Number of records to skip at beginning')
     parser.add_argument('--bins',
                         type    = int,
                         default = 100,
-						help    = 'Number of bins for histogram')
+                        help    = 'Number of bins for histogram')
     parser.add_argument('--show',
                         action = 'store_true',
                         help   = 'Show plot')
