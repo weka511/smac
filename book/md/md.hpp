@@ -23,6 +23,9 @@
 #include "params.hpp"
 #include "history.hpp"
 
+/**
+ *  Used when we parse saved state.
+ */
 enum ParserState {
 	START     = 0, 
 	PARTICLES = 2

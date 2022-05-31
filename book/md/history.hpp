@@ -19,18 +19,39 @@
 #define _HISTORY_HPP_
 
 /**
- *  This class is responsible for storing history
+ *  This class allows History to call back to Configuration 
+ *  when it dumps the position and velocities
+ */
+class HistoryPartner {
+  public:
+     /**
+      *   Used to report position to history file
+	  */
+     virtual void report(ofstream* output)=0;
+};
+
+/**
+ *  This class is responsible for reporting history
  */
 class History {
 	ofstream * _history=NULL;
 	
   public:
-	History(bool history,string path){
+    /**
+     * Open stream if user wants history stored.
+     */	 
+	History(bool history, string path){
 		if (history)
 			_history = new ofstream(path);
 	}
 	
-	ofstream * get_stream() {return _history;}
+	/**
+	 *   Report positions and velocities to history file.
+	 */
+	void report(HistoryPartner  *partner) {
+		if (_history!=NULL)
+			partner->report(_history);
+	}
 	
 	virtual ~History(){
 		if (_history!=NULL)

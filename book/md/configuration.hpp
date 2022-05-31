@@ -19,11 +19,12 @@
 #define _CONFIGURATION_HPP_
 #include <random>
 #include "particle.hpp"
+#include "history.hpp"
 
 using namespace std;
 
 /**
- * Used to identify reasons for failure
+ * Used to report success, or identify reasons for failure
  */
 enum Status {
 	SUCCESS              = 0,
@@ -57,7 +58,7 @@ class ParticleCollision{
 /**
  * This class represents a box containing particles.
  */
-class Configuration{
+class Configuration : public HistoryPartner {
 
 	const int         _n;          // Number of particles
 	const int         _d;          // Dimension of box
@@ -147,10 +148,12 @@ class Configuration{
 	 *  Output configuration and velocities to specified stream
 	 */
 	void dump(ofstream& output);
+	
 	/**
 	 *  Output configuration and velocities to specified stream
 	 */
-	void dump(ofstream* output);
+	void report(ofstream* output);
+	
 	virtual ~Configuration() {
 		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
 			delete  *particle;

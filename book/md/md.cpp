@@ -51,7 +51,6 @@ int main(int argc, char **argv) {
 	
 	int status = UNDEFINED;   // Return code when program executed from shell
 
-
 	if (params.restart) {
 		ParserState       parser_state = START;
 		ifstream          restart_stream(params.restart_path);
@@ -99,7 +98,7 @@ int main(int argc, char **argv) {
 /**
  *  Drive configuration forward a specified number of epochs
  */
-int evolve(Configuration& configuration,
+int evolve( Configuration& configuration,
 			string         output_path, 
 			int            status,
 			ParameterSet   params,
@@ -107,7 +106,6 @@ int evolve(Configuration& configuration,
 			string         check_path,
 			const int      epoch) {
 
-	ofstream * history_stream = history.get_stream();	
 	for  (int i=params.epoch; SUCCESS==status && i<params.N && !killed();i++) {
 		if (i%params.freq ==0) {
 			cout << "Epoch " << (i+1) << ", "<<
@@ -121,9 +119,7 @@ int evolve(Configuration& configuration,
 		}
 			
 		status = configuration.event_disks();
-		if (history_stream!=NULL)
-			configuration.dump(history_stream);
-		
+		history.report(&configuration);		
 	}
 
 	save(output_path, configuration,params.N,params);
