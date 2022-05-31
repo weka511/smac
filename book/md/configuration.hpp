@@ -22,6 +22,9 @@
 
 using namespace std;
 
+/**
+ * Used to identify reasons for failure
+ */
 enum Status {
 	SUCCESS              = 0,
 	FAIL_DISKS_TOO_CLOSE = SUCCESS + 1,
@@ -34,9 +37,9 @@ enum Status {
  */
 class WallCollision{
   public:
-	const double _time;
-	const int    _j;
-	const int    _wall;
+	const double _time;    // Time when collision will occur
+	const int    _j;       // Index of sphere
+	const int    _wall;    // The index of the wall (actually a pair of opposite walls)
 	WallCollision(const double time, const int j, const int wall) : _time(time), _j(j), _wall(wall){}
 };
 
@@ -45,9 +48,9 @@ class WallCollision{
  */
 class ParticleCollision{
   public:
-  	const double _time;
-	const int _k;
-	const int _l;
+  	const double _time;    // Time when collision will occur
+	const int _k;          // Index of one sphere
+	const int _l;          // Index of the other sphere
 	ParticleCollision(const double time, const int k, const int l): _time(time), _k(k), _l(l){}
 };
 
@@ -67,8 +70,8 @@ class Configuration{
 	 * but initialize(...) and _build_config(...) will assign valid positions and velocities.
 	 */
 	vector<Particle*> _particles;
-	int               n_wall_collisions;    // Number of collisions
-	int               n_pair_collisions;    // Number of collisions
+	int               n_wall_collisions;    // Number of collisions with walls
+	int               n_pair_collisions;    // Number of collisions between pairs
 
   public:
  
@@ -130,26 +133,48 @@ class Configuration{
      */
 	int event_disks();
 	
+	/**
+	 * Number of collisions with walls
+	 */
 	int get_n_wall_collisions() {return n_wall_collisions;}
 	
+	/**
+	 * Number of collisions between pairs
+	 */
 	int get_n_pair_collisions() {return n_pair_collisions;}
 	
 	/**
 	 *  Output configuration and velocities to specified stream
 	 */
 	void dump(ofstream& output);
-	
+	/**
+	 *  Output configuration and velocities to specified stream
+	 */
+	void dump(ofstream* output);
 	virtual ~Configuration() {
 		for (auto particle = begin (_particles); particle != end (_particles); ++particle)
 			delete  *particle;
 	}
   private:
   
+    /**
+     * Used when we initialize Configuration to make one attempt at constructing
+     * an admissable set of spheres or disks.
+     */
   	int _build_config(  uniform_real_distribution<double> & distr,
 						default_random_engine& eng);
-						
+	
+    /**
+     * Determine earliest time when any sphere will hit wall, 
+     * ignoring the possibility of an earler collision with
+     * another sphere
+     */	
 	WallCollision     _get_next_wall_collision();
 	
+	/**
+     * Determine earliest time when any sphere will hit another sphere, 
+     * ignoring the possibility of an earler collision with a wall
+     */	
 	ParticleCollision _get_next_particle_collision();
 	
 };

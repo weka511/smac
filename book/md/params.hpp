@@ -38,7 +38,9 @@ class ParameterSet {
 	string restart_path;
 	int    wall_collisions = 0;
 	int    pair_collisions = 0;
-	int    epoch           = 0;	
+	int    epoch           = 0;
+    bool   history         = false;
+    string history_path;	
 	
 	/**
 	 *  Create ParameterSet from command line parameters

@@ -24,21 +24,21 @@
 /**
  *   Place particle in a random position.
  */
-void Particle::randomizeX(  uniform_real_distribution<double> & distr,
-							default_random_engine             & eng,
-							const  double                       scale[3]) {
+void Particle::randomizeX(  uniform_real_distribution<double> & distribution,
+							default_random_engine             & engine,
+							const  double                     * scale) {
 	for (int i=0;i<_d;i++)
-		_x[i] = scale[i] * distr(eng);
+		_x[i] = scale[i] * distribution(engine);
 }
 	
 /**
  *   Assign random velocity to a particle
  */
-void Particle::randomizeV(  uniform_real_distribution<double> & distr,
-							default_random_engine             & eng,
-							const double                        scale[3]) {
+void Particle::randomizeV(  uniform_real_distribution<double> & distribution,
+							default_random_engine             & engine,
+							const double                      * scale) {
 for (int i=0;i<_d;i++)
-	_v[i] = scale[i] * distr(eng);
+	_v[i] = scale[i] * distribution(engine);
 }
 
 /**

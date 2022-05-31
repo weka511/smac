@@ -20,13 +20,28 @@
 
 #include "particle.hpp"
 #include "configuration.hpp"
+#include "params.hpp"
 
 enum ParserState {
 	START     = 0, 
 	PARTICLES = 2
 };
 
-
+class History {
+	ofstream * _history=NULL;
+	
+  public:
+	History(bool history,string path){
+		if (history)
+			_history = new ofstream(path);
+	}
+	
+	ofstream * get_stream() {return _history;}
+	virtual ~History(){
+		if (_history!=NULL)
+			_history->close();
+	}
+};
 /**
  *   Check to see whether user wants to terminate program.
  */
@@ -44,6 +59,7 @@ int evolve( Configuration& configuration,
 			string         output_path, 
 			int            status, 
 			ParameterSet   params,
+			History        history,
 			string         check_path = "check.csv",
 			const int      epoch = 0);
 

@@ -36,17 +36,21 @@
 using namespace std;
 
 /**
- * Main program. 
+ * Perform Molecular Dynamics simulation, either from scratch,
+ * or by restarting an existing simulation.
  */
 int main(int argc, char **argv) {
 	ParameterSet params(argc, argv);
 	
+	History history(params.history,params.history_path);
+		
 	if (ifstream(params.output_path)){
 		cerr << "Output file " << params.output_path << " already exists" << endl;
 		exit(EXIT_FAILURE);
 	}
 	
 	int status = UNDEFINED;   // Return code when program executed from shell
+
 
 	if (params.restart) {
 		ParserState       parser_state = START;
@@ -81,11 +85,11 @@ int main(int argc, char **argv) {
 		cout << "Restarting from Epoch " <<params.epoch <<", max=" << params.N<< endl;
 		Configuration configuration(params.n,params.d,params.sigma,particles,params.wall_collisions,params.pair_collisions);
 		status = SUCCESS;
-		status = evolve(configuration, params.output_path,  status,  params, "check.csv", params.epoch);
+		status = evolve(configuration, params.output_path,  status,  params, history, "check.csv", params.epoch);
 	} else {
 		Configuration configuration(params.n,params.d,params.sigma);
 		status = configuration.initialize(params.M);
-		status = evolve(configuration,  params.output_path,  status, params);
+		status = evolve(configuration,  params.output_path,  status, params, history);
 	}
 
 	return status;
@@ -99,9 +103,11 @@ int evolve(Configuration& configuration,
 			string         output_path, 
 			int            status,
 			ParameterSet   params,
+			History        history,
 			string         check_path,
 			const int      epoch) {
-	
+
+	ofstream * history_stream = history.get_stream();	
 	for  (int i=params.epoch; SUCCESS==status && i<params.N && !killed();i++) {
 		if (i%params.freq ==0) {
 			cout << "Epoch " << (i+1) << ", "<<
@@ -115,6 +121,9 @@ int evolve(Configuration& configuration,
 		}
 			
 		status = configuration.event_disks();
+		if (history_stream!=NULL)
+			configuration.dump(history_stream);
+		
 	}
 
 	save(output_path, configuration,params.N,params);
@@ -125,7 +134,7 @@ int evolve(Configuration& configuration,
 /**
  *    Save configuration to specified file
  */
-void save(string           output_path,
+void save(  string         output_path,
 			Configuration& configuration,
 			const int      epoch,
 			ParameterSet & params) {

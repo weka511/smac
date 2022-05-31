@@ -40,12 +40,13 @@
 			{"sigma",  	  required_argument, 	0, 	's'},
 			{"output",    required_argument,    0,  'o'},
 			{"restart",   required_argument,    0,  'r'},
+			{"history",   required_argument,    0,  'h'},
 			{0, 				0, 				0, 	0}
 	};	
 
 	int c;
 	int option_index = 0;
-	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:r:",long_options, &option_index)) != -1)
+	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:r:y:",long_options, &option_index)) != -1)
 		_extract(c);
 	 
  }
@@ -83,6 +84,10 @@
 		case 'h':
 			_help();
 			exit(SUCCESS);
+		case 'y':
+			history      = true;
+			history_path = optarg;
+			break;
 		default:
 			abort();
 	}

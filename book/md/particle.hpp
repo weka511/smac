@@ -24,7 +24,7 @@
 using namespace std;
 
 /**
- * This class represents a particle, either a hard disk (2d_ or hard sphere (3d).
+ * This class represents a particle, either a hard disk (2d) or hard sphere (3d).
  */
 class Particle{
 	double*      _v;     // Velocity vector
@@ -70,23 +70,23 @@ class Particle{
 	double get_dist_sq(Particle* other){
 		double result = 0;
 		for (int i;i<_d;i++)
-			result += (_x[i]-other->_x[i]) * (_x[i]-other->_x[i]);
+			result += (_x[i] - other->_x[i]) * (_x[i] - other->_x[i]);
 		return result;	
 	}
 
 	/**
-	 *   Place particle in a random position.
+	 *   Place particle at a random position.
 	 */
-	void randomizeX(uniform_real_distribution<double> & distr,
-					default_random_engine& eng,
-					const  double scale[3]);
+	void randomizeX(uniform_real_distribution<double> & distribution,
+					default_random_engine             & engine,
+					const  double                     * scale);
 	
 	/**
 	 *   Assign random velocity to a particle
 	 */
-	void randomizeV(uniform_real_distribution<double> & distr,
-					default_random_engine& eng,
-					const double scale[3]);
+	void randomizeV(uniform_real_distribution<double> & distribution,
+					default_random_engine             & engine,
+					const double                      * scale);
 	
 	/**
 	 * Find time for this particle to collide with a specified wall
