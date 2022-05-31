@@ -17,7 +17,7 @@
 
 from argparse          import ArgumentParser
 from matplotlib        import rc
-from matplotlib.pyplot import figure, plot, savefig,show
+from matplotlib.pyplot import figure, plot, savefig, show
 from os.path           import basename, splitext
 
 def get_plot_file_name(plot=None):
