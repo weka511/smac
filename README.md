@@ -251,7 +251,8 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -|md|particle.cpp|Represents one single particle
 -|md|particle.hpp|Represents one single particle
 2.2||directDisksAny.py|
--||direct-disks.py|Exercise 2.6: directly sample the positions of 4 disks ina square box without periodic boundary conditions, for different covering densities
+-||direct-disks.py|Exercise 2.6: directly sample the positions of 4 disks in a square box without periodic boundary conditions, for different covering densities
+-||hist-plot.py|Exercise 2.6:  ...
 3.1||harmonic_wavefunction.py|Exercise 3.1: verify orthonormality of the solutions to Schroedinger's equation for Simple Harmonic Oscillator
 -||harmonic_density.py|Exercise 3.2: determine density matrix
 3.2||matrix-square.py|Exercise 3.4: implement Alg 3.3, matrix-square
