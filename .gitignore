@@ -58,6 +58,11 @@ target/
 
 *.png
 *.txt
+
+# C++ stuff
 *.exe
 .depend
+*.o
+*.stackdump
+
 
