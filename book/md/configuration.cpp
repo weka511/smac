@@ -154,7 +154,6 @@ void Configuration::dump(ofstream& output) {
 
 void Configuration::dump(ofstream* output) {
 
-
 	for (auto particle = begin (_particles); particle != end (_particles); ++particle)
 		*output << *particle << std::endl;
 }

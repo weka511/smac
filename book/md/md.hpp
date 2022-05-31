@@ -21,27 +21,14 @@
 #include "particle.hpp"
 #include "configuration.hpp"
 #include "params.hpp"
+#include "history.hpp"
 
 enum ParserState {
 	START     = 0, 
 	PARTICLES = 2
 };
 
-class History {
-	ofstream * _history=NULL;
-	
-  public:
-	History(bool history,string path){
-		if (history)
-			_history = new ofstream(path);
-	}
-	
-	ofstream * get_stream() {return _history;}
-	virtual ~History(){
-		if (_history!=NULL)
-			_history->close();
-	}
-};
+
 /**
  *   Check to see whether user wants to terminate program.
  */
