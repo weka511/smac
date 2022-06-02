@@ -30,9 +30,16 @@
 
 TEST_CASE( "Particle Tests", "[particle]" ) {
 	
-	SECTION("Simple Earth-Sun Kepler"){
-		std::cout << "Dummy" << std::endl;
-		REQUIRE (0==0);
+	SECTION("Test distance"){
+		double O[] = {0.0,0.0,0.0,0.0};
+		Particle p0(2,O);
+		double A[] = {3.0,0.0,0.0,0.0};
+		Particle p1(2,A);
+		double B[] = {0.0,4.0,0.0,0.0};
+		Particle p2(2,B);
+		REQUIRE (9== p0.get_dist_sq(&p1));
+		REQUIRE (16== p2.get_dist_sq(&p0));
+		REQUIRE (25== p1.get_dist_sq(&p2));
 	}
 	
 
