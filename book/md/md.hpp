@@ -62,5 +62,10 @@ void save(  string    output_path,
 			ParameterSet & params);
 
 
+/**
+ * Get date formatted for display
+ */
+string get_date_string();
+
 #endif
 

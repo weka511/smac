@@ -38,17 +38,13 @@
 
 using namespace std;
 
+
 /**
  * Perform Molecular Dynamics simulation, either from scratch,
  * or by restarting an existing simulation.
  */
 int main(int argc, char **argv) {
-	auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    std::ostringstream oss;
-    oss << std::put_time(&tm, "%d-%B-%Y %H-%M-%S");
-    auto date = oss.str();
-    cout << "MD " <<VERSION << " "<< date << endl;
+    cout << "MD " <<VERSION << " "<< get_date_string() << endl;
 	ParameterSet params(argc, argv);
 	
 	History history(params.history,params.history_path);
@@ -168,6 +164,17 @@ bool killed(string kill_file){
 		remove(kill_file.c_str());
 	}
 	return kill_file_found;
+}
+
+/**
+ * Get date formatted for display
+ */
+string get_date_string() {
+	auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%B-%Y %H-%M-%S");
+    return oss.str();
 }
 
 
