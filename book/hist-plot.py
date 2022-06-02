@@ -17,21 +17,24 @@
 
 from argparse          import ArgumentParser
 from matplotlib        import rc
-from matplotlib.pyplot import figure, hist, savefig, show, title
+from matplotlib.pyplot import figure, hist, savefig, show, suptitle, title
 from os.path           import basename, splitext
 
 def get_column(path,
                column = 0,
                burn   = 100000):
     Xs = []
+    version = None
     for line in open(path):
         if burn<=0:
             fields = line.strip().split(',')
             Xs.append(float(fields[column]))
         else:
+            if version ==None:
+                version = line.strip()
             burn-=1
 
-    return Xs
+    return version,Xs
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -67,10 +70,11 @@ if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     figure(figsize=(12,12))
-    hist( get_column(args.input,
-                     burn = args.burn),
+    version,Xs = get_column(args.input,burn = args.burn)
+    hist(Xs,
           bins = args.bins)
     title(f'{args.input} burn={args.burn:,}')
+    suptitle(version)
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
