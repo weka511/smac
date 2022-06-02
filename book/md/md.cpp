@@ -29,6 +29,9 @@
 #include <string>
 #include <sys/stat.h> 
 #include <vector>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 
 #include "params.hpp"
 #include "md.hpp"
@@ -40,6 +43,12 @@ using namespace std;
  * or by restarting an existing simulation.
  */
 int main(int argc, char **argv) {
+	auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%B-%Y %H-%M-%S");
+    auto date = oss.str();
+    cout << "MD " <<VERSION << " "<< date << endl;
 	ParameterSet params(argc, argv);
 	
 	History history(params.history,params.history_path);
