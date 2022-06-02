@@ -25,7 +25,7 @@ RM        = rm -f
 MKDIR     = mkdir
 SRCS      = configuration.cpp particle.cpp params.cpp
 
-TESTS     = 	
+TESTS     = test-particle.cpp	
 		
 OBJS1     = $(subst .cpp,.o,$(SRCS)) 
 OBJS      = $(subst .cc,.o,$(OBJS1)) 
@@ -35,6 +35,7 @@ THREADING = threading.exe
 
 MAIN      = md.exe
 TARGETS   = $(MAIN) 
+TEST_MAIN = tests.exe
 
 all : $(MAIN)
 
