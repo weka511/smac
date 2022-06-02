@@ -41,8 +41,11 @@ class History {
      * Open stream if user wants history stored.
      */	 
 	History(bool history, string path){
-		if (history)
+		if (history){
 			_history = new ofstream(path);
+			*_history << VERSION << endl;
+		}
+		
 	}
 	
 	/**
