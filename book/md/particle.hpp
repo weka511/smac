@@ -132,7 +132,7 @@ class Particle{
 	/**
 	 *   Calculate distance between two vectors
 	 */
-	double delta(double * x, double * y, double * Delta){
+	void delta(double * x, double * y, double * Delta){
 		for (int i=0;i<_d;i++)
 			Delta[i] = x[i] - y[i];
 	}
