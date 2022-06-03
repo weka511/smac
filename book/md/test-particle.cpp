@@ -31,16 +31,55 @@
 TEST_CASE( "Particle Tests", "[particle]" ) {
 	
 	SECTION("Test distance"){
-		double O[] = {0.0,0.0,0.0,0.0};
-		Particle p0(2,O);
-		double A[] = {3.0,0.0,0.0,0.0};
-		Particle p1(2,A);
-		double B[] = {0.0,4.0,0.0,0.0};
-		Particle p2(2,B);
+		double O[] = {0.0, 0.0, 0.0, 0.0};
+		Particle p0(2, O);
+		double A[] = {3.0, 0.0, 0.0, 0.0};
+		Particle p1(2, A);
+		double B[] = {0.0, 4.0, 0.0, 0.0};
+		Particle p2(2, B);
 		REQUIRE (9== p0.get_dist_sq(&p1));
 		REQUIRE (16== p2.get_dist_sq(&p0));
 		REQUIRE (25== p1.get_dist_sq(&p2));
 	}
 	
+	SECTION("Test gap between two vectors"){
+		double O[] = {0.0, 0.0, 0.0, 0.0};
+		Particle p0(2, O);
+		double A[] = {3.0, 0.0};
+		double B[] = {0.0, 4.0};
+		double Delta[2];
+		p0.delta(A, B, Delta);
+		REQUIRE (3.0 == Delta[0]);
+		REQUIRE (-4.0 == Delta[1]);
+	}
+	
+	SECTION("Test inner product"){
+		double O[] = {0.0,0.0,0.0,0.0};
+		Particle p0(2,O);
+		double A[] = {1, 2, 3};
+		double B[] = {4, 5, 6};
+		REQUIRE(14.0 == p0.get_inner_product(A,B));
+		double O3[] = {0.0,0.0,0.0,0.0,0.0,0.0};
+		Particle p3(23,O3);
+		REQUIRE(32.0 == p3.get_inner_product(A,B));
+	}
+	
+	SECTION("Test time to wall"){
+		double O1[] = {0.1,0.0,0.2,0.0};
+		Particle p1(2,O1);
+		REQUIRE(0.9/0.2 == p1.get_time_to_wall(0,1.0));
+		double O2[] = {-0.1,0.0,0.2,0.0};
+		Particle p2(2,O2);
+		REQUIRE(1.1/0.2 == p2.get_time_to_wall(0,1.0));
+		double O3[] = {0.1,0.0,-0.2,0.0};
+		Particle p3(2,O3);
+		REQUIRE(1.1/0.2 == p3.get_time_to_wall(0,1.0));
+		double O4[] = {-0.1,0.25,-0.2,0.3};
+		Particle p4(2,O4);
+		REQUIRE(0.9/0.2 == p4.get_time_to_wall(0,1.0));
+		REQUIRE((0.95-0.25)/0.3 == p4.get_time_to_wall(1,0.95));
+	}
+	
+	SECTION("Test time to other particle"){}
 
 }
