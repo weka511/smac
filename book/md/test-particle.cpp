@@ -17,7 +17,9 @@
  * This file contains tests for the Particle class
  */
  
+#include <fstream>
 
+using namespace std;
 #include "catch.hpp"
 #include "particle.hpp"
 
@@ -74,6 +76,15 @@ TEST_CASE( "Particle Tests", "[particle]" ) {
 	}
 	
 	SECTION("Test time to other particle"){
+		double O1[] = {1.0,0.0,-2.0,1.0};
+		Particle p1(2,O1);
+		double O2[] = {-1,0.0,1,1};
+		Particle p2(2,O2);
+		double sigma = 0.1;
+		double t = p1.get_time_to_particle(&p2,sigma);
+		p1.evolve(t);
+		p2.evolve(t);
+		REQUIRE(4*sigma*sigma == Approx(p1.get_dist_sq(&p2)));
 	}
 	
 	SECTION("Test wall collision"){
