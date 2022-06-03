@@ -16,10 +16,8 @@
  */
  
 
-#include <fstream>
+
 #include <getopt.h>
-#include <iostream>
-#include <string>
 
  using namespace std;
  #include "params.hpp"
