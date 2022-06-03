@@ -22,17 +22,17 @@ from os.path           import basename, splitext
 
 def get_column(path,
                column = 0,
-               burn   = 100000):
-    Xs = []
+               burn   = 100000,
+               freq   = 1):
+    '''Extract specified columns from history file'''
+    Xs      = []
     version = None
-    for line in open(path):
-        if burn<=0:
+    for i,line in enumerate(open(path)):
+        if i==0:
+            version = line.strip()
+        elif i%freq==0 and i > burn:
             fields = line.strip().split(',')
             Xs.append(float(fields[column]))
-        else:
-            if version ==None:
-                version = line.strip()
-            burn-=1
 
     return version,Xs
 
@@ -50,8 +50,12 @@ def parse_arguments():
                         help    = 'Path to history file')
     parser.add_argument('--burn',
                         type    = int,
-                        default = 100000,
+                        default = 10000,
                         help    = 'Number of records to skip at beginning')
+    parser.add_argument('--freq',
+                        type    = int,
+                        default = 1,
+                        help    = 'Used to sample a subset of data')
     parser.add_argument('--bins',
                         type    = int,
                         default = 100,
@@ -70,11 +74,16 @@ if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     figure(figsize=(12,12))
-    version,Xs = get_column(args.input,burn = args.burn)
+    version,Xs = get_column(args.input,
+                            burn = args.burn,
+                            freq = args.freq)
     hist(Xs,
           bins = args.bins)
-    title(f'{args.input} burn={args.burn:,}')
-    suptitle(version)
+    if args.freq>1:
+        title(f'{args.input}: skip {args.burn:,} records at beginning. Frequency = {args.freq:,}.')
+    else:
+        title(f'{args.input}: skip {args.burn:,} records at beginning.')
+    suptitle(f'From md {version}')
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
