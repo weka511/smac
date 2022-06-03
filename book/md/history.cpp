@@ -14,42 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
+  
+ using namespace std;
 
-#ifndef _HISTORY_HPP_
-#define _HISTORY_HPP_
-
-#include <fstream>
+ #include "history.hpp"
+ 
+/**
+ * Open stream if user wants history stored.
+ */	 
+History::History(bool history, string path){
+	if (history){
+		_history = new ofstream(path);
+		*_history << VERSION << endl;
+	}
+}
 
 /**
- *  This class allows History to call back to Configuration 
- *  when it dumps the position and velocities
+ *   Report positions and velocities to history file.
  */
-class HistoryPartner {
-  public:
-     /**
-      *   Used to report position to history file
-	  */
-     virtual void report(ofstream* output)=0;
-};
+void History::report(HistoryPartner  *partner) {
+	if (_history!=NULL)
+		partner->report(_history);
+}
 
-/**
- *  This class is responsible for reporting history
- */
-class History {
-	ofstream * _history=NULL;
-	
-  public:
-    /**
-     * Open stream if user wants history stored.
-     */	 
-	History(bool history, string path);
-	
-	/**
-	 *   Report positions and velocities to history file.
-	 */
-	void report(HistoryPartner  *partner);
-	
-	virtual ~History();
-};
-
-#endif
+History::~History(){
+	if (_history!=NULL)
+		_history->close();
+}
+ 
+ 
