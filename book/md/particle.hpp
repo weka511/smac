@@ -18,7 +18,7 @@
 #ifndef _PARTICLE_HPP_
 #define _PARTICLE_HPP_
 
-#include <cassert>
+
 #include <iostream>
 #include <random>
 
@@ -37,11 +37,7 @@ class Particle{
   /**
    *   Create a particle for a new configuration (still need to be initialized)
    */
-	Particle(const int d): _d(d) {
-		assert(d==2 or d ==3);
-		_x = new double[d];
-		_v = new double[d];
-	}
+	Particle(const int d);
 	
 	/**
 	 *  Create a particle from a saved configuration.
@@ -51,29 +47,12 @@ class Particle{
 	 *     values    A vector whose first 'd' entries are posiion,
      *            	 and the second 'd' the velocity
 	 */
-	Particle(const int d,double * values): _d(d) {
-		int  i=0;
-		_x    = new double [d];
-		_x[0] = values[i++];
-		_x[1] = values[i++];
-		if (d==3)
-			_x[2] = values[i++];
-		_v    = new double[d];
-		_v[0] = values[i++];
-		_v[1] = values[i++];
-		if (d==3)
-			_v[2] = values[i++];
-	}
+	Particle(const int d,double * values);
 	
 	/**
 	 * Get squared distance between this particle and some other.
 	 */
-	double get_dist_sq(Particle* other){
-		double result = 0;
-		for (int i;i<_d;i++)
-			result += (_x[i] - other->_x[i]) * (_x[i] - other->_x[i]);
-		return result;	
-	}
+	double get_dist_sq(Particle* other);
 
 	/**
 	 *   Place particle at a random position.
@@ -93,9 +72,7 @@ class Particle{
 	 * Find time for this particle to collide with a specified wall
 	 */
 	double get_time_to_wall(const int wall,
-							double free_space) {
-		return (free_space - _x[wall] * copysign(1.0, _v[wall])) /fabs(_v[wall]); // abs was returning int!!
-	}
+							double free_space);
 	
 	/**
 	 * Find time for this particle to collide with a specified other particle
@@ -103,19 +80,14 @@ class Particle{
 	double get_time_to_particle(Particle* other, const double sigma);
 	
 	/**
-	 * Determine future position of partcle (must be before next collision)
+	 * Determine future position of particle (must be before next collision)
 	 */
-	void evolve (const double t) {
-		for (int i=0;i<_d;i++)
-			_x[i] += _v[i] * t;
-	};
+	void evolve (const double t);
 	
 	/**
 	 *  Reverse velocity component when we collide with wall
 	 */
-	void wall_collide(const int wall) {
-		_v[wall] *= -1;
-	}
+	void wall_collide(const int wall);
 	
 	/**
 	 *  Collide particle with a specified other particle
@@ -125,28 +97,19 @@ class Particle{
 	/**
 	 *  When patticles destroyed, free up position and velocity
 	 */
-	virtual ~Particle() {
-		delete this->_x;
-		delete this->_v;
-	}
+	virtual ~Particle();
 	
 	/**
-	 *   Calculate distance between two vectors
+	 *   Calculate difference between two vectors
+	 *
+	 *   Delta = x - y
 	 */
-	void delta(double * x, double * y, double * Delta){
-		for (int i=0;i<_d;i++)
-			Delta[i] = x[i] - y[i];
-	}
+	void delta(double * x, double * y, double * Delta);
 	
 	/**
 	 *   Calculate inner product of two vectors
 	 */
-	double get_inner_product(double *x, double * y){
-		double result = 0;
-		for (int i=0;i<_d;i++)
-			result += x[i]*y[i];
-		return result;
-	}
+	double get_inner_product(double *x, double * y);
 	
 	/**
 	 *  Used to output position and velocity of particle
