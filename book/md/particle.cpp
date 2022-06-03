@@ -102,10 +102,21 @@ double Particle::get_time_to_particle(	Particle* other,
 	return (Upsilon>0 && DeltaVX<0) ? -(DeltaVX + sqrt(Upsilon))/DeltaV2: std::numeric_limits<double>::infinity(); 
 }
 
+
+
+/**
+ * Determine future position of particle (must be before next collision)
+ */
+void Particle::evolve (const double t) {
+	for (int i=0;i<_d;i++)
+		_x[i] += _v[i] * t;
+};
+
+
 /**
  *  Collide particle with a specified other particle
  */
-void Particle::pair_collide(Particle* other) {
+void Particle::collide(Particle* other) {
 	double DeltaX[_d];
 	delta(_x, other->_x,DeltaX);
 	double DeltaV[_d];
@@ -124,17 +135,9 @@ void Particle::pair_collide(Particle* other) {
 }
 
 /**
- * Determine future position of particle (must be before next collision)
- */
-void Particle::evolve (const double t) {
-	for (int i=0;i<_d;i++)
-		_x[i] += _v[i] * t;
-};
-
-/**
  *  Reverse velocity component when we collide with wall
  */
-void Particle::wall_collide(const int wall) {
+void Particle::collide(const int wall) {
 	_v[wall] *= -1;
 }
 
@@ -156,6 +159,16 @@ double Particle::get_inner_product(double *x, double * y){
 	for (int i=0;i<_d;i++)
 		result += x[i]*y[i];
 	return result;
+}
+
+/**
+ *   Determine kinetic energy, assuming unit mass
+ */
+double Particle::get_energy() {
+	double energy = 0.0;
+	for (int i=0;i<_d;i++)
+		energy += _v[i]*_v[i];
+	return 0.5 * energy;
 }
 	
 /**

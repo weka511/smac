@@ -75,13 +75,13 @@ int Configuration::event_disks(){
 		for (int i=0;i<_n;i++)
 			_particles[i]->evolve(next_wall_collision._time);
 		
-		_particles[next_wall_collision._j]->wall_collide(next_wall_collision._wall);
+		_particles[next_wall_collision._j]->collide(next_wall_collision._wall);
 		n_wall_collisions++;
 	} else {
 		for (int i=0;i<_n;i++)
 			_particles[i]->evolve(next_particle_collision._time);
 		
-		_particles[next_particle_collision._k]->pair_collide(_particles[next_particle_collision._l]);
+		_particles[next_particle_collision._k]->collide(_particles[next_particle_collision._l]);
 		n_pair_collisions++;
 	}
 	return SUCCESS;

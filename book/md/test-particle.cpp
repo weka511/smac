@@ -17,9 +17,7 @@
  * This file contains tests for the Particle class
  */
  
-#include <fstream>
 
-using namespace std;
 #include "catch.hpp"
 #include "particle.hpp"
 
@@ -90,11 +88,19 @@ TEST_CASE( "Particle Tests", "[particle]" ) {
 	SECTION("Test wall collision"){
 		double O1[] = {1.0,0.0,2.0,1.0};
 		Particle p1(2,O1);
-		p1.wall_collide(0);
+		p1.collide(0);
 		REQUIRE(-2.0 == p1.get_velocity(0));
 		REQUIRE(1.0 == p1.get_velocity(1));
 	}
 	
-	SECTION("Test particle collision"){}
+	SECTION("Test particle collision"){
+		double O1[] = {1.0,0.0,-2.0,1.0};
+		Particle p1(2,O1);
+		double O2[] = {-1,0.0,1,1};
+		Particle p2(2,O2);
+		double E = p1.get_energy()+p2.get_energy();
+		p1.collide(&p2);
+		REQUIRE(E==Approx(p1.get_energy()+p2.get_energy()));
+	}
 
 }

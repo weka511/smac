@@ -87,12 +87,12 @@ class Particle{
 	/**
 	 *  Reverse velocity component when we collide with wall
 	 */
-	void wall_collide(const int wall);
+	void collide(const int wall);
 	
 	/**
 	 *  Collide particle with a specified other particle
 	 */
-	void pair_collide(Particle* other);
+	void collide(Particle* other);
 	
 	/**
 	 *  When patticles destroyed, free up position and velocity
@@ -111,7 +111,15 @@ class Particle{
 	 */
 	double get_inner_product(double *x, double * y);
 	
+	/**
+	 * Accessor for velocity
+	 */
 	double get_velocity(int index) {return _v[index];}
+	
+	/**
+     *   Determine kinetic energy, assuming unit mass
+     */
+	double get_energy();
 	
 	/**
 	 *  Used to output position and velocity of particle
