@@ -41,7 +41,7 @@ class ParameterSet {
 	int    epoch           = 0;
     bool   history         = false;
     string history_path;	
-	
+	bool   parsing_error   = false;
 	/**
 	 *  Create ParameterSet from command line parameters
 	 */

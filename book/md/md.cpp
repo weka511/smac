@@ -40,6 +40,10 @@ using namespace std;
 int main(int argc, char **argv) {
     cout << "MD " <<VERSION << " "<< get_date_string() << endl;
 	ParameterSet params(argc, argv);
+	if (params.parsing_error) {
+		cerr << "Terminating because of errors" << endl;
+		exit(EXIT_FAILURE);
+	}
 	
 	History history(params.history,params.history_path);
 		

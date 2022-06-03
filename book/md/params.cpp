@@ -53,42 +53,49 @@
  *   Used to extract one command line parameter and store in Parameter Set
  */
  void ParameterSet::_extract(const int c) {
-	switch(c) {
-		case 'N':
-			N = atoi(optarg);
-			break;
-		case 'n':
-			n = atoi(optarg);
-			break;
-		case 'd':
-			d = atoi(optarg);
-			break;
-		case 's':
-			sigma = atof(optarg);
-			break;
-		case 'M':
-			M = atoi(optarg);
-			break;
-		case 'f':
-			freq = atoi(optarg);
-			break;
-		case 'o':
-			output_path = optarg;
-			break;
-		case 'r':
-			restart      = true;
-			restart_path = optarg;
-			break;
-		case 'h':
-			_help();
-			exit(SUCCESS);
-		case 'y':
-			history      = true;
-			history_path = optarg;
-			break;
-		default:
-			abort();
-	}
+	 try {	switch(c) {
+				case 'N':
+					N = stoi(optarg);
+					break;
+				case 'n':
+					n = stoi(optarg);
+					break;
+				case 'd':
+					d = stoi(optarg);
+					break;
+				case 's':
+					sigma = stof(optarg);
+					break;
+				case 'M':
+					M = stoi(optarg);
+					break;
+				case 'f':
+					freq = stoi(optarg);
+					break;
+				case 'o':
+					output_path = optarg;
+					break;
+				case 'r':
+					restart      = true;
+					restart_path = optarg;
+					break;
+				case 'h':
+					_help();
+					exit(SUCCESS);
+				case 'y':
+					history      = true;
+					history_path = optarg;
+					break;
+				default:
+					parsing_error   = true;
+					return;
+		}
+	 } catch(std::exception const & e){
+		 char arg = c;
+		 cerr<<"error parsing argument: " << arg << " " << optarg << " " << e.what() <<endl;
+		 parsing_error   = true;
+	 }
+
 }
 
  	/**
