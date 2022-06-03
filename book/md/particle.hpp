@@ -33,7 +33,7 @@ class Particle{
 	const int    _d;     // dimension - 2 or 3
 	
   public:
-  
+    
   /**
    *   Create a particle for a new configuration (still need to be initialized)
    */
@@ -110,6 +110,8 @@ class Particle{
 	 *   Calculate inner product of two vectors
 	 */
 	double get_inner_product(double *x, double * y);
+	
+	double get_velocity(int index) {return _v[index];}
 	
 	/**
 	 *  Used to output position and velocity of particle
