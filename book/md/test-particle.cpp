@@ -14,19 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  *
- * This file exercises the Verlet algorithm for some simple N-body cases
- * without using the Barnes Hut approximations.
+ * This file contains tests for the Particle class
  */
  
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <cmath>
+
 #include "catch.hpp"
 #include "particle.hpp"
-
-
-
 
 TEST_CASE( "Particle Tests", "[particle]" ) {
 	
@@ -80,6 +73,17 @@ TEST_CASE( "Particle Tests", "[particle]" ) {
 		REQUIRE((0.95-0.25)/0.3 == p4.get_time_to_wall(1,0.95));
 	}
 	
-	SECTION("Test time to other particle"){}
+	SECTION("Test time to other particle"){
+	}
+	
+	SECTION("Test wall collision"){
+		double O1[] = {1.0,0.0,2.0,1.0};
+		Particle p1(2,O1);
+		p1.wall_collide(0);
+		REQUIRE(-2.0 == p1.get_velocity(0));
+		REQUIRE(1.0 == p1.get_velocity(1));
+	}
+	
+	SECTION("Test particle collision"){}
 
 }
