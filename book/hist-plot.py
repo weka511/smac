@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Copyright (C) 2022 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
@@ -16,7 +18,6 @@
 '''Template for programs--replace with description'''
 
 from argparse          import ArgumentParser
-from matplotlib        import rc
 from matplotlib.pyplot import figure, hist, savefig, show, suptitle, title
 from os.path           import basename, splitext
 
@@ -71,8 +72,6 @@ def parse_arguments():
 if __name__=='__main__':
     args = parse_arguments()
 
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
     figure(figsize=(12,12))
     version,Xs = get_column(args.input,
                             burn = args.burn,
@@ -84,6 +83,6 @@ if __name__=='__main__':
     else:
         title(f'{args.input}: skip {args.burn:,} records at beginning.')
     suptitle(f'From md {version}')
-    savefig(get_plot_file_name(args.plot))
+    savefig(get_plot_file_name())
     if args.show:
         show()
