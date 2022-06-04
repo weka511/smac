@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Copyright (C) 2015-2022 Greenweaves Software Limited
 #
 # This is free software: you can redistribute it and/or modify
@@ -17,8 +19,9 @@
 Useful functions: BoxMuller, CircleThrowing, and SphereGenerator
 '''
 
-from math   import log, pi, sqrt
-from random import random
+from math              import log, pi, sqrt
+from matplotlib.pyplot import figure, hist, show, subplot, suptitle, title, xlabel, ylabel
+from random            import random
 
 class BoxMuller:
     '''Algorithm 1.19'''
@@ -107,4 +110,27 @@ class SphereGenerator:
             raise ValueError("Dimension {0} does not divide {1} length exactly".format(n,len(xs)))
 
 if __name__=="__main__":
-    print ("Library only")
+
+    N        = 1000000
+    sg       = SphereGenerator(3,N)
+    energies = [x*x+y*y+z*z for (x,y,z) in sg.direct_sphere()]
+
+    figure(figsize = (12,6))
+    subplot(1,2,1)
+    hist(energies,bins=500)
+    title("Bolzmann Histogram")
+    xlabel("Frequency")
+    ylabel("Energy")
+
+    gauss = BoxMuller()
+    subplot(1,2,2)
+    hist([gauss.gauss() for _ in range(1000000)],
+         bins    = 200,
+         density = True)
+    title("Gaussian Histogram")
+    xlabel("Value")
+    ylabel("Frequency")
+
+    suptitle('SMAC tests')
+    show()
+

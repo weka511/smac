@@ -226,11 +226,9 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -||markov-discrete-pebble.py| 1.4 Use table
 -||large-markov.py|
 -||transfer.m|1.8 Eigenvalues of transfer matrix
--||sphere-test.py|1.13 Vectors within Uniform sphere
 1.2||permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often
 -||permutation-histogram.py
 -||naivegauss.py|1.12 Gauss
--||boxmuller.py|Test for Box Muller algorithm
 -||direct-surface.py|Monte Carlo simulation of Exercise 2.11 of Chaosbook: in higher dimensions, any two vectors are nearly orthogonal
 1.3||binomialconvolution.py|1.18 Binomial Convolution
 1.4.2||direct-gamma.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
