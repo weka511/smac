@@ -16,7 +16,8 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
 from math              import pi
-from matplotlib.pyplot import plot, savefig
+from matplotlib.pyplot import plot, savefig, show
+from os                import name
 from os.path           import basename, splitext
 
 def get_plot_file_name(plot=None):
@@ -38,4 +39,8 @@ if __name__=="__main__":
     for i in range(8):
         pi_estimates = binomial_convolution(pi/4,pi_estimates)
         plot(pi_estimates)
-    savefig(get_plot_file_name())
+
+    if name == 'posix':
+        savefig(get_plot_file_name())
+    if name == 'nt':
+        show()
