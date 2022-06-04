@@ -1,6 +1,6 @@
-# binomialconvolution.py
+#!/usr/bin/env python
 
-# Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
+# Copyright (C) 2015-2022 Greenweaves Software Limited
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,20 +15,27 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
-import math,matplotlib.pyplot as plt
+from math              import pi
+from matplotlib.pyplot import plot, savefig
+from os.path           import basename, splitext
 
-# Algorithm 1.25 from Krauth
-def binomial_convolution(theta,pi):
-    def calculate_row(pi):
-        return [theta*x + (1-theta)*y for (x,y) in zip(pi[:-1],pi[1:])]
-    return calculate_row([0]+pi+[0])
-    
+def get_plot_file_name(plot=None):
+    '''Determine plot file name from source file name or command line arguments'''
+    if plot==None:
+        return f'{splitext(basename(__file__))[0]}.png'
+    base,ext = splitext(plot)
+    return f'{plot}.png' if len(ext)==0 else plot
+
+def binomial_convolution(theta,estimates):
+    '''Algorithm 1.25 from Krauth'''
+    def calculate_row(estimates):
+        return [theta*x + (1-theta)*y for (x,y) in zip(estimates[:-1],estimates[1:])]
+    return calculate_row([0] + estimates + [0])
+
 
 if __name__=="__main__":
-    pi=[1]
-    theta=math.pi/4
+    pi_estimates = [1]
     for i in range(8):
-        pi=binomial_convolution(theta,pi)
-        plt.plot(pi)
-    plt.show()
-    
+        pi_estimates = binomial_convolution(pi/4,pi_estimates)
+        plot(pi_estimates)
+    savefig(get_plot_file_name())
