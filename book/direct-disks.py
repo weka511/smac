@@ -25,7 +25,7 @@
 from argparse          import ArgumentParser
 from matplotlib        import rc
 from matplotlib.pyplot import figure, legend, plot, savefig, show, title, xlabel, ylabel, ylim
-from numpy             import array, histogram, minimum, ones, pi, reshape, zeros
+from numpy             import array, histogram, minimum, ones, pi, prod, reshape, zeros
 from numpy.linalg      import norm
 from os.path           import basename, splitext
 from numpy.random      import random
@@ -49,11 +49,13 @@ def direct_disks(sigma    = 0.25,
                  L        = array([1,1]),
                  periodic = False):
     '''Prepare one admissable configuration of disks'''
+
     def get_distance(X0,X1):
         if args.periodic:
             return norm(diff_vec(X0,X1,L=L))
         else:
             return norm(X0-X1)
+
     def is_overlapped(X):
         '''Verify that spheres overlap'''
         for i in range(N):
@@ -76,8 +78,11 @@ def direct_disks(sigma    = 0.25,
 
     raise Exception(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
 
-def get_density(sigma=0.25,L=1,N=4):
-    return N*pi*sigma**2/(4*L**2)
+def get_density(sigma = 0.25,
+                L     = [1],
+                N     = 4):
+    '''Calculate fraction of total volums that will be occupied'''
+    return N*pi*sigma**2/prod(L)
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -109,7 +114,7 @@ def parse_arguments():
                         help    = 'Name of plot file')
     parser.add_argument('--bins',
                         type    = int,
-                        default = 1000,
+                        default = 100,
                         help    = 'Number of bins for histogram')
     parser.add_argument('--periodic',
                         action = 'store_true',
@@ -123,25 +128,32 @@ def parse_arguments():
 if __name__=='__main__':
     args = parse_arguments()
     L    = array(args.L if len(args.L)==args.d else args.L * args.d)
-    figure(figsize=(12,12))
-
+    figure(figsize = (12,12))
+    upper_limit    = -float('inf')
     for sigma in args.sigma:
-        print (f'sigma={sigma}')
-        hist,bin_edges = histogram(
-                            reshape(
-                                [direct_disks( sigma    = sigma,
-                                               N        = args.Disks,
-                                               d        = args.d,
-                                               L        = L)[:,0] for _ in range(args.N)],
-                                args.N*args.Disks),
-                            bins    = args.bins,
-                            density = True)
-        plot([0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)], hist,
-             label = fr'$\sigma=${sigma}, $\eta=$ {get_density(sigma=sigma,L=1,N=4):.3}')
+        eta = get_density(sigma = sigma,
+                          L     = L,
+                          N     = args.Disks)
+        print (f'sigma = {sigma}, eta = {eta}')
+        configurations = [direct_disks( sigma    = sigma,
+                                        N        = args.Disks,
+                                        d        = args.d,
+                                        L        = L,
+                                        periodic = args.periodic)[:,0] for _ in range(args.N)]
+        positions      = reshape(configurations, args.N*args.Disks)
+        hist,bin_edges = histogram(positions,
+                                   bins    = args.bins,
+                                   density = True)
 
-    title(fr'{args.N:,} Trials, {args.Disks} Disks')
+        plot([0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)], hist,
+             label = fr'$\sigma=${sigma}, $\eta=$ {eta:.3}')
+
+        upper_limit = max(max(hist),upper_limit)
+
+    boundary_conditions = 'with' if args.periodic else 'without'
+    title(fr'{args.N:,} Trials, {args.Disks} Disks {boundary_conditions} periodic boundary conditions')
     legend()
-    ylim([0,1])
+    ylim([0,upper_limit])
     xlabel('Position')
     ylabel('Frequency')
     savefig(get_plot_file_name(args.plot))
