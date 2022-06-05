@@ -25,7 +25,7 @@
 from argparse          import ArgumentParser
 from matplotlib        import rc
 from matplotlib.pyplot import figure, legend, plot, savefig, show, title, xlabel, ylabel, ylim
-from numpy             import array, histogram, minimum, pi, reshape
+from numpy             import array, histogram, minimum, ones, pi, reshape, zeros
 from numpy.linalg      import norm
 from os.path           import basename, splitext
 from numpy.random      import random
@@ -46,19 +46,27 @@ def direct_disks(sigma    = 0.25,
                  N        = 4,
                  NTrials  = None,
                  d        = 2,
-                 distance = lambda X0,X1: norm(X0-X1),
-                 L        = array([1,1])):
+                 L        = array([1,1]),
+                 periodic = False):
     '''Prepare one admissable configuration of disks'''
+    def get_distance(X0,X1):
+        if args.periodic:
+            return norm(diff_vec(X0,X1,L=L))
+        else:
+            return norm(X0-X1)
     def is_overlapped(X):
+        '''Verify that spheres overlap'''
         for i in range(N):
             for j in range(i+1,N):
-                if distance(X[i,:],X[j,:])<2*sigma:
+                if get_distance(X[i,:],X[j,:])<2*sigma:
                     return True
         return False
 
     k = 0
+    LowerBound = zeros(d) if periodic else sigma*ones(d)
+    UpperBound = L if periodic else L - 2*sigma*ones(d)
     while True:
-        X = sigma + (L - 2*sigma) * random(size=(N,d))
+        X = LowerBound + UpperBound * random(size=(N,d))
         if is_overlapped(X):
             k += 1
             if NTrials != None and k>=NTrials:
@@ -116,17 +124,18 @@ if __name__=='__main__':
     args = parse_arguments()
     L    = array(args.L if len(args.L)==args.d else args.L * args.d)
     figure(figsize=(12,12))
-    distance = lambda X0,X1: norm(diff_vec(X0,X1,L=L)) if args.periodic else lambda X0,X1: norm(X0-X1)
+
     for sigma in args.sigma:
         print (f'sigma={sigma}')
-        hist,bin_edges = histogram(reshape([direct_disks( sigma    = sigma,
-                                                          N        = args.Disks,
-                                                          d        = args.d,
-                                                          distance = distance,
-                                                          L        = L)[:,0] for _ in range(args.N)],
-                                           args.N*args.Disks),
-                                   bins    = args.bins,
-                                   density = True)
+        hist,bin_edges = histogram(
+                            reshape(
+                                [direct_disks( sigma    = sigma,
+                                               N        = args.Disks,
+                                               d        = args.d,
+                                               L        = L)[:,0] for _ in range(args.N)],
+                                args.N*args.Disks),
+                            bins    = args.bins,
+                            density = True)
         plot([0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)], hist,
              label = fr'$\sigma=${sigma}, $\eta=$ {get_density(sigma=sigma,L=1,N=4):.3}')
 
