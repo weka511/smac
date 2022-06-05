@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Copyright (C) 2022 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
@@ -91,8 +93,7 @@ def parse_arguments():
 
 if __name__=='__main__':
     args = parse_arguments()
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
+
     figure(figsize=(12,12))
     for sigma in args.sigma:
         print (f'sigma={sigma}')
@@ -111,5 +112,6 @@ if __name__=='__main__':
     xlabel('Position')
     ylabel('Frequency')
     savefig(get_plot_file_name(args.plot))
+
     if args.show:
         show()
