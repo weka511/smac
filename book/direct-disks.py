@@ -16,35 +16,49 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-    Exercise 2.6: directly sample the positions of 4 disks ina square box without
+    Exercise 2.6: directly sample the positions of 4 disks in a square box without
     periodic boundary conditions, for different covering densities.
+    Exercise 2.7: directly sample the positions of 4 disks in a square box with
+    periodic boundary conditions
 '''
 
 from argparse          import ArgumentParser
 from matplotlib        import rc
 from matplotlib.pyplot import figure, legend, plot, savefig, show, title, xlabel, ylabel, ylim
-from numpy             import array, histogram, pi, reshape
+from numpy             import array, histogram, minimum, pi, reshape
 from numpy.linalg      import norm
 from os.path           import basename, splitext
 from numpy.random      import random
 
-def direct_disks(sigma = 0.25,
-                 x0      = -1,
-                 x1      = 1,
-                 N       = 4,
-                 NTrials = None,
-                 d       = 2):
+def box_it(X,
+           L = array([1,1])):
+    '''Algorithm 2.5'''
+    return X%L
+
+def diff_vec(X0,X1,
+             L = array([1,1])):
+    '''Algorithm 2.6'''
+    Delta  = box_it(X0 - X1,L=L)
+    return minimum(Delta, Delta - L/2)
+
+
+def direct_disks(sigma    = 0.25,
+                 N        = 4,
+                 NTrials  = None,
+                 d        = 2,
+                 distance = lambda X0,X1: norm(X0-X1),
+                 L        = array([1,1])):
     '''Prepare one admissable configuration of disks'''
     def is_overlapped(X):
         for i in range(N):
             for j in range(i+1,N):
-                if norm(X[i,:]-X[j,:])<2*sigma:
+                if distance(X[i,:],X[j,:])<2*sigma:
                     return True
         return False
 
     k = 0
     while True:
-        X = x0 + sigma + (x1 - x0 - 2*sigma) * random(size=(N,d))
+        X = sigma + (L - 2*sigma) * random(size=(N,d))
         if is_overlapped(X):
             k += 1
             if NTrials != None and k>=NTrials:
@@ -89,17 +103,27 @@ def parse_arguments():
                         type    = int,
                         default = 1000,
                         help    = 'Number of bins for histogram')
+    parser.add_argument('--periodic',
+                        action = 'store_true',
+                        default = False)
+    parser.add_argument('--L',
+                        type    = float,
+                        nargs   = '+',
+                        default = [1])
     return parser.parse_args()
 
 if __name__=='__main__':
     args = parse_arguments()
-
+    L    = array(args.L if len(args.L)==args.d else args.L * args.d)
     figure(figsize=(12,12))
+    distance = lambda X0,X1: norm(diff_vec(X0,X1,L=L)) if args.periodic else lambda X0,X1: norm(X0-X1)
     for sigma in args.sigma:
         print (f'sigma={sigma}')
-        hist,bin_edges = histogram(reshape([direct_disks( sigma   = sigma,
-                                                          N       = args.Disks,
-                                                          d       = args.d)[:,0] for _ in range(args.N)],
+        hist,bin_edges = histogram(reshape([direct_disks( sigma    = sigma,
+                                                          N        = args.Disks,
+                                                          d        = args.d,
+                                                          distance = distance,
+                                                          L        = L)[:,0] for _ in range(args.N)],
                                            args.N*args.Disks),
                                    bins    = args.bins,
                                    density = True)
