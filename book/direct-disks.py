@@ -23,66 +23,42 @@
 '''
 
 from argparse          import ArgumentParser
+from geometry          import Box, Torus
 from matplotlib        import rc
 from matplotlib.pyplot import figure, legend, plot, savefig, show, title, xlabel, ylabel, ylim
-from numpy             import array, histogram, minimum, ones, pi, prod, reshape, zeros
-from numpy.linalg      import norm
+from numpy             import array, histogram, reshape
 from os.path           import basename, splitext
 from numpy.random      import random
 
-def box_it(X,
-           L = array([1,1])):
-    '''Algorithm 2.5'''
-    return X%L
-
-def diff_vec(X0,X1,
-             L = array([1,1])):
-    '''Algorithm 2.6'''
-    Delta  = box_it(X0 - X1,L=L)
-    return minimum(Delta, Delta - L/2)
 
 
 def direct_disks(sigma    = 0.25,
                  N        = 4,
-                 NTrials  = None,
+                 NTrials  = float('inf'),
                  d        = 2,
-                 L        = array([1,1]),
-                 periodic = False):
+                 geometry = None):
     '''Prepare one admissable configuration of disks'''
 
-    def get_distance(X0,X1):
-        if args.periodic:
-            return norm(diff_vec(X0,X1,L=L))
-        else:
-            return norm(X0-X1)
-
     def is_overlapped(X):
-        '''Verify that spheres overlap'''
+        '''Determine whether spheres overlap'''
         for i in range(N):
             for j in range(i+1,N):
-                if get_distance(X[i,:],X[j,:])<2*sigma:
+                if geometry.get_distance(X[i,:],X[j,:])<2*sigma:
                     return True
         return False
 
     k = 0
-    LowerBound = zeros(d) if periodic else sigma*ones(d)
-    UpperBound = L if periodic else L - 2*sigma*ones(d)
     while True:
-        X = LowerBound + UpperBound * random(size=(N,d))
+        X = geometry.LowerBound + geometry.UpperBound * random(size=(N,d))
         if is_overlapped(X):
-            k += 1
-            if NTrials != None and k>=NTrials:
-                break
+            if k>NTrials:
+                raise Exception(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
+            else:
+                k += 1
         else:
             return X
 
-    raise Exception(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
 
-def get_density(sigma = 0.25,
-                L     = [1],
-                N     = 4):
-    '''Calculate fraction of total volums that will be occupied'''
-    return N*pi*sigma**2/prod(L)
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -128,18 +104,17 @@ def parse_arguments():
 if __name__=='__main__':
     args = parse_arguments()
     L    = array(args.L if len(args.L)==args.d else args.L * args.d)
+
     figure(figsize = (12,12))
     upper_limit    = -float('inf')
     for sigma in args.sigma:
-        eta = get_density(sigma = sigma,
-                          L     = L,
-                          N     = args.Disks)
+        geometry = Torus(L = L, sigma = sigma, d = args.d) if args.periodic else Box(L = L, sigma = sigma, d = args.d)
+        eta      = geometry.get_density(N = args.Disks)
         print (f'sigma = {sigma}, eta = {eta}')
         configurations = [direct_disks( sigma    = sigma,
                                         N        = args.Disks,
                                         d        = args.d,
-                                        L        = L,
-                                        periodic = args.periodic)[:,0] for _ in range(args.N)]
+                                        geometry = geometry)[:,0] for _ in range(args.N)]
         positions      = reshape(configurations, args.N*args.Disks)
         hist,bin_edges = histogram(positions,
                                    bins    = args.bins,
@@ -150,8 +125,7 @@ if __name__=='__main__':
 
         upper_limit = max(max(hist),upper_limit)
 
-    boundary_conditions = 'with' if args.periodic else 'without'
-    title(fr'{args.N:,} Trials, {args.Disks} Disks {boundary_conditions} periodic boundary conditions')
+    title(fr'{args.N:,} Trials, {args.Disks} Disks {geometry.get_description()}')
     legend()
     ylim([0,upper_limit])
     xlabel('Position')
