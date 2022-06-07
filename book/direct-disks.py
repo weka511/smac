@@ -23,20 +23,19 @@
 '''
 
 from argparse          import ArgumentParser
-from geometry          import Box, Torus
+from geometry          import GeometryFactory
 from matplotlib        import rc
 from matplotlib.pyplot import figure, legend, plot, savefig, show, title, xlabel, ylabel, ylim
 from numpy             import array, histogram, reshape
 from os.path           import basename, splitext
-from numpy.random      import random
-
-
+from numpy.random      import default_rng
 
 def direct_disks(sigma    = 0.25,
                  N        = 4,
                  NTrials  = float('inf'),
                  d        = 2,
-                 geometry = None):
+                 geometry = None,
+                 rng      = default_rng()):
     '''Prepare one admissable configuration of disks'''
 
     def is_overlapped(X):
@@ -49,7 +48,7 @@ def direct_disks(sigma    = 0.25,
 
     k = 0
     while True:
-        X = geometry.LowerBound + geometry.UpperBound * random(size=(N,d))
+        X = geometry.LowerBound + geometry.UpperBound * rng.random(size=(N,d))
         if is_overlapped(X):
             if k>NTrials:
                 raise Exception(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
@@ -102,13 +101,15 @@ def parse_arguments():
     return parser.parse_args()
 
 if __name__=='__main__':
-    args = parse_arguments()
-    L    = array(args.L if len(args.L)==args.d else args.L * args.d)
-
-    figure(figsize = (12,12))
+    args           = parse_arguments()
     upper_limit    = -float('inf')
+    rng            = default_rng()
+    figure(figsize = (12,12))
     for sigma in args.sigma:
-        geometry = Torus(L = L, sigma = sigma, d = args.d) if args.periodic else Box(L = L, sigma = sigma, d = args.d)
+        geometry = GeometryFactory(periodic = args.periodic,
+                                   L        = array(args.L if len(args.L)==args.d else args.L * args.d),
+                                   sigma    = sigma,
+                                   d        = args.d)
         eta      = geometry.get_density(N = args.Disks)
         print (f'sigma = {sigma}, eta = {eta}')
         configurations = [direct_disks( sigma    = sigma,
