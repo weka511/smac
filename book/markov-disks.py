@@ -24,27 +24,25 @@ from numpy.random      import default_rng
 from os.path           import basename, splitext
 
 def markov_disks(X,
-                 rng   = default_rng(),
-                 delta = array([0.01,0.1]),
-                 N     = 4,
-                 d     = 2,
-                 geometry = None,
+                 rng      = default_rng(),
+                 delta    = array([0.01,0.01]),
+                 geometry = GeometryFactory(),
                  sigma    = 0.125):
     def can_move(k):
         for i in range(N):
             if i!=k and geometry.get_distance(X[i,:],X[k,:])<2*sigma:
                 return False
         return True
-
-    k      = rng.randint(0,N)
-    Delta  = -delta * 2* delta*rnd.rand(d)
+    N,d    = X.shape
+    k      = rng.integers(0,high=N)
+    Delta  = -delta * 2* delta*rng.random(size=d)
     x0     = copy(X[k,:]) # https://stackoverflow.com/questions/47181092/numpy-views-vs-copy-by-slicing
     X[k,:] = x0 + Delta
     if can_move(k):
-        return True
+        return k,X
     else:
-        X[k:i] = x0
-        return False
+        X[k,:] = x0
+        return -1,X
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
@@ -69,7 +67,6 @@ def parse_arguments():
                         default = 4)
     parser.add_argument('--sigma',
                         type    = float,
-                        nargs   = '+',
                         default = 0.125)
     parser.add_argument('--d',
                         type    = int,
@@ -81,19 +78,33 @@ def parse_arguments():
                         type    = float,
                         nargs   = '+',
                         default = [1])
+    parser.add_argument('--delta',
+                        type    = float,
+                        nargs   = '+',
+                        default = [0.01])
     return parser.parse_args()
 
 if __name__=='__main__':
     args     = parse_arguments()
+    rng      = default_rng()
+    delta    = array(args.delta if len(args.delta)==args.d else args.delta * args.d)
     geometry = GeometryFactory(periodic = args.periodic,
                                L        = array(args.L if len(args.L)==args.d else args.L * args.d),
                                sigma    = args.sigma,
                                d        = args.d)
     eta      = geometry.get_density(N = args.Disks)
     print (f'sigma = {args.sigma}, eta = {eta}')
+
     X = geometry.create_configuration(N=args.Disks)
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
+    print (X)
+    for epoch in range(args.N):
+        k,X = markov_disks(X,
+                           rng      = rng,
+                           delta    = delta,
+                           geometry = geometry,
+                           sigma    = args.sigma)
+        print (k,X)
+
     figure(figsize=(12,12))
     plot([1,2,3])
     savefig(get_plot_file_name(args.plot))

@@ -45,10 +45,10 @@ class Geometry:
 
     def pack_disks(self, N=4):
         def alloc(i,j):
-            deltaY = 0 if i%2==0 else 0.5*Delta[1]
-            x      = self.LowerBound[0] +  i * Delta[0]
-            y      = self.LowerBound[1] + deltaY + j * Delta[1]
-            return [x,y]
+            offset = 0 if i%2==0 else 0.5*Delta[1]
+            return [self.LowerBound[0] +  i * Delta[0],
+                    self.LowerBound[1] + offset + j * Delta[1]]
+
         m = isqrt(N)
         n = N // m
         if  m*n < n:
