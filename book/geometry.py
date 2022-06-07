@@ -14,7 +14,8 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 '''Support use of periodic and unbounded boundary conditions '''
-from numpy             import array, minimum, ones, pi, prod, reshape, zeros
+from math              import isqrt
+from numpy             import array, minimum, ones, pi, prod, reshape, sqrt, zeros
 from numpy.linalg      import norm
 
 class Geometry:
@@ -31,6 +32,32 @@ class Geometry:
                     N     = 4):
         '''Calculate fraction of total volums that will be occupied'''
         return N*pi*self.sigma**2/prod(self.L)
+
+    def create_configuration(self,N=4):
+        if self.d==2:
+            eta = self.get_density(N=N)
+            if eta > pi*sqrt(3)/6:
+                raise Exception(f'Density of {eta} exceeds {pi*sqrt(3)/6}')
+            else:
+                return self.pack_disks(N)
+        else:
+            raise Exception(f'Not implemented for d={d}')
+
+    def pack_disks(self, N=4):
+        def alloc(i,j):
+            deltaY = 0 if i%2==0 else 0.5*Delta[1]
+            x      = self.LowerBound[0] +  i * Delta[0]
+            y      = self.LowerBound[1] + deltaY + j * Delta[1]
+            return [x,y]
+        m = isqrt(N)
+        n = N // m
+        if  m*n < n:
+            n += 1
+        assert(m<=n)
+        Available   = self.UpperBound - self.LowerBound
+        Delta       = [Available[0]/m, Available[1]/n]
+        coordinates = [alloc(i,j) for i in range(m) for j in range(n)]
+        return array(coordinates[0:N])
 
 class Box(Geometry):
     '''This class reprsents a simple box geometry without periodic boundary conditions'''
@@ -74,3 +101,10 @@ class Torus(Geometry):
 
     def get_description(self):
         return 'with periodic boundary conditions'
+
+def GeometryFactory(periodic = False,
+                    L        = array([1,1]),
+                    sigma    = 0.25,
+                    d        = 2):
+    '''Create a periodic or aperiodic Geometry'''
+    return Torus(L = L, sigma = sigma, d = d) if periodic else Box(L = L, sigma = sigma, d = d)
