@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Template for programs--replace with description'''
+'''Exercise 2.8 and Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC'''
 
 from argparse          import ArgumentParser
 from geometry          import GeometryFactory
@@ -28,20 +28,24 @@ def markov_disks(X,
                  delta    = array([0.01,0.01]),
                  geometry = GeometryFactory(),
                  sigma    = 0.125):
+    '''Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC'''
+
     def can_move(k):
+        '''Verify that proposed configuration is acceptable'''
         for i in range(N):
             if i!=k and geometry.get_distance(X[i,:],X[k,:])<2*sigma:
                 return False
         return True
-    N,d    = X.shape
-    k      = rng.integers(0,high=N)
-    Delta  = -delta * 2* delta*rng.random(size=d)
-    x0     = copy(X[k,:]) # https://stackoverflow.com/questions/47181092/numpy-views-vs-copy-by-slicing
-    X[k,:] = x0 + Delta
+
+    N,d     = X.shape
+    k       = rng.integers(0,high=N)
+    Delta   = -delta * 2* delta*rng.random(size=d)
+    x_save  = copy(X[k,:]) # https://stackoverflow.com/questions/47181092/numpy-views-vs-copy-by-slicing
+    X[k,:] += Delta
     if can_move(k):
         return k,X
     else:
-        X[k,:] = x0
+        X[k,:] = x_save
         return -1,X
 
 def get_plot_file_name(plot=None):
@@ -97,12 +101,15 @@ if __name__=='__main__':
 
     X = geometry.create_configuration(N=args.Disks)
     print (X)
+    n_accepted = 0
     for epoch in range(args.N):
         k,X = markov_disks(X,
                            rng      = rng,
                            delta    = delta,
                            geometry = geometry,
                            sigma    = args.sigma)
+        if k>-1:
+            n_accepted += 1
         print (k,X)
 
     figure(figsize=(12,12))
