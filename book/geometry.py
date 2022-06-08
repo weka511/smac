@@ -34,20 +34,28 @@ class Geometry:
         return N*pi*self.sigma**2/prod(self.L)
 
     def create_configuration(self,N=4):
+        '''Create an initial configuration, spread uniformly through space'''
         if self.d==2:
-            eta = self.get_density(N=N)
-            if eta > pi*sqrt(3)/6:
-                raise Exception(f'Density of {eta} exceeds {pi*sqrt(3)/6}')
-            else:
-                return self.pack_disks(N)
+            return self.pack_disks(N)
         else:
             raise Exception(f'Not implemented for d={d}')
 
     def pack_disks(self, N=4):
+        '''
+            Create an initial configuration of disks, spread uniformly through a rectangle,
+            using Lagrange's formula https://en.wikipedia.org/wiki/Circle_packing#Densest_packing
+        '''
         def alloc(i,j):
+            '''Determine position of one disk'''
             offset = 0 if i%2==0 else 0.5*Delta[1]
-            return [self.LowerBound[0] +  i * Delta[0],
-                    self.LowerBound[1] + offset + j * Delta[1]]
+            x0 = self.LowerBound[0] +  (i+1) * Delta[0]
+            y0 = self.LowerBound[1] + offset + (j+1) * Delta[1]
+            x1,y1 = self.move_to((x0,y0))
+            return (x1,y1)
+
+        eta = self.get_density(N=N)
+        if eta > pi*sqrt(3)/6:
+            raise Exception(f'Density of {eta} exceeds {pi*sqrt(3)/6}')
 
         m = isqrt(N)
         n = N // m
@@ -73,7 +81,7 @@ class Box(Geometry):
         '''Calculate distance between two points using appropriate boundary conditions'''
         return norm(X0-X1)
 
-    def box_it(self,X):
+    def move_to(self,X):
         return X
 
     def get_description(self):
@@ -93,6 +101,9 @@ class Torus(Geometry):
         '''Calculate distance between two points using appropriate boundary conditions'''
         return norm(self.diff_vec(X0,X1))
 
+    def move_to(self,X):
+        return self.box_it(X)
+
     def box_it(self,X):
         '''Algorithm 2.5'''
         return X%self.L
@@ -103,6 +114,7 @@ class Torus(Geometry):
         return minimum(Delta, Delta - self.L/2)
 
     def get_description(self):
+        '''Used in titles of plots'''
         return 'with periodic boundary conditions'
 
 def GeometryFactory(periodic = False,
@@ -110,4 +122,8 @@ def GeometryFactory(periodic = False,
                     sigma    = 0.25,
                     d        = 2):
     '''Create a periodic or aperiodic Geometry'''
-    return Torus(L = L, sigma = sigma, d = d) if periodic else Box(L = L, sigma = sigma, d = d)
+    return Torus(L     = L,
+                 sigma = sigma,
+                 d     = d) if periodic else Box(L     = L,
+                                                 sigma = sigma,
+                                                 d     = d)

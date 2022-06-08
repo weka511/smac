@@ -18,8 +18,8 @@
 from argparse          import ArgumentParser
 from geometry          import GeometryFactory
 from matplotlib        import rc
-from matplotlib.pyplot import figure, hist, savefig, show
-from numpy             import array, copy
+from matplotlib.pyplot import figure, hist, savefig, show, title, xlim
+from numpy             import any, array, copy
 from numpy.random      import default_rng
 from os.path           import basename, splitext
 
@@ -31,17 +31,24 @@ def markov_disks(X,
     '''Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC'''
 
     def can_move(k):
-        '''Verify that proposed configuration is acceptable'''
+        '''
+            Verify that proposed new position is within the geometry,
+            and that the resulting new configuration will be acceptable.
+        '''
+        if any(X[k,:] < geometry.LowerBound): return False
+        if any(geometry.UpperBound < X[k,:]): return False
+
         for i in range(N):
             if i!=k and geometry.get_distance(X[i,:],X[k,:])<2*sigma:
                 return False
+
         return True
 
     N,d     = X.shape
     k       = rng.integers(0,high=N)
     Delta   = -delta * 2* delta*rng.random(size=d)
     x_save  = copy(X[k,:]) # https://stackoverflow.com/questions/47181092/numpy-views-vs-copy-by-slicing
-    X[k,:]  = geometry.box_it(X[k,:]+Delta)
+    X[k,:]  = geometry.move_to(X[k,:]+Delta)   # Provisional move
 
     if can_move(k):
         return k,X
@@ -92,38 +99,44 @@ def parse_arguments():
                         default = 100,
                         help    = 'Number of bins for histogram')
     parser.add_argument('--coordinate',
-                        type = int,
+                        type    = int,
                         default = 0)
+    parser.add_argument('--burn',
+                        type    = int,
+                        default = 1000)
     return parser.parse_args()
 
 if __name__=='__main__':
-    args     = parse_arguments()
-    rng      = default_rng()
-    delta    = array(args.delta if len(args.delta)==args.d else args.delta * args.d)
-    geometry = GeometryFactory(periodic = args.periodic,
+    args       = parse_arguments()
+    rng        = default_rng()
+    delta      = array(args.delta if len(args.delta)==args.d else args.delta * args.d)
+    geometry   = GeometryFactory(periodic = args.periodic,
                                L        = array(args.L if len(args.L)==args.d else args.L * args.d),
                                sigma    = args.sigma,
                                d        = args.d)
-    eta      = geometry.get_density(N = args.Disks)
-    print (f'sigma = {args.sigma}, eta = {eta}')
-
-    X = geometry.create_configuration(N=args.Disks)
+    eta        = geometry.get_density(N = args.Disks)
+    X          = geometry.create_configuration(N=args.Disks)
+    print (X)
     n_accepted = 0
-    Samples = []
+    Samples    = []
+
     for epoch in range(args.N):
         k,X = markov_disks(X,
                            rng      = rng,
                            delta    = delta,
                            geometry = geometry,
                            sigma    = args.sigma)
-        if k>-1:
-            n_accepted += 1
-        for x in array(X[:,args.coordinate]):
-            Samples.append(x)
 
+        if epoch>args.burn:
+            if k>-1:
+                n_accepted += 1
+            for x in array(X[:,args.coordinate]):
+                Samples.append(x)
 
     figure(figsize=(12,12))
     hist(Samples, bins=args.bins)
+    title(f'{geometry.get_description()} sigma = {args.sigma}, eta = {eta:.3f}, acceptance = {100*n_accepted/(args.N-args.burn):.3f}%')
+    xlim(geometry.LowerBound[args.coordinate]-args.sigma, geometry.UpperBound[args.coordinate]+args.sigma)
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
