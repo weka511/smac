@@ -18,7 +18,7 @@
 from argparse          import ArgumentParser
 from geometry          import GeometryFactory
 from matplotlib        import rc
-from matplotlib.pyplot import figure, plot, savefig, show
+from matplotlib.pyplot import figure, hist, savefig, show
 from numpy             import array, copy
 from numpy.random      import default_rng
 from os.path           import basename, splitext
@@ -41,7 +41,8 @@ def markov_disks(X,
     k       = rng.integers(0,high=N)
     Delta   = -delta * 2* delta*rng.random(size=d)
     x_save  = copy(X[k,:]) # https://stackoverflow.com/questions/47181092/numpy-views-vs-copy-by-slicing
-    X[k,:] += Delta
+    X[k,:]  = geometry.box_it(X[k,:]+Delta)
+
     if can_move(k):
         return k,X
     else:
@@ -74,7 +75,7 @@ def parse_arguments():
                         default = 0.125)
     parser.add_argument('--d',
                         type    = int,
-                        default =2)
+                        default = 2)
     parser.add_argument('--periodic',
                         action = 'store_true',
                         default = False)
@@ -86,6 +87,13 @@ def parse_arguments():
                         type    = float,
                         nargs   = '+',
                         default = [0.01])
+    parser.add_argument('--bins',
+                        type    = int,
+                        default = 100,
+                        help    = 'Number of bins for histogram')
+    parser.add_argument('--coordinate',
+                        type = int,
+                        default = 0)
     return parser.parse_args()
 
 if __name__=='__main__':
@@ -100,8 +108,8 @@ if __name__=='__main__':
     print (f'sigma = {args.sigma}, eta = {eta}')
 
     X = geometry.create_configuration(N=args.Disks)
-    print (X)
     n_accepted = 0
+    Samples = []
     for epoch in range(args.N):
         k,X = markov_disks(X,
                            rng      = rng,
@@ -110,10 +118,12 @@ if __name__=='__main__':
                            sigma    = args.sigma)
         if k>-1:
             n_accepted += 1
-        print (k,X)
+        for x in array(X[:,args.coordinate]):
+            Samples.append(x)
+
 
     figure(figsize=(12,12))
-    plot([1,2,3])
+    hist(Samples, bins=args.bins)
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
