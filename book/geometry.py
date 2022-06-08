@@ -73,6 +73,9 @@ class Box(Geometry):
         '''Calculate distance between two points using appropriate boundary conditions'''
         return norm(X0-X1)
 
+    def box_it(self,X):
+        return X
+
     def get_description(self):
         return 'without periodic boundary conditions'
 
