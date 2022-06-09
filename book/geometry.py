@@ -14,6 +14,7 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 '''Support use of periodic and unbounded boundary conditions '''
+
 from math              import isqrt
 from numpy             import array, minimum, ones, pi, prod, reshape, sqrt, zeros
 from numpy.linalg      import norm
@@ -133,6 +134,11 @@ def GeometryFactory(periodic = False,
                                                  d     = d)
 
 class Histogram:
+    '''
+       This class represents a Histogram, to which we can add points dynamically.
+       This allows memeory to be saved, as we don;t have to maintain individual
+       samples in memory.
+    '''
     def __init__(self,
                  n  = 10,
                  x0 = 0,
@@ -149,9 +155,11 @@ class Histogram:
         return self.h[i]
 
     def add(self,x):
+        '''Add one value to histogram. This increases the count of the relevant bin by 1'''
         self.h[min(int(self.n * (x-self.x0)/(self.xn-self.x0)),len(self)-1)]+=1
 
     def get_hist(self):
+        '''Retrieve counts and bin boundaries'''
         bins = [self.x0 + i*(self.xn-self.x0)/self.n for i in range(self.n)]
         return self.h,bins+[self.xn]
 

@@ -18,7 +18,7 @@
 from argparse          import ArgumentParser
 from geometry          import GeometryFactory
 from matplotlib        import rc
-from matplotlib.pyplot import figure, legend, plot, savefig, show, title, xlabel, xlim
+from matplotlib.pyplot import figure, legend, plot, savefig, show, title
 from numpy             import any, array, copy
 from numpy.random      import default_rng
 from os.path           import basename, splitext
@@ -107,9 +107,6 @@ def parse_arguments():
                         type    = int,
                         default = 100,
                         help    = 'Number of bins for histogram')
-    # parser.add_argument('--coordinate',
-                        # type    = int,
-                        # default = 0)
     parser.add_argument('--burn',
                         type    = int,
                         default = 1000)
@@ -130,7 +127,6 @@ if __name__=='__main__':
     X          = geometry.create_configuration(N=args.Disks)
     n_accepted = 0
     histograms = geometry.create_Histograms(n=args.bins)
-    # Samples    = []
 
     for epoch in range(args.N):
         k,X = markov_disks(X,
@@ -142,8 +138,6 @@ if __name__=='__main__':
         if epoch>args.burn:
             if k>-1:
                 n_accepted += 1
-            # for x in array(X[:,args.coordinate]):
-                # Samples.append(x)
             for i in range(args.d):
                 for x in array(X[:,i]):
                     histograms[i].add(x)
@@ -151,15 +145,13 @@ if __name__=='__main__':
             print (f'Epoch {epoch:,}')
 
     figure(figsize=(12,12))
-    # hist(Samples, bins=args.bins)
+
     for j in range(args.d):
         h,bins = histograms[j].get_hist()
         plot([0.5*(bins[i]+bins[i+1]) for i in range(len(h))],h,
              label =f'{get_coordinate_description(j)}')
     title(f'{geometry.get_description()} sigma = {args.sigma}, eta = {eta:.3f}, delta = {max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
-    # xlim(geometry.LowerBound[args.coordinate]-args.sigma, geometry.UpperBound[args.coordinate]+args.sigma)
     legend()
-    # xlabel(f'{get_coordinate_description(args.coordinate)}')
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
