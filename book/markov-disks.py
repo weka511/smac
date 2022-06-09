@@ -18,7 +18,7 @@
 from argparse          import ArgumentParser
 from geometry          import GeometryFactory
 from matplotlib        import rc
-from matplotlib.pyplot import figure, hist, savefig, show, title, xlim
+from matplotlib.pyplot import figure, legend, plot, savefig, show, title, xlabel, xlim
 from numpy             import any, array, copy
 from numpy.random      import default_rng
 from os.path           import basename, splitext
@@ -56,6 +56,14 @@ def markov_disks(X,
         X[k,:] = x_save
         return -1,X
 
+def get_coordinate_description(coordinate):
+    if coordinate==0:
+        return 'X'
+    elif coordinate==1:
+        return 'Y'
+    else:
+        return 'Z'
+
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
     if plot==None:
@@ -73,7 +81,8 @@ def parse_arguments():
                         help    = 'Name of plot file')
     parser.add_argument('--N',
                         type    = int,
-                        default = 10000)
+                        default = 10000,
+                        help    = 'Name of plot file')
     parser.add_argument('--Disks',
                         type    = int,
                         default = 4)
@@ -98,10 +107,13 @@ def parse_arguments():
                         type    = int,
                         default = 100,
                         help    = 'Number of bins for histogram')
-    parser.add_argument('--coordinate',
-                        type    = int,
-                        default = 0)
+    # parser.add_argument('--coordinate',
+                        # type    = int,
+                        # default = 0)
     parser.add_argument('--burn',
+                        type    = int,
+                        default = 1000)
+    parser.add_argument('--frequency',
                         type    = int,
                         default = 1000)
     return parser.parse_args()
@@ -116,9 +128,9 @@ if __name__=='__main__':
                                d        = args.d)
     eta        = geometry.get_density(N = args.Disks)
     X          = geometry.create_configuration(N=args.Disks)
-    print (X)
     n_accepted = 0
-    Samples    = []
+    histograms = geometry.create_Histograms(n=args.bins)
+    # Samples    = []
 
     for epoch in range(args.N):
         k,X = markov_disks(X,
@@ -130,13 +142,24 @@ if __name__=='__main__':
         if epoch>args.burn:
             if k>-1:
                 n_accepted += 1
-            for x in array(X[:,args.coordinate]):
-                Samples.append(x)
+            # for x in array(X[:,args.coordinate]):
+                # Samples.append(x)
+            for i in range(args.d):
+                for x in array(X[:,i]):
+                    histograms[i].add(x)
+        if epoch%args.frequency ==0:
+            print (f'Epoch {epoch:,}')
 
     figure(figsize=(12,12))
-    hist(Samples, bins=args.bins)
-    title(f'{geometry.get_description()} sigma = {args.sigma}, eta = {eta:.3f}, acceptance = {100*n_accepted/(args.N-args.burn):.3f}%')
-    xlim(geometry.LowerBound[args.coordinate]-args.sigma, geometry.UpperBound[args.coordinate]+args.sigma)
+    # hist(Samples, bins=args.bins)
+    for j in range(args.d):
+        h,bins = histograms[j].get_hist()
+        plot([0.5*(bins[i]+bins[i+1]) for i in range(len(h))],h,
+             label =f'{get_coordinate_description(j)}')
+    title(f'{geometry.get_description()} sigma = {args.sigma}, eta = {eta:.3f}, delta = {max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
+    # xlim(geometry.LowerBound[args.coordinate]-args.sigma, geometry.UpperBound[args.coordinate]+args.sigma)
+    legend()
+    # xlabel(f'{get_coordinate_description(args.coordinate)}')
     savefig(get_plot_file_name(args.plot))
     if args.show:
         show()

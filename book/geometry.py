@@ -17,6 +17,7 @@
 from math              import isqrt
 from numpy             import array, minimum, ones, pi, prod, reshape, sqrt, zeros
 from numpy.linalg      import norm
+from unittest          import TestCase, main
 
 class Geometry:
     '''This class represents the apce in which the action occurs'''
@@ -66,6 +67,9 @@ class Geometry:
         Delta       = [Available[0]/m, Available[1]/n]
         coordinates = [alloc(i,j) for i in range(m) for j in range(n)]
         return array(coordinates[0:N])
+
+    def create_Histograms(self,n=10):
+        return [Histogram(n) for _ in range(self.d)]
 
 class Box(Geometry):
     '''This class reprsents a simple box geometry without periodic boundary conditions'''
@@ -127,3 +131,47 @@ def GeometryFactory(periodic = False,
                  d     = d) if periodic else Box(L     = L,
                                                  sigma = sigma,
                                                  d     = d)
+
+class Histogram:
+    def __init__(self,
+                 n  = 10,
+                 x0 = 0,
+                 xn = 1):
+        self.n  = n
+        self.h  = [0] * n
+        self.x0 = x0
+        self.xn = xn
+
+    def __len__(self):
+        return self.n
+
+    def __getitem__(self, i):
+        return self.h[i]
+
+    def add(self,x):
+        self.h[min(int(self.n * (x-self.x0)/(self.xn-self.x0)),len(self)-1)]+=1
+
+    def get_hist(self):
+        bins = [self.x0 + i*(self.xn-self.x0)/self.n for i in range(self.n)]
+        return self.h,bins+[self.xn]
+
+class TestHistogram(TestCase):
+    def setUp(self):
+        self.histogram = Histogram()
+
+    def test_init(self):
+        self.assertEqual(10,len(self.histogram))
+
+    def test_add(self):
+        self.assertEqual(0,self.histogram[0])
+        self.histogram.add(0.05)
+        self.assertEqual(1,self.histogram[0])
+        self.histogram.add(0.15)
+        self.assertEqual(1,self.histogram[1])
+        self.histogram.add(0.15)
+        self.assertEqual(2,self.histogram[1])
+        self.histogram.add(1)
+        self.assertEqual(1,self.histogram[-1])
+
+if __name__ =='__main__':
+    main()
