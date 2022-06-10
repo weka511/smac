@@ -21,7 +21,7 @@ from numpy.linalg      import norm
 from unittest          import TestCase, main
 
 class Geometry:
-    '''This class represents the apce in which the action occurs'''
+    '''This class represents the space in which the action occurs'''
     def __init__(self,
                  L     = array([1,1]),
                  sigma = 0.25,
@@ -50,8 +50,8 @@ class Geometry:
         def alloc(i,j):
             '''Determine position of one disk'''
             offset = 0 if i%2==0 else 0.5*Delta[1]
-            x0 = self.LowerBound[0] +  (i+1) * Delta[0]
-            y0 = self.LowerBound[1] + offset + (j+1) * Delta[1]
+            x0 = self.LowerBound[0] +  i * Delta[0]
+            y0 = self.LowerBound[1] + offset + j * Delta[1]
             x1,y1 = self.move_to((x0,y0))
             return (x1,y1)
 
@@ -69,21 +69,25 @@ class Geometry:
         coordinates = [alloc(i,j) for i in range(m) for j in range(n)]
         return array(coordinates[0:N])
 
-    def create_Histograms(self,n=10):
-        return [Histogram(n) for _ in range(self.d)]
+    def create_Histograms(self,n=10,HistogramBins=zeros(0)):
+        self.HistogramBins = zeros((n,self.d)) if HistogramBins.size==0 else HistogramBins
+        return [Histogram(n,
+                          h = self.HistogramBins[:,j]) for j in range(self.d)]
 
 class Box(Geometry):
-    '''This class reprsents a simple box geometry without periodic boundary conditions'''
+    '''This class represents a simple box geometry without periodic boundary conditions'''
     def __init__(self,
                  L     = array([1,1]),
-                 sigma = 0.25,
+                 sigma = 0.125,
                  d     = 2):
-        super().__init__(L = L, sigma=sigma, d = d)
+        super().__init__(L     = L,
+                         sigma = sigma,
+                         d     = d)
         self.LowerBound = sigma*ones(d)
-        self.UpperBound =  L - 2*sigma*ones(d)
+        self.UpperBound =  L - sigma*ones(d)
 
     def get_distance(self, X0,X1):
-        '''Calculate distance between two points using appropriate boundary conditions'''
+        '''Calculate Euclidean distance between two points'''
         return norm(X0-X1)
 
     def move_to(self,X):
@@ -96,14 +100,16 @@ class Torus(Geometry):
     '''This class reprsents a  box geometry with periodic boundary conditions, i.e. a torus.'''
     def __init__(self,
                  L     = array([1,1]),
-                 sigma = 0.25,
+                 sigma = 0.125,
                  d     = 2):
-        super().__init__(L = L, sigma=sigma, d = d)
+        super().__init__(L     = L,
+                         sigma = sigma,
+                         d     = d)
         self.LowerBound = zeros(d)
         self.UpperBound = L
 
     def get_distance(self, X0,X1):
-        '''Calculate distance between two points using appropriate boundary conditions'''
+        '''Calculate distance between two points using periodic boundary conditions'''
         return norm(self.diff_vec(X0,X1))
 
     def move_to(self,X):
@@ -124,7 +130,7 @@ class Torus(Geometry):
 
 def GeometryFactory(periodic = False,
                     L        = array([1,1]),
-                    sigma    = 0.25,
+                    sigma    = 0.125,
                     d        = 2):
     '''Create a periodic or aperiodic Geometry'''
     return Torus(L     = L,
@@ -142,9 +148,10 @@ class Histogram:
     def __init__(self,
                  n  = 10,
                  x0 = 0,
-                 xn = 1):
+                 xn = 1,
+                 h  = zeros((0,0))):
         self.n  = n
-        self.h  = [0] * n
+        self.h  = zeros((n)) if h.size == 0 else h
         self.x0 = x0
         self.xn = xn
 
@@ -162,6 +169,11 @@ class Histogram:
         '''Retrieve counts and bin boundaries'''
         bins = [self.x0 + i*(self.xn-self.x0)/self.n for i in range(self.n)]
         return self.h,bins+[self.xn]
+
+    def bins(self):
+        for i in range(self.n):
+            yield(self.h[i])
+
 
 class TestHistogram(TestCase):
     def setUp(self):

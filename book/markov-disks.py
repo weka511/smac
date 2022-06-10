@@ -18,28 +18,28 @@
 from argparse          import ArgumentParser
 from geometry          import GeometryFactory
 from matplotlib        import rc
-from matplotlib.pyplot import figure, legend, plot, savefig, show, title
-from numpy             import any, array, copy
+from matplotlib.pyplot import bar, figure, legend, savefig, show, title
+from numpy             import any, array, copy, load, savez
 from numpy.random      import default_rng
-from os.path           import basename, splitext
+from os.path           import basename, exists, splitext
+from shutil            import copyfile
 
 def markov_disks(X,
                  rng      = default_rng(),
                  delta    = array([0.01,0.01]),
-                 geometry = GeometryFactory(),
-                 sigma    = 0.125):
+                 geometry = GeometryFactory()):
     '''Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC'''
 
-    def can_move(k):
+    def can_move(k,X_proposed):
         '''
             Verify that proposed new position is within the geometry,
             and that the resulting new configuration will be acceptable.
         '''
-        if any(X[k,:] < geometry.LowerBound): return False
-        if any(geometry.UpperBound < X[k,:]): return False
+        if any(X_proposed < geometry.LowerBound): return False
+        if any(geometry.UpperBound < X_proposed): return False
 
         for i in range(N):
-            if i!=k and geometry.get_distance(X[i,:],X[k,:])<2*sigma:
+            if i!=k and geometry.get_distance(X[i,:],X_proposed)<2*geometry.sigma:
                 return False
 
         return True
@@ -47,13 +47,11 @@ def markov_disks(X,
     N,d     = X.shape
     k       = rng.integers(0,high=N)
     Delta   = -delta * 2* delta*rng.random(size=d)
-    x_save  = copy(X[k,:]) # https://stackoverflow.com/questions/47181092/numpy-views-vs-copy-by-slicing
-    X[k,:]  = geometry.move_to(X[k,:]+Delta)   # Provisional move
-
-    if can_move(k):
+    X_proposed = geometry.move_to(X[k,:]+Delta)
+    if can_move(k,X_proposed):
+        X[k,:] = X_proposed
         return k,X
     else:
-        X[k,:] = x_save
         return -1,X
 
 def get_coordinate_description(coordinate):
@@ -113,27 +111,59 @@ def parse_arguments():
     parser.add_argument('--frequency',
                         type    = int,
                         default = 1000)
+    parser.add_argument('--restart',
+                        action = 'store_true',
+                        help   = 'Restart from checkpoint')
     return parser.parse_args()
+
+
+class Checkpointer:
+    '''Used to save a configuration to a checkpoint, and restore from saved checkpoint'''
+    def __init__(self,file='check'):
+        self.path   = f'{file}.npz'
+        self.backup = f'{self.path}~'
+
+    def load(self):
+        with load(self.path) as data:
+            X             = data['X']
+            HistogramBins = data['HistogramBins']
+            return X,HistogramBins
+
+    def save(self,
+             X        = [],
+             geometry = None):
+
+        if exists(self.path):
+            copyfile(self.path,self.backup)
+        savez(self.path,
+              X             = X,
+              HistogramBins = geometry.HistogramBins)
 
 if __name__=='__main__':
     args       = parse_arguments()
+    check      = Checkpointer()
     rng        = default_rng()
     delta      = array(args.delta if len(args.delta)==args.d else args.delta * args.d)
-    geometry   = GeometryFactory(periodic = args.periodic,
-                               L        = array(args.L if len(args.L)==args.d else args.L * args.d),
-                               sigma    = args.sigma,
-                               d        = args.d)
+    geometry   = GeometryFactory(
+                        periodic = args.periodic,
+                        L        = array(args.L if len(args.L)==args.d else args.L * args.d),
+                        sigma    = args.sigma,
+                        d        = args.d)
     eta        = geometry.get_density(N = args.Disks)
-    X          = geometry.create_configuration(N=args.Disks)
     n_accepted = 0
-    histograms = geometry.create_Histograms(n=args.bins)
+    if args.restart:
+        X,HistogramBins = check.load()
+        histograms = geometry.create_Histograms(n=args.bins,HistogramBins = HistogramBins)
+    else:
+        X          = geometry.create_configuration(N = args.Disks)
+        histograms = geometry.create_Histograms(n=args.bins)
 
     for epoch in range(args.N):
-        k,X = markov_disks(X,
-                           rng      = rng,
-                           delta    = delta,
-                           geometry = geometry,
-                           sigma    = args.sigma)
+        k,X = markov_disks(
+                    X,
+                    rng      = rng,
+                    delta    = delta,
+                    geometry = geometry)
 
         if epoch>args.burn:
             if k>-1:
@@ -143,15 +173,22 @@ if __name__=='__main__':
                     histograms[i].add(x)
         if epoch%args.frequency ==0:
             print (f'Epoch {epoch:,}')
+            check.save(X          = X,
+                       geometry   = geometry)
+
 
     figure(figsize=(12,12))
 
     for j in range(args.d):
         h,bins = histograms[j].get_hist()
-        plot([0.5*(bins[i]+bins[i+1]) for i in range(len(h))],h,
-             label =f'{get_coordinate_description(j)}')
+        bar([0.5*(bins[i]+bins[i+1]) for i in range(len(h))],h,
+                width = [0.5*(bins[i+1]-bins[i]) for i in range(len(h))],
+                label = f'{get_coordinate_description(j)}',
+                alpha = 0.5,
+                color = 'xkcd:red' if j==0 else 'xkcd:blue' if j==1 else 'xkcd:green')
     title(f'{geometry.get_description()} sigma = {args.sigma}, eta = {eta:.3f}, delta = {max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
     legend()
     savefig(get_plot_file_name(args.plot))
+
     if args.show:
         show()
