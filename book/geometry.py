@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Copyright (C) 2022 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
@@ -16,7 +18,7 @@
 '''Support use of periodic and unbounded boundary conditions '''
 
 from math              import isqrt
-from numpy             import array, minimum, ones, pi, prod, reshape, sqrt, zeros
+from numpy             import array, int64, minimum, ones, pi, prod, reshape, sqrt, zeros
 from numpy.linalg      import norm
 from unittest          import TestCase, main
 
@@ -70,7 +72,7 @@ class Geometry:
         return array(coordinates[0:N])
 
     def create_Histograms(self,n=10,HistogramBins=zeros(0)):
-        self.HistogramBins = zeros((n,self.d)) if HistogramBins.size==0 else HistogramBins
+        self.HistogramBins = zeros((n,self.d), dtype=int64) if HistogramBins.size==0 else HistogramBins
         return [Histogram(n,
                           h = self.HistogramBins[:,j]) for j in range(self.d)]
 
@@ -88,7 +90,8 @@ class Box(Geometry):
 
     def get_distance(self, X0,X1):
         '''Calculate Euclidean distance between two points'''
-        return norm(X0-X1)
+        s = norm(X0-X1)
+        return s
 
     def move_to(self,X):
         return X
@@ -167,8 +170,9 @@ class Histogram:
 
     def get_hist(self):
         '''Retrieve counts and bin boundaries'''
+        Z    = sum(self.h)
         bins = [self.x0 + i*(self.xn-self.x0)/self.n for i in range(self.n)]
-        return self.h,bins+[self.xn]
+        return self.h/Z,bins+[self.xn]
 
     def bins(self):
         for i in range(self.n):
