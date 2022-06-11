@@ -46,7 +46,7 @@ def markov_disks(X,
 
     N,d     = X.shape
     k       = rng.integers(0,high=N)
-    Delta   = -delta * 2* delta*rng.random(size=d)
+    Delta   = -delta + 2* delta*rng.random(size=d)
     X_proposed = geometry.move_to(X[k,:]+Delta)
     if can_move(k,X_proposed):
         X[k,:] = X_proposed
@@ -172,7 +172,7 @@ if __name__=='__main__':
                 for x in array(X[:,i]):
                     histograms[i].add(x)
         if epoch%args.frequency ==0:
-            print (f'Epoch {epoch:,}')
+            print (f'Epoch {epoch:,} Accepted: {n_accepted}')
             check.save(X          = X,
                        geometry   = geometry)
 
