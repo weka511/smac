@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Copyright (C) 2022 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
@@ -100,14 +102,14 @@ def parse_arguments():
     parser.add_argument('--delta',
                         type    = float,
                         nargs   = '+',
-                        default = [0.01])
+                        default = [0.1])
     parser.add_argument('--bins',
                         type    = int,
                         default = 100,
                         help    = 'Number of bins for histogram')
     parser.add_argument('--burn',
                         type    = int,
-                        default = 1000)
+                        default = 0)
     parser.add_argument('--frequency',
                         type    = int,
                         default = 1000)
@@ -172,7 +174,7 @@ if __name__=='__main__':
                 for x in array(X[:,i]):
                     histograms[i].add(x)
         if epoch%args.frequency ==0:
-            print (f'Epoch {epoch:,} Accepted: {n_accepted}')
+            print (f'Epoch {epoch:,} Accepted: {n_accepted:,}')
             check.save(X          = X,
                        geometry   = geometry)
 
