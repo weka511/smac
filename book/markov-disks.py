@@ -82,37 +82,46 @@ def parse_arguments():
     parser.add_argument('--N',
                         type    = int,
                         default = 10000,
-                        help    = 'Name of plot file')
+                        help    = 'Number of iterations')
     parser.add_argument('--Disks',
                         type    = int,
-                        default = 4)
+                        default = 4,
+                        help    = 'Number of disks/spheres')
     parser.add_argument('--sigma',
                         type    = float,
-                        default = 0.125)
+                        default = 0.125,
+                        help    = 'Radius of disk/sphere')
     parser.add_argument('--d',
                         type    = int,
-                        default = 2)
+                        choices = [2,3],
+                        default = 2,
+                        help    = 'Number of dumensions for space')
     parser.add_argument('--periodic',
                         action = 'store_true',
-                        default = False)
+                        default = False,
+                        help    = 'Used to specifiy periodic boundary conditions')
     parser.add_argument('--L',
                         type    = float,
                         nargs   = '+',
-                        default = [1])
+                        default = [1],
+                        help    = 'Length of each side of box (just one value for square/cube)')
     parser.add_argument('--delta',
                         type    = float,
                         nargs   = '+',
-                        default = [0.1])
+                        default = [0.1],
+                        help    = 'Maximum distance for each step')
     parser.add_argument('--bins',
                         type    = int,
                         default = 100,
                         help    = 'Number of bins for histogram')
     parser.add_argument('--burn',
                         type    = int,
-                        default = 0)
+                        default = 0,
+                        help    = 'Used to skip over early steps without accumulating stats')
     parser.add_argument('--frequency',
                         type    = int,
-                        default = 1000)
+                        default = 1000,
+                        help    = 'For reporting progress')
     parser.add_argument('--restart',
                         action = 'store_true',
                         help   = 'Restart from checkpoint')
