@@ -37,6 +37,11 @@ class Geometry:
         '''Calculate fraction of total volums that will be occupied'''
         return N*pi*self.sigma**2/prod(self.L)
 
+    def set_sigma(self,
+                  eta = 1.0,
+                  N   = 4):
+        self.sigma = sqrt(prod(self.L)*eta/(N*pi))
+
     def create_configuration(self,N=4):
         '''Create an initial configuration, spread uniformly through space'''
         if self.d==2:

@@ -58,6 +58,10 @@ target/
 
 *.png
 *.txt
+*.csv
+*.npz
+*.npz~
+*.csv~
 
 # C++ stuff
 *.exe

@@ -64,6 +64,9 @@ def get_coordinate_description(coordinate):
     else:
         return 'Z'
 
+def get_coordinate_colour(coordinate):
+    'xkcd:red' if coordinate==0 else 'xkcd:blue' if coordinate==1 else 'xkcd:green'
+
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
     if plot==None:
@@ -125,6 +128,10 @@ def parse_arguments():
     parser.add_argument('--restart',
                         action = 'store_true',
                         help   = 'Restart from checkpoint')
+    parser.add_argument('--eta',
+                        type    = float,
+                        default = None,
+                        help    = 'Used to specify density (override sigma)')
     return parser.parse_args()
 
 
@@ -160,11 +167,15 @@ if __name__=='__main__':
                         L        = array(args.L if len(args.L)==args.d else args.L * args.d),
                         sigma    = args.sigma,
                         d        = args.d)
+    if args.eta != None:
+        geometry.set_sigma(eta = args.eta,
+                           N   = args.Disks)
     eta        = geometry.get_density(N = args.Disks)
     n_accepted = 0
     if args.restart:
         X,HistogramBins = check.load()
-        histograms = geometry.create_Histograms(n=args.bins,HistogramBins = HistogramBins)
+        histograms = geometry.create_Histograms(n             = args.bins,
+                                                HistogramBins = HistogramBins)
     else:
         X          = geometry.create_configuration(N = args.Disks)
         histograms = geometry.create_Histograms(n=args.bins)
@@ -196,8 +207,8 @@ if __name__=='__main__':
                 width = [0.5*(bins[i+1]-bins[i]) for i in range(len(h))],
                 label = f'{get_coordinate_description(j)}',
                 alpha = 0.5,
-                color = 'xkcd:red' if j==0 else 'xkcd:blue' if j==1 else 'xkcd:green')
-    title(f'{geometry.get_description()} sigma = {args.sigma}, eta = {eta:.3f}, delta = {max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
+                color = get_coordinate_colour(j))
+    title(f'{args.Disks} Disks {geometry.get_description()}: sigma = {geometry.sigma:.3g}, eta = {eta:.3g}, delta = {max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
     legend()
     savefig(get_plot_file_name(args.plot))
 
