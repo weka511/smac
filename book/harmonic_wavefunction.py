@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # harmonic_wavefunction.py
 
 # Copyright (C) 2020 Greenweaves Software Limited
@@ -44,7 +46,7 @@ ones   = [step*sum(psi[x][i]*psi[x][i] for x in grid_x) for i in range(n_states)
 zeroes = [sum(psi[x][i]*psi[x][j] for x in grid_x) for i in range(n_states) for j in range(i)]
 print (
     'Maximum deviation: from normalization={0}, from orthogonality {1}'.format(
-    max([abs(o-1) for o in ones]), 
+    max([abs(o-1) for o in ones]),
     max([abs(z) for z in zeroes])))
 
 for n in range(n_states):

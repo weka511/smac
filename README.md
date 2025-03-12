@@ -262,7 +262,8 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 3.4|||Pair density matrices
 3.5|||Geometry of Paths
 4||| Bosons
-5.1||gray.py|Algorithm 5.2: Gray code for spins {1,...N}.
+5.1||energy_ising.py|5.1: Compute energyy of a simple Ising configuration
+-||gray.py|Algorithm 5.2: Gray code for spins {1,...N}.
 -||enumerate-ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
 -||ising.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
 -||ising-stats.py|Figure 6.6 - plot data from ising.py
@@ -292,8 +293,9 @@ Q10.py|
 Q11.py|
 
 
-## Miscellaneous
+## Miscellaneous (utils folder)
 
 File|Description
 ----------|---------------------------------------------------------------------------------------
+backends.py|List graphics backends
 walker.py|Used to create README.MD from file tree

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # direct-plot.py
 
 # Copyright (C) 2015 Greenweaves Software Pty Ltd
@@ -34,8 +36,8 @@ for n in range(12):
         error+=(math.pi-pi_approx)*(math.pi-pi_approx)
     n_trials *= mult
     errors.append(math.log(error))
-    iterations.append(n)    
-    
+    iterations.append(n)
+
 plt.plot(iterations, errors, 'o')
 plt.xlabel('Log N trials')
 plt.ylabel('Log Error')

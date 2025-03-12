@@ -1,17 +1,17 @@
-# MIT License
-# 
+#!/usr/bin/env python
+#
 # Copyright (c) 2018 Simon Crase
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-#   
+#
 #   The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,7 +28,7 @@ from scipy.stats import gaussian_kde
 
 def direct_gamma(gamma,generator=False,K=10000,N=1000000):
     sigma = 0
-    for i in range(N): 
+    for i in range(N):
         sigma += random.random()**gamma
     return sigma/N
 
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     M = args.steps[0]
     gamma = args.gamma
     bins=[0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,10.5,11,100000000000]
-    
+
     for N in args.N:
         def scaled(n):
             return (direct_gamma(gamma,N=n)-5)/(N**(-1-gamma))
@@ -51,7 +51,7 @@ if __name__ == '__main__':
         density = gaussian_kde(data)
         y,binEdges=np.histogram(data,normed=True,bins=bins)
         bincenters = 0.5*(binEdges[1:]+binEdges[:-1])
-        pylab.plot(bincenters,density(bincenters),label='N={0}'.format(N))        
+        pylab.plot(bincenters,density(bincenters),label='N={0}'.format(N))
     pylab.xlim(1,10)
     pylab.xlabel(r'$\Sigma/N$')
     pylab.ylabel(r'$\pi(\Sigma/N$)')
@@ -59,5 +59,5 @@ if __name__ == '__main__':
     pylab.legend()
     pylab.savefig('histogram.png')
     pylab.show()
-    
+
 

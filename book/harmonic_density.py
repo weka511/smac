@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # harmonic_density.py
 
 # Copyright (C) 2020 Greenweaves Software Limited
@@ -30,7 +32,7 @@ def density(a, b):
     psi_x       = psi[a]
     psi_x_prime = psi[b]
     return sum([psi_x[i] * psi_x_prime[i] * math.exp(- beta * (i+0.5)) for i in range(n_states)])
-        
+
 rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
 
@@ -56,7 +58,7 @@ for x in grid_x:
     for n in range(2, n_states):
         psi[x].append(math.sqrt(2.0 / n) * x * psi[x][n - 1] -
                       math.sqrt((n - 1.0) / n) * psi[x][n - 2])
-        
+
 plt.figure(figsize=(20,20))
 for i in range(M*N):
     plt.subplot(M,N,i+1)
@@ -67,5 +69,5 @@ for i in range(M*N):
     plt.title(r'$\rho(x,x^{{\prime}},{0:.3f})$'.format(beta))
     beta /= 2
 
-plt.savefig('harmonic-density.png')    
+plt.savefig('harmonic-density.png')
 plt.show()

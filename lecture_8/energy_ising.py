@@ -15,7 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-def energy(S, N, nbr):
+'''
+   5-1 Compute the energy of an Ising configuration
+'''
+def energy(S, N, nbr = [[1, 2], [3, 0], [3, 0], [2, 1]]):
     E = 0.0
     for k in range(N):
         E -=  S[k] * sum(S[nn] for nn in nbr[k])
@@ -23,6 +26,5 @@ def energy(S, N, nbr):
 
 if __name__ == '__main__':
     L = 2
-    nbr = [[1, 2], [3, 0], [3, 0], [2, 1]]
     S = [1, 1, -1, 1]
-    print (f'State {S}, E {energy(S, L * L, nbr)}')
+    print (f'State {S}, E {energy(S, L*L)}')

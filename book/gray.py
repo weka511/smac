@@ -1,4 +1,6 @@
-# Copyright (C) 2019-2022 Greenweaves Software Limited
+#!/usr/bin/env python
+
+# Copyright (C) 2019-2025 Greenweaves Software Limited
 #
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,6 +16,8 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
 '''Algorithm 5.2: Gray code for spins {1,...N}.'''
+
+from unittest import main, TestCase
 
 def gray_flip(N, tau = None):
     '''
@@ -98,7 +102,6 @@ def Nbr(k,
 
 
 if __name__=='__main__':
-    from unittest import main, TestCase
 
     class GrayTest(TestCase):
         def setUp(self):

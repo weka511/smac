@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (C) 2015 Greenweaves Software Pty Ltd
 
 # This is free software: you can redistribute it and/or modify
@@ -30,7 +31,7 @@ def run(zeta,n):
     for gamma in [2.0,1.0,0.0,-0.1,-0.4,-0.8]:
         (s,t)=direct_gamma_zeta(gamma,zeta,n)
         print (gamma, s-t,s+t, (zeta+1)/(gamma+1))
-            
+
 if __name__=="__main__":
     for zeta in [0.0, -0.1, -0.7]:
         run(zeta,1000)

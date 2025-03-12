@@ -1,4 +1,6 @@
-# Copyright (C) 2022 Simon Crase
+#!/usr/bin/env python
+
+# Copyright (C) 2025 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,10 +17,10 @@
 
 '''Template for programs--replace with description'''
 
-from argparse          import ArgumentParser
-from matplotlib        import rc
+from argparse import ArgumentParser
+from matplotlib import rc
 from matplotlib.pyplot import figure, plot, savefig, show
-from os.path           import basename, splitext
+from os.path import basename, splitext
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
