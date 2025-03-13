@@ -42,8 +42,7 @@ def enumerate_ising(shape, periodic = True):
     Ms[E,M] = 1
 
     for i, (k,_) in enumerate(gray_flip(N)):
-        if i > 2**(N-1)-2:
-            return [(E,Ns[E]) for E in sorted(Ns.keys())], [(M,Ms[M]) for M in sorted(Ms.keys())]
+
 
         k0 = k - 1 #1=based -> 0-based
         h = sum(sigma[j] for j in Nbr(k0, shape = shape, periodic = periodic))
@@ -54,6 +53,8 @@ def enumerate_ising(shape, periodic = True):
         Ms[E,M] += 1
 
         sigma[k0] *= -1
+
+    return [(E,Ns[E]) for E in sorted(Ns.keys())], [(M,Ms[M]) for M in sorted(Ms.keys())]
 
 if __name__=='__main__':
 

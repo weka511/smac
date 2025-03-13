@@ -56,10 +56,10 @@ class Gray:
 
     def __next__(self):
         '''The next spin to flip (1-based)'''
-        k       = self.tau[0]
-        if k>self.N: raise StopIteration
+        k = self.tau[0]
+        if k > self.N: raise StopIteration
         self.tau[k-1] = self.tau[k]
-        self.tau[k]   = k+1
+        self.tau[k] = k+1
         if (k != 1): self.tau[0] = 1
         return k
 

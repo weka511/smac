@@ -90,7 +90,7 @@ def get_magnetization(data,beta):
                if data[j,1] == M[i]:
                     frequency[i] += np.exp(-beta*(data[j,0]-Emin))*data[j,2]
 
-     return M,frequency
+     return M,frequency/frequency.sum()
 
 
 
@@ -111,7 +111,7 @@ if __name__=='__main__':
      ax1.legend()
 
      ax2 = fig.add_subplot(2,1,2)
-     for T in [Tc+0.5,Tc-0.5]:
+     for T in [2.5,5]:
           M,frequency = get_magnetization(data,beta=1/T)
           ax2.plot(M,frequency,label=f'$T={T}$')
 
