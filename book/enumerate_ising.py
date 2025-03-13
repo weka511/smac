@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2018-2022 Greenweaves Software Limited
+# Copyright (C) 2018-2025 Greenweaves Software Limited
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
 '''Algorithm 5.3: single flip enumeration for the Ising model.'''
 
 from collections import defaultdict
-from gray        import gray_flip, Nbr
-
+from gray import gray_flip, Nbr
+from unittest import main, TestCase
 
 def enumerate_ising(shape, periodic = True):
     '''
@@ -27,34 +27,35 @@ def enumerate_ising(shape, periodic = True):
 
     Inputs: shape    Dimension of array
             periodic Indicates whether to use periodic boundary conditions
+
+    Returns:
+           Energy
+           Magnetization
     '''
-    N         = shape[0] * shape[1]
-    sigma     = [-1]  *N
-    M         = sum(sigma)
-    E         = 2 * M
-    Ns        = defaultdict(lambda: 0)
-    Ns[E]     = 2
-    Ms        = defaultdict(lambda: 0)
-    Ms[M]     = 1
+    N = shape[0] * shape[1]
+    sigma = [-1]  *N
+    M = sum(sigma)
+    E = 2 * M
+    Ns = defaultdict(lambda: 0)
+    Ns[E] = 2
+    Ms = defaultdict(lambda: 0)
+    Ms[E,M] = 1
 
     for i, (k,_) in enumerate(gray_flip(N)):
-        if i>2**(N-1)-2:
-            return [(E,Ns[E]) for E in sorted(Ns.keys())], [(M,Ms[M]) for M in sorted(Ns.keys())]
+        if i > 2**(N-1)-2:
+            return [(E,Ns[E]) for E in sorted(Ns.keys())], [(M,Ms[M]) for M in sorted(Ms.keys())]
 
-        k0         = k - 1 #1=based -> 0-based
-        h          = sum(sigma[j] for j in Nbr(k0,
-                                               shape    = shape,
-                                               periodic = periodic))
-        E         += 2 * sigma[k0] * h
-        Ns[E]     += 2
+        k0 = k - 1 #1=based -> 0-based
+        h = sum(sigma[j] for j in Nbr(k0, shape = shape, periodic = periodic))
+        E += 2*sigma[k0]*h
+        Ns[E] += 2
 
-        M         -= 2 * sigma[k0]
-        Ms[M]     +=1
+        M -= 2 *sigma[k0]
+        Ms[E,M] += 1
 
         sigma[k0] *= -1
 
 if __name__=='__main__':
-    from unittest import main, TestCase
 
     class TestIsing(TestCase):
         def test2(self):

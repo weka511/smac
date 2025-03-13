@@ -39,9 +39,9 @@ def gray_flip(N, tau = None):
 
     while True:
         k = tau[0]                   # The next spin to flip (1-based)
-        if k>N: return
+        if k > N: return
         tau[k-1] = tau[k]
-        tau[k]   = k+1
+        tau[k] = k+1
         if (k != 1): tau[0] = 1
         yield k, tau
 
@@ -67,9 +67,7 @@ class Gray:
         '''Convert tau to string, so we can save and restart'''
         return f'[{",".join(str(t) for t in self.tau)}]'
 
-def Nbr(k,
-        shape    = (4,5),
-        periodic = False):
+def Nbr(k, shape = (4,5), periodic = False):
     '''
     A generator to iterate through neighbours of a spin
 
