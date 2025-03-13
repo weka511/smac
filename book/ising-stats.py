@@ -32,7 +32,11 @@ def read_data(input_file):
     data = np.genfromtxt(input_file, delimiter=',')[1:,:]
     m,_ = data.shape
     E = np.unique(data[:,0])
-    N  = np.zeros_like(E)
+    N = np.zeros_like(E)
+    for i in range(len(E)):
+        mask = np.in1d(data[:,0],E[i])
+        N[i] = data[mask,2].sum()
+
     for i in range(len(E)):
         for j in range(m):
             if E[i] == data[j,0]:
