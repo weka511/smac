@@ -18,8 +18,26 @@
 '''Figure 6.6 - plot data from ising.py'''
 
 from argparse import ArgumentParser
-from matplotlib.pyplot import axvline, figure, legend, plot, show, title, xlabel, ylabel
+from matplotlib.pyplot import  figure, show
 import numpy as np
+
+def parse_arguments():
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument('-i', '--input',
+                        default = 'ising.csv',
+                        help  = 'File to read data from')
+    return parser.parse_args()
+
+def read_data(input_file):
+    data = np.genfromtxt(input_file, delimiter=',')[1:,:]
+    m,_ = data.shape
+    E = np.unique(data[:,0])
+    N  = np.zeros_like(E)
+    for i in range(len(E)):
+        for j in range(m):
+            if E[i] == data[j,0]:
+                N[i] += data[j,2]
+    return data,E,N
 
 def thermo(N,E,beta=1.0):
     '''Algorithm 5.4 Calculate thermodynamic quantities'''
@@ -32,69 +50,45 @@ def thermo(N,E,beta=1.0):
     Z = Z*np.exp(-beta*Emin)
     return (Z, (Emean + Emin)/len(N), beta**2*(Esq - Emean**2)/len(N) ) # Z, <e>, cV
 
-parser = ArgumentParser(description='Compute statistics for Ising model')
-parser.add_argument('-i', '--input',
-                    default = 'ising.csv',
-                    help  = 'File to record results')
-args = parser.parse_args()
+def get_magnetization(data,Energy):
+    mask = np.in1d(data[:,0],Energy)
+    M = data[mask,1]
+    N = data[mask,2]
+    total = N.sum()
+    if total == 0: total += 1
+    frequency = N/total
+    return M,frequency
 
-ff = np.genfromtxt(args.input, delimiter=',')
-E = ff[1:,0]
-N = ff[1:,1]
+if __name__=='__main__':
+    args = parse_arguments()
+    data,E,N = read_data(args.input)
+    T = np.linspace(0.8,6.0)
+    cV = np.array([thermo(N,E,beta=1/t)[2] for t in T])
 
-# with open(args.input) as f:
-    # Es = []
-    # Ms = []
-    # Ns = []
-    # N  = 1# FIXME None
-    # pi = {}
-    # for i,line in enumerate(f):
-        # if i == 0:
-            # continue
-        # else:
-            # parts = line.strip().split(',')
-            # Es.append(int(parts[0]))
-            # Ms.append(int(parts[1]))
-            # Ns.append(float(parts[0]))
-            # if not Es[-1] in pi:
-                # pi[Es[-1]] = []
-            # pi[Es[-1]].append((Ms[-1],Ns[-1]))
-        # i += 1
-T = np.linspace(0.8,6.0)
-cV = np.array([thermo(N,E,beta=1/t)[2] for t in T])
-# for t in np.arange(0.8, 6.0, 0.05):
-    # _,_,cv = thermo(N,E,beta=1/t)
-    # Ts.append(t)
-    # cvs.append(cv)
+    fig = figure(figsize=(10,10))
+    ax1 = fig.add_subplot(2,1,1)
+    ax1.plot(T,cV,color='b',label='$c_V$')
+    ax1.axvline(x=2/np.log(1+np.sqrt(2)),color='r',linestyle='--')
+    ax1.set_xlabel('Temperature')
+    ax1.set_ylabel('Specific Heat Capacity')
+    ax1.set_title('Thermodynamic quantities')
+    ax1.legend()
 
-fig = figure(figsize=(10,10))
-ax1 = fig.add_subplot(2,1,1)
-ax1.plot(T,cV,color='b',label='$c_V$')
-ax1.axvline(x=2/np.log(1+np.sqrt(2)),color='r',linestyle='--')
-ax1.set_xlabel('Temperature')
-ax1.set_ylabel('Specific Heat Capacity')
-ax1.set_title('Thermodynamic quantities')
-ax1.legend()
+    colours = ['r','g','b','m','y','c','k']
+    line_styles = ['--',':','-.']
+    index = 0
+    ax2 = fig.add_subplot(2,1,2)
+    for Energy in sorted(E):
+        M,frequency = get_magnetization(data,Energy)
+        ax2.plot(M,frequency,
+                    color=colours[index%len(colours)],
+                    label='{0}'.format(Energy),
+                    ls=line_styles[index//len(colours)])
+        index+=1
 
-# figure(figsize=(10,10))
-# colours     = ['r','g','b','m','y','c','k']
-# line_styles = ['--',':','-.']
-# index       = 0
+    ax2.set_xlabel('Magnetization')
+    ax2.set_ylabel('Frequency')
+    ax2.set_title('Frequency of Magnetization as a function of Energy')
+    ax2.legend(title='Energy')
 
-    # for E in sorted(pi.keys()):
-        # stats         = sorted(pi[E])
-        # magnetization = [m for m,_ in stats]
-        # counts        = [n for _,n in stats]
-        # total         = sum(counts)
-        # if total == 0: total += 1
-        # frequency     = [n/total for n in counts]
-        # plot(magnetization,frequency,
-                 # color=colours[index%len(colours)],
-                 # label='{0}'.format(E),ls=line_styles[index//len(colours)])
-        # index+=1
-
-# xlabel('Magnetization')
-# ylabel('Frequency')
-# title('Frequency of Magnetization as a function of Energy')
-# legend(title='Energy')
-show()
+    show()
