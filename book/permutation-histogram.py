@@ -1,4 +1,4 @@
-# permutation-test.py
+#!/usr/bin/env python
 
 # Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
 
@@ -18,7 +18,7 @@
 import permutation, math
 
 perms={}
-     
+
 for i in range(120000):
     perm0=permutation.ran_perm(5)
     perm = permutation.permutation2str(perm0)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (C) 2015,2018 Greenweaves Software Limited
 
 # This is free software: you can redistribute it and/or modify
@@ -25,29 +26,29 @@ def markov_zeta(delta,zeta,x):
 if __name__=="__main__":
     from matplotlib import rc
     rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-    rc('text', usetex=True)    
+    rc('text', usetex=True)
     delta=0.005
     n=1000000
     x=1
     zeta=-0.8
     xs=[]
-    
+
     for i in range(0,n):
         x=markov_zeta(delta,zeta,x)
         xs.append(x)
-    plt.figure(1)   
+    plt.figure(1)
     plt.plot(xs)
     plt.title('$\zeta=-0.8$')
     plt.savefig('markov-zeta-0-8.png')
-    
+
     x=1
     zeta=-1.6
     xs=[]
-    
+
     for i in range(0,n):
         x=markov_zeta(delta,zeta,x)
         xs.append(x)
-    plt.figure(2)    
+    plt.figure(2)
     plt.plot(xs)
     plt.title('$\zeta=-1.6$')
     plt.savefig('markov-zeta-1-6.png')

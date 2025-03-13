@@ -1,4 +1,4 @@
-# markov-pi.py
+#!/usr/bin/env python
 
 # Copyright (C) 2015 Greenweaves Software Pty Ltd
 
@@ -32,7 +32,7 @@ def perform_markov(n_trials,delta):
     x, y = 1.0, 1.0
     n_hits=0
     n_reject=0
-    
+
     for i in range(n_trials):
         del_x, del_y = random.uniform(-delta, delta), random.uniform(-delta, delta)
         if abs(x + del_x) < 1.0 and abs(y + del_y) < 1.0:
@@ -40,7 +40,7 @@ def perform_markov(n_trials,delta):
         else:
             n_reject+=1
         if x*x + y*y < 1.0: n_hits += 1
-    
+
     return (4.0 * n_hits / float(n_trials), n_reject/ float(n_trials))
 
 if __name__=='__main__':
@@ -61,8 +61,8 @@ if __name__=='__main__':
         mean_reject=sum_reject/n
         errors.append(mean_sq)
         rejections.append(mean_reject)
-     
-    plt.figure(1) 
+
+    plt.figure(1)
     plt.subplot(211)
     plt.plot(deltas, normalize(errors), 'o', label='Errors')
     plt.plot(deltas, rejections,'+', label='Rejections')
@@ -70,7 +70,7 @@ if __name__=='__main__':
     plt.ylabel('Error')
     plt.title('Error and rejection rate vs step size')
     legend = plt.legend(loc='upper center', shadow=True, fontsize='x-large')
-    legend.get_frame().set_facecolor('#00FFCC')    
+    legend.get_frame().set_facecolor('#00FFCC')
 
     plt.subplot(212)
     plt.plot(rejections[1:], errors[1:],'x')
@@ -78,5 +78,5 @@ if __name__=='__main__':
     plt.ylabel('Error')
     plt.title('Error vs rejection rate')
     plt.savefig('markov-pi.png')
-    
+
     plt.show()

@@ -1,4 +1,4 @@
-# matrix-square-check.py
+#!/usr/bin/env python
 
 # Copyright (C) 2020 Greenweaves Software Limited
 
@@ -42,22 +42,22 @@ def get_plot_file_name(plot):
 
 if __name__=='__main__':
     import argparse
-    
+
     parser = argparse.ArgumentParser('Check results of matrix squaring against exact solution')
     parser.add_argument('--beta',   default=0.1, type=float,                      help='Inverse temperature')
     parser.add_argument('--h',      default=1,   type=float,                      help='Planck\'s constant')
     parser.add_argument('-m','--m', default=1.0, type=float,                      help='Mass of particle')
     parser.add_argument('--omega',  default=1.0, type=float,                      help='Frequency')
     parser.add_argument('--n',      default=100, type=int,                        help='Number of steps')
-    parser.add_argument('--L',      default=5,   type=float,                      help='Length')    
+    parser.add_argument('--L',      default=5,   type=float,                      help='Length')
     parser.add_argument('--show',                           action='store_true',  help='Show plot')
     parser.add_argument('--plot', default='',                                     help='Name of plot file')
-    
+
     args        = parser.parse_args()
-    beta        = args.beta  
+    beta        = args.beta
     step        = args.L / args.n
     grid_x      = [i * step for i in range(-args.n,args.n+1)]   # grid for plotting
-    X,Y         = np.meshgrid(grid_x,grid_x)                    # grid for plotting 
+    X,Y         = np.meshgrid(grid_x,grid_x)                    # grid for plotting
     sinh_factor = math.sqrt(1/(2 * math.pi * math.sinh(beta)))
     tanh_factor = math.tanh(beta/2)
     coth_factor = 1/math.tanh(beta/2)
@@ -70,6 +70,6 @@ if __name__=='__main__':
     plt.xlabel('$x$')
     plt.ylabel(r'$x^{\prime}$')
     plt.title(r'$\rho(x,x^{{\prime}},{0:.3f})$'.format(beta))
-    plt.savefig(get_plot_file_name(args.plot))   
+    plt.savefig(get_plot_file_name(args.plot))
     if args.show:
-        plt.show()    
+        plt.show()

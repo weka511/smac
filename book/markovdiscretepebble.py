@@ -1,4 +1,4 @@
-# markov-discrete-pebble.py
+#!/usr/bin/env python
 
 # Copyright (C) 2015 Greenweaves Software Pty Ltd
 
@@ -33,7 +33,7 @@ neighbour_table =[
 
 def row(cell):
    return cell //3
-    
+
 def column(cell):
    return cell%3
 
@@ -58,7 +58,7 @@ def markov_visits(m,n,i,j,N):
             return 1
       row_index=index(i,m)
       col_index=index(j,n)
-      return row_index*3+col_index   
+      return row_index*3+col_index
    visits=np.zeros((m,n),dtype=int)
    k=index(i,j)
    for trial in range(N):
@@ -75,11 +75,11 @@ def markov_visits(m,n,i,j,N):
       for j in range(n):
          frequencies[i,j]=visits[i,j]/N
    return frequencies
- 
-     
+
+
 if __name__=="__main__":
    m=51
-   n=91   
+   n=91
    N=1
    ns=[]
    sds=[]
@@ -88,7 +88,7 @@ if __name__=="__main__":
       frequencies=markov_visits(m,n,0,0,N)
       ns.append(math.log(N))
       sds.append(math.log(np.std(frequencies)/np.mean(frequencies)))
-      
+
    plt.plot(ns, sds, 'o')
    plt.xlabel('Log N trials')
    plt.ylabel('Log Error')

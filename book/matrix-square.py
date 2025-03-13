@@ -1,4 +1,4 @@
-# matrix-square.py
+#!/usr/bin/env python
 
 # Copyright (C) 2020 Greenweaves Software Limited
 
@@ -20,7 +20,7 @@
 import math,matplotlib.pyplot as plt,numpy as np,os
 from matplotlib import rc
 
-# Helper tables, which speed up calculation by caching exponentials. Index on i and j, not x and y. 
+# Helper tables, which speed up calculation by caching exponentials. Index on i and j, not x and y.
 phi_helper = {}
 V          = {}
 
@@ -60,10 +60,10 @@ def plot_density(X,Y,rho,beta):
       plt.pcolor(X,Y,rho)
       plt.colorbar()
       plt.title(r'$\rho(x,x^{{\prime}},{0:.4f})$'.format(beta))
-      
+
 if __name__=='__main__':
    import argparse
-      
+
    parser = argparse.ArgumentParser('Exercise 3.4: calculate density matrix by matrix squaring')
    parser.add_argument('--beta',   default=0.1, type=float,                      help='Inverse temperature')
    parser.add_argument('--h',      default=1,   type=float,                      help='Planck\'s constant')
@@ -76,16 +76,16 @@ if __name__=='__main__':
    parser.add_argument('--cols',   default=4,   type=int,                        help='Number of columns to plot')
    parser.add_argument('--plot',   default='',                                   help='Name of plot file')
    parser.add_argument('--N',      default=None, type=int,                       help='Plot last dx only (number of dx)')
-   
-   args   = parser.parse_args() 
-   
-   beta   = args.beta  
+
+   args   = parser.parse_args()
+
+   beta   = args.beta
    dx     = args.L / args.n
    grid_i = [i for i in range(-args.n,args.n+1)]          # integer grid for calculation - allow lookup
    I,J    = np.meshgrid(grid_i,grid_i)
    grid_x = [i * dx for i in range(-args.n,args.n+1)]     # grid for plotting
    X,Y    = np.meshgrid(grid_x,grid_x)                    # grid for plotting
-   
+
    build_helpers(n        = args.n,
                  phi_mult = math.sqrt(args.m/(2*math.pi*args.h*args.h*beta)),
                  m        = args.m,
@@ -93,7 +93,7 @@ if __name__=='__main__':
                  beta     = args.beta,
                  dx       = dx,
                  omega    = args.omega)
-         
+
    rho = trotter(I,J) # Calculate starting value (good for small beta)
 
    rc('font',**{'family':'serif','serif':['Palatino']})
@@ -104,19 +104,19 @@ if __name__=='__main__':
       if args.N==None:  # i.e. plot for all values of beta
          plt.subplot(args.rows,args.cols,i+1)
          plot_density(X,Y,rho,beta)
-         
+
       if i <N-1:  # Avoid redundant squaring after final plot
-         beta *= 2      
+         beta *= 2
          rho = np.dot(rho, rho)   # We have to use .dot, as * does elementwise multiplication
-         rho *= dx                # we want an integral, not just a sum 
-         
+         rho *= dx                # we want an integral, not just a sum
+
    if args.N==None:       # i.e. plot for all values of beta
       plt.tight_layout()  # Avoid scrunching plots
    else:
       plot_density(X,Y,rho,beta)
 
-        
-   plt.savefig(get_plot_file_name(args.plot))   
-   
+
+   plt.savefig(get_plot_file_name(args.plot))
+
    if args.show:
-      plt.show()        
+      plt.show()

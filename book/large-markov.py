@@ -1,4 +1,4 @@
-# large-markov.pi
+#!/usr/bin/env python
 
 # Copyright (C) 2015 Greenweaves Software Pty Ltd
 
@@ -26,7 +26,7 @@ def explore_space(m,n,max_iterations):
             elif j<n-1:
                 return values[1]
             else:
-                return values[2]        
+                return values[2]
         if i<1:
             return helper(j,[1,2,3])
         elif i<m-1:
@@ -37,7 +37,7 @@ def explore_space(m,n,max_iterations):
     counts=[]
     for i in range(m*n):
         counts.append(0)
-        
+
     i=0
     j=0
     iteration=0
@@ -50,14 +50,14 @@ def explore_space(m,n,max_iterations):
         j+=j_step
         counts[n*i+j]+=1
         iteration+=1
-    
-    mean=1.0/(m*n)    
-    sum_sq=0.0    
+
+    mean=1.0/(m*n)
+    sum_sq=0.0
 
     for i in range(m*n):
         diff=counts[i]/float(max_iterations)-mean
         sum_sq+=(diff*diff)
-        
+
     print sum_sq
-    
+
 explore_space(200,100,100000)

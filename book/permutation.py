@@ -1,4 +1,4 @@
-# permutation.py
+#!/usr/bin/env python
 
 # Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
 
@@ -31,8 +31,8 @@ def ran_combination(K,M):
     for k in range(M):
         l=random.randint(k,K-1)
         perm[k],perm[l]=perm[l],perm[k]
-    return perm[0:2]    
- 
+    return perm[0:2]
+
 def permutation2str(perm):
     result=""
     for el in perm:
@@ -40,9 +40,9 @@ def permutation2str(perm):
     return (result)
 
 if __name__=='__main__':
-    for i in range(10):    
+    for i in range(10):
         perms={}
-            
+
         for i in range(120000):
             perm0=ran_perm(5)
             perm = permutation2str(perm0)
@@ -50,18 +50,18 @@ if __name__=='__main__':
                 perms[perm]+=1
             else:
                 perms[perm]=1
-            
+
         count= len(perms.keys())
-        
+
         sum=0
         for kk in perms.keys():
             sum+=perms[kk]
-        
+
         average=sum/count
-        
+
         chi_squared=0
         for kk in perms.keys():
             chi_squared+=((perms[kk]-average)*(perms[kk]-average))
-        
+
         ss=math.sqrt(2*chi_squared)
-        print (count, average, chi_squared, ss, math.sqrt(2*count-1))    
+        print (count, average, chi_squared, ss, math.sqrt(2*count-1))

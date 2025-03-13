@@ -1,4 +1,4 @@
-# gauss.py
+#!/usr/bin/env python
 
 # Copyright (C) 2015,2018 Greenweaves Software Pty Ltd
 
@@ -30,20 +30,20 @@ def get_frequencies(k):
     for i in range(2*m+1):
         xs.append(i)
         frequencies.append(0)
-        
+
     for i in range(n):
         r=gauss(k)
         rindex=int(m*r/math.sqrt(12*k))+m
         frequencies[rindex]+=1
-        
+
     for i in range(2*m+1):
         frequencies[i]/=float(2*m+1)
- 
+
     return (xs,frequencies)
 
 if __name__=="__main__":
     import matplotlib.pyplot as plt
-    
+
     for k in range(1,12):
         (xs,frequencies)=get_frequencies(k)
         plt.plot(xs,frequencies,label='k={0}'.format(k))
@@ -52,5 +52,5 @@ if __name__=="__main__":
         plt.title('Gauss')
         plt.legend(loc='upper left')
         plt.savefig(ft.make_temp_file('gauss.png'))
-        
-    plt.show()    
+
+    plt.show()
