@@ -19,18 +19,27 @@
     Generate Gray Codes
 '''
 
-def gray(N):
+def create_gray_codes(N):
     '''
-        Recursive algorithm for k-bit Gray code, from
-        http://cacs.usc.edu/education/phys516/01-4AdvancedMC.pdf
+        Create a list of k-bit Gray codes
+
+        Parameters:
+            N    Number of bits
+
+        Returns: A list, each element being a binary number.
     '''
     k = 1
-    g=[[0],[1]]
+    product = [[0],[1]]
+
+    # Stating with a list for k==1, generate lists for k==2, 3, etc, by:
+    # a) prepending 0 to each member of list; and
+    # b) reversing the klist, and prependong 1 to each member.
     while k < N:
-        g = [[0] + gg for gg in g] + [[1] + gg for gg in g[::-1]]
-        k+= 1
-    return g
+        product = [[0] + code for code in product] + [[1] + code for code in product[::-1]]
+        k += 1
+
+    return product
 
 if __name__ == '__main__':
-    for gray_code in gray(4):
+    for gray_code in create_gray_codes(4):
         print (gray_code)

@@ -162,7 +162,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 8|||Ising Model: Enumerations and Monte-Carlo Algorithms
 &nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_8)|cluster_ising.py|
 &nbsp;|&nbsp;|cluster_ising_movie.py|
-&nbsp;|&nbsp;|energy_ising.py|
+&nbsp;|&nbsp;|energy_ising.py|5-1 Compute the energy of an Ising configuration
 &nbsp;|&nbsp;|enumerate_ising.py|
 &nbsp;|&nbsp;|enumerate_ising_mod.py|
 &nbsp;|&nbsp;|enumerate_ising_movie.py|
