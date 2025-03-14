@@ -82,17 +82,19 @@ def get_magnetization(data,beta):
             frequency is an array of the same length
      '''
      Emin = data[:,0].min()
-     M,indices = np.unique(data[:,1],return_index=True)
-     frequency = np.zeros_like(M)
-     m,_ = data.shape
-     for i in range(len(M)):
-          for j in range(m):
-               if data[j,1] == M[i]:
-                    frequency[i] += np.exp(-beta*(data[j,0]-Emin))*data[j,2]
+     EPrime = data[:,0] - Emin
+     N = data[:,2]
+     M = data[:,1]
+     N_weighted= np.exp(-beta*EPrime)*N
+     M_index = np.unique(M)
+     frequency = np.zeros_like(M_index)
 
-     return M,frequency/frequency.sum()
+     for i in range(len(M_index)):
+          for j in range(len(M)):
+               if M[j] == M_index[i]:
+                    frequency[i] += N_weighted[j]
 
-
+     return M_index,frequency/frequency.sum()
 
 if __name__=='__main__':
      args = parse_arguments()
@@ -101,8 +103,9 @@ if __name__=='__main__':
      cV = np.array([thermo(N,E,beta=1/t)[2] for t in T])
      Tc = 2/np.log(1+np.sqrt(2))
      fig = figure(figsize=(10,10))
-     ax1 = fig.add_subplot(2,1,1)
      fig.suptitle(f'{args.input}')
+
+     ax1 = fig.add_subplot(2,1,1)
      ax1.plot(T,cV,color='b',label='$c_V$')
      ax1.axvline(x=Tc,color='r',linestyle='--',label='$T_C$')
      ax1.set_xlabel('Temperature')
@@ -111,9 +114,9 @@ if __name__=='__main__':
      ax1.legend()
 
      ax2 = fig.add_subplot(2,1,2)
-     for T in [2.5,5]:
+     for T in [2.5,Tc,5]:
           M,frequency = get_magnetization(data,beta=1/T)
-          ax2.plot(M,frequency,label=f'$T={T}$')
+          ax2.plot(M,frequency,label=f'$T={T:.02f}$')
 
      ax2.set_xlabel('Magnetization')
      ax2.set_ylabel('Frequency')
