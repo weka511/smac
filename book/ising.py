@@ -29,12 +29,6 @@ args = parser.parse_args()
 
 energy,magnetization = enumerate_ising((args.m, args.n))
 with open(args.output,'w') as f:
-    # f.write('E,N\n')
-    # for E,N in energy:
-        # if args.trace:
-            # print (f'{E},{N}')
-        # f.write(f'{E},{N}\n')
-# with open('mag.csv','w') as f:
     f.write('E,M,N\n')
     for EM,N in magnetization:
         E,M = EM
