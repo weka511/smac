@@ -37,6 +37,11 @@ def parse_arguments():
                          type = int,
                          nargs = '+',
                          help  = 'File to read data from')
+     parser.add_argument('-T','--Temperatures',
+                         default=[2.5,5],
+                         type=float,
+                         nargs='+',
+                         help='Temperatures to be plotted')
      return parser.parse_args()
 
 def read_data(input_file):
@@ -107,16 +112,17 @@ if __name__=='__main__':
 
      ax1 = fig.add_subplot(2,1,1)
      ax1.plot(T,cV,color='b',label='$c_V$')
-     ax1.axvline(x=Tc,color='r',linestyle='--',label='$T_C$')
+     ax1.axvline(x=Tc,color='r',linestyle='--',label=f'$T_C={Tc:.02f}$')
      ax1.set_xlabel('Temperature')
      ax1.set_ylabel('Specific Heat Capacity')
      ax1.set_title('Thermodynamic quantities')
      ax1.legend()
 
      ax2 = fig.add_subplot(2,1,2)
-     for T in [2.5,Tc,5]:
+     for T in sorted([Tc] + args.Temperatures):
           M,frequency = get_magnetization(data,beta=1/T)
-          ax2.plot(M,frequency,label=f'$T={T:.02f}$')
+          sTc = ' $(T_C)$' if T == Tc else ''
+          ax2.plot(M,frequency,label=f'$T={T:.02f}$' + sTc)
 
      ax2.set_xlabel('Magnetization')
      ax2.set_ylabel('Frequency')
