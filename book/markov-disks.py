@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2022 Simon Crase
+# Copyright (C) 2022-2025 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,18 +17,19 @@
 
 '''Exercise 2.8 and Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC'''
 
-from argparse          import ArgumentParser
-from geometry          import GeometryFactory
-from matplotlib        import rc
-from matplotlib.pyplot import bar, figure, legend, savefig, show, title
-from numpy             import any, array, copy, load, savez
-from numpy.random      import default_rng
-from os.path           import basename, exists, splitext
-from shutil            import copyfile
+from argparse import ArgumentParser
+from os.path import basename, exists, splitext
+from shutil import copyfile
+from time import time
+from matplotlib import rc
+from matplotlib.pyplot import figure, show
+import numpy as np
+from numpy.random import default_rng
+from geometry import GeometryFactory
 
 def markov_disks(X,
-                 rng      = default_rng(),
-                 delta    = array([0.01,0.01]),
+                 rng = default_rng(),
+                 delta = np.array([0.01,0.01]),
                  geometry = GeometryFactory()):
     '''Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC'''
 
@@ -37,18 +38,17 @@ def markov_disks(X,
             Verify that proposed new position is within the geometry,
             and that the resulting new configuration will be acceptable.
         '''
-        if any(X_proposed < geometry.LowerBound): return False
-        if any(geometry.UpperBound < X_proposed): return False
+        if not geometry.is_within_bounds(X_proposed): return False
 
         for i in range(N):
-            if i!=k and geometry.get_distance(X[i,:],X_proposed)<2*geometry.sigma:
+            if i != k and geometry.get_distance(X[i,:],X_proposed) < 2*geometry.sigma:
                 return False
 
         return True
 
-    N,d     = X.shape
-    k       = rng.integers(0,high=N)
-    Delta   = -delta + 2* delta*rng.random(size=d)
+    N,d = X.shape
+    k = rng.integers(0,high=N)
+    Delta = -delta + 2* delta*rng.random(size=d)
     X_proposed = geometry.move_to(X[k,:]+Delta)
     if can_move(k,X_proposed):
         X[k,:] = X_proposed
@@ -57,9 +57,10 @@ def markov_disks(X,
         return -1,X
 
 def get_coordinate_description(coordinate):
-    if coordinate==0:
+    '''Used to display the name of a oordinate'''
+    if coordinate == 0:
         return 'X'
-    elif coordinate==1:
+    elif coordinate == 1:
         return 'Y'
     else:
         return 'Z'
@@ -69,10 +70,10 @@ def get_coordinate_colour(coordinate):
 
 def get_plot_file_name(plot=None):
     '''Determine plot file name from source file name or command line arguments'''
-    if plot==None:
+    if plot == None:
         return f'{splitext(basename(__file__))[0]}.png'
     base,ext = splitext(plot)
-    return f'{plot}.png' if len(ext)==0 else plot
+    return f'{plot}.png' if len(ext) == 0 else plot
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
@@ -138,79 +139,73 @@ def parse_arguments():
 class Checkpointer:
     '''Used to save a configuration to a checkpoint, and restore from saved checkpoint'''
     def __init__(self,file='check'):
-        self.path   = f'{file}.npz'
+        self.path = f'{file}.npz'
         self.backup = f'{self.path}~'
 
     def load(self):
         with load(self.path) as data:
-            X             = data['X']
+            X = data['X']
             HistogramBins = data['HistogramBins']
             return X,HistogramBins
 
-    def save(self,
-             X        = [],
-             geometry = None):
+    def save(self, X = [], geometry = None):
 
         if exists(self.path):
             copyfile(self.path,self.backup)
-        savez(self.path,
-              X             = X,
-              HistogramBins = geometry.HistogramBins)
+
+        np.savez(self.path,
+              X = X, HistogramBins = geometry.HistogramBins)
 
 if __name__=='__main__':
-    args       = parse_arguments()
-    check      = Checkpointer()
-    rng        = default_rng()
-    delta      = array(args.delta if len(args.delta)==args.d else args.delta * args.d)
-    geometry   = GeometryFactory(
-                        periodic = args.periodic,
-                        L        = array(args.L if len(args.L)==args.d else args.L * args.d),
-                        sigma    = args.sigma,
-                        d        = args.d)
+    start  = time()
+    args = parse_arguments()
+    check = Checkpointer()
+    rng = default_rng()
+    delta = np.array(args.delta if len(args.delta)==args.d else args.delta * args.d)
+    L  = np.array(args.L if len(args.L)==args.d else args.L * args.d)
+    geometry = GeometryFactory(periodic = args.periodic, L = L, sigma = args.sigma, d = args.d)
     if args.eta != None:
-        geometry.set_sigma(eta = args.eta,
-                           N   = args.Disks)
-    eta        = geometry.get_density(N = args.Disks)
+        geometry.set_sigma(eta = args.eta, N = args.Disks)
+    eta = geometry.get_density(N = args.Disks)
     n_accepted = 0
     if args.restart:
-        X,HistogramBins = check.load()
-        histograms = geometry.create_Histograms(n             = args.bins,
-                                                HistogramBins = HistogramBins)
+        X,HistogramBins = check.np.load()
+        histograms = geometry.create_Histograms(n = args.bins, HistogramBins = HistogramBins)
     else:
-        X          = geometry.create_configuration(N = args.Disks)
+        X = geometry.create_configuration(N = args.Disks)
         histograms = geometry.create_Histograms(n=args.bins)
 
     for epoch in range(args.N):
-        k,X = markov_disks(
-                    X,
-                    rng      = rng,
-                    delta    = delta,
-                    geometry = geometry)
+        k,X = markov_disks(X, rng = rng, delta = delta, geometry = geometry)
 
-        if epoch>args.burn:
-            if k>-1:
+        if epoch > args.burn:
+            if k >- 1:
                 n_accepted += 1
             for i in range(args.d):
-                for x in array(X[:,i]):
+                for x in np.array(X[:,i]):
                     histograms[i].add(x)
+
         if epoch%args.frequency ==0:
             print (f'Epoch {epoch:,} Accepted: {n_accepted:,}')
-            check.save(X          = X,
-                       geometry   = geometry)
+            check.save(X = X, geometry   = geometry)
 
-
-    figure(figsize=(12,12))
-
+    fig = figure(figsize=(12,12))
+    ax1 = fig.add_subplot(1,1,1)
     for j in range(args.d):
         h,bins = histograms[j].get_hist()
-        bar([0.5*(bins[i]+bins[i+1]) for i in range(len(h))],h,
+        ax1.bar([0.5*(bins[i]+bins[i+1]) for i in range(len(h))],h,
                 width = [0.5*(bins[i+1]-bins[i]) for i in range(len(h))],
                 label = f'{get_coordinate_description(j)}',
                 alpha = 0.5,
                 color = get_coordinate_colour(j))
-    title(f'{args.Disks} Disks {geometry.get_description()}: sigma = {geometry.sigma:.3g}, eta = {eta:.3g}, delta = {max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
-    legend()
-    savefig(get_plot_file_name(args.plot))
+    ax1.set_title(f'{args.Disks} Disks {geometry.get_description()}: sigma = {geometry.sigma:.3g}, eta = {eta:.3g}, delta = {max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
+    ax1.legend()
+    fig.savefig(get_plot_file_name(args.plot))
+
+    elapsed = time() - start
+    minutes = int(elapsed/60)
+    seconds = elapsed - 60*minutes
+    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
 
     if args.show:
         show()

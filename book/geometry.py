@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2022 Simon Crase
+# Copyright (C) 2022-2025 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,34 +17,26 @@
 
 '''Support use of periodic and unbounded boundary conditions '''
 
-from math              import isqrt
-from numpy             import array, int64, minimum, ones, pi, prod, reshape, sqrt, zeros
-from numpy.linalg      import norm
-from unittest          import TestCase, main
+import numpy as np
+from unittest import TestCase, main
 
 class Geometry:
     '''This class represents the space in which the action occurs'''
-    def __init__(self,
-                 L     = array([1,1]),
-                 sigma = 0.25,
-                 d     = 2):
-        self.L     = L
+    def __init__(self, L  = np.array([1,1]), sigma = 0.25,  d = 2):
+        self.L = L
         self.sigma = sigma
-        self.d     = d
+        self.d = d
 
-    def get_density(self,
-                    N     = 4):
+    def get_density(self, N = 4):
         '''Calculate fraction of total volums that will be occupied'''
-        return N*pi*self.sigma**2/prod(self.L)
+        return N * np.pi * self.sigma**2/np.prod(self.L)
 
-    def set_sigma(self,
-                  eta = 1.0,
-                  N   = 4):
-        self.sigma = sqrt(prod(self.L)*eta/(N*pi))
+    def set_sigma(self, eta = 1.0, N   = 4):
+        self.sigma = np.sqrt(np.prod(self.L)*eta/(N*np.pi))
 
     def create_configuration(self,N=4):
         '''Create an initial configuration, spread uniformly through space'''
-        if self.d==2:
+        if self.d == 2:
             return self.pack_disks(N)
         else:
             raise Exception(f'Not implemented for d={d}')
@@ -62,41 +54,60 @@ class Geometry:
             x1,y1 = self.move_to((x0,y0))
             return (x1,y1)
 
+        def get_side_dimensions(N):
+            '''
+            Determine the sides of a rectangle
+
+            Parameters:
+                N
+            Returns:
+                m, n such that m*n >= M and m<=N
+            '''
+            m = int(np.sqrt(N))
+            n = N // m
+            if  m*n < N:
+                n += 1
+            assert(m<=n)
+            return m,n
+
         eta = self.get_density(N=N)
-        if eta > pi*sqrt(3)/6:
-            raise Exception(f'Density of {eta} exceeds {pi*sqrt(3)/6}')
+        if eta > np.pi*np.sqrt(3)/6:
+            raise Exception(f'Density of {eta} exceeds {np.pi*np.sqrt(3)/6}')
 
-        m = isqrt(N)
-        n = N // m
-        if  m*n < n:
-            n += 1
-        assert(m<=n)
-        Available   = self.UpperBound - self.LowerBound
-        Delta       = [Available[0]/m, Available[1]/n]
+        m,n = get_side_dimensions(N)
+
+        Available = self.UpperBound - self.LowerBound
+        Delta = [Available[0]/m, Available[1]/n]
         coordinates = [alloc(i,j) for i in range(m) for j in range(n)]
-        return array(coordinates[0:N])
+        return np.array(coordinates[0:N])
 
-    def create_Histograms(self,n=10,HistogramBins=zeros(0)):
-        self.HistogramBins = zeros((n,self.d), dtype=int64) if HistogramBins.size==0 else HistogramBins
-        return [Histogram(n,
-                          h = self.HistogramBins[:,j]) for j in range(self.d)]
+    def create_Histograms(self,n=10,HistogramBins=np.zeros(0)):
+        self.HistogramBins = np.zeros((n,self.d), dtype=np.int64) if HistogramBins.size==0 else HistogramBins
+        return [Histogram(n, h = self.HistogramBins[:,j]) for j in range(self.d)]
 
-class Box(Geometry):
+class BoundedGeometry(Geometry):
+    '''
+    This class represents Boxes, Tori, etc. Any space that is bounded in at least one dimension
+    '''
+    def __init__(self, L  = np.array([1,1]), sigma = 0.25,  d = 2, LowerBound=-np.inf,UpperBound=np.inf):
+        super().__init__(L, sigma, d)
+        self.LowerBound = LowerBound
+        self.UpperBound = UpperBound
+
+    def is_within_bounds(self,X_proposed):
+        if any(X_proposed < self.LowerBound): return False
+        if any(self.UpperBound < X_proposed): return False
+        return True
+
+class Box(BoundedGeometry):
     '''This class represents a simple box geometry without periodic boundary conditions'''
-    def __init__(self,
-                 L     = array([1,1]),
-                 sigma = 0.125,
-                 d     = 2):
-        super().__init__(L     = L,
-                         sigma = sigma,
-                         d     = d)
-        self.LowerBound = sigma*ones(d)
-        self.UpperBound =  L - sigma*ones(d)
+    def __init__(self, L = np.array([1,1]), sigma = 0.125, d = 2):
+        super().__init__(L = L, sigma = sigma, d = d,LowerBound = sigma*np.ones(d),UpperBound =  L - sigma*np.ones(d))
+
 
     def get_distance(self, X0,X1):
         '''Calculate Euclidean distance between two points'''
-        s = norm(X0-X1)
-        return s
+        return np.linalg.norm(X0-X1)
 
     def move_to(self,X):
         return X
@@ -104,48 +115,43 @@ class Box(Geometry):
     def get_description(self):
         return 'without periodic boundary conditions'
 
-class Torus(Geometry):
-    '''This class reprsents a  box geometry with periodic boundary conditions, i.e. a torus.'''
-    def __init__(self,
-                 L     = array([1,1]),
-                 sigma = 0.125,
-                 d     = 2):
-        super().__init__(L     = L,
-                         sigma = sigma,
-                         d     = d)
-        self.LowerBound = zeros(d)
-        self.UpperBound = L
+
+
+class Torus(BoundedGeometry):
+    '''This class represents a  box geometry with periodic boundary conditions, i.e. a torus.'''
+    def __init__(self, L = np.array([1,1]), sigma = 0.125, d = 2):
+        super().__init__(L = L, sigma = sigma, d = d, LowerBound = np.zeros(d),UpperBound = L)
+
 
     def get_distance(self, X0,X1):
         '''Calculate distance between two points using periodic boundary conditions'''
-        return norm(self.diff_vec(X0,X1))
+        return np.linalg.norm(self.diff_vec(X0,X1))
 
     def move_to(self,X):
         return self.box_it(X)
 
     def box_it(self,X):
         '''Algorithm 2.5'''
-        return X%self.L
+        return X % self.L
 
     def diff_vec(self,X0,X1):
         '''Algorithm 2.6'''
         Delta  = self.box_it(X0 - X1)
-        return minimum(Delta, Delta - self.L/2)
+        return np.minimum(Delta, Delta - self.L/2)
 
     def get_description(self):
         '''Used in titles of plots'''
         return 'with periodic boundary conditions'
 
 def GeometryFactory(periodic = False,
-                    L        = array([1,1]),
-                    sigma    = 0.125,
-                    d        = 2):
+                    L = np.array([1,1]),
+                    sigma = 0.125,
+                    d = 2):
     '''Create a periodic or aperiodic Geometry'''
-    return Torus(L     = L,
-                 sigma = sigma,
-                 d     = d) if periodic else Box(L     = L,
-                                                 sigma = sigma,
-                                                 d     = d)
+    if periodic:
+        return Torus(L = L, sigma = sigma, d = d)
+    else:
+        return Box(L = L, sigma = sigma, d = d)
 
 class Histogram:
     '''
@@ -157,9 +163,9 @@ class Histogram:
                  n  = 10,
                  x0 = 0,
                  xn = 1,
-                 h  = zeros((0,0))):
-        self.n  = n
-        self.h  = zeros((n)) if h.size == 0 else h
+                 h  = np.zeros((0,0))):
+        self.n = n
+        self.h = np.zeros((n)) if h.size == 0 else h
         self.x0 = x0
         self.xn = xn
 
@@ -175,7 +181,7 @@ class Histogram:
 
     def get_hist(self):
         '''Retrieve counts and bin boundaries'''
-        Z    = sum(self.h)
+        Z = sum(self.h)
         bins = [self.x0 + i*(self.xn-self.x0)/self.n for i in range(self.n)]
         return self.h/Z,bins+[self.xn]
 
