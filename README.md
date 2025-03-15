@@ -281,18 +281,6 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 6|||Entropic Forces
 7|||Dynamic Monte Carlo Methods
 
-## Exam
-
-File|Description
-------|-----------------------------------------------------------
-Q1.py|
-Q4-1.py|
-Q4-2.py|
-Q7.py|
-Q10.py|
-Q11.py|
-
-
 ## Miscellaneous (utils folder)
 
 File|Description
