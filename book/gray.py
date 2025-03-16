@@ -95,6 +95,19 @@ def Nbr(k, shape = (4,5), periodic = False):
             if j0>-1 and j0 < n:
                 yield i *n + j0
 
+def generate_edges(shape = (4,4), periodic = False):
+    def get_coordinates(i):
+        return i//n, i % n
+
+    m,n = shape
+    for i in range(m*n):
+        for j in Nbr(i,shape=shape,periodic=periodic):
+            if j >i: continue
+            m0,n0 = get_coordinates(i)
+            m1,n1 = get_coordinates(j)
+            yield m0,n0,m1,n1
+
+
 class NbrTest(TestCase):
     '''
     Test for Nbr class
@@ -140,6 +153,11 @@ class NbrTest(TestCase):
     def testNbrP4(self):
         Nbrs = list(Nbr(4,periodic=True))
         self.assertListEqual([19,9,3,0], Nbrs)
+
+    def testEdges(self):
+        for edge in generate_edges():
+            print (edge)
+
 
 class GrayTest(TestCase):
     '''
