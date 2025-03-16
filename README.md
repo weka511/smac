@@ -264,7 +264,8 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 4||| Bosons
 5.1||energy_ising.py|5.1: Compute energyy of a simple Ising configuration
 -||gray.py|Algorithm 5.2: Gray code for spins {1,...N}.
--||enumerate-ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
+-||edge_ising.py|Algorithm 5.5 edge-ising. Gray code enumeration of the loop configurations in Figure 5.8
+-||enumerate_ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
 -||ising.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
 -||ising-stats.py|Figure 6.6 - plot data from ising.py
 -|ising|catch.hpp|Support for Test harness for enumerate-ising.cpp
