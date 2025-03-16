@@ -22,7 +22,7 @@
 
 from unittest import main, TestCase
 
-def gray_flip(N, tau = None):
+def gray_flip(N, tau = []):
     '''
     Generator for Gray code
 
@@ -37,7 +37,7 @@ def gray_flip(N, tau = None):
         for k in gray(N):
             ....
     '''
-    if tau==None:
+    if len(tau) == 0:
         tau = list(range(1,(N+1)+1))
 
     while True:
