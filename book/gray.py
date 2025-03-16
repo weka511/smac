@@ -102,10 +102,8 @@ def generate_edges(shape = (4,4), periodic = False):
     m,n = shape
     for i in range(m*n):
         for j in Nbr(i,shape=shape,periodic=periodic):
-            if j >i: continue
-            m0,n0 = get_coordinates(i)
-            m1,n1 = get_coordinates(j)
-            yield m0,n0,m1,n1
+            if i<j:
+                yield i,j
 
 
 class NbrTest(TestCase):
@@ -155,8 +153,8 @@ class NbrTest(TestCase):
         self.assertListEqual([19,9,3,0], Nbrs)
 
     def testEdges(self):
-        for edge in generate_edges():
-            print (edge)
+        Edges = list(generate_edges())
+        self.assertEqual(24,len(Edges))
 
 
 class GrayTest(TestCase):
