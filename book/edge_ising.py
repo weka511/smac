@@ -26,7 +26,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from gray import gray_flip
+from gray import gray_flip, generate_edges
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -38,7 +38,7 @@ def parse_arguments():
 def get_file_name(figs):
     return join(figs,basename(splitext(__file__)[0]))
 
-def edge_ising(n=24,m=16):
+def edge_ising(shape=(4,4)):
     '''
     Algorithm 5.5 edge-ising. Gray code enumeration of the loop configurations in Figure 5.8
 
@@ -46,16 +46,24 @@ def edge_ising(n=24,m=16):
         n   Number of edges
         m    Number of sites
     '''
-    N = np.zeros((n),dtype=np.int64)
-    tau = np.arange(1,n,dtype=np.int64)
-    O = np.zeros((m),dtype=np.int64)
-    yield N
-    for _, (k,_) in enumerate(gray_flip(2**n)):
+    M,N = shape
+    n_sites = M*N
+    s = list(generate_edges(shape))
+    n_edges=len(s)
+    n = np.zeros((n_edges),dtype=np.int64)
+    tau = np.arange(1,n_edges,dtype=np.int64)
+    o = np.zeros((n_sites),dtype=np.int64)
+    yield n
+    for _, (k,_) in enumerate(gray_flip(2**n_edges,tau)):
         k -= 1              # k starts at 1 (following The Book), convert to 0-based
                             # so we can use as an array index
-        tau[k] *= -1
-        N[k] = (N[k+1] + 1)% 2
+        n[k] = (n[k+1] + 1) % 2
+        sk,sk_prime = s[k]
+        o[sk] = o[sk] + 2*n[k]  - 1
+        o[sk_prime] = o[sk_prime] + 2*n[k]  - 1
         z=0
+        if np.all([o%2 ==0]):
+            yield n
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -65,7 +73,8 @@ if __name__=='__main__':
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    edge_ising(24,16)
+    for o in edge_ising(shape=(4,4)):
+        print (o)
     # fig = figure(figsize=(12,12))
 
     # fig.savefig(get_file_name(args.figs))
