@@ -109,7 +109,7 @@ def generate_edges(shape = (4,4), periodic = False):
 
 class NbrTest(TestCase):
     '''
-    Test for Nbr class
+    Test finding neighbours
 
     Test data correspond to
          15  16  17  18  19
@@ -154,10 +154,63 @@ class NbrTest(TestCase):
         Nbrs = list(Nbr(4,periodic=True))
         self.assertCountEqual([19,9,3,0], Nbrs)
 
-    def testEdges(self):
+class EdgeTest(TestCase):
+    '''
+    Tests for generate_edges(...)
+    '''
+    def testEdges2(self):
+        '''
+        Test data corresponds to
+             2   3
+             0   1
+        '''
+        Edges = list(generate_edges((2,2)))
+        self.assertEqual(4,len(Edges))
+        self.assertIn((0,1),Edges)
+        self.assertIn((0,2),Edges)
+        self.assertIn((1,3),Edges)
+        self.assertIn((2,3),Edges)
+
+    def testEdges4(self):
+        '''
+        Test data corresponds to
+              12  13  14  15
+               8   9  10  11
+               4   5   6   7
+               0   1   2   3
+        '''
         Edges = list(generate_edges())
         self.assertIn((0,1),Edges)
+        self.assertIn((1,2),Edges)
+        self.assertIn((2,3),Edges)
+
+        self.assertIn((0,4),Edges)
+        self.assertIn((1,5),Edges)
+        self.assertIn((2,6),Edges)
+        self.assertIn((3,7),Edges)
+
         self.assertIn((4,5),Edges)
+        self.assertIn((5,6),Edges)
+        self.assertIn((6,7),Edges)
+
+        self.assertIn((4,8),Edges)
+        self.assertIn((5,9),Edges)
+        self.assertIn((6,10),Edges)
+        self.assertIn((7,11),Edges)
+
+        self.assertIn((8,9),Edges)
+        self.assertIn((9,10),Edges)
+        self.assertIn((10,11),Edges)
+
+        self.assertIn((8,12),Edges)
+        self.assertIn((9,13),Edges)
+        self.assertIn((10,14),Edges)
+        self.assertIn((11,15),Edges)
+
+        self.assertIn((12,13),Edges)
+        self.assertIn((13,14),Edges)
+        self.assertIn((14,15),Edges)
+
         self.assertEqual(24,len(Edges))
 
 
