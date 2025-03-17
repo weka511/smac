@@ -46,24 +46,30 @@ def edge_ising(shape=(4,4)):
         n   Number of edges
         m    Number of sites
     '''
+    def create_edges():
+        S1 = []
+        S2 = []
+        for s1,s2 in generate_edges(shape):
+            S1.append(s1)
+            S2.append(s2)
+        return S1,S2
+
     M,N = shape
     n_sites = M*N
-    s = list(generate_edges(shape))
-    n_edges=len(s)
+    S1,S2 = create_edges()
+    n_edges = len(S1)
     n = np.zeros((n_edges),dtype=np.int64)
-    tau = np.arange(1,n_edges,dtype=np.int64)
     o = np.zeros((n_sites),dtype=np.int64)
     yield n
-    for _, (k,_) in enumerate(gray_flip(2**n_edges,tau)):
+    for i, (k,_) in enumerate(gray_flip(2**n_edges)):
+        if i > 2**n_edges -2: return
         k -= 1              # k starts at 1 (following The Book), convert to 0-based
                             # so we can use as an array index
-        n[k] = (n[k+1] + 1) % 2
-        sk,sk_prime = s[k]
-        o[sk] = o[sk] + 2*n[k]  - 1
-        o[sk_prime] = o[sk_prime] + 2*n[k]  - 1
-        z=0
-        if np.all([o%2 ==0]):
-            yield n
+        n[k] = (n[k] + 1) % 2
+        o[S1[k]] += 2*n[k]  - 1
+        o[S2[k]] += 2*n[k]  - 1
+        if np.all(o%2 ==0):
+            yield i,n
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -73,8 +79,8 @@ if __name__=='__main__':
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    for o in edge_ising(shape=(4,4)):
-        print (o)
+    for n in edge_ising(shape=(4,4)):
+        print (n)
     # fig = figure(figsize=(12,12))
 
     # fig.savefig(get_file_name(args.figs))
