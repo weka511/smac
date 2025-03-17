@@ -79,7 +79,7 @@ if __name__=='__main__':
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    for i,n in enumerate(edge_ising(shape=(2,2))):
+    for i,n in enumerate(edge_ising(shape=(4,4))):
         print (i,n)
     # fig = figure(figsize=(12,12))
 
