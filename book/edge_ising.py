@@ -24,19 +24,20 @@ from argparse import ArgumentParser
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
-from matplotlib import rc
-from matplotlib.pyplot import figure, show
 from gray import gray_flip, generate_edges
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
-    parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
-    parser.add_argument('--figs', default = './figs')
-    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('-m',default=4,type=int, help='Number of rows')
+    parser.add_argument('-n',default=4,type=int, help='Number of columns')
+    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     return parser.parse_args()
 
-def get_file_name(figs):
-    return join(figs,basename(splitext(__file__)[0]))
+def get_file_name(arg):
+    base,ext = splitext(arg)
+    if len(ext)==0:
+        ext = '.csv'
+    return f'{base}{ext}'
 
 def edge_ising(shape=(4,4)):
     '''
@@ -61,33 +62,37 @@ def edge_ising(shape=(4,4)):
     n = np.zeros((n_edges),dtype=np.int64) # Contribution from each edge {0,1}
     o = np.zeros((n_sites),dtype=np.int64) # Count number of times each site is present
     yield n
+
     for i, (k,_) in enumerate(gray_flip(2**n_edges)):
         if i > 2**n_edges - 2: return
-        k -= 1              # k starts at 1 (following The Book), convert to 0-based
-                            # so we can use as an array index
+        k -= 1              # k starts at 1 (following The Book), convert to array index
         n[k] = (n[k] + 1) % 2
         o[S1[k]] += 2*n[k]  - 1
         o[S2[k]] += 2*n[k]  - 1
         if np.all(o%2 ==0):
             yield n
 
-if __name__=='__main__':
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
-    start  = time()
-    parser = ArgumentParser(__doc__)
-    parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
-    args = parse_arguments()
-    rng = np.random.default_rng(args.seed)
-    for i,n in enumerate(edge_ising(shape=(4,4))):
-        print (i,n)
-    # fig = figure(figsize=(12,12))
+def expand(A):
+    '''
+    Convert a list to a form suitable for printing, without the parentheses
 
-    # fig.savefig(get_file_name(args.figs))
+    E.g. A = [1, 2, 3, 4] becomes '1, 2, 3, 4'
+    '''
+    return ', '.join([str(a) for a in A])
+
+if __name__=='__main__':
+    start  = time()
+    args = parse_arguments()
+    with open(get_file_name(args.out),'w') as out:
+        N = np.zeros((25),dtype=int)
+        out.write(f'{args.m,args.n}\n')
+        for i,n in enumerate(edge_ising(shape=(args.m,args.n))):
+            out.write(f'{expand(n)}\n')
+            N[n.sum()] += 1
+
+        out.write(f'{expand(N)}\n')
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
     print (f'Elapsed Time {minutes} m {seconds:.2f} s')
-
-    if args.show:
-        show()
