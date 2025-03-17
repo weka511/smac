@@ -83,22 +83,23 @@ def Nbr(k, shape = (4,5), periodic = False):
     m,n = shape
     i,j = k//n,k%n
     if periodic:
-        for i0 in [i-1,i+1]:
-            yield (i0%m)*n + j
         for j0 in [j-1,j+1]:
             yield i *n + j0%n
-    else:
         for i0 in [i-1,i+1]:
-            if i0>-1 and i0<m:
-                yield i0*n + j
+            yield (i0%m)*n + j
+    else:
         for j0 in [j-1,j+1]:
             if j0>-1 and j0 < n:
                 yield i *n + j0
+        for i0 in [i-1,i+1]:
+            if i0>-1 and i0<m:
+                yield i0*n + j
+
 
 def generate_edges(shape = (4,4), periodic = False):
-    def get_coordinates(i):
-        return i//n, i % n
-
+    '''
+    Used to iterate through all the edges of a matrix of spins
+    '''
     m,n = shape
     for i in range(m*n):
         for j in Nbr(i,shape=shape,periodic=periodic):
@@ -116,44 +117,47 @@ class NbrTest(TestCase):
           5   6   7   8   9
           0   1   2   3   4
     '''
+
     def testNbr0(self):
         Nbrs = list(Nbr(8))
-        self.assertListEqual([3,13,7,9], Nbrs)
+        self.assertCountEqual([3,13,7,9], Nbrs)
 
     def testNbr1(self):
         Nbrs = list(Nbr(12))
-        self.assertListEqual([7,17,11,13], Nbrs)
+        self.assertCountEqual([7,17,11,13], Nbrs)
 
     def testNbr2(self):
         Nbrs = list(Nbr(14))
-        self.assertListEqual([9,19,13], Nbrs)
+        self.assertCountEqual([9,19,13], Nbrs)
 
     def testNbr3(self):
         Nbrs = list(Nbr(15))
-        self.assertListEqual([10,16], Nbrs)
+        self.assertCountEqual([10,16], Nbrs)
 
     def testNbr4(self):
         Nbrs = list(Nbr(4))
-        self.assertListEqual([9,3], Nbrs)
+        self.assertCountEqual([9,3], Nbrs)
 
     def testNbrP1(self):
         Nbrs = list(Nbr(12,periodic=True))
-        self.assertListEqual([7,17,11,13], Nbrs)
+        self.assertCountEqual([7,17,11,13], Nbrs)
 
     def testNbrP2(self):
         Nbrs = list(Nbr(14,periodic=True))
-        self.assertListEqual([9,19,13,10], Nbrs)
+        self.assertCountEqual([9,19,13,10], Nbrs)
 
     def testNbrP3(self):
         Nbrs = list(Nbr(15,periodic=True))
-        self.assertListEqual([10,0,19,16], Nbrs)
+        self.assertCountEqual([10,0,19,16], Nbrs)
 
     def testNbrP4(self):
         Nbrs = list(Nbr(4,periodic=True))
-        self.assertListEqual([19,9,3,0], Nbrs)
+        self.assertCountEqual([19,9,3,0], Nbrs)
 
     def testEdges(self):
         Edges = list(generate_edges())
+        self.assertIn((0,1),Edges)
+        self.assertIn((4,5),Edges)
         self.assertEqual(24,len(Edges))
 
 
