@@ -43,33 +43,33 @@ def edge_ising(shape=(4,4)):
     Algorithm 5.5 edge-ising. Gray code enumeration of the loop configurations in Figure 5.8
 
     Parameters:
-        n   Number of edges
-        m    Number of sites
-    '''
-    def create_edges():
-        S1 = []
-        S2 = []
-        for s1,s2 in generate_edges(shape):
-            S1.append(s1)
-            S2.append(s2)
-        return S1,S2
+        shape
 
+    '''
     M,N = shape
     n_sites = M*N
-    S1,S2 = create_edges()
-    n_edges = len(S1)
-    n = np.zeros((n_edges),dtype=np.int64)
-    o = np.zeros((n_sites),dtype=np.int64)
+    n_edges = (M-1)*N + M*(N-1)
+
+    # Construct end points of all edges
+    S1 = np.zeros((n_edges),dtype=int)
+    S2 = np.zeros((n_edges),dtype=int)
+    for i,(s1,s2) in enumerate(generate_edges(shape)):
+        S1[i] = s1
+        S2[i] = s2
+    assert all(S1<S2)
+
+    n = np.zeros((n_edges),dtype=np.int64) # Contribution from each edge {0,1}
+    o = np.zeros((n_sites),dtype=np.int64) # Count number of times each site is present
     yield n
     for i, (k,_) in enumerate(gray_flip(2**n_edges)):
-        if i > 2**n_edges -2: return
+        if i > 2**n_edges - 2: return
         k -= 1              # k starts at 1 (following The Book), convert to 0-based
                             # so we can use as an array index
         n[k] = (n[k] + 1) % 2
         o[S1[k]] += 2*n[k]  - 1
         o[S2[k]] += 2*n[k]  - 1
         if np.all(o%2 ==0):
-            yield i,n
+            yield n
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -79,8 +79,8 @@ if __name__=='__main__':
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    for n in edge_ising(shape=(4,4)):
-        print (n)
+    for i,n in enumerate(edge_ising(shape=(2,2))):
+        print (i,n)
     # fig = figure(figsize=(12,12))
 
     # fig.savefig(get_file_name(args.figs))
