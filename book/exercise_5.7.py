@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 5.7. Compute Partition functions'''
+'''Exercise 5.7. Compute Partition function'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -23,15 +23,15 @@ from re import split
 from time import time
 import numpy as np
 from matplotlib import rc
-from matplotlib.pyplot import figure, show
+from matplotlib.pyplot import show, subplots
 from ising_stats import read_data, thermo
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument( '-p','--params', default = basename(splitext(__file__)[0]),help='Name of parameters file')
-    parser.add_argument('-i', '--input',
-                         default = 'ising.csv',
-                         help  = 'File to read data from')
+    parser.add_argument('-i', '--input', default = 'ising.csv',  help  = 'File to read stats from')
+    parser.add_argument('--figs', default = './figs',  help  = 'Folder to save plots')
+    # parser.add_argument('-o', '--output', default = 'ising.csv',  help  = 'File to save plots')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     return parser.parse_args()
 
@@ -78,11 +78,7 @@ class Partition:
         than_k_beta = get_than_k(beta)
         S0 = np.dot(C,than_k_beta)
         k_C_k = np.multiply(np.arange(0,len(C)),C)
-        S1 = np.dot(C[1:],than_k_beta[:-1])
-        # for i in self.non_zero:
-            # # sigma_Z += self.C[i] * th**i
-            # S1 += self.n_edges * ch**(self.n_edges-1) * sh * self.C[i] * tanh_beta**i
-            # S1 += ch**(self.n_edges-2) * i * tanh_beta**(i-1)
+        S1 = np.dot(k_C_k[1:],than_k_beta[:-1])
         Z = 2**self.n_sites * ch**self.n_edges * S0
         E_mean = -2**self.n_sites * (n*ch*sh*S0 + S1)/(S0*ch**2)
         return Z,E_mean
@@ -106,49 +102,42 @@ if __name__=='__main__':
         E_ising_stats.append(e)
 
     Z_fn = Partition(m,n,C)
-    Ts = np.linspace(0.8,6)
     Z_param = []
     E_param = []
-    for t in Ts:
+    for t in T:
         z,dz = Z_fn.evaluate(beta=1/t)
         Z_param.append(z)
         E_param.append(-dz/z)
 
-    fig = figure(figsize=(12,12))
+    cols = ['Partition Function', 'Energy']
+    rows = ['Stats', 'Params']
 
-    ax1 = fig.add_subplot(2,2,1)
-    ax1.plot(T,Z_ising_stats,color='b',label='$Z$')
-    ax1.set_xlabel('Temperature')
-    ax1.set_ylabel('Partition Function')
-    ax1.set_title('Partition Function (stats)')
-    ax1.legend()
+    fig, axes = subplots(nrows=2, ncols=2, figsize=(12, 8))
 
-    ax2 = fig.add_subplot(2,2,2)
-    ax2.plot(T,E_ising_stats,color='b',label='$E$')
-    ax2.set_xlabel('Temperature')
-    ax2.set_ylabel('Energy')
-    ax2.set_title('Energy')
-    ax2.legend()
+    for ax, col in zip(axes[0], cols):
+        ax.set_title(col)
 
-    ax3 = fig.add_subplot(2,2,3)
-    ax3.plot(Ts,Z_param,label='$Z$')
-    ax3.set_xlabel('Temperature')
-    ax3.set_ylabel('Partition Function')
-    ax3.set_title('Partition Function (parama)')
-    ax3.legend()
+    for ax, row in zip(axes[:,0], rows):
+        ax.set_ylabel(row, rotation=0, size='large')
 
-    ax4 = fig.add_subplot(2,2,4)
-    ax4.plot(Ts,E_param,color='b',label='$E$')
-    ax4.set_xlabel('Temperature')
-    ax4.set_ylabel('Energy')
-    ax4.set_title('Energy')
-    ax4.legend()
+    axes[0][0].plot(T,Z_ising_stats,color='b',label='$Z$')
+    # axes[0][0].set_xlabel('Temperature')
+    axes[0][0].legend()
 
-    # ax2 = fig.add_subplot(2,1,2)
-    # ax2.plot(Ts,Z1s)
+    axes[0][1].plot(T,E_ising_stats,color='b',label='$E$')
+    # axes[0][1].set_xlabel('Temperature')
+    axes[0][1].legend()
+
+    axes[1][0].plot(T,Z_param,label='$Z$')
+    axes[1][0].set_xlabel('Temperature')
+    axes[1][0].legend()
+
+    axes[1][1].plot(T,E_param,color='b',label='$E$')
+    axes[1][1].set_xlabel('Temperature')
+    axes[1][1].legend()
 
     fig.tight_layout()
-    fig.savefig('exe')
+    fig.savefig(join(args.figs,'ex27'))
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
