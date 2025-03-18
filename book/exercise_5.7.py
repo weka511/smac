@@ -41,17 +41,62 @@ def get_file_name(args,default_ext='.csv'):
     return f'{base}{ext}'
 
 def read_coefficients(args):
+    m = None
+    n = None
     with open(get_file_name(args)) as parameter_file:
         for line in parameter_file:
             params = line.strip()
-    return np.array([float(x) for x in split(r',\s*',params)])
+            if m == None:
+                parts = params.split(',')
+                m = int(parts[0])
+                n = int(parts[1])
+
+    return m,n,np.array([float(x) for x in params.split(',')])
+
+class Partition:
+    '''
+    This class represent the partition function
+    '''
+    def __init__(self,m,n,C):
+        self.C = C.copy()
+        self.non_zero = [i for i in range(len(C)) if C[i] != 0]
+        self.n_sites = m*n
+        self.n_edges = (m-1)*n + m*(n-1)
+
+    def evaluate(self,beta):
+        ch = np.cosh(beta)
+        sh = np.sinh(beta)
+        th = np.tanh(beta)
+        sigma_Z = 0
+        sigma_Z1 = 0
+        for i in self.non_zero:
+            sigma_Z += self.C[i] * th**i
+            sigma_Z1 += self.n_edges * ch**(self.n_edges-1) * sh * self.C[i] * th**i
+            sigma_Z1 += ch**(self.n_edges-2) * i * th**(i-1)
+        Z = 2**self.n_sites * ch**self.n_edges * sigma_Z
+        Z1 = 2**self.n_sites * sigma_Z1
+        return Z,Z1
+
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    C = read_coefficients(args)
+    m,n,C = read_coefficients(args)
+    Z = Partition(m,n,C)
+    Betas = np.linspace(2,3,25)
+    Zs = []
+    Z1s = []
+    for beta in Betas:
+        Z0,Z1 = Z.evaluate(beta)
+        Zs.append(Z0)
+        Z1s.append(-Z1/Z0)
+    fig = figure(figsize=(12,12))
+    ax1 = fig.add_subplot(2,1,1)
+    ax1.plot(Betas,Zs)
+    ax2 = fig.add_subplot(2,1,2)
+    ax2.plot(Betas,Z1s)
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
