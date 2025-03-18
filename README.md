@@ -262,13 +262,13 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 3.4|||Pair density matrices
 3.5|||Geometry of Paths
 4||| Bosons
-5.1||energy_ising.py|5.1: Compute energyy of a simple Ising configuration
--|book|gray.py|Algorithm 5.2: Gray code for spins {1,...N}.
--|book|edge_ising.py|Algorithm 5.5 edge-ising. Gray code enumeration of the loop configurations in Figure 5.8
--|book|enumerate_ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
--|book|exercise_5.7.py|Exercise 5.7. Compute Partition functions
--|book|ising.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
--|book|ising-stats.py|Figure 6.6 - plot data from ising.py
+5.1||energy_ising.py|5.1: Compute energy of a simple Ising configuration
+-||edge_ising.py|Algorithm 5.5 edge-ising. Gray code enumeration of the loop configurations in Figure 5.8
+-||enumerate_ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
+-||exercise_5.7.py|Exercise 5.7. Compute Partition functions
+-||gray.py|Algorithm 5.2: Gray code for spins {1,...N}.
+-||ising.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
+-||ising-stats.py|Figure 6.6 - plot data from ising.py
 -|ising|catch.hpp|Support for Test harness for enumerate-ising.cpp
 -|ising|enumerate-ising.cpp|Algorithm 5.3: single flip enumeration for the Ising model.
 -|ising|enumerate-ising.hpp|Algorithm 5.3: single flip enumeration for the Ising model.
