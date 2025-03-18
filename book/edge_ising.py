@@ -85,7 +85,7 @@ if __name__=='__main__':
     args = parse_arguments()
     with open(get_file_name(args.out),'w') as out:
         N = np.zeros((25),dtype=int)
-        out.write(f'{args.m,args.n}\n')
+        out.write(f'{args.m},{args.n}\n')
         for i,n in enumerate(edge_ising(shape=(args.m,args.n))):
             out.write(f'{expand(n)}\n')
             N[n.sum()] += 1
