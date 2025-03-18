@@ -85,18 +85,18 @@ if __name__=='__main__':
     args = parse_arguments()
     m,n,C = read_coefficients(args)
     Z = Partition(m,n,C)
-    Betas = np.linspace(2,3,25)
+    Ts = np.linspace(0.8,6)
     Zs = []
     Z1s = []
-    for beta in Betas:
-        Z0,Z1 = Z.evaluate(beta)
+    for t in Ts:
+        Z0,Z1 = Z.evaluate(1/t)
         Zs.append(Z0)
         Z1s.append(-Z1/Z0)
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(2,1,1)
-    ax1.plot(Betas,Zs)
+    ax1.plot(Ts,Zs)
     ax2 = fig.add_subplot(2,1,2)
-    ax2.plot(Betas,Z1s)
+    ax2.plot(Ts,Z1s)
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
