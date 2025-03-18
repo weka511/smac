@@ -66,16 +66,24 @@ class Partition:
     def evaluate(self,beta):
         ch = np.cosh(beta)
         sh = np.sinh(beta)
-        th = np.tanh(beta)
-        sigma_Z = 0
-        sigma_Z1 = 0
-        for i in self.non_zero:
-            sigma_Z += self.C[i] * th**i
-            sigma_Z1 += self.n_edges * ch**(self.n_edges-1) * sh * self.C[i] * th**i
-            sigma_Z1 += ch**(self.n_edges-2) * i * th**(i-1)
-        Z = 2**self.n_sites * ch**self.n_edges * sigma_Z
-        Z1 = 2**self.n_sites * sigma_Z1
-        return Z,Z1
+        tanh_beta = np.tanh(beta)
+        def get_than_k(beta):
+            tanh_beta = np.tanh(beta)
+            than_k_beta = [1]
+            for k in range(1,len(C)):
+                than_k_beta.append(than_k_beta[-1]*tanh_beta)
+            return np.array(than_k_beta)
+        than_k_beta = get_than_k(beta)
+        S0 = np.dot(C,than_k_beta)
+        k_C_k = np.multiply(np.arange(0,len(C)),C)
+        S1 = np.dot(C[1:],than_k_beta[:-1])
+        # for i in self.non_zero:
+            # # sigma_Z += self.C[i] * th**i
+            # S1 += self.n_edges * ch**(self.n_edges-1) * sh * self.C[i] * tanh_beta**i
+            # S1 += ch**(self.n_edges-2) * i * tanh_beta**(i-1)
+        Z = 2**self.n_sites * ch**self.n_edges * S0
+        E_mean = -2**self.n_sites * (n*ch*sh*S0 + S1)/(S0*ch**2)
+        return Z,E_mean
 
 
 if __name__=='__main__':
