@@ -105,12 +105,20 @@ if __name__=='__main__':
      args = parse_arguments()
      data,E,N = read_data(args.input)
      T = np.linspace(0.8,6.0)
-     cV = np.array([thermo(N,E,beta=1/t)[2] for t in T])
+     cV = []
+     e = []
+     Z = []
+     for t in T:
+          z,b,c = thermo(N,E,beta=1/t)
+          Z.append(z)
+          cV.append(c)
+          e.append(b)
+
      Tc = 2/np.log(1+np.sqrt(2))
      fig = figure(figsize=(10,10))
      fig.suptitle(f'{args.input}')
 
-     ax1 = fig.add_subplot(2,1,1)
+     ax1 = fig.add_subplot(2,2,1)
      ax1.plot(T,cV,color='b',label='$c_V$')
      ax1.axvline(x=Tc,color='r',linestyle='--',label=f'$T_C={Tc:.02f}$')
      ax1.set_xlabel('Temperature')
@@ -118,16 +126,30 @@ if __name__=='__main__':
      ax1.set_title('Thermodynamic quantities')
      ax1.legend()
 
-     ax2 = fig.add_subplot(2,1,2)
-     for T in sorted([Tc] + args.Temperatures):
-          M,frequency = get_magnetization(data,beta=1/T)
-          sTc = ' $(T_C)$' if T == Tc else ''
-          ax2.plot(M,frequency,label=f'$T={T:.02f}$' + sTc)
+     ax2 = fig.add_subplot(2,2,2)
+     for t in sorted([Tc] + args.Temperatures):
+          M,frequency = get_magnetization(data,beta=1/t)
+          sTc = ' $(T_C)$' if t == Tc else ''
+          ax2.plot(M,frequency,label=f'$T={t:.02f}$' + sTc)
 
      ax2.set_xlabel('Magnetization')
      ax2.set_ylabel('Frequency')
      ax2.set_title('Distribution of Magnetization')
      ax2.legend(title='Temperature')
+
+     ax3 = fig.add_subplot(2,2,3)
+     ax3.plot(T,Z,color='b',label='$Z$')
+     ax3.set_xlabel('Temperature')
+     ax3.set_ylabel('Partition Function')
+     ax3.set_title('Partition Function')
+     ax3.legend()
+
+     ax4 = fig.add_subplot(2,2,4)
+     ax4.plot(T,e,color='b',label='$E$')
+     ax4.set_xlabel('Temperature')
+     ax4.set_ylabel('Energy')
+     ax4.set_title('Energy')
+     ax4.legend()
 
      fig.tight_layout(pad=2)
      if not exists(args.figs):
