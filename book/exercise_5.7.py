@@ -24,18 +24,20 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-
+from ising_stats import read_data, thermo
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
-    parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
-    parser.add_argument('-i', '--input', default = basename(splitext(__file__)[0]),help='Name of parameters file')
+    parser.add_argument( '-p','--params', default = basename(splitext(__file__)[0]),help='Name of parameters file')
+    parser.add_argument('-i', '--input',
+                         default = 'ising.csv',
+                         help  = 'File to read data from')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     return parser.parse_args()
 
 
 def get_file_name(args,default_ext='.csv'):
-    base,ext = splitext(args.input)
+    base,ext = splitext(args.params)
     if len(ext)==0:
         ext = default_ext
     return f'{base}{ext}'
@@ -63,7 +65,7 @@ class Partition:
         self.n_sites = m*n
         self.n_edges = (m-1)*n + m*(n-1)
 
-    def evaluate(self,beta):
+    def evaluate(self,beta=1):
         ch = np.cosh(beta)
         sh = np.sinh(beta)
         tanh_beta = np.tanh(beta)
@@ -92,19 +94,61 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     m,n,C = read_coefficients(args)
-    Z = Partition(m,n,C)
+    data,E,N = read_data(args.input)
+    T = np.linspace(0.8,6.0)
+    cV0 = []
+    E_ising_stats = []
+    Z_ising_stats = []
+    for t in T:
+        z,e,c = thermo(N,E,beta=1/t)
+        Z_ising_stats.append(z)
+        cV0.append(c)
+        E_ising_stats.append(e)
+
+    Z_fn = Partition(m,n,C)
     Ts = np.linspace(0.8,6)
-    Zs = []
-    Z1s = []
+    Z_param = []
+    E_param = []
     for t in Ts:
-        Z0,Z1 = Z.evaluate(1/t)
-        Zs.append(Z0)
-        Z1s.append(-Z1/Z0)
+        z,dz = Z_fn.evaluate(beta=1/t)
+        Z_param.append(z)
+        E_param.append(-dz/z)
+
     fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(2,1,1)
-    ax1.plot(Ts,Zs)
-    ax2 = fig.add_subplot(2,1,2)
-    ax2.plot(Ts,Z1s)
+
+    ax1 = fig.add_subplot(2,2,1)
+    ax1.plot(T,Z_ising_stats,color='b',label='$Z$')
+    ax1.set_xlabel('Temperature')
+    ax1.set_ylabel('Partition Function')
+    ax1.set_title('Partition Function (stats)')
+    ax1.legend()
+
+    ax2 = fig.add_subplot(2,2,2)
+    ax2.plot(T,E_ising_stats,color='b',label='$E$')
+    ax2.set_xlabel('Temperature')
+    ax2.set_ylabel('Energy')
+    ax2.set_title('Energy')
+    ax2.legend()
+
+    ax3 = fig.add_subplot(2,2,3)
+    ax3.plot(Ts,Z_param,label='$Z$')
+    ax3.set_xlabel('Temperature')
+    ax3.set_ylabel('Partition Function')
+    ax3.set_title('Partition Function (parama)')
+    ax3.legend()
+
+    ax4 = fig.add_subplot(2,2,4)
+    ax4.plot(Ts,E_param,color='b',label='$E$')
+    ax4.set_xlabel('Temperature')
+    ax4.set_ylabel('Energy')
+    ax4.set_title('Energy')
+    ax4.legend()
+
+    # ax2 = fig.add_subplot(2,1,2)
+    # ax2.plot(Ts,Z1s)
+
+    fig.tight_layout()
+    fig.savefig('exe')
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
