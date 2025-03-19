@@ -31,22 +31,24 @@ def parse_arguments():
     parser.add_argument( '-p','--params', default = basename(splitext(__file__)[0]),help='Name of parameters file')
     parser.add_argument('-i', '--input', default = 'ising.csv',  help  = 'File to read stats from')
     parser.add_argument('-T', '--T', default=[0.8,6], type=float, help = 'Range for temperature')
-    parser.add_argument('--nT', default=10, type=int, help='Number of temperature to plot')
+    parser.add_argument('--nT', default=10, type=int, help='Number of temperature to plot ')
     parser.add_argument('--figs', default = './figs',  help  = 'Folder to save plots')
+    default_plot_file_name,_ = splitext(__file__)
+    parser.add_argument('--plots', default=default_plot_file_name,help  = 'Folder to save plots')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     return parser.parse_args()
 
 
-def get_file_name(args,default_ext='.csv'):
-    base,ext = splitext(args.params)
+def get_file_name(name,default_ext='.csv'):
+    base,ext = splitext(name)
     if len(ext)==0:
         ext = default_ext
     return f'{base}{ext}'
 
-def read_coefficients(args):
+def read_coefficients(params):
     m = None
     n = None
-    with open(get_file_name(args)) as parameter_file:
+    with open(get_file_name(params)) as parameter_file:
         for line in parameter_file:
             params = line.strip()
             if m == None:
@@ -95,7 +97,7 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    m,n,C = read_coefficients(args)
+    m,n,C = read_coefficients(args.params)
     data,E,N = read_data(args.input)
     T = np.linspace(args.T[0],args.T[1],num=args.nT)
     cV0 = []
@@ -141,7 +143,7 @@ if __name__=='__main__':
     axes[1][1].legend()
 
     fig.tight_layout()
-    fig.savefig(join(args.figs,get_file_name(args,default_ext='.png')))
+    fig.savefig(join(args.figs,get_file_name(args.plots,default_ext='.png'))) #FIXME
 
     elapsed = time() - start
     minutes = int(elapsed/60)
