@@ -30,8 +30,9 @@ def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument( '-p','--params', default = basename(splitext(__file__)[0]),help='Name of parameters file')
     parser.add_argument('-i', '--input', default = 'ising.csv',  help  = 'File to read stats from')
+    parser.add_argument('-T', '--T', default=[0.8,6], type=float, help = 'Range for temperature')
+    parser.add_argument('--nT', default=10, type=int, help='Number of temperature to plot')
     parser.add_argument('--figs', default = './figs',  help  = 'Folder to save plots')
-    # parser.add_argument('-o', '--output', default = 'ising.csv',  help  = 'File to save plots')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     return parser.parse_args()
 
@@ -57,7 +58,8 @@ def read_coefficients(args):
 
 class Partition:
     '''
-    This class represent the partition function
+    This class represent the partition function using the representation
+    of given in Section 5.3.1
     '''
     def __init__(self,m,n,C):
         self.C = C.copy()
@@ -66,22 +68,26 @@ class Partition:
         self.n_edges = (m-1)*n + m*(n-1)
 
     def evaluate(self,beta=1):
+        '''
+        Calculate Thermodynamic quantities
+
+        Parameters:
+            beta
+        '''
+        def get_powers(x,n=3):
+            result = np.ones((n))
+            for k in range(1,n):
+                result[k] = result[k-1]*x
+            return result
+
         ch = np.cosh(beta)
         sh = np.sinh(beta)
-        tanh_beta = np.tanh(beta)
-        def get_than_k(beta):
-            tanh_beta = np.tanh(beta)
-            than_k_beta = [1]
-            for k in range(1,len(C)):
-                than_k_beta.append(than_k_beta[-1]*tanh_beta)
-            return np.array(than_k_beta)
-        than_k_beta = get_than_k(beta)
-        S0 = np.dot(C,than_k_beta)
-        k_C_k = np.multiply(np.arange(0,len(C)),C)
-        S1 = np.dot(k_C_k[1:],than_k_beta[:-1])
+        tanh_k_beta = get_powers(np.tanh(beta),n=len(C))
+        S0 = np.dot(C,tanh_k_beta)
+        S1 = np.dot(np.multiply(np.arange(1,len(C)),C[1:]), tanh_k_beta[:-1])
         Z = 2**self.n_sites * ch**self.n_edges * S0
-        E_mean = -2**self.n_sites * (n*ch*sh*S0 + S1)/(S0*ch**2)
-        return Z,E_mean
+        dZ = 2**self.n_sites * (self.n_edges*ch*sh*S0 + S1)/(S0 * ch**2)
+        return Z,dZ
 
 
 if __name__=='__main__':
@@ -91,7 +97,7 @@ if __name__=='__main__':
     args = parse_arguments()
     m,n,C = read_coefficients(args)
     data,E,N = read_data(args.input)
-    T = np.linspace(0.8,6.0)
+    T = np.linspace(args.T[0],args.T[1],num=args.nT)
     cV0 = []
     E_ising_stats = []
     Z_ising_stats = []
@@ -109,8 +115,8 @@ if __name__=='__main__':
         Z_param.append(z)
         E_param.append(-dz/z)
 
-    cols = ['Partition Function', 'Energy']
-    rows = ['Stats', 'Params']
+    cols = [r'$Z(\beta)$', r'$\bar{E}$']
+    rows = ['Thermo Ising', 'Edge Ising']
 
     fig, axes = subplots(nrows=2, ncols=2, figsize=(12, 8))
 
@@ -118,14 +124,12 @@ if __name__=='__main__':
         ax.set_title(col)
 
     for ax, row in zip(axes[:,0], rows):
-        ax.set_ylabel(row, rotation=0, size='large')
+        ax.set_ylabel(row, rotation=90)
 
     axes[0][0].plot(T,Z_ising_stats,color='b',label='$Z$')
-    # axes[0][0].set_xlabel('Temperature')
     axes[0][0].legend()
 
     axes[0][1].plot(T,E_ising_stats,color='b',label='$E$')
-    # axes[0][1].set_xlabel('Temperature')
     axes[0][1].legend()
 
     axes[1][0].plot(T,Z_param,label='$Z$')
@@ -137,7 +141,8 @@ if __name__=='__main__':
     axes[1][1].legend()
 
     fig.tight_layout()
-    fig.savefig(join(args.figs,'ex27'))
+    fig.savefig(join(args.figs,get_file_name(args,default_ext='.png')))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes

@@ -63,15 +63,23 @@ def read_data(input_file):
      return data,E,N
 
 def thermo(N,E,beta=1.0):
-     '''Algorithm 5.4 Calculate thermodynamic quantities'''
+     '''
+     Algorithm 5.4 Calculate thermodynamic quantities
+
+     Parameters:
+         N
+         E
+         beta
+     '''
      Emin = E.min()
      Eprime = E - Emin
      weights = np.exp(-beta*Eprime)
      Z = np.dot(N, weights)
      Emean = np.dot(N,Eprime*weights)/Z
      Esq = np.dot(N,Eprime*Eprime*weights)/Z
-     Z = Z*np.exp(-beta*Emin)
-     return (Z, (Emean + Emin)/len(N), beta**2*(Esq - Emean**2)/len(N) ) # Z, <e>, cV
+     return (Z*np.exp(-beta*Emin),                # Partition function
+             (Emean + Emin)/len(N),               # Mean energy
+             beta**2 * (Esq - Emean**2)/len(N) )  # Specific heat capacity
 
 def get_magnetization(data,beta):
      '''
@@ -105,21 +113,22 @@ if __name__=='__main__':
      args = parse_arguments()
      data,E,N = read_data(args.input)
      T = np.linspace(0.8,6.0)
-     cV = []
-     e = []
+
+     specific_heat_capacities = []
+     mean_energies = []
      Z = []
      for t in T:
-          z,b,c = thermo(N,E,beta=1/t)
+          z,mean_energy,cV = thermo(N,E,beta=1/t)
           Z.append(z)
-          cV.append(c)
-          e.append(b)
+          specific_heat_capacities.append(cV)
+          mean_energies.append(mean_energy)
 
      Tc = 2/np.log(1+np.sqrt(2))
      fig = figure(figsize=(10,10))
      fig.suptitle(f'{args.input}')
 
      ax1 = fig.add_subplot(2,2,1)
-     ax1.plot(T,cV,color='b',label='$c_V$')
+     ax1.plot(T,specific_heat_capacities,color='b',label='$c_V$')
      ax1.axvline(x=Tc,color='r',linestyle='--',label=f'$T_C={Tc:.02f}$')
      ax1.set_xlabel('Temperature')
      ax1.set_ylabel('Specific Heat Capacity')
@@ -145,10 +154,10 @@ if __name__=='__main__':
      ax3.legend()
 
      ax4 = fig.add_subplot(2,2,4)
-     ax4.plot(T,e,color='b',label='$E$')
+     ax4.plot(T,mean_energies,color='b',label=r'$\bar{E}$')
      ax4.set_xlabel('Temperature')
      ax4.set_ylabel('Energy')
-     ax4.set_title('Energy')
+     ax4.set_title('Mean Energy')
      ax4.legend()
 
      fig.tight_layout(pad=2)
