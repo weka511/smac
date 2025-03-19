@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2018-20225Greenweaves Software Limited
+# Copyright (C) 2018-2025 Greenweaves Software Limited
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,21 +17,34 @@
 
 '''Algorithm 5.3: Single spin-slip enumeration for Ising model'''
 
-from enumerate_ising import enumerate_ising
+
 from argparse import ArgumentParser
+from os.path import  splitext
+from enumerate_ising import enumerate_ising
 
-parser = ArgumentParser(description='Compute statistics for Ising model')
-parser.add_argument('-o', '--output', default = 'ising.csv', help = 'File to record results')
-parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
-parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
-parser.add_argument('--trace', default=False, action='store_true', help='Display output on console also')
-args = parser.parse_args()
+def parse_args():
+    parser = ArgumentParser(description='Compute statistics for Ising model')
+    parser.add_argument('-o', '--output', default = 'ising.csv', help = 'File to record results')
+    parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
+    parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
+    parser.add_argument('--trace', default=False, action='store_true', help='Display output on console also')
+    return parser.parse_args()
 
-energy,magnetization = enumerate_ising((args.m, args.n))
-with open(args.output,'w') as f:
-    f.write('E,M,N\n')
-    for EM,N in magnetization:
-        E,M = EM
-        if args.trace:
-            print (f'{E},{M},{N}')
-        f.write(f'{E},{M},{N}\n')
+def get_file_name(arg,default_ext = '.csv'):
+    base,ext = splitext(arg)
+    if len(ext)==0:
+        ext = default_ext
+    return f'{base}{ext}'
+
+if __name__ == '__main__':
+    args = parse_args()
+
+    energy,magnetization = enumerate_ising((args.m, args.n))
+
+    with open(get_file_name(args.output),'w') as output_file:
+        output_file.write('E,M,N\n')
+        for EM,N in magnetization:
+            E,M = EM
+            if args.trace:
+                print (f'{E},{M},{N}')
+            output_file.write(f'{E},{M},{N}\n')

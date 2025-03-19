@@ -98,7 +98,7 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     m,n,C = read_coefficients(args.params)
-    data,E,N = read_data(args.input)
+    data,E,N = read_data(get_file_name(args.input))
     T = np.linspace(args.T[0],args.T[1],num=args.nT)
     cV0 = []
     E_ising_stats = []
@@ -121,7 +121,7 @@ if __name__=='__main__':
     rows = ['Thermo Ising', 'Edge Ising']
 
     fig, axes = subplots(nrows=2, ncols=2, figsize=(12, 8))
-
+    fig.suptitle(str(m)+r'$\times$'+str(n))
     for ax, col in zip(axes[0], cols):
         ax.set_title(col)
 
@@ -143,7 +143,7 @@ if __name__=='__main__':
     axes[1][1].legend()
 
     fig.tight_layout()
-    fig.savefig(join(args.figs,get_file_name(args.plots,default_ext='.png'))) #FIXME
+    fig.savefig(join(args.figs,get_file_name(basename(args.plots),default_ext='.png')))
 
     elapsed = time() - start
     minutes = int(elapsed/60)

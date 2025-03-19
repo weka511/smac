@@ -33,10 +33,10 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     return parser.parse_args()
 
-def get_file_name(arg):
+def get_file_name(arg,default_ext = '.csv'):
     base,ext = splitext(arg)
     if len(ext)==0:
-        ext = '.csv'
+        ext = default_ext
     return f'{base}{ext}'
 
 def edge_ising(shape=(4,4)):
@@ -80,9 +80,11 @@ def expand(A):
     '''
     return ', '.join([str(a) for a in A])
 
+
 if __name__=='__main__':
     start  = time()
     args = parse_arguments()
+
     with open(get_file_name(args.out),'w') as out:
         N = np.zeros((25),dtype=int)
         out.write(f'{args.m},{args.n}\n')
