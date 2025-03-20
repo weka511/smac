@@ -24,7 +24,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import show, subplots
-from ising_stats import read_data, thermo
+from ising_stats import thermo
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -58,6 +58,20 @@ def read_coefficients(params):
 
     return m,n,np.array([float(x) for x in params.split(',')])
 
+def read_data(input_file):
+    '''
+    Read Counts by Energy and Magnetization prepared by ising.py
+    '''
+    data = np.genfromtxt(input_file, delimiter=',')[1:,:]
+    m,_ = data.shape
+    E = np.unique(data[:,0])
+    N = np.zeros_like(E)
+    for i in range(len(E)):
+        mask = np.in1d(data[:,0],E[i])
+        N[i] = data[mask,2].sum()
+
+    return E,N
+
 class Partition:
     '''
     This class represent the partition function using the representation
@@ -88,8 +102,9 @@ class Partition:
         S0 = np.dot(C,tanh_k_beta)
         S1 = np.dot(np.multiply(np.arange(1,len(C)),C[1:]), tanh_k_beta[:-1])
         Z = 2**self.n_sites * ch**self.n_edges * S0
-        dZ = 2**self.n_sites * (self.n_edges*ch*sh*S0 + S1)/(S0 * ch**2)
+        dZ =  (self.n_edges*ch*sh*S0 + S1)/(S0 * ch**2)
         return Z,dZ
+
 
 
 if __name__=='__main__':
@@ -98,7 +113,7 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     m,n,C = read_coefficients(args.params)
-    data,E,N = read_data(get_file_name(args.input))
+    E,N = read_data(get_file_name(args.input))
     T = np.linspace(args.T[0],args.T[1],num=args.nT)
     cV0 = []
     E_ising_stats = []
@@ -115,7 +130,7 @@ if __name__=='__main__':
     for t in T:
         z,dz = Z_fn.evaluate(beta=1/t)
         Z_param.append(z)
-        E_param.append(-dz/z)
+        E_param.append(-dz)#/z)
 
     cols = [r'$Z(\beta)$', r'$\bar{E}$']
     rows = ['Thermo Ising', 'Edge Ising']
