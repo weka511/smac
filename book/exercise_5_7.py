@@ -15,7 +15,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 5.7. Compute Partition function'''
+'''
+    Exercise 5.7. Compute Partition function
+    using loop configurations as described in 5.1.3
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -90,20 +93,24 @@ class Partition:
         Parameters:
             beta
         '''
-        def get_powers(x,n=3):
-            result = np.ones((n))
+        def create_powers(x=np.tanh(beta),n=3):
+            '''
+            Populate an array withe powers of tanh(beta),
+            which are used in the calculatation of Z and its derivatines.
+            '''
+            Product = np.ones((n))
             for k in range(1,n):
-                result[k] = result[k-1]*x
-            return result
+                Product[k] = Product[k-1]*x
+            return Product
 
         ch = np.cosh(beta)
         sh = np.sinh(beta)
-        tanh_k_beta = get_powers(np.tanh(beta),n=len(C))
+        tanh_k_beta = create_powers(n=len(C))
         S0 = np.dot(C,tanh_k_beta)
         S1 = np.dot(np.multiply(np.arange(1,len(C)),C[1:]), tanh_k_beta[:-1])
         Z = 2**self.n_sites * ch**self.n_edges * S0
-        dZ =  (self.n_edges*ch*sh*S0 + S1)/(S0 * ch**2)
-        return Z,dZ
+        E_mean =  - (self.n_edges*ch*sh*S0 + S1)/(S0 * ch**2)
+        return Z,E_mean
 
 
 
@@ -128,9 +135,9 @@ if __name__=='__main__':
     Z_param = []
     E_param = []
     for t in T:
-        z,dz = Z_fn.evaluate(beta=1/t)
+        z,E_mean = Z_fn.evaluate(beta=1/t)
         Z_param.append(z)
-        E_param.append(-dz)#/z)
+        E_param.append(E_mean)
 
     cols = [r'$Z(\beta)$', r'$\bar{E}$']
     rows = ['Thermo Ising', 'Edge Ising']
