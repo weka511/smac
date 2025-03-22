@@ -28,6 +28,7 @@ def parse_args():
     parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
     parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
     parser.add_argument('--trace', default=False, action='store_true', help='Display output on console also')
+    parser.add_argument('--bounded', default=False, action='store_true', help='Use this for bounded (not periodic) boundary conditions')
     return parser.parse_args()
 
 def get_file_name(arg,default_ext = '.csv'):
@@ -39,7 +40,7 @@ def get_file_name(arg,default_ext = '.csv'):
 if __name__ == '__main__':
     args = parse_args()
 
-    energy,magnetization = enumerate_ising((args.m, args.n))
+    energy,magnetization = enumerate_ising((args.m, args.n),periodic = not args.bounded)
 
     with open(get_file_name(args.output),'w') as output_file:
         output_file.write('E,M,N\n')
