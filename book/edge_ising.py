@@ -92,7 +92,12 @@ if __name__=='__main__':
             out.write(f'{expand(n)}\n')
             N[n.sum()] += 1
 
-        out.write(f'{expand(N)}\n')
+        # Eliminate trailing zeros
+        n = len(N)
+        while N[n-1] == 0:
+            n -= 1
+
+        out.write(f'{expand(N[:n])}\n')
 
     elapsed = time() - start
     minutes = int(elapsed/60)
