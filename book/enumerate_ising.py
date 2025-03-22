@@ -35,7 +35,7 @@ def enumerate_ising(shape, periodic = True):
     N = shape[0] * shape[1]
     sigma = [-1]  *N
     M = sum(sigma)
-    E = - 2 * N if periodic else -2 * N + shape[0] + shape[1]  # FIXME
+    E = - 2 * N if periodic else -2 * N + shape[0] + shape[1]
     Ns = defaultdict(lambda: 0)
     Ns[E] = 1
     Ms = defaultdict(lambda: 0)
@@ -44,14 +44,11 @@ def enumerate_ising(shape, periodic = True):
     # Visit all configuraions and adjust E and M
 
     for i, (k,_) in enumerate(gray_flip(N)):
-        # if i > 2**(N-0) - 2:   #FIXME
-            # return [(E,Ns[E]) for E in sorted(Ns.keys())], [(M,Ms[M]) for M in sorted(Ms.keys())]
         k -= 1                                #k starts at 1 (following The Book), convert to 0-based
                                               # so we can use as an array index
         # Calculate field on site k and use it to update E
         h = sum(sigma[j] for j in Nbr(k, shape = shape, periodic = periodic))
         E += 2*sigma[k]*h   # FIXME
-        print (k,list(Nbr(k, shape = shape, periodic = periodic)),sigma,h,E)
         Ns[E] += 1
 
         M -= 2 *sigma[k]
@@ -59,7 +56,7 @@ def enumerate_ising(shape, periodic = True):
 
         sigma[k] *= -1  # Flip this site
     return [(E,Ns[E]) for E in sorted(Ns.keys())], [(M,Ms[M]) for M in sorted(Ms.keys())]
-    # raise ValueError(f'{i} not reached its limit')
+
 
 class TestIsing(TestCase):
     '''Tests for enumerate_ising'''
