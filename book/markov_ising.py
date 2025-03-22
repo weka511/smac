@@ -18,15 +18,24 @@
 ''' Local Metropolis algorithm for the Ising model'''
 
 from argparse import ArgumentParser
+from collections import defaultdict
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from gray import Nbr
+from enumerate_ising import get_initial_energy
 
-def markov_ising(sigma,E,N,Nbr=Nbr,rng = np.random.default_rng()):
+def markov_ising(sigma,E,N,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.5):
     k = rng.integers(N)
+    h = sum(sigma[i] for i in Nbr(k,shape=shape,periodic=periodic))
+    deltaE = 2*h*sigma[k]
+    Upsilon = np.exp(-beta*deltaE)
+    if rng.random() < Upsilon:
+        sigma[k] *= -1
+        E += deltaE
+    return E,sigma
 
 
 def parse_arguments():
@@ -50,7 +59,22 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    markov_ising([],0,1,Nbr=Nbr,rng = np.random.default_rng())
+    periodic = False
+    m =2
+    n =2
+    N = m*n
+    E = get_initial_energy(N,m,n,periodic=periodic)
+    sigma = [-1] *N
+    Ns = defaultdict(lambda: 0)
+    Ns[E] = 1
+    for i in range(100000):
+        E,sigma = markov_ising(sigma,E,N,Nbr=Nbr,rng = np.random.default_rng(),shape=(m,n),periodic=periodic)
+        Ns[E] += 1
+        if i%1000==0:
+            print (E,sigma)
+
+    for k,v in Ns.items():
+        print (k,v)
     fig = figure(figsize=(12,12))
 
     fig.savefig(get_file_name(args))
