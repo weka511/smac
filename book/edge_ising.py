@@ -80,6 +80,14 @@ def expand(A):
     '''
     return ', '.join([str(a) for a in A])
 
+def strip_trailing_zeros(N):
+    '''
+    Eliminate trailing zeros from an array
+    '''
+    n = len(N)
+    while N[n-1] == 0:
+        n -= 1
+    return N[:n]
 
 if __name__=='__main__':
     start  = time()
@@ -92,12 +100,7 @@ if __name__=='__main__':
             out.write(f'{expand(n)}\n')
             N[n.sum()] += 1
 
-        # Eliminate trailing zeros
-        n = len(N)
-        while N[n-1] == 0:
-            n -= 1
-
-        out.write(f'{expand(N[:n])}\n')
+        out.write(f'{expand(strip_trailing_zeros(N))}\n')
 
     elapsed = time() - start
     minutes = int(elapsed/60)
