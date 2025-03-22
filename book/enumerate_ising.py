@@ -32,10 +32,20 @@ def enumerate_ising(shape, periodic = True):
            Energy         Pairs (E,Count) for all possible energies
            Magnetization  Pairs (M,Count) for all possible energies
     '''
+    def get_initial_energy(N,m,n):
+        '''
+        Initialize energy for all spins negative. The will be -2*N if periodic;
+        Otherwise, there is one edge missing for each row and each column
+        '''
+        if periodic:
+            return - 2 * N
+        else:
+            return -2 * N + m + n
+
     N = shape[0] * shape[1]
     sigma = [-1]  *N
     M = sum(sigma)
-    E = - 2 * N if periodic else -2 * N + shape[0] + shape[1]
+    E = get_initial_energy(N, shape[0], shape[1])
     Ns = defaultdict(lambda: 0)
     Ns[E] = 1
     Ms = defaultdict(lambda: 0)
@@ -60,7 +70,7 @@ def enumerate_ising(shape, periodic = True):
 
 class TestIsing(TestCase):
     '''Tests for enumerate_ising'''
-    @skip('')
+
     def test2(self):
         Expected   = {  # From Table 5.2
             -8:2,
@@ -90,7 +100,7 @@ class TestIsing(TestCase):
         self.assertEqual(len(Expected), len(Energies))
         for E,Ns in Energies:
             self.assertEqual(Expected[abs(E)],Ns)
-    @skip('')
+
     def test4(self):
         Expected   = {  # From Table 5.2
             0:  20524,
