@@ -27,7 +27,7 @@ from matplotlib.pyplot import figure, show
 from gray import Nbr
 from enumerate_ising import get_initial_energy
 
-def markov_ising(sigma,E,N,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.5):
+def markov_ising(sigma,E,N,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001):
     k = rng.integers(N)
     h = sum(sigma[i] for i in Nbr(k,shape=shape,periodic=periodic))
     deltaE = 2*h*sigma[k]
@@ -67,14 +67,15 @@ if __name__=='__main__':
     sigma = [-1] *N
     Ns = defaultdict(lambda: 0)
     Ns[E] = 1
-    for i in range(100000):
+    for i in range(1000000):
         E,sigma = markov_ising(sigma,E,N,Nbr=Nbr,rng = np.random.default_rng(),shape=(m,n),periodic=periodic)
         Ns[E] += 1
-        if i%1000==0:
+        if i%10000==0:
             print (E,sigma)
 
+    Sum = sum([v for _,v in Ns.items()])
     for k,v in Ns.items():
-        print (k,v)
+        print (k,v/Sum)
     fig = figure(figsize=(12,12))
 
     fig.savefig(get_file_name(args))
