@@ -269,6 +269,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -||gray.py|Algorithm 5.2: Gray code for spins {1,...N}.
 -||ising.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
 -||ising-stats.py|Figure 6.6 - plot data from ising.py
+-||makkov_ising.py|Algorithm 5.7: Local Metropolis algorithm for the Ising model
 -|ising|catch.hpp|Support for Test harness for enumerate-ising.cpp
 -|ising|enumerate-ising.cpp|Algorithm 5.3: single flip enumeration for the Ising model.
 -|ising|enumerate-ising.hpp|Algorithm 5.3: single flip enumeration for the Ising model.
