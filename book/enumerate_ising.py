@@ -21,7 +21,17 @@ from collections import defaultdict
 from gray import gray_flip, Nbr
 from unittest import main, TestCase, skip
 
-def enumerate_ising(shape, periodic = True):
+def get_initial_energy(N,m,n,periodic=True):
+    '''
+    Initialize energy for all spins negative. The will be -2*N if periodic;
+    Otherwise, there is one edge missing for each row and each column
+    '''
+    if periodic:
+        return - 2 * N
+    else:
+        return -2 * N + m + n
+
+def enumerate_ising(shape, periodic=True):
     '''
     Algorithm 5.3: single flip enumeration for the Ising model.
 
@@ -32,20 +42,10 @@ def enumerate_ising(shape, periodic = True):
            Energy         Pairs (E,Count) for all possible energies
            Magnetization  Pairs (M,Count) for all possible energies
     '''
-    def get_initial_energy(N,m,n):
-        '''
-        Initialize energy for all spins negative. The will be -2*N if periodic;
-        Otherwise, there is one edge missing for each row and each column
-        '''
-        if periodic:
-            return - 2 * N
-        else:
-            return -2 * N + m + n
-
-    N = shape[0] * shape[1]
-    sigma = [-1]  *N
+    N = shape[0]*shape[1]
+    sigma = [-1]*N
     M = sum(sigma)
-    E = get_initial_energy(N, shape[0], shape[1])
+    E = get_initial_energy(N, shape[0], shape[1],periodic=periodic)
     Ns = defaultdict(lambda: 0)
     Ns[E] = 1
     Ms = defaultdict(lambda: 0)
