@@ -22,7 +22,6 @@
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
-from re import split
 from time import time
 import numpy as np
 from matplotlib import rc
@@ -161,6 +160,7 @@ if __name__=='__main__':
     axes[1][0].legend()
 
     axes[1][1].plot(T,E_param,color='b',label='$E$')
+    axes[1][1].plot(T,np.array(E_param)/np.array(E_ising_stats),color='r',label='ratio')
     axes[1][1].set_xlabel('Temperature')
     axes[1][1].legend()
 
