@@ -78,7 +78,7 @@ def thermo(N,E,beta=1.0):
      Emean = np.dot(N,Eprime*weights)/Z
      Esq = np.dot(N,Eprime*Eprime*weights)/Z
      return (Z*np.exp(-beta*Emin),                # Partition function
-             (Emean + Emin)/len(N),               # Mean energy
+             (Emean + Emin),#/len(N),               # Mean energy
              beta**2 * (Esq - Emean**2)/len(N) )  # Specific heat capacity
 
 def get_magnetization(data,beta):
