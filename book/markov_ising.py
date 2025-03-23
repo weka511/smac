@@ -33,12 +33,12 @@ class MarkovIsing:
     This class uses Markov Chain Monte Carlo (MCMC) to sample a Ising Model
 
     Attributes:
-        Nbr
-        m
-        n
-        N
-        periodic
-        data
+        Nbr Used to iterate through neighbours of a location
+        m         Number of rows
+        n         Number of columns
+        N         Number of sites
+        periodic  Use periodic boundary conditions
+        data      Store counts
     '''
     def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5):
         self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
@@ -144,6 +144,14 @@ def get_boundary_conditions(periodic):
     '''
     return 'Periodic boundary conditions' if periodic else 'Bounded'
 
+def get_scaled_means(means,m=4,n=4):
+    '''
+    Used for comparison with Table5.2 - scale mean
+    so total is number of states
+    '''
+    N = m*n
+    NStates = 2**N
+    return NStates*means/means.sum()
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
