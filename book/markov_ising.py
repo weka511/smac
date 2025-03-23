@@ -59,7 +59,7 @@ class MarkovIsing:
             if i < Nburn: continue
             Ns[E] += 1
             if frequency > 0 and i%frequency == 0:
-                print (E,sigma)
+                print (f'Iteration {iteration}, step {i}')
 
         for k,v in Ns.items():
             if v > 0:
@@ -140,15 +140,20 @@ if __name__=='__main__':
 
     fig = figure(figsize=(12,12))
     fig.suptitle(fr'{get_boundary_conditions(args.periodic)}: {args.m}$\times${args.n} sites.')
-    ax = fig.add_subplot(1,1,1)
 
-    ax.bar(Es,get_scaled(means,m=args.m,n=args.n),color='blue',label=r'$\mu$')
-    ax.set_xlabel('Energy')
-    axt = ax.twinx()
-    axt.plot(Es,stds,color='red',label=r'$\sigma$')
-    ax.legend(loc='upper left')
-    axt.legend(loc='upper right')
-    ax.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, a burn in of {args.Nburn} steps.')
+    ax1 = fig.add_subplot(2,1,1)
+    ax1.bar(Es,get_scaled(means,m=args.m,n=args.n),color='blue')
+    ax1.set_xlabel('$E$')
+    ax1.set_ylabel('$N(E)$')
+    ax1.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, a burn in of {args.Nburn} steps.')
+
+    ax2 = fig.add_subplot(2,1,2)
+    ax2.plot(Es,stds/np.maximum(means,1),color='red')
+    ax2.set_xlabel('$E$')
+    ax2.set_ylabel(r'$\frac{\sigma}{\mu}$')
+    ax2.set_title('Standard deviation')
+
+    fig.tight_layout(h_pad=4,pad=2)
     fig.savefig(get_file_name(args))
 
     elapsed = time() - start
