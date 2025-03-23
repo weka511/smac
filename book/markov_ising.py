@@ -115,6 +115,9 @@ def get_range(T,deltaT=0.1):
             return np.arange(T[0],T[1]+T[2],T[2])
     raise ValueError(f'Parameter T must have length of 1,2, or 3')
 
+def get_boundary_conditions(periodic):
+    return 'Periodic boundary coditions' if periodic else 'Bounded'
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -131,14 +134,16 @@ if __name__=='__main__':
     Es,means, stds = markov.get_stats()
 
     fig = figure(figsize=(12,12))
+    fig.suptitle(fr'{get_boundary_conditions(args.periodic)}: {args.m}$\times${args.n} sites.')
     ax = fig.add_subplot(1,1,1)
-
     ax.bar(Es,means,color='blue',label=r'$\mu$')
+    ax.set_xlabel('Energy')
     axt = ax.twinx()
     axt.plot(Es,stds,color='red',label=r'$\sigma$')
     ax.legend(loc='upper left')
     axt.legend(loc='upper right')
 
+    ax.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, a burn in of {args.Nburn} steps.')
     fig.savefig(get_file_name(args))
     elapsed = time() - start
     minutes = int(elapsed/60)
