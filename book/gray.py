@@ -96,7 +96,7 @@ def Nbr(k, shape = (4,5), periodic = False):
                 yield i0*n + j
 
 
-def generate_edges(shape = (4,4), periodic = False):
+def generate_edges(shape=(4,4), periodic=False):
     '''
     Used to iterate through all the edges of a matrix of spins
     '''
@@ -106,6 +106,15 @@ def generate_edges(shape = (4,4), periodic = False):
             if i<j:
                 yield i,j
 
+def get_energy_magnetism(sigma, shape=(4,4), periodic=False):
+    '''
+    Used to calculate energy and magnetization for a configuration
+    '''
+    N = len(sigma)
+    assert N == shape[0]*shape[1]
+    E = -sum([sigma[i] * sigma[j] for i,j in generate_edges(shape=shape,periodic=periodic)])
+    M = sum(sigma)
+    return E,M
 
 class NbrTest(TestCase):
     '''
@@ -247,6 +256,33 @@ class GrayFlipTest(GrayTest):
         for i,(k,_) in enumerate(gray_flip(4)):
             self.assertEqual(self.expected[i],k)
         self.assertEqual(2**4-1,i+1)
+
+class EM_Test(TestCase):
+    def test2_2(self):
+        E,M=get_energy_magnetism([-1,-1,-1,-1], shape=(2,2), periodic=False)
+        self.assertEqual(-4,E)
+        self.assertEqual(-4,M)
+        E,M=get_energy_magnetism([-1,-1,+1,-1], shape=(2,2), periodic=False)
+        self.assertEqual(0,E)
+        self.assertEqual(-2,M)
+        E,M=get_energy_magnetism([-1,-1,+1,+1], shape=(2,2), periodic=False)
+        self.assertEqual(0,E)
+        self.assertEqual(0,M)
+        E,M=get_energy_magnetism([-1,-1,-1,+1], shape=(2,2), periodic=False)
+        self.assertEqual(0,E)
+        self.assertEqual(-2,M)
+        E,M=get_energy_magnetism([+1,-1,-1,+1], shape=(2,2), periodic=False)
+        self.assertEqual(4,E)
+        self.assertEqual(0,M)
+        E,M=get_energy_magnetism([+1,-1,+1,+1], shape=(2,2), periodic=False)
+        self.assertEqual(0,E)
+        self.assertEqual(+2,M)
+        E,M=get_energy_magnetism([+1,-1,+1,-1], shape=(2,2), periodic=False)
+        self.assertEqual(0,E)
+        self.assertEqual(0,M)
+        E,M=get_energy_magnetism([+1,-1,-1,-1], shape=(2,2), periodic=False)
+        self.assertEqual(0,E)
+        self.assertEqual(-2,M)
 
 if __name__=='__main__':
     main()
