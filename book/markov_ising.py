@@ -28,16 +28,53 @@ import seaborn as sns
 from gray import Nbr
 from enumerate_ising import get_initial_energy
 
-def markov_ising(sigma,E,N,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001):
-    k = rng.integers(N)
-    h = sum(sigma[i] for i in Nbr(k,shape=shape,periodic=periodic))
-    deltaE = 2*h*sigma[k]
-    Upsilon = np.exp(-beta*deltaE)
-    if rng.random() < Upsilon:
-        sigma[k] *= -1
-        E += deltaE
-    return E,sigma
+class MarkovIsing:
+    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5):
+        self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
+        self.rng = rng
+        self.m = shape[0]
+        self.n = shape[1]
+        self.N = self.m*self.n
+        self.periodic = periodic
+        self.data = np.zeros((Niterations,4*self.N+1,2))
 
+    def step(self,sigma,E,beta=0.001):
+        k = self.rng.integers(self.N)
+        h = sum(sigma[i] for i in self.Nbr(k))
+        deltaE = 2*h*sigma[k]
+        Upsilon = np.exp(-beta*deltaE)
+        if self.rng.random() < Upsilon:
+            sigma[k] *= -1
+            E += deltaE
+        return E,sigma
+
+    def run(self,periodic=False,Nsteps=100000,Nburn=100,frequency=0,iteration=0):
+        E = get_initial_energy(self.N,self.m,self.n,periodic=self.periodic)
+        sigma = [-1] *self.N
+        Ns = defaultdict(lambda: 0)
+        Ns[E] = 1
+
+        for i in range(Nsteps + Nburn):
+            E,sigma = self.step(sigma,E)
+            if i < Nburn: continue
+            Ns[E] += 1
+            if frequency > 0 and i%frequency == 0:
+                print (E,sigma)
+
+        for k,v in Ns.items():
+            if v > 0:
+                self.data[iteration,2*self.N+k,0] = k
+                self.data[iteration,2*self.N+k,1] = v
+
+def markov(m,n,periodic=False,Nsteps=100000,Nburn=100,rng = np.random.default_rng(),frequency=0):
+    N =m*n
+    E = get_initial_energy(N,m,n,periodic=periodic)
+    sigma = [-1] *N
+    Ns = defaultdict(lambda: 0)
+    Ns[E] = 1
+    markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(m,n),periodic=periodic)
+    markov.run(periodic=periodic,Nsteps=Nsteps,Nburn=Nburn,frequency=frequency)
+    return markov.data[markov.data[:,1] > 0,:]
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -72,26 +109,17 @@ def get_range(T,deltaT=0.1):
             return np.arange(T[0],T[1]+T[2],T[2])
     raise ValueError(f'Parameter T must have length of 1,2, or 3')
 
-def markov(m,n,periodic=False,Nsteps=100000,Nburn=100,rng = np.random.default_rng(),frequency=0):
+def iterate(m,n,periodic=False,Nsteps=100000,Nburn=100,rng = np.random.default_rng(),frequency=0,iteration=0,markov=None):
     N =m*n
     E = get_initial_energy(N,m,n,periodic=periodic)
     sigma = [-1] *N
     Ns = defaultdict(lambda: 0)
     Ns[E] = 1
+    # markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(m,n),periodic=periodic)
+    markov.run(periodic=periodic,Nsteps=Nsteps,Nburn=Nburn,frequency=frequency,iteration=iteration)
+    non_zero = markov.data[iteration,:,1] > 0
+    return markov.data[iteration,non_zero,:]
 
-    for i in range(Nsteps + Nburn):
-        E,sigma = markov_ising(sigma,E,N,Nbr=Nbr,rng = rng,shape=(m,n),periodic=periodic)
-        if i < Nburn: continue
-        Ns[E] += 1
-        if frequency > 0 and i%frequency == 0:
-            print (E,sigma)
-
-    Sum = sum([v for _,v in Ns.items()])
-    data = np.zeros((len(Ns),2))
-    for i,(k,v) in enumerate(Ns.items()):
-        data[i,0] = k
-        data[i,1] = v
-    return np.sort(data,axis=1)
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -105,8 +133,10 @@ if __name__=='__main__':
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
     width = 0.75
+    markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,Niterations=args.Niterations)
     for i in range(args.Niterations):
-        data = markov(args.m,args.n,periodic=args.periodic,Nsteps=args.Nsteps,Nburn=args.Nburn,rng = rng,frequency=args.frequency)
+        data = iterate(args.m,args.n,periodic=args.periodic,Nsteps=args.Nsteps,
+                       Nburn=args.Nburn,rng = rng,frequency=args.frequency,markov=markov)
         ax.bar(data[:,0] + i*width,data[:,1],width,label=f'{i}')
     ax.legend()
 
