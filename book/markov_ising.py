@@ -76,9 +76,11 @@ class MarkovIsing:
         return self.data[iteration,non_zero,:]
 
     def get_stats(self):
-        means = np.mean(self.data[:,:,1],axis=0)
-        stds = np.std(self.data[:,:,1],axis=0)
-        return means, stds
+        non_zero= np.sum(self.data[:,:,1],axis=0) > 0
+        E = self.data[0,non_zero,0]
+        means = np.mean(self.data[:,non_zero,1],axis=0)
+        stds = np.std(self.data[:,non_zero,1],axis=0)
+        return E,means, stds
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -130,10 +132,14 @@ if __name__=='__main__':
         data = markov.iterate(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
         ax1.bar(data[:,0] + i*width,data[:,1],width,label=f'{i}')
     ax1.legend()
-    means, stds = markov.get_stats()
+    Es,means, stds = markov.get_stats()
     ax2 = fig.add_subplot(2,1,2)
-    ax2.plot(means)
-    ax2.plot(stds)
+
+    ax2.bar(Es,means,color='blue',label=r'$\mu$')
+    ax2t = ax2.twinx()
+    ax2t.plot(Es,stds,color='red',label=r'$\sigma$')
+    ax2.legend(loc='upper right')
+    ax2t.legend(loc='center right')
 
     fig.savefig(get_file_name(args))
     elapsed = time() - start
