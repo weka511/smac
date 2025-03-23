@@ -24,7 +24,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-import seaborn as sb
+import seaborn as sns
 from gray import Nbr
 from enumerate_ising import get_initial_energy
 
@@ -71,6 +71,26 @@ def get_range(T,deltaT=0.1):
             return np.arange(T[0],T[1]+T[2],T[2])
     raise ValueError(f'Parameter T must have length of 1,2, or 3')
 
+def markov(m,n,periodic=False,Nsteps=100000,rng = np.random.default_rng(),frequency=0):
+    N =m*n
+    E = get_initial_energy(N,m,n,periodic=periodic)
+    sigma = [-1] *N
+    Ns = defaultdict(lambda: 0)
+    Ns[E] = 1
+
+    for i in range(--Nsteps):
+        E,sigma = markov_ising(sigma,E,N,Nbr=Nbr,rng = rng,shape=(m,n),periodic=periodic)
+        Ns[E] += 1
+        if frequency > 0 and i%frequency == 0:
+            print (E,sigma)
+
+    Sum = sum([v for _,v in Ns.items()])
+    xs = np.zeros((len(Ns)))
+    ys = np.zeros((len(Ns)))
+    for i,(k,v) in enumerate(Ns.items()):
+        xs[i] = k
+        ys[i] = v
+    return xs,ys
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -80,28 +100,14 @@ if __name__=='__main__':
 
     rng = np.random.default_rng(args.seed)
     T_range = get_range(args.T)
-    N = args.m*args.n
-    E = get_initial_energy(N,args.m,args.n,periodic=args.periodic)
-    sigma = [-1] *N
-    Ns = defaultdict(lambda: 0)
-    Ns[E] = 1
 
-    for i in range(--args.Nsteps):
-        E,sigma = markov_ising(sigma,E,N,Nbr=Nbr,rng = np.random.default_rng(),shape=(args.m,args.n),periodic=args.periodic)
-        Ns[E] += 1
-        if args.frequency > 0 and i%args.frequency == 0:
-            print (E,sigma)
-
-    Sum = sum([v for _,v in Ns.items()])
-    xs = []
-    ys = []
-    for k,v in Ns.items():
-        xs.append(k)
-        ys.append(v)
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
-    ax.bar(xs,ys)
-    ax.bar([1+x for x in xs],ys)
+    width = 0.75
+    for i in range(args.Niterations):
+        xs,ys = markov(args.m,args.n,periodic=args.periodic,Nsteps=args.Nsteps,rng = rng,frequency=args.frequency)
+        ax.bar(xs + i*width,ys,0.9*width,label=f'{i}')
+    ax.legend()
 
     fig.savefig(get_file_name(args))
     elapsed = time() - start
