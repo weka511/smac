@@ -87,12 +87,11 @@ def markov(m,n,periodic=False,Nsteps=100000,Nburn=100,rng = np.random.default_rn
             print (E,sigma)
 
     Sum = sum([v for _,v in Ns.items()])
-    xs = np.zeros((len(Ns)))
-    ys = np.zeros((len(Ns)))
+    data = np.zeros((len(Ns),2))
     for i,(k,v) in enumerate(Ns.items()):
-        xs[i] = k
-        ys[i] = v
-    return xs,ys
+        data[i,0] = k
+        data[i,1] = v
+    return np.sort(data,axis=1)
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -107,8 +106,8 @@ if __name__=='__main__':
     ax = fig.add_subplot(1,1,1)
     width = 0.75
     for i in range(args.Niterations):
-        xs,ys = markov(args.m,args.n,periodic=args.periodic,Nsteps=args.Nsteps,Nburn=args.Nburn,rng = rng,frequency=args.frequency)
-        ax.bar(xs + i*width,ys,0.9*width,label=f'{i}')
+        data = markov(args.m,args.n,periodic=args.periodic,Nsteps=args.Nsteps,Nburn=args.Nburn,rng = rng,frequency=args.frequency)
+        ax.bar(data[:,0] + i*width,data[:,1],width,label=f'{i}')
     ax.legend()
 
     fig.savefig(get_file_name(args))
