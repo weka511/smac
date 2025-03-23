@@ -266,8 +266,8 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -||edge_ising.py|Algorithm 5.5 edge-ising. Gray code enumeration of the loop configurations in Figure 5.8
 -||enumerate_ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
 -||exercise_5.7.py|Exercise 5.7. Compute Partition function using loop configurations as described in 5.1.3
--||gray.py|Algorithm 5.2: Gray code for spins {1,...N}.
--||ising.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
+-||ising.py|Algorithm 5.2: Gray code for spins {1,...N}.
+-||ising_enum.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
 -||ising-stats.py|Figure 6.6 - plot data from ising.py
 -||markov_ising.py|Algorithm 5.7: Local Metropolis algorithm for the Ising model
 -|ising|catch.hpp|Support for Test harness for enumerate-ising.cpp

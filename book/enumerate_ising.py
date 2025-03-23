@@ -18,7 +18,7 @@
 '''Algorithm 5.3: single flip enumeration for the Ising model.'''
 
 from collections import defaultdict
-from gray import gray_flip, Nbr
+from ising import gray_flip, Nbr
 from unittest import main, TestCase, skip
 
 def get_initial_energy(N,m,n,periodic=True):

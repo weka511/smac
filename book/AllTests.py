@@ -22,7 +22,7 @@
 
 from unittest import main
 
-from gray import NbrTest, GrayGeneratorTest, GrayFlipTest
+from ising import NbrTest, GrayGeneratorTest, GrayFlipTest
 from enumerate_ising import TestIsing
 from geometry import TestHistogram
 

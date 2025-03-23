@@ -25,7 +25,7 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 import seaborn as sns
-from gray import Nbr
+from ising import Nbr
 from enumerate_ising import get_initial_energy
 
 class MarkovIsing:

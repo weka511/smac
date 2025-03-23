@@ -24,7 +24,7 @@ from argparse import ArgumentParser
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
-from gray import gray_flip, generate_edges
+from ising import gray_flip, generate_edges
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
