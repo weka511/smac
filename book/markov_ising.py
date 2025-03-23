@@ -29,6 +29,17 @@ from gray import Nbr
 from enumerate_ising import get_initial_energy
 
 class MarkovIsing:
+    '''
+    This class uses Markov Chain Monte Carlo (MCMC) to sample a Ising Model
+
+    Attributes:
+        Nbr
+        m
+        n
+        N
+        periodic
+        data
+    '''
     def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5):
         self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
         self.rng = rng
@@ -39,16 +50,32 @@ class MarkovIsing:
         self.data = np.zeros((Niterations,4*self.N+1,2))
 
     def step(self,sigma,E,beta=0.001):
+        '''
+        Perform one step of MCMC
+
+        Parameters:
+            sigma
+            E
+            beta
+        '''
         k = self.rng.integers(self.N)
         h = sum(sigma[i] for i in self.Nbr(k))
         deltaE = 2*h*sigma[k]
-        Upsilon = np.exp(-beta*deltaE)
-        if self.rng.random() < Upsilon:
+        if self.rng.random() < np.exp(-beta*deltaE):
             sigma[k] *= -1
             E += deltaE
         return E,sigma
 
-    def run(self,periodic=False,Nsteps=100000,Nburn=100,frequency=0,iteration=0):
+    def run(self,Nsteps=100000,Nburn=100,frequency=10000,iteration=0):
+        '''
+        Initialize configuration and carry out a specified number of steps
+
+        Parameters:
+             Nsteps
+             Nburn
+             frequency
+             iteration
+        '''
         E = get_initial_energy(self.N,self.m,self.n,periodic=self.periodic)
         sigma = [-1] *self.N
         Ns = defaultdict(lambda: 0)
@@ -66,16 +93,12 @@ class MarkovIsing:
                 self.data[iteration,2*self.N+k,0] = k
                 self.data[iteration,2*self.N+k,1] = v
 
-    def iterate(self,Nsteps=100000,Nburn=100,frequency=0,iteration=0):
-        E = get_initial_energy(self.N,self.m,self.n,periodic=self.periodic)
-        sigma = [-1] *self.N
-        Ns = defaultdict(lambda: 0)
-        Ns[E] = 1
-        self.run(periodic=self.periodic,Nsteps=Nsteps,Nburn=Nburn,frequency=frequency,iteration=iteration)
-        non_zero = self.data[iteration,:,1] > 0
-        return self.data[iteration,non_zero,:]
 
     def get_stats(self):
+        '''
+        Extract mean and standard deviation for those energies
+        that have appered at least once in MCMC
+        '''
         non_zero= np.sum(self.data[:,:,1],axis=0) > 0
         E = self.data[0,non_zero,0]
         means = np.mean(self.data[:,non_zero,1],axis=0)
@@ -116,12 +139,11 @@ def get_range(T,deltaT=0.1):
     raise ValueError(f'Parameter T must have length of 1,2, or 3')
 
 def get_boundary_conditions(periodic):
-    return 'Periodic boundary coditions' if periodic else 'Bounded'
+    '''
+    Used to format suptitle
+    '''
+    return 'Periodic boundary conditions' if periodic else 'Bounded'
 
-def get_scaled(means,m=4,n=4):
-    N = m*n
-    NStates = 2**N
-    return NStates*means/means.sum()
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -134,7 +156,7 @@ if __name__=='__main__':
 
     markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,Niterations=args.Niterations)
     for i in range(args.Niterations):
-        data = markov.iterate(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
+        markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
 
     Es,means, stds = markov.get_stats()
 
@@ -142,16 +164,20 @@ if __name__=='__main__':
     fig.suptitle(fr'{get_boundary_conditions(args.periodic)}: {args.m}$\times${args.n} sites.')
 
     ax1 = fig.add_subplot(2,1,1)
-    ax1.bar(Es,get_scaled(means,m=args.m,n=args.n),color='blue')
+    ax1.bar(Es,get_scaled_means(means,m=args.m,n=args.n),color='blue')
     ax1.set_xlabel('$E$')
     ax1.set_ylabel('$N(E)$')
-    ax1.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, a burn in of {args.Nburn} steps.')
+    ax1.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, and a burn in of {args.Nburn} steps.')
 
     ax2 = fig.add_subplot(2,1,2)
-    ax2.plot(Es,stds/np.maximum(means,1),color='red')
+    ax2_twin = ax2.twinx()
+    ax2.bar(Es,stds,width=0.8,color='red',label=r'$\sigma$')
+    ax2_twin.bar(Es+0.8,means,width=0.8,color='blue',label=r'$\mu$')
     ax2.set_xlabel('$E$')
     ax2.set_ylabel(r'$\frac{\sigma}{\mu}$')
     ax2.set_title('Standard deviation')
+    ax2.legend(loc='upper left')
+    ax2_twin.legend(loc='upper right')
 
     fig.tight_layout(h_pad=4,pad=2)
     fig.savefig(get_file_name(args))
