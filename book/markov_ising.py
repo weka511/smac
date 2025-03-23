@@ -45,6 +45,7 @@ def parse_arguments():
     parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
     parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
     parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
+    parser.add_argument('--Nburn', type = int, default = 1000, help = 'Number of steps for burn in')
     parser.add_argument('--Niterations', type = int, default = 5, help = 'Number of iterations of Markov chain')
     parser.add_argument('-f', '--frequency',type = int, default = 100, help = 'Number of columns')
     parser.add_argument('-T', '--T', default=[0.8,6], nargs='+', type=float, help = 'Range for temperature')
@@ -71,15 +72,16 @@ def get_range(T,deltaT=0.1):
             return np.arange(T[0],T[1]+T[2],T[2])
     raise ValueError(f'Parameter T must have length of 1,2, or 3')
 
-def markov(m,n,periodic=False,Nsteps=100000,rng = np.random.default_rng(),frequency=0):
+def markov(m,n,periodic=False,Nsteps=100000,Nburn=100,rng = np.random.default_rng(),frequency=0):
     N =m*n
     E = get_initial_energy(N,m,n,periodic=periodic)
     sigma = [-1] *N
     Ns = defaultdict(lambda: 0)
     Ns[E] = 1
 
-    for i in range(--Nsteps):
+    for i in range(Nsteps + Nburn):
         E,sigma = markov_ising(sigma,E,N,Nbr=Nbr,rng = rng,shape=(m,n),periodic=periodic)
+        if i < Nburn: continue
         Ns[E] += 1
         if frequency > 0 and i%frequency == 0:
             print (E,sigma)
@@ -105,7 +107,7 @@ if __name__=='__main__':
     ax = fig.add_subplot(1,1,1)
     width = 0.75
     for i in range(args.Niterations):
-        xs,ys = markov(args.m,args.n,periodic=args.periodic,Nsteps=args.Nsteps,rng = rng,frequency=args.frequency)
+        xs,ys = markov(args.m,args.n,periodic=args.periodic,Nsteps=args.Nsteps,Nburn=args.Nburn,rng = rng,frequency=args.frequency)
         ax.bar(xs + i*width,ys,0.9*width,label=f'{i}')
     ax.legend()
 
