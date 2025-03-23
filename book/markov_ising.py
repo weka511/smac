@@ -124,22 +124,20 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
     T_range = get_range(args.T)
 
-    fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(2,1,1)
-    width = 0.75
     markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,Niterations=args.Niterations)
     for i in range(args.Niterations):
         data = markov.iterate(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
-        ax1.bar(data[:,0] + i*width,data[:,1],width,label=f'{i}')
-    ax1.legend()
-    Es,means, stds = markov.get_stats()
-    ax2 = fig.add_subplot(2,1,2)
 
-    ax2.bar(Es,means,color='blue',label=r'$\mu$')
-    ax2t = ax2.twinx()
-    ax2t.plot(Es,stds,color='red',label=r'$\sigma$')
-    ax2.legend(loc='upper right')
-    ax2t.legend(loc='center right')
+    Es,means, stds = markov.get_stats()
+
+    fig = figure(figsize=(12,12))
+    ax = fig.add_subplot(1,1,1)
+
+    ax.bar(Es,means,color='blue',label=r'$\mu$')
+    axt = ax.twinx()
+    axt.plot(Es,stds,color='red',label=r'$\sigma$')
+    ax.legend(loc='upper left')
+    axt.legend(loc='upper right')
 
     fig.savefig(get_file_name(args))
     elapsed = time() - start
