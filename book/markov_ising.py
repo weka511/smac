@@ -118,6 +118,11 @@ def get_range(T,deltaT=0.1):
 def get_boundary_conditions(periodic):
     return 'Periodic boundary coditions' if periodic else 'Bounded'
 
+def get_scaled(means,m=4,n=4):
+    N = m*n
+    NStates = 2**N
+    return NStates*means/means.sum()
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -136,15 +141,16 @@ if __name__=='__main__':
     fig = figure(figsize=(12,12))
     fig.suptitle(fr'{get_boundary_conditions(args.periodic)}: {args.m}$\times${args.n} sites.')
     ax = fig.add_subplot(1,1,1)
-    ax.bar(Es,means,color='blue',label=r'$\mu$')
+
+    ax.bar(Es,get_scaled(means,m=args.m,n=args.n),color='blue',label=r'$\mu$')
     ax.set_xlabel('Energy')
     axt = ax.twinx()
     axt.plot(Es,stds,color='red',label=r'$\sigma$')
     ax.legend(loc='upper left')
     axt.legend(loc='upper right')
-
     ax.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, a burn in of {args.Nburn} steps.')
     fig.savefig(get_file_name(args))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
