@@ -24,6 +24,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
+import seaborn as sb
 from gray import Nbr
 from enumerate_ising import get_initial_energy
 
@@ -40,10 +41,17 @@ def markov_ising(sigma,E,N,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),perio
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
+    parser.add_argument('--periodic', default=False,action = 'store_true', help = 'Use periodic boundary conditions')
+    parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
+    parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
+    parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
+    parser.add_argument('--Niterations', type = int, default = 5, help = 'Number of iterations of Markov chain')
+    parser.add_argument('-f', '--frequency',type = int, default = 100, help = 'Number of columns')
+    parser.add_argument('-T', '--T', default=[0.8,6], nargs='+', type=float, help = 'Range for temperature')
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
-    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('--show', action = 'store_true', help = 'Show plot')
     return parser.parse_args()
 
 
@@ -53,30 +61,47 @@ def get_file_name(args,default_ext='.png'):
         ext = default_ext
     return join(args.figs,f'{base}{ext}')
 
+def get_range(T,deltaT=0.1):
+    match (len(T)):
+        case 1:
+            return T
+        case 2:
+            return np.arange(T[0],T[1],deltaT)
+        case 3:
+            return np.arange(T[0],T[1]+T[2],T[2])
+    raise ValueError(f'Parameter T must have length of 1,2, or 3')
+
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
+
     rng = np.random.default_rng(args.seed)
-    periodic = False
-    m =2
-    n =2
-    N = m*n
-    E = get_initial_energy(N,m,n,periodic=periodic)
+    T_range = get_range(args.T)
+    N = args.m*args.n
+    E = get_initial_energy(N,args.m,args.n,periodic=args.periodic)
     sigma = [-1] *N
     Ns = defaultdict(lambda: 0)
     Ns[E] = 1
-    for i in range(1000000):
-        E,sigma = markov_ising(sigma,E,N,Nbr=Nbr,rng = np.random.default_rng(),shape=(m,n),periodic=periodic)
+
+    for i in range(--args.Nsteps):
+        E,sigma = markov_ising(sigma,E,N,Nbr=Nbr,rng = np.random.default_rng(),shape=(args.m,args.n),periodic=args.periodic)
         Ns[E] += 1
-        if i%10000==0:
+        if args.frequency > 0 and i%args.frequency == 0:
             print (E,sigma)
 
     Sum = sum([v for _,v in Ns.items()])
+    xs = []
+    ys = []
     for k,v in Ns.items():
-        print (k,v/Sum)
+        xs.append(k)
+        ys.append(v)
     fig = figure(figsize=(12,12))
+    ax = fig.add_subplot(1,1,1)
+    ax.bar(xs,ys)
+    ax.bar([1+x for x in xs],ys)
 
     fig.savefig(get_file_name(args))
     elapsed = time() - start
