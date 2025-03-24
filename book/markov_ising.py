@@ -199,30 +199,33 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
     T_range = get_range(args.T)
 
-    markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,Niterations=args.Niterations)
-    for i in range(args.Niterations):
-        markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
+    for j,T in enumerate(T_range):
+        beta = 1/T
 
-    Es,means, stds,M,magnetization = markov.get_stats()
+        markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,Niterations=args.Niterations,beta=beta)
+        for i in range(args.Niterations):
+            markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
 
-    fig = figure(figsize=(12,12))
-    fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, {get_initial_conditions(args.lowest)}: {args.m}$\times${args.n} sites.')
+        Es,means, stds,M,magnetization = markov.get_stats()
 
-    ax1 = fig.add_subplot(2,1,1)
-    ax1.bar(Es,get_scaled_means(means,m=args.m,n=args.n),color='blue')
-    ax1.set_xlabel('$E$')
-    ax1.set_ylabel('$N(E)$')
-    ax1.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, and a burn in of {args.Nburn} steps.')
+        fig = figure(figsize=(12,12))
+        fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, {get_initial_conditions(args.lowest)}: {args.m}$\times${args.n} sites, $\beta=${beta:.3g}')
 
-    ax2 = fig.add_subplot(2,1,2)
-    ax2.bar(M,magnetization,width=0.8,color='red',label=r'Magnetization')
-    ax2.set_xlabel('$M$')
-    ax2.set_ylabel('Magnetization')
-    ax2.set_title('Magnetization')
-    ax2.legend(loc='upper left')
+        ax1 = fig.add_subplot(2,1,1)
+        ax1.bar(Es,get_scaled_means(means,m=args.m,n=args.n),color='blue')
+        ax1.set_xlabel('$E$')
+        ax1.set_ylabel('$N(E)$')
+        ax1.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, and a burn in of {args.Nburn} steps.')
 
-    fig.tight_layout(h_pad=4,pad=2)
-    fig.savefig(get_file_name(args,seq=1))
+        ax2 = fig.add_subplot(2,1,2)
+        ax2.bar(M,magnetization,width=0.8,color='red',label=r'Magnetization')
+        ax2.set_xlabel('$M$')
+        ax2.set_ylabel('Magnetization')
+        ax2.set_title('Magnetization')
+        ax2.legend(loc='upper left')
+
+        fig.tight_layout(h_pad=4,pad=2)
+        fig.savefig(get_file_name(args,seq=j))
 
     elapsed = time() - start
     minutes = int(elapsed/60)
