@@ -40,7 +40,7 @@ class MarkovIsing:
         periodic  Use periodic boundary conditions
         data      Store counts
     '''
-    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5):
+    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5,beta=0.001):
         self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
         self.rng = rng
         self.m = shape[0]
@@ -49,6 +49,7 @@ class MarkovIsing:
         self.periodic = periodic
         self.data = np.zeros((Niterations,4*self.N+1,2))
         self.magnetization = np.zeros((Niterations,4*self.N+1,2))
+        self.beta =beta
 
     def step(self,sigma,E,M,beta=0.001):
         '''
@@ -62,7 +63,7 @@ class MarkovIsing:
         k = self.rng.integers(self.N)
         h = sum(sigma[i] for i in self.Nbr(k))
         deltaE = 2*h*sigma[k]
-        if self.rng.random() < np.exp(-beta*deltaE):
+        if self.rng.random() < np.exp(-self.beta*deltaE):
             sigma[k] *= -1
             E += deltaE
             M += 2*sigma[k]
@@ -150,10 +151,12 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_file_name(args,default_ext='.png'):
+def get_file_name(args,default_ext='.png',seq=None):
     base,ext = splitext(args.out)
-    if len(ext)==0:
+    if len(ext) == 0:
         ext = default_ext
+    if seq != None:
+        base = f'{base}{seq}'
     return join(args.figs,f'{base}{ext}')
 
 def get_range(T,deltaT=0.1):
@@ -219,7 +222,7 @@ if __name__=='__main__':
     ax2.legend(loc='upper left')
 
     fig.tight_layout(h_pad=4,pad=2)
-    fig.savefig(get_file_name(args))
+    fig.savefig(get_file_name(args,seq=1))
 
     elapsed = time() - start
     minutes = int(elapsed/60)
