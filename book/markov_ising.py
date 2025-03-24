@@ -34,11 +34,13 @@ class MarkovIsing:
 
     Attributes:
         Nbr Used to iterate through neighbours of a location
-        m         Number of rows
-        n         Number of columns
-        N         Number of sites
-        periodic  Use periodic boundary conditions
-        data      Store counts
+        m              Number of rows
+        n              Number of columns
+        N              Number of sites
+        periodic       Use periodic boundary conditions
+        data           Store counts for each energy
+        magnetization  Store counts for each magnetization
+        beta           Inverse temperature
     '''
     def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5,beta=0.001):
         self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
@@ -49,16 +51,21 @@ class MarkovIsing:
         self.periodic = periodic
         self.data = np.zeros((Niterations,4*self.N+1,2))
         self.magnetization = np.zeros((Niterations,4*self.N+1,2))
-        self.beta =beta
+        self.beta = beta
 
-    def step(self,sigma,E,M,beta=0.001):
+    def step(self,sigma,E,M):
         '''
         Perform one step of MCMC
 
         Parameters:
-            sigma
-            E
-            beta
+            sigma     Spins before step
+            E         Energy before step
+            M         Magnetization before step
+
+        Returns:
+            sigma     Spins after step
+            E         Energy after step
+            M         Magnetization afterstep
         '''
         k = self.rng.integers(self.N)
         h = sum(sigma[i] for i in self.Nbr(k))
@@ -74,10 +81,11 @@ class MarkovIsing:
         Initialize configuration and carry out a specified number of steps
 
         Parameters:
-             Nsteps
-             Nburn
-             frequency
-             iteration
+             Nsteps     Number of steps to be performed and recorded
+             Nburn      Number of steps to be performed at start and not recorded
+             frequency  Report to user after this many steps
+             iteration  Iteration number: used for storing data and reporting
+             lowest     Use lowest energy (instead of random) for initialization
         '''
         def initialize():
             '''
@@ -142,7 +150,7 @@ def parse_arguments():
     parser.add_argument('--Nburn', type = int, default = 0, help = 'Number of steps for burn in')
     parser.add_argument('--Niterations', type = int, default = 5, help = 'Number of iterations of Markov chain')
     parser.add_argument('-f', '--frequency',type = int, default = 100, help = 'Number of columns')
-    parser.add_argument('-T', '--T', default=[0.8,6], nargs='+', type=float, help = 'Range for temperature')
+    parser.add_argument('-T', '--T', default=[1000], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
@@ -152,6 +160,14 @@ def parse_arguments():
 
 
 def get_file_name(args,default_ext='.png',seq=None):
+    '''
+    Used to create file names
+
+    Parameters:
+        args
+        default_ext
+        seq
+    '''
     base,ext = splitext(args.out)
     if len(ext) == 0:
         ext = default_ext
@@ -160,6 +176,12 @@ def get_file_name(args,default_ext='.png',seq=None):
     return join(args.figs,f'{base}{ext}')
 
 def get_range(T,deltaT=0.1):
+    '''
+    Used to convert temperature (specified in args) to a range
+
+    Parameters:
+        T       [start, ]stop, [step, ]
+    '''
     match (len(T)):
         case 1:
             return T
@@ -167,6 +189,7 @@ def get_range(T,deltaT=0.1):
             return np.arange(T[0],T[1],deltaT)
         case 3:
             return np.arange(T[0],T[1]+T[2],T[2])
+
     raise ValueError(f'Parameter T must have length of 1,2, or 3')
 
 def get_boundary_conditions(periodic):
@@ -189,6 +212,18 @@ def get_scaled_means(means,m=4,n=4):
     N = m*n
     NStates = 2**N
     return NStates*means/means.sum()
+
+def get_burn_in(Nburn):
+    '''
+    Used to construct suptitle
+    '''
+    match(Nburn):
+        case 0:
+            return 'no burn in'
+        case 1:
+            return f'after a burn in of one step'
+        case _:
+            return f'after a burn in of {Nburn} steps'
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -215,7 +250,7 @@ if __name__=='__main__':
         ax1.bar(Es,get_scaled_means(means,m=args.m,n=args.n),color='blue')
         ax1.set_xlabel('$E$')
         ax1.set_ylabel('$N(E)$')
-        ax1.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, and a burn in of {args.Nburn} steps.')
+        ax1.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, and {get_burn_in(args.Nburn)}.')
 
         ax2 = fig.add_subplot(2,1,2)
         ax2.bar(M,magnetization,width=0.8,color='red',label=r'Magnetization')
@@ -225,7 +260,7 @@ if __name__=='__main__':
         ax2.legend(loc='upper left')
 
         fig.tight_layout(h_pad=4,pad=2)
-        fig.savefig(get_file_name(args,seq=j))
+        fig.savefig(get_file_name(args,seq = j if len(args.T) > 1 else None))
 
     elapsed = time() - start
     minutes = int(elapsed/60)
