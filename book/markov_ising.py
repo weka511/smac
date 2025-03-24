@@ -48,8 +48,9 @@ class MarkovIsing:
         self.N = self.m*self.n
         self.periodic = periodic
         self.data = np.zeros((Niterations,4*self.N+1,2))
+        self.magnetization = np.zeros((Niterations,4*self.N+1,2))
 
-    def step(self,sigma,E,beta=0.001):
+    def step(self,sigma,E,M,beta=0.001):
         '''
         Perform one step of MCMC
 
@@ -64,7 +65,8 @@ class MarkovIsing:
         if self.rng.random() < np.exp(-beta*deltaE):
             sigma[k] *= -1
             E += deltaE
-        return E,sigma
+            M += 2*sigma[k]
+        return sigma,E,M
 
     def run(self,Nsteps=100000,Nburn=100,frequency=10000,iteration=0,lowest=False):
         '''
@@ -94,10 +96,14 @@ class MarkovIsing:
         Ns = defaultdict(lambda: 0)
         Ns[E] = 1
 
+        NMs = defaultdict(lambda: 0)
+        NMs[M] = 1
+
         for i in range(Nsteps + Nburn):
-            E,sigma = self.step(sigma,E)
+            sigma,E,M = self.step(sigma,E,M)
             if i < Nburn: continue
             Ns[E] += 1
+            NMs[M] += 1
             if frequency > 0 and i%frequency == 0:
                 print (f'Iteration {iteration}, step {i}')
 
@@ -105,6 +111,11 @@ class MarkovIsing:
             if v > 0:
                 self.data[iteration,2*self.N+k,0] = k
                 self.data[iteration,2*self.N+k,1] = v
+
+        for k,v in NMs.items():
+            if v > 0:
+                self.magnetization[iteration,2*self.N+k,0] = k
+                self.magnetization[iteration,2*self.N+k,1] = v
 
 
     def get_stats(self):
@@ -116,7 +127,10 @@ class MarkovIsing:
         E = self.data[0,non_zero,0]
         means = np.mean(self.data[:,non_zero,1],axis=0)
         stds = np.std(self.data[:,non_zero,1],axis=0)
-        return E,means, stds
+        non_zero_magnetization= np.sum(self.magnetization[:,:,1],axis=0) > 0
+        M = self.magnetization[0,non_zero_magnetization,0]
+        magnetization = np.mean(self.magnetization[:,non_zero_magnetization,1],axis=0)
+        return E,means, stds,M,magnetization
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -186,7 +200,7 @@ if __name__=='__main__':
     for i in range(args.Niterations):
         markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
 
-    Es,means, stds = markov.get_stats()
+    Es,means, stds,M,magnetization = markov.get_stats()
 
     fig = figure(figsize=(12,12))
     fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, {get_initial_conditions(args.lowest)}: {args.m}$\times${args.n} sites.')
@@ -198,14 +212,11 @@ if __name__=='__main__':
     ax1.set_title(f'After {args.Niterations} iterations, {args.Nsteps} steps, and a burn in of {args.Nburn} steps.')
 
     ax2 = fig.add_subplot(2,1,2)
-    ax2_twin = ax2.twinx()
-    ax2.bar(Es,stds,width=0.8,color='red',label=r'$\sigma$')
-    ax2_twin.bar(Es+0.8,means,width=0.8,color='blue',label=r'$\mu$')
-    ax2.set_xlabel('$E$')
-    ax2.set_ylabel(r'$\frac{\sigma}{\mu}$')
-    ax2.set_title('Standard deviation')
+    ax2.bar(M,magnetization,width=0.8,color='red',label=r'Magnetization')
+    ax2.set_xlabel('$M$')
+    ax2.set_ylabel('Magnetization')
+    ax2.set_title('Magnetization')
     ax2.legend(loc='upper left')
-    ax2_twin.legend(loc='upper right')
 
     fig.tight_layout(h_pad=4,pad=2)
     fig.savefig(get_file_name(args))
