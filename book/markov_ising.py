@@ -25,7 +25,7 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 import seaborn as sns
-from ising import Nbr
+from ising import Nbr,get_energy_magnetism
 from enumerate_ising import get_initial_energy
 
 class MarkovIsing:
@@ -66,7 +66,7 @@ class MarkovIsing:
             E += deltaE
         return E,sigma
 
-    def run(self,Nsteps=100000,Nburn=100,frequency=10000,iteration=0):
+    def run(self,Nsteps=100000,Nburn=100,frequency=10000,iteration=0,lowest=False):
         '''
         Initialize configuration and carry out a specified number of steps
 
@@ -76,8 +76,21 @@ class MarkovIsing:
              frequency
              iteration
         '''
-        E = get_initial_energy(self.N,self.m,self.n,periodic=self.periodic)
-        sigma = [-1] *self.N
+        def initialize():
+            '''
+            Set Spins, Energy, and Magnetization at the start of a run
+            '''
+            if lowest:
+                E = get_initial_energy(self.N,self.m,self.n,periodic=self.periodic)
+                sigma = [-1] *self.N
+                M = - self.N
+            else:
+                sigma = rng.choice([-1,1],size=self.N)
+                E,M = get_energy_magnetism(sigma, shape=(self.m,self.n), periodic=self.periodic)
+            return sigma,E,M
+
+        sigma,E,M = initialize()
+
         Ns = defaultdict(lambda: 0)
         Ns[E] = 1
 
@@ -107,18 +120,19 @@ class MarkovIsing:
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
-    parser.add_argument('--periodic', default=False,action = 'store_true', help = 'Use periodic boundary conditions')
+    parser.add_argument('--periodic', default=False, action = 'store_true', help = 'Use periodic boundary conditions')
     parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
     parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
     parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
-    parser.add_argument('--Nburn', type = int, default = 1000, help = 'Number of steps for burn in')
+    parser.add_argument('--Nburn', type = int, default = 0, help = 'Number of steps for burn in')
     parser.add_argument('--Niterations', type = int, default = 5, help = 'Number of iterations of Markov chain')
     parser.add_argument('-f', '--frequency',type = int, default = 100, help = 'Number of columns')
     parser.add_argument('-T', '--T', default=[0.8,6], nargs='+', type=float, help = 'Range for temperature')
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
-    parser.add_argument('--show', action = 'store_true', help = 'Show plot')
+    parser.add_argument('--show', default=False, action = 'store_true', help = 'Show plot')
+    parser.add_argument('--lowest', default=False, action = 'store_true', help = 'Initialize to all spins down at the start of each run')
     return parser.parse_args()
 
 
@@ -144,6 +158,12 @@ def get_boundary_conditions(periodic):
     '''
     return 'Periodic boundary conditions' if periodic else 'Bounded'
 
+def get_initial_conditions(lowest):
+    '''
+    Used to format suptitle
+    '''
+    return 'Start at lowest energy' if lowest else 'Random starting configuration'
+
 def get_scaled_means(means,m=4,n=4):
     '''
     Used for comparison with Table5.2 - scale mean
@@ -164,12 +184,12 @@ if __name__=='__main__':
 
     markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,Niterations=args.Niterations)
     for i in range(args.Niterations):
-        markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
+        markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
 
     Es,means, stds = markov.get_stats()
 
     fig = figure(figsize=(12,12))
-    fig.suptitle(fr'{get_boundary_conditions(args.periodic)}: {args.m}$\times${args.n} sites.')
+    fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, {get_initial_conditions(args.lowest)}: {args.m}$\times${args.n} sites.')
 
     ax1 = fig.add_subplot(2,1,1)
     ax1.bar(Es,get_scaled_means(means,m=args.m,n=args.n),color='blue')

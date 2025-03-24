@@ -16,8 +16,10 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
 '''
-    Algorithm 5.2: Gray code for spins {1,...N}.
-    Also generate neighbours of a spin
+    Various common code for Ising model:
+    - Algorithm 5.2: Gray code for spins {1,...N}.
+    - Generate neighbours of a spin
+    - Calculate energy for a configuration
 '''
 
 from unittest import main, TestCase
@@ -259,28 +261,35 @@ class GrayFlipTest(GrayTest):
 
 class EM_Test(TestCase):
     def test2_2(self):
-        E,M=get_energy_magnetism([-1,-1,-1,-1], shape=(2,2), periodic=False)
+        E,M = get_energy_magnetism([-1,-1,-1,-1], shape=(2,2), periodic=False)
         self.assertEqual(-4,E)
         self.assertEqual(-4,M)
-        E,M=get_energy_magnetism([-1,-1,+1,-1], shape=(2,2), periodic=False)
+
+        E,M = get_energy_magnetism([-1,-1,+1,-1], shape=(2,2), periodic=False)
         self.assertEqual(0,E)
         self.assertEqual(-2,M)
-        E,M=get_energy_magnetism([-1,-1,+1,+1], shape=(2,2), periodic=False)
+
+        E,M = get_energy_magnetism([-1,-1,+1,+1], shape=(2,2), periodic=False)
         self.assertEqual(0,E)
         self.assertEqual(0,M)
-        E,M=get_energy_magnetism([-1,-1,-1,+1], shape=(2,2), periodic=False)
+
+        E,M = get_energy_magnetism([-1,-1,-1,+1], shape=(2,2), periodic=False)
         self.assertEqual(0,E)
         self.assertEqual(-2,M)
-        E,M=get_energy_magnetism([+1,-1,-1,+1], shape=(2,2), periodic=False)
+
+        E,M = get_energy_magnetism([+1,-1,-1,+1], shape=(2,2), periodic=False)
         self.assertEqual(4,E)
         self.assertEqual(0,M)
-        E,M=get_energy_magnetism([+1,-1,+1,+1], shape=(2,2), periodic=False)
+
+        E,M = get_energy_magnetism([+1,-1,+1,+1], shape=(2,2), periodic=False)
         self.assertEqual(0,E)
         self.assertEqual(+2,M)
-        E,M=get_energy_magnetism([+1,-1,+1,-1], shape=(2,2), periodic=False)
+
+        E,M = get_energy_magnetism([+1,-1,+1,-1], shape=(2,2), periodic=False)
         self.assertEqual(0,E)
         self.assertEqual(0,M)
-        E,M=get_energy_magnetism([+1,-1,-1,-1], shape=(2,2), periodic=False)
+
+        E,M = get_energy_magnetism([+1,-1,-1,-1], shape=(2,2), periodic=False)
         self.assertEqual(0,E)
         self.assertEqual(-2,M)
 
