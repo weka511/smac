@@ -28,6 +28,47 @@ import seaborn as sns
 from ising import Nbr,get_energy_magnetism
 from enumerate_ising import get_initial_energy
 
+class IsingData:
+    '''
+    This class is responsible for keeping track of energuies and megnetization
+    '''
+    def __init__(self,Niterations=5,N=16):
+        self.N = N
+        self.energies = np.zeros((Niterations,4*N+1,2))
+        self.magnetization = np.zeros((Niterations,4*N+1,2))
+
+    def store_energies(self,iteration,Ns):
+        '''
+        Store energy value and count
+        '''
+        for k,v in Ns.items():
+            if v > 0:
+                self.energies[iteration,2*self.N+k,0] = k
+                self.energies[iteration,2*self.N+k,1] = v
+
+    def store_magnetization(self,iteration,Ns):
+        '''
+        Store magnetization value and count
+        '''
+        for k,v in Ns.items():
+            if v > 0:
+                self.magnetization[iteration,2*self.N+k,0] = k
+                self.magnetization[iteration,2*self.N+k,1] = v
+
+    def get_stats(self):
+        '''
+        Extract mean and standard deviation for those energies
+        that have appered at least once in MCMC
+        '''
+        non_zero= np.sum(self.energies[:,:,1],axis=0) > 0
+        E = self.energies[0,non_zero,0]
+        means = np.mean(self.energies[:,non_zero,1],axis=0)
+        stds = np.std(self.energies[:,non_zero,1],axis=0)
+        non_zero_magnetization= np.sum(self.magnetization[:,:,1],axis=0) > 0
+        M = self.magnetization[0,non_zero_magnetization,0]
+        magnetization = np.mean(self.magnetization[:,non_zero_magnetization,1],axis=0)
+        return E,means, stds,M,magnetization
+
 class MarkovIsing:
     '''
     This class uses Markov Chain Monte Carlo (MCMC) to sample a Ising Model
@@ -38,7 +79,7 @@ class MarkovIsing:
         n              Number of columns
         N              Number of sites
         periodic       Use periodic boundary conditions
-        data           Store counts for each energy
+        energies       Store counts for each energy
         magnetization  Store counts for each magnetization
         beta           Inverse temperature
     '''
@@ -49,9 +90,8 @@ class MarkovIsing:
         self.n = shape[1]
         self.N = self.m*self.n
         self.periodic = periodic
-        self.data = np.zeros((Niterations,4*self.N+1,2))
-        self.magnetization = np.zeros((Niterations,4*self.N+1,2))
         self.beta = beta
+        self.data = IsingData(Niterations=Niterations,N=self.N)
 
     def step(self,sigma,E,M):
         '''
@@ -116,15 +156,8 @@ class MarkovIsing:
             if frequency > 0 and i%frequency == 0:
                 print (f'Iteration {iteration}, step {i}')
 
-        for k,v in Ns.items():
-            if v > 0:
-                self.data[iteration,2*self.N+k,0] = k
-                self.data[iteration,2*self.N+k,1] = v
-
-        for k,v in NMs.items():
-            if v > 0:
-                self.magnetization[iteration,2*self.N+k,0] = k
-                self.magnetization[iteration,2*self.N+k,1] = v
+        self.data.store_energies(iteration,Ns)
+        self.data.store_magnetization(iteration,NMs)
 
 
     def get_stats(self):
@@ -132,14 +165,8 @@ class MarkovIsing:
         Extract mean and standard deviation for those energies
         that have appered at least once in MCMC
         '''
-        non_zero= np.sum(self.data[:,:,1],axis=0) > 0
-        E = self.data[0,non_zero,0]
-        means = np.mean(self.data[:,non_zero,1],axis=0)
-        stds = np.std(self.data[:,non_zero,1],axis=0)
-        non_zero_magnetization= np.sum(self.magnetization[:,:,1],axis=0) > 0
-        M = self.magnetization[0,non_zero_magnetization,0]
-        magnetization = np.mean(self.magnetization[:,non_zero_magnetization,1],axis=0)
-        return E,means, stds,M,magnetization
+        return self.data.get_stats()
+
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
