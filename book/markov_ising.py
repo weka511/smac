@@ -19,41 +19,42 @@
 
 from argparse import ArgumentParser
 from collections import defaultdict
+from enum import Enum
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-import seaborn as sns
 from ising import Nbr,get_energy_magnetism
 from enumerate_ising import get_initial_energy
 
+class Datum(Enum):
+    ENERGY = 0
+    MAGNETIZATION = 1
+
 class IsingData:
     '''
-    This class is responsible for keeping track of energuies and megnetization
+    This class is responsible for keeping track of energies and megnetization
     '''
     def __init__(self,Niterations=5,N=16):
         self.N = N
         self.energies = np.zeros((Niterations,4*N+1,2))
         self.magnetization = np.zeros((Niterations,4*N+1,2))
 
-    def store_energies(self,iteration,Ns):
+    def store_data(self,table=None,iteration=0,Ns={}):
         '''
-        Store energy value and count
-        '''
-        for k,v in Ns.items():
-            if v > 0:
-                self.energies[iteration,2*self.N+k,0] = k
-                self.energies[iteration,2*self.N+k,1] = v
+        Store value and count for energy or magnetization
 
-    def store_magnetization(self,iteration,Ns):
+        Parameters:
+             iteration   Iteration number: specified location of data
+             Ns          A dictionary of E or M, accompanied by counts
+             table       Datum.ENERGY or Datum.MAGNETIZATION
         '''
-        Store magnetization value and count
-        '''
+        data = self.energies if table == Datum.ENERGY else self.magnetization
         for k,v in Ns.items():
             if v > 0:
-                self.magnetization[iteration,2*self.N+k,0] = k
-                self.magnetization[iteration,2*self.N+k,1] = v
+                data[iteration,2*self.N+k,0] = k
+                data[iteration,2*self.N+k,1] = v
 
     def get_stats(self):
         '''
@@ -71,7 +72,7 @@ class IsingData:
 
 class MarkovIsing:
     '''
-    This class uses Markov Chain Monte Carlo (MCMC) to sample a Ising Model
+    This class uses Markov Chain Monte Carlo (MCMC) to sample an Ising Model
 
     Attributes:
         Nbr Used to iterate through neighbours of a location
@@ -156,8 +157,8 @@ class MarkovIsing:
             if frequency > 0 and i%frequency == 0:
                 print (f'Iteration {iteration}, step {i}')
 
-        self.data.store_energies(iteration,Ns)
-        self.data.store_magnetization(iteration,NMs)
+        self.data.store_data(table=Datum.ENERGY,iteration=iteration,Ns=Ns)
+        self.data.store_data(table=Datum.MAGNETIZATION,iteration=iteration,Ns=NMs)
 
 
     def get_stats(self):
