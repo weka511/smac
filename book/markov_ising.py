@@ -244,7 +244,8 @@ if __name__=='__main__':
         Es,means, stds,M,magnetization = markov.get_stats()
 
         fig = figure(figsize=(12,12))
-        fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, {get_initial_conditions(args.lowest)}: {args.m}$\times${args.n} sites, $\beta=${beta:.3g}')
+        fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, {get_initial_conditions(args.lowest)}:' +
+                     fr' {args.m}$\times${args.n} sites, $\beta=${beta:.3g}')
 
         ax1 = fig.add_subplot(2,1,1)
         ax1.bar(Es,get_scaled_means(means,m=args.m,n=args.n),color='blue')
