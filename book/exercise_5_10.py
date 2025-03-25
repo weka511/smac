@@ -15,7 +15,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+'''
+    Exercise 5.10 Implement Local Metropolis algorithm and test it against the specific heat capacity.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -23,10 +25,20 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-
+from ising import Nbr
+from markov_ising import MarkovIsing
+from ising_stats import thermo
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
+    parser.add_argument('--periodic', default=False, action = 'store_true', help = 'Use periodic boundary conditions')
+    parser.add_argument('--lowest', default=False, action = 'store_true', help = 'Initialize to all spins down at the start of each run')
+    parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
+    parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
+    parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
+    parser.add_argument('--Nburn', type = int, default = 0, help = 'Number of steps for burn in')
+    parser.add_argument('--Niterations', type = int, default = 5, help = 'Number of iterations of Markov chain')
+    parser.add_argument('-f', '--frequency',type = int, default = 100, help = 'How often to report progress')
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
@@ -55,7 +67,10 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    rng = np.random.default_rng(args.seed)
+
+    markov = MarkovIsing(Nbr=Nbr,rng = np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,Niterations=args.Niterations,beta=1/2.5)
+    for i in range(args.Niterations):
+        markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
     fig = figure(figsize=(12,12))
 
     fig.savefig(get_file_name(args))
