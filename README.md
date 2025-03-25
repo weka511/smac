@@ -278,8 +278,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -|ising|test-gray.cpp|Tests for gray.hpp
 -|ising|test-nbr.cpp|Tests for nbr.cpp
 -|ising|tests.cpp|Test harness for enumerate-ising.cpp
-5.2|||The Ising model - Monte-Carlo algorithm
--||exercise_5.10.py|Exercise 5.10: Test Local Metropolis algorithm for the Ising model
+5.2||exercise_5.10.py|Exercise 5.10: Test Local Metropolis algorithm for the Ising model
 -||markov_ising.py|Algorithm 5.7: Local Metropolis algorithm for the Ising model
 5.3|||Generalized Ising models
 6|||Entropic Forces
