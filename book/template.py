@@ -34,10 +34,20 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_file_name(args,default_ext='.png'):
+def get_file_name(args,default_ext='.png',seq=None):
+    '''
+    Used to create file names
+
+    Parameters:
+        args
+        default_ext
+        seq
+    '''
     base,ext = splitext(args.out)
-    if len(ext)==0:
+    if len(ext) == 0:
         ext = default_ext
+    if seq != None:
+        base = f'{base}{seq}'
     return join(args.figs,f'{base}{ext}')
 
 if __name__=='__main__':
