@@ -49,18 +49,18 @@ def read_data(input_file):
      Read Counts by Energy and Magnetization prepared by ising.py
      '''
      data = np.genfromtxt(input_file, delimiter=',')[1:,:]
-     m,_ = data.shape
+     m,n = data.shape
      E = np.unique(data[:,0])
      N = np.zeros_like(E)
      for i in range(len(E)):
           mask = np.in1d(data[:,0],E[i])
-          N[i] = data[mask,2].sum()
+          N[i] = data[mask,-1].sum()
 
      for i in range(len(E)):
           for j in range(m):
                if E[i] == data[j,0]:
-                    N[i] += data[j,2]
-     return data,E,N
+                    N[i] += data[j,-1]
+     return data,E,N,n>2
 
 def thermo(N,E,beta=1.0):
      '''
@@ -111,7 +111,7 @@ def get_magnetization(data,beta):
 
 if __name__=='__main__':
      args = parse_arguments()
-     data,E,N = read_data(args.input)
+     data,E,N,magnetization_data_is_present = read_data(args.input)
      T = np.linspace(0.8,6.0)
 
      specific_heat_capacities = []
@@ -136,15 +136,18 @@ if __name__=='__main__':
      ax1.legend()
 
      ax2 = fig.add_subplot(2,2,2)
-     for t in sorted([Tc] + args.Temperatures):
-          M,frequency = get_magnetization(data,beta=1/t)
-          sTc = ' $(T_C)$' if t == Tc else ''
-          ax2.plot(M,frequency,label=f'$T={t:.02f}$' + sTc)
+     if magnetization_data_is_present:
+          for t in sorted([Tc] + args.Temperatures):
+               M,frequency = get_magnetization(data,beta=1/t)
+               sTc = ' $(T_C)$' if t == Tc else ''
+               ax2.plot(M,frequency,label=f'$T={t:.02f}$' + sTc)
 
-     ax2.set_xlabel('Magnetization')
-     ax2.set_ylabel('Frequency')
-     ax2.set_title('Distribution of Magnetization')
-     ax2.legend(title='Temperature')
+          ax2.set_xlabel('Magnetization')
+          ax2.set_ylabel('Frequency')
+          ax2.set_title('Distribution of Magnetization')
+          ax2.legend(title='Temperature')
+     else:
+          ax2.set_title('Magnetization data unavailable')
 
      ax3 = fig.add_subplot(2,2,3)
      ax3.plot(T,Z,color='b',label='$Z$')
