@@ -22,6 +22,7 @@ from os import makedirs
 from os.path import basename, exists, join, splitext
 from matplotlib.pyplot import  figure, show
 import numpy as np
+import matplotlib.patches as mpatches
 
 def get_file_name():
      return join(args.figs,basename(splitext(__file__)[0]))
@@ -59,14 +60,14 @@ def read_data(input_file):
                     N[i] += data[j,-1]
      return data,E,N,n>2
 
-def thermo(N,E,beta=1.0):
+def thermo(E,N,beta=1.0):
      '''
      Algorithm 5.4 Calculate thermodynamic quantities
 
      Parameters:
-         N
-         E
-         beta
+         E      Energies that are present in data
+         N      Count of each energy
+         beta   Inverse temperature
      '''
      Emin = E.min()
      Eprime = E - Emin
@@ -128,26 +129,26 @@ if __name__=='__main__':
      data,E,N,magnetization_data_is_present = read_data(args.input)
      T_range = get_range(args.T)
 
-     specific_heat_capacities = []
-     mean_energies = []
-     Z = []
-     for T in T_range:
-          z,mean_energy,cV = thermo(N,E,beta=1/T)
-          Z.append(z)
-          specific_heat_capacities.append(cV)
-          mean_energies.append(mean_energy)
+     cV = np.zeros((len(T_range)))
+     mean_energies = np.zeros((len(T_range)))
+     Z = np.zeros((len(T_range)))
+     for i,T in enumerate(T_range):
+          Z[i],mean_energies[i],cV[i] = thermo(E,N,beta=1/T)
+
 
      Tc = 2/np.log(1+np.sqrt(2))
      fig = figure(figsize=(10,10))
      fig.suptitle(f'{args.input}')
 
      ax1 = fig.add_subplot(2,2,1)
-     ax1.plot(T_range,specific_heat_capacities,color='b',label='$c_V$')
-     ax1.axvline(x=Tc,color='r',linestyle='--',label=f'$T_C={Tc:.02f}$')
+     ax1.plot(T_range,cV,color='b',label='$c_V$')
+     ax1.axvline(x=Tc,color='r',linestyle='--')
      ax1.set_xlabel('Temperature')
      ax1.set_ylabel('Specific Heat Capacity')
      ax1.set_title('Thermodynamic quantities')
-     ax1.legend()
+     ax1.legend(title='$c_V$',
+                handles=[mpatches.Patch(color='none',
+                                        label=f'{T:.1f}: {cV[i]:.5f}') for i,T in enumerate(T_range)])
 
      ax2 = fig.add_subplot(2,2,2)
      if magnetization_data_is_present:
@@ -171,11 +172,13 @@ if __name__=='__main__':
      ax3.legend()
 
      ax4 = fig.add_subplot(2,2,4)
-     ax4.plot(T_range,mean_energies,color='b',label=r'$\bar{E}$')
+     ax4.plot(T_range,mean_energies,color='b')
      ax4.set_xlabel('Temperature')
      ax4.set_ylabel('Energy')
      ax4.set_title('Mean Energy')
-     ax4.legend()
+     ax4.legend(title='E',
+           handles=[mpatches.Patch(color='none',
+                                   label=f'{T:.1f}: {mean_energies[i]:.3f}') for i,T in enumerate(T_range)])
 
      fig.tight_layout(pad=2)
      if not exists(args.figs):
