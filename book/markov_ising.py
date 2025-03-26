@@ -41,7 +41,7 @@ class IsingData:
         self.energies = np.zeros((Niterations,4*N+1,2))
         self.magnetization = np.zeros((Niterations,4*N+1,2))
 
-    def store_data(self,table=None,iteration=0,Ns={}):
+    def store_data(self,table=Datum.ENERGY,iteration=0,Ns={}):
         '''
         Store value and count for energy or magnetization
 
@@ -56,19 +56,32 @@ class IsingData:
                 data[iteration,2*self.N+k,0] = k
                 data[iteration,2*self.N+k,1] = v
 
+    def get_non_zero(self,table=Datum.ENERGY):
+        data = self.energies if table == Datum.ENERGY else self.magnetization
+        return np.sum(data[:,:,1],axis=0) > 0
+
     def get_stats(self):
         '''
         Extract mean and standard deviation for those energies
         that have appered at least once in MCMC
         '''
-        non_zero= np.sum(self.energies[:,:,1],axis=0) > 0
+        non_zero = self.get_non_zero(table=Datum.ENERGY)
         E = self.energies[0,non_zero,0]
         means = np.mean(self.energies[:,non_zero,1],axis=0)
         stds = np.std(self.energies[:,non_zero,1],axis=0)
-        non_zero_magnetization= np.sum(self.magnetization[:,:,1],axis=0) > 0
+        non_zero_magnetization = self.get_non_zero(table=Datum.MAGNETIZATION)
         M = self.magnetization[0,non_zero_magnetization,0]
         magnetization = np.mean(self.magnetization[:,non_zero_magnetization,1],axis=0)
         return E,means, stds,M,magnetization
+
+    def get_data(self):
+        non_zero = self.get_non_zero(table=Datum.ENERGY)
+        E = self.energies[0,non_zero,0]   # FIXME: should be for all iterations
+        N = np.zeros_like(E)
+        for i in range(len(E)):
+            mask = np.in1d(self.energies[0,:,0],E[i])  # FIXME: should be for all iterations
+            N[i] = self.energies[0,mask,1].sum()       # FIXME: should be for all iterations
+        return E,N
 
 class MarkovIsing:
     '''
