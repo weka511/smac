@@ -37,11 +37,8 @@ def parse_arguments():
                          type = int,
                          nargs = '+',
                          help  = 'File to read data from')
-     parser.add_argument('-T','--Temperatures',
-                         default=[2.5,5],
-                         type=float,
-                         nargs='+',
-                         help='Temperatures to be plotted')
+     parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
+     parser.add_argument('--show', default=False, action = 'store_true', help = 'Show plot')
      return parser.parse_args()
 
 def read_data(input_file):
@@ -109,16 +106,33 @@ def get_magnetization(data,beta):
 
      return M_index,frequency/frequency.sum()
 
+def get_range(T,deltaT=0.1):
+     '''
+     Used to convert temperature (specified in args) to a range
+
+     Parameters:
+         T       [start, ]stop, [step, ]
+     '''
+     match (len(T)):
+          case 1:
+               return T
+          case 2:
+               return np.arange(T[0],T[1],deltaT)
+          case 3:
+               return np.arange(T[0],T[1]+T[2],T[2])
+
+     raise ValueError(f'Parameter T must have length of 1,2, or 3')
+
 if __name__=='__main__':
      args = parse_arguments()
      data,E,N,magnetization_data_is_present = read_data(args.input)
-     T = np.linspace(0.8,6.0)
+     T_range = get_range(args.T)
 
      specific_heat_capacities = []
      mean_energies = []
      Z = []
-     for t in T:
-          z,mean_energy,cV = thermo(N,E,beta=1/t)
+     for T in T_range:
+          z,mean_energy,cV = thermo(N,E,beta=1/T)
           Z.append(z)
           specific_heat_capacities.append(cV)
           mean_energies.append(mean_energy)
@@ -128,7 +142,7 @@ if __name__=='__main__':
      fig.suptitle(f'{args.input}')
 
      ax1 = fig.add_subplot(2,2,1)
-     ax1.plot(T,specific_heat_capacities,color='b',label='$c_V$')
+     ax1.plot(T_range,specific_heat_capacities,color='b',label='$c_V$')
      ax1.axvline(x=Tc,color='r',linestyle='--',label=f'$T_C={Tc:.02f}$')
      ax1.set_xlabel('Temperature')
      ax1.set_ylabel('Specific Heat Capacity')
@@ -150,14 +164,14 @@ if __name__=='__main__':
           ax2.set_title('Magnetization data unavailable')
 
      ax3 = fig.add_subplot(2,2,3)
-     ax3.plot(T,Z,color='b',label='$Z$')
+     ax3.plot(T_range,Z,color='b',label='$Z$')
      ax3.set_xlabel('Temperature')
      ax3.set_ylabel('Partition Function')
      ax3.set_title('Partition Function')
      ax3.legend()
 
      ax4 = fig.add_subplot(2,2,4)
-     ax4.plot(T,mean_energies,color='b',label=r'$\bar{E}$')
+     ax4.plot(T_range,mean_energies,color='b',label=r'$\bar{E}$')
      ax4.set_xlabel('Temperature')
      ax4.set_ylabel('Energy')
      ax4.set_title('Mean Energy')
@@ -167,4 +181,6 @@ if __name__=='__main__':
      if not exists(args.figs):
           makedirs(args.figs)
      fig.savefig(get_file_name())
-     show()
+
+     if args.show:
+          show()
