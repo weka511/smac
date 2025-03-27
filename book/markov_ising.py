@@ -106,6 +106,7 @@ class MarkovIsing:
         self.periodic = periodic
         self.beta = beta
         self.data = IsingData(Niterations=Niterations,N=self.N)
+        self.Weights = {}
 
     def step(self,sigma,E,M):
         '''
@@ -124,11 +125,19 @@ class MarkovIsing:
         k = self.rng.integers(self.N)
         h = sum(sigma[i] for i in self.Nbr(k))
         deltaE = 2*h*sigma[k]
-        if self.rng.random() < np.exp(-self.beta*deltaE):
+        Upsilon = self.get_upsilon(deltaE)
+        if self.rng.random() < Upsilon:
             sigma[k] *= -1
             E += deltaE
             M += 2*sigma[k]
         return sigma,E,M
+
+    def get_upsilon(self,deltaE):
+        if deltaE <= 0:
+            return np.inf
+        if not deltaE in self.Weights:
+            self.Weights[deltaE] = np.exp(-self.beta*deltaE)
+        return self.Weights[deltaE]
 
     def run(self,Nsteps=100000,Nburn=100,frequency=10000,iteration=0,lowest=False):
         '''
