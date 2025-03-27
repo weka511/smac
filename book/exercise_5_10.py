@@ -68,19 +68,23 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
 
-    beta=0.5#1/2.5
+    beta=0.5
+
     markov = MarkovIsing(Nbr=Nbr,rng = np.random.default_rng(args.seed),
                          shape=(args.m,args.n),periodic=args.periodic,
                          Niterations=args.Niterations,beta=beta)
     for i in range(args.Niterations):
         markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
-
+    NObservations=args.m*args.n
     E, N = markov.data.get_data()
-    z,e,cV = thermo(E,N,beta=beta,NObservations=args.Niterations*args.Nsteps)
+    Emean = np.average(E,weights=N)
+    e = Emean/NObservations
+    cV = beta**2 * np.average((E-Emean)**2,weights=N)/NObservations
+    # z,e,cV = thermo(E,N,beta=beta,NObservations=NObservations)
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
     ax.bar(E,N)
-    ax.set_title(fr'$\beta={beta},$Z={z},$<e>$={e},$c_V$={cV}')
+    ax.set_title(fr'$\beta=${beta},$<e>$={e},$c_V$={cV}')
     fig.savefig(get_file_name(args))
     elapsed = time() - start
     minutes = int(elapsed/60)
