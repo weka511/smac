@@ -83,6 +83,24 @@ class IsingData:
             N[i] = self.energies[0,mask,1].sum()       # FIXME: should be for all iterations
         return E,N
 
+class Weights:
+    '''
+    Used to cache values of np.exp(-self.beta*deltaE) to reduce recalculation
+    '''
+    def __init__(self,beta):
+        self.cache = {}
+        self.beta = beta
+
+    def get_upsilon(self,deltaE):
+        '''
+        Used to decide whether to accept a proposed move.
+        '''
+        if deltaE <= 0:
+            return np.inf
+        if not deltaE in self.cache:
+            self.cache[deltaE] = np.exp(-self.beta*deltaE)
+        return self.cache[deltaE]
+
 class MarkovIsing:
     '''
     This class uses Markov Chain Monte Carlo (MCMC) to sample an Ising Model
@@ -106,7 +124,7 @@ class MarkovIsing:
         self.periodic = periodic
         self.beta = beta
         self.data = IsingData(Niterations=Niterations,N=self.N)
-        self.Weights = {}
+        self.weights = Weights(beta)
 
     def step(self,sigma,E,M):
         '''
@@ -125,19 +143,14 @@ class MarkovIsing:
         k = self.rng.integers(self.N)
         h = sum(sigma[i] for i in self.Nbr(k))
         deltaE = 2*h*sigma[k]
-        Upsilon = self.get_upsilon(deltaE)
-        if self.rng.random() < Upsilon:
+        Upsilon = self.weights.get_upsilon(deltaE)
+        if deltaE <= 0 or self.rng.random() < Upsilon:
             sigma[k] *= -1
             E += deltaE
             M += 2*sigma[k]
         return sigma,E,M
 
-    def get_upsilon(self,deltaE):
-        if deltaE <= 0:
-            return np.inf
-        if not deltaE in self.Weights:
-            self.Weights[deltaE] = np.exp(-self.beta*deltaE)
-        return self.Weights[deltaE]
+
 
     def run(self,Nsteps=100000,Nburn=100,frequency=10000,iteration=0,lowest=False):
         '''
