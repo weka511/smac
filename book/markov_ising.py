@@ -63,7 +63,7 @@ class IsingData:
     def get_stats(self):
         '''
         Extract mean and standard deviation for those energies
-        that have appered at least once in MCMC
+        that have appeared at least once in MCMC
         '''
         non_zero = self.get_non_zero(table=Datum.ENERGY)
         E = self.energies[0,non_zero,0]
@@ -74,13 +74,13 @@ class IsingData:
         magnetization = np.mean(self.magnetization[:,non_zero_magnetization,1],axis=0)
         return E,means, stds,M,magnetization
 
-    def get_data(self):
+    def get_data(self,iteration=0):
         non_zero = self.get_non_zero(table=Datum.ENERGY)
-        E = self.energies[0,non_zero,0]   # FIXME: should be for all iterations
+        E = self.energies[iteration,non_zero,0]
         N = np.zeros_like(E)
         for i in range(len(E)):
-            mask = np.in1d(self.energies[0,:,0],E[i])  # FIXME: should be for all iterations
-            N[i] = self.energies[0,mask,1].sum()       # FIXME: should be for all iterations
+            mask = np.in1d(self.energies[iteration,:,0],E[i])
+            N[i] = self.energies[iteration,mask,1].sum()
         return E,N
 
 class Weights:

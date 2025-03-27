@@ -27,7 +27,6 @@ from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from ising import Nbr
 from markov_ising import MarkovIsing
-from ising_stats import thermo
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -67,25 +66,36 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-
+    NObservations=args.m*args.n
     beta=0.5
 
     markov = MarkovIsing(Nbr=Nbr,rng = np.random.default_rng(args.seed),
                          shape=(args.m,args.n),periodic=args.periodic,
                          Niterations=args.Niterations,beta=beta)
+    e = np.zeros((args.Niterations))
+    cV = np.zeros((args.Niterations))
     for i in range(args.Niterations):
         markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
-    NObservations=args.m*args.n
-    E, N = markov.data.get_data()
-    Emean = np.average(E,weights=N)
-    e = Emean/NObservations
-    cV = beta**2 * np.average((E-Emean)**2,weights=N)/NObservations
-    # z,e,cV = thermo(E,N,beta=beta,NObservations=NObservations)
+        E, N = markov.data.get_data(iteration=i)
+        Emean = np.average(E,weights=N)
+        e[i] = Emean/NObservations
+        cV[i] = beta**2 * np.average((E-Emean)**2,weights=N)/NObservations
+        # print (f'<e>={e},cV={cV}')
+
     fig = figure(figsize=(12,12))
-    ax = fig.add_subplot(1,1,1)
+    ax = fig.add_subplot(2,1,1)
     ax.bar(E,N)
-    ax.set_title(fr'$\beta=${beta},$<e>$={e},$c_V$={cV}')
+    ax.set_title(fr'$\beta=${beta}')
+
+    ax2 = fig.add_subplot(2,1,2)
+    ax2.plot(e,label='e',color='blue')
+    ax2.legend(loc='upper left')
+    ax2t = ax2.twinx()
+    ax2t.plot(cV,label='$c_V$',color='red')
+    ax2t.legend(loc='upper right')
+
     fig.savefig(get_file_name(args))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
