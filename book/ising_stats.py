@@ -53,14 +53,15 @@ def read_data(input_file):
                     N[i] += data[j,-1]
      return data,E,N,n>2
 
-def thermo(E,N,beta=1.0):
+def thermo(E,N,beta=1.0,NObservations= None):
      '''
      Algorithm 5.4 Calculate thermodynamic quantities
 
      Parameters:
-         E      Energies that are present in data
-         N      Count of each energy
-         beta   Inverse temperature
+         E             Energies that are present in data
+         N             Count of each energy
+         beta          Inverse temperature
+         NObservations Total number of States (exact enumeration) or data points (MCMC)
 
      Returns:
          Z      Partition function
@@ -73,9 +74,13 @@ def thermo(E,N,beta=1.0):
      Z = np.sum(weights)
      Emean = np.average(Eprime,weights=weights)
      EVariance = np.average((Eprime-Emean)**2,weights=weights)
-     return (Z*np.exp(-beta*Emin),                # Partition function
-             (Emean + Emin)/(len(N)-1),               # Mean energy e.g. 37-1!
-             beta**2 * EVariance/(len(N)-1))          # Specific heat capacity
+     if NObservations == None:
+          NObservations = len(N)-1
+     return (
+          Z*np.exp(-beta*Emin),                # Partition function
+          (Emean + Emin)/NObservations,        # Mean energy e.g. 37-1!
+          beta**2 * EVariance/NObservations    # Specific heat capacity
+     )
 
 def get_magnetization(data,beta):
      '''

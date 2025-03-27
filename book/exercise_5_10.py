@@ -76,7 +76,7 @@ if __name__=='__main__':
         markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
 
     E, N = markov.data.get_data()
-    z,e,cV = thermo(N,E,beta=beta)
+    z,e,cV = thermo(E,N,beta=beta,NObservations=args.Niterations*args.Nsteps)
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
     ax.bar(E,N)
