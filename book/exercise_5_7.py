@@ -125,7 +125,7 @@ if __name__=='__main__':
     E_ising_stats = []
     Z_ising_stats = []
     for t in T:
-        z,e,c = thermo(N,E,beta=1/t)
+        z,e,c = thermo(E,N,beta=1/t)
         Z_ising_stats.append(z)
         cV0.append(c)
         E_ising_stats.append(e)
