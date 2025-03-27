@@ -29,15 +29,8 @@ def get_file_name():
 
 def parse_arguments():
      parser = ArgumentParser(description=__doc__)
-     parser.add_argument('-i', '--input',
-                         default = 'ising.csv',
-                         help  = 'File to read data from')
+     parser.add_argument('-i', '--input', default = 'ising.csv', help  = 'File to read data from')
      parser.add_argument('--figs', default = './figs')
-     parser.add_argument('-e', '--energies',
-                         default = [],
-                         type = int,
-                         nargs = '+',
-                         help  = 'File to read data from')
      parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
      parser.add_argument('--show', default=False, action = 'store_true', help = 'Show plot')
      return parser.parse_args()
@@ -68,16 +61,21 @@ def thermo(E,N,beta=1.0):
          E      Energies that are present in data
          N      Count of each energy
          beta   Inverse temperature
+
+     Returns:
+         Z      Partition function
+         Emean  Mean energy
+         cV     Specific heat capacity
      '''
      Emin = E.min()
      Eprime = E - Emin
-     weights = np.exp(-beta*Eprime)
-     Z = np.dot(N, weights)
-     Emean = np.dot(N,Eprime*weights)/Z
-     Esq = np.dot(N,Eprime*Eprime*weights)/Z
+     weights = np.exp(-beta*Eprime) *N
+     Z = np.sum(weights)
+     Emean = np.average(Eprime,weights=weights)
+     EVariance = np.average((Eprime-Emean)**2,weights=weights)
      return (Z*np.exp(-beta*Emin),                # Partition function
-             (Emean + Emin),#/len(N),               # Mean energy
-             beta**2 * (Esq - Emean**2)/len(N) )  # Specific heat capacity
+             (Emean + Emin)/(len(N)-1),               # Mean energy e.g. 37-1!
+             beta**2 * EVariance/(len(N)-1))          # Specific heat capacity
 
 def get_magnetization(data,beta):
      '''
@@ -133,7 +131,7 @@ if __name__=='__main__':
      mean_energies = np.zeros((len(T_range)))
      Z = np.zeros((len(T_range)))
      for i,T in enumerate(T_range):
-          Z[i],mean_energies[i],cV[i] = thermo(E,N,beta=1/T)
+          Z[i],mean_energies[i],cV[i] = thermo(E,N,beta=1.0/T)
 
 
      Tc = 2/np.log(1+np.sqrt(2))
