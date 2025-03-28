@@ -42,6 +42,7 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('-T', '--T', type=float, default=2.0,help='Temperature')
     return parser.parse_args()
 
 
@@ -66,8 +67,8 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    NObservations=args.m*args.n
-    beta=0.5
+    NObservations = args.m*args.n
+    beta = 1/args.T
 
     markov = MarkovIsing(Nbr=Nbr,rng = np.random.default_rng(args.seed),
                          shape=(args.m,args.n),periodic=args.periodic,
@@ -80,8 +81,9 @@ if __name__=='__main__':
         Emean = np.average(E,weights=N)
         e[i] = Emean/NObservations
         cV[i] = beta**2 * np.average((E-Emean)**2,weights=N)/NObservations
-        # print (f'<e>={e},cV={cV}')
-
+        print (f'e={e[i]:.03f},cV={cV[i]:.05f}')
+    print (f'e: {e.mean():.03f} {e.std():.03g}')
+    print (f'cV: {cV.mean():.05f} {cV.std():.03g}')
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(2,1,1)
     ax.bar(E,N)
