@@ -79,23 +79,24 @@ def Nbr(k, shape = (4,5), periodic = False):
     Parameters:
         k        Index of spin (zero based)
         shape    Number of rows, columns, etc.
-        periodic Indicates whther or not spins live on a torus
+        periodic Indicates whether or not spins live on a torus
     '''
+    def in_range(j,n):
+        '''
+        Used to eliminate wrapped values if not periodic
+        '''
+        return periodic or (j>-1 and j < n)
     assert len(shape)==2,'2 D is the only version implemented'
     m,n = shape
     i,j = k//n,k%n
-    if periodic:
-        for j0 in [j-1,j+1]:
-            yield i *n + j0%n
-        for i0 in [i-1,i+1]:
+
+    for j0 in [j-1,j+1]:
+        if in_range(j0,n):
+            yield i*n + j0%n
+
+    for i0 in [i-1,i+1]:
+        if in_range(i0,m):
             yield (i0%m)*n + j
-    else:
-        for j0 in [j-1,j+1]:
-            if j0>-1 and j0 < n:
-                yield i *n + j0
-        for i0 in [i-1,i+1]:
-            if i0>-1 and i0<m:
-                yield i0*n + j
 
 def get_max_neigbbours(shape = (4,5)):
     '''
@@ -193,6 +194,7 @@ class NbrTest(TestCase):
     def test_max_neighbours(self):
         self.assertEqual(4, get_max_neigbbours())
 
+
 class EdgeTest(TestCase):
     '''
     Tests for generate_edges(...)
@@ -286,6 +288,7 @@ class GrayFlipTest(GrayTest):
         for i,(k,_) in enumerate(gray_flip(4)):
             self.assertEqual(self.expected[i],k)
         self.assertEqual(2**4-1,i+1)
+
 
 class EM_Test(TestCase):
     def test2_2(self):
