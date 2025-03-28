@@ -22,7 +22,8 @@
     - Calculate energy for a configuration
 '''
 
-from unittest import main, TestCase
+from unittest import main, TestCase,skip
+import numpy as np
 
 def gray_flip(N, tau = []):
     '''
@@ -86,17 +87,26 @@ def Nbr(k, shape = (4,5), periodic = False):
         Used to eliminate wrapped values if not periodic
         '''
         return periodic or (j>-1 and j < n)
-    assert len(shape)==2,'2 D is the only version implemented'
-    m,n = shape
-    i,j = k//n,k%n
 
-    for j0 in [j-1,j+1]:
-        if in_range(j0,n):
-            yield i*n + j0%n
+    def get_new_coordinate(j0,i):
+        '''
+        Used to handle wrap around for periodic
+        '''
+        if j0 < 0:
+            return shape[i] - 1
+        elif j0 >= shape[i]:
+            return  0
+        else:
+            return j0
 
-    for i0 in [i-1,i+1]:
-        if in_range(i0,m):
-            yield (i0%m)*n + j
+    coords = np.unravel_index(k,shape)
+    for i in range(len(coords)):
+        j = coords[i]
+        for j0 in [j-1,j+1]:
+            if in_range(j0,shape[i]):
+                neighbour_coords = tuple(get_new_coordinate(j0,i) if l == i else coords[l] for l in range(len(coords)))
+                yield neighbour_coords[-1] + np.dot(neighbour_coords[:-1],shape[1:])
+
 
 def get_max_neigbbours(shape = (4,5)):
     '''
