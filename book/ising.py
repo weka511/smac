@@ -99,16 +99,23 @@ def Nbr(index, shape = (4,5), periodic = False):
         else:
             return j
 
-    # We unravel index to a tuple, its coordinates in d dimensional space.
-    coordinates = np.unravel_index(index,shape)
+    def create_neighbour(i,j,coordinates):
+        '''
+        Constuct one neighbour of a point by taking one step
 
-    # Work out the coordinates of the neighbours of the tuple, then ravel the
-    # coordinates of each neighbour back into an index.
+        Parameters:
+            i             Position at which to step
+            j             Direction in shich to step
+            coordinates   Coordinates of point
+        '''
+        return tuple(get_wrapped(j,k) if k == i else coordinates[k] for k in range(len(coordinates)))
+
+    coordinates = np.unravel_index(index,shape) # coordinates of index in len(shape) dimensional space.
+
     for i in range(len(coordinates)):
         for j in [coordinates[i] - 1,coordinates[i] + 1]:
-            if in_range(j,shape[i]):
-                yield np.ravel_multi_index(
-                    tuple(get_wrapped(j,k) if k == i else coordinates[k] for k in range(len(coordinates))),shape)
+            if in_range(j,shape[i]):  # Can we step in this direction?
+                yield np.ravel_multi_index(create_neighbour(i,j,coordinates),shape) # Ravel neighbour back to an index
 
 
 def get_max_neigbbours(shape = (4,5)):
