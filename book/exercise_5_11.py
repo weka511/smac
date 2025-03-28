@@ -18,16 +18,21 @@
 '''Exercise 5-11/Algorithm 5-9-cluster ising'''
 
 from argparse import ArgumentParser
+from collections import defaultdict
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-
+from ising import Nbr, get_energy_magnetism
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
+    parser.add_argument('--periodic', default=False, action = 'store_true', help = 'Use periodic boundary conditions')
+    parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
+    parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
+    parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
@@ -43,21 +48,33 @@ class ClusterIsing:
         self.periodic = periodic
         self.beta = beta
         self.p  = 1.0 - np.exp(-2.0*beta)
-        # self.data = IsingData(Niterations=Niterations,N=self.N)
-        # self.weights = Weights(beta,get_max_neigbbours(shape))
+        self.E = defaultdict(lambda: 0)
+        self.M = defaultdict(lambda: 0)
 
     def step(self,sigma):
         j = self.rng.integers(self.N)
         Pocket, Cluster = [j], [j]
         while Pocket != []:
             k = self.rng.choice(Pocket)
-            for l in nbr[k]:
+            for l in self.Nbr(k):
                 if sigma[l] == sigma[k] and l not in Cluster and self.rng.uniform() < self.p:
                     Pocket.append(l)
                     Cluster.append(l)
-            Pocket.remove(j)
+            Pocket.remove(k)
         for k in Cluster:
             sigma[k] *= -1
+
+    def run(self,Nsteps=1000):
+        get_em = lambda sigma:get_energy_magnetism(sigma, shape=(self.m,self.n), periodic=self.periodic)
+        sigma = self.rng.choice([-1,1],size=self.N)
+        E,M = get_em(sigma)
+        self.E[E] += 1
+        self.M[M] += 1
+        for i in range(Nsteps):
+            self.step(sigma)
+            E,M = get_em(sigma)
+            self.E[E] += 1
+            self.M[M] += 1
 
 def get_file_name(args,default_ext='.png',seq=None):
     '''
@@ -80,9 +97,15 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    rng = np.random.default_rng(args.seed)
-    fig = figure(figsize=(12,12))
+    markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,Niterations=5,beta=10)
+    markov.run(Nsteps=args.Nsteps)
 
+    fig = figure(figsize=(12,12))
+    ax = fig.add_subplot(1,1,1)
+    Es = sorted(list(markov.E.keys()))
+    Ms = sorted(list(markov.M.keys()))
+    ax.plot(Es,[markov.E[e] for e in Es],color='blue')
+    ax.plot(Ms,[markov.M[m] for m in Ms],color='red')
     fig.savefig(get_file_name(args))
     elapsed = time() - start
     minutes = int(elapsed/60)
