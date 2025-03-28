@@ -25,7 +25,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from ising import Nbr,get_energy_magnetism
+from ising import Nbr,get_energy_magnetism,get_max_neigbbours
 from enumerate_ising import get_initial_energy
 
 class Datum(Enum):
@@ -85,21 +85,21 @@ class IsingData:
 
 class Weights:
     '''
-    Used to cache values of np.exp(-self.beta*deltaE) to reduce recalculation
+    Used to cache values of np.exp(-self.beta*deltaE) to reduce recalculation.
+    NB: only a few values of deltaE are possible.
     '''
-    def __init__(self,beta):
-        self.cache = {}
-        self.beta = beta
+    def __init__(self,beta,max_neigbbours):
+        deltaE =np.array([2*i for i in range(1,max_neigbbours+1)])
+        self.cache = np.exp(-beta*deltaE)
 
     def get_upsilon(self,deltaE):
         '''
         Used to decide whether to accept a proposed move.
+
+        Parameters:
+            deltaE   Change in energy
         '''
-        if deltaE <= 0:
-            return np.inf
-        if not deltaE in self.cache:
-            self.cache[deltaE] = np.exp(-self.beta*deltaE)
-        return self.cache[deltaE]
+        return self.cache[deltaE//2-1] if deltaE > 0 else np.inf
 
 class MarkovIsing:
     '''
@@ -124,7 +124,7 @@ class MarkovIsing:
         self.periodic = periodic
         self.beta = beta
         self.data = IsingData(Niterations=Niterations,N=self.N)
-        self.weights = Weights(beta)
+        self.weights = Weights(beta,get_max_neigbbours(shape))
 
     def step(self,sigma,E,M):
         '''

@@ -97,10 +97,26 @@ def Nbr(k, shape = (4,5), periodic = False):
             if i0>-1 and i0<m:
                 yield i0*n + j
 
+def get_max_neigbbours(shape = (4,5)):
+    '''
+    Used to determine the maximum number of energy or magnetization steps
+    possible
+
+    Parameters:
+        shape    Shape of space
+    Returns:
+        2**d, where d i the dimension of the space
+    '''
+    d = len(shape)
+    return 2**d
 
 def generate_edges(shape=(4,4), periodic=False):
     '''
     Used to iterate through all the edges of a matrix of spins
+
+    Parameters:
+        shape         Number of rows and columns in space
+        periodic      Indicates whether space wraps around
     '''
     m,n = shape
     for i in range(m*n):
@@ -111,6 +127,15 @@ def generate_edges(shape=(4,4), periodic=False):
 def get_energy_magnetism(sigma, shape=(4,4), periodic=False):
     '''
     Used to calculate energy and magnetization for a configuration
+
+    Parameters:
+        sigma         The spins
+        shape         Number of rows and columns in space
+        periodic      Indicates whether space wraps around
+
+    Returns:
+        E                   Energy due to spins
+        M                   Magnetization
     '''
     N = len(sigma)
     assert N == shape[0]*shape[1]
@@ -164,6 +189,9 @@ class NbrTest(TestCase):
     def testNbrP4(self):
         Nbrs = list(Nbr(4,periodic=True))
         self.assertCountEqual([19,9,3,0], Nbrs)
+
+    def test_max_neighbours(self):
+        self.assertEqual(4, get_max_neigbbours())
 
 class EdgeTest(TestCase):
     '''
