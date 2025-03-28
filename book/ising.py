@@ -73,12 +73,12 @@ class Gray:
         '''Convert tau to string, so we can save and restart'''
         return f'[{",".join(str(t) for t in self.tau)}]'
 
-def Nbr(k, shape = (4,5), periodic = False):
+def Nbr(index, shape = (4,5), periodic = False):
     '''
     A generator to iterate through neighbours of a spin
 
     Parameters:
-        k        Index of spin (zero based)
+        index    Index of spin (zero based)
         shape    Number of rows, columns, etc.
         periodic Indicates whether or not spins live on a torus
     '''
@@ -88,24 +88,27 @@ def Nbr(k, shape = (4,5), periodic = False):
         '''
         return periodic or (j>-1 and j < n)
 
-    def get_new_coordinate(j0,i):
+    def get_wrapped(j,i):
         '''
         Used to handle wrap around for periodic
         '''
-        if j0 < 0:
+        if j < 0:
             return shape[i] - 1
-        elif j0 >= shape[i]:
+        elif j >= shape[i]:
             return  0
         else:
-            return j0
+            return j
 
-    coords = np.unravel_index(k,shape)
-    for i in range(len(coords)):
-        j = coords[i]
-        for j0 in [j-1,j+1]:
-            if in_range(j0,shape[i]):
-                neighbour_coords = tuple(get_new_coordinate(j0,i) if l == i else coords[l] for l in range(len(coords)))
-                yield neighbour_coords[-1] + np.dot(neighbour_coords[:-1],shape[1:])
+    # We unravel index to a tuple, its coordinates in d dimensional space.
+    coordinates = np.unravel_index(index,shape)
+
+    # Work out the coordinates of the neighbours of the tuple, then ravel the
+    # coordinates of each neighbour back into an index.
+    for i in range(len(coordinates)):
+        for j in [coordinates[i] - 1,coordinates[i] + 1]:
+            if in_range(j,shape[i]):
+                yield np.ravel_multi_index(
+                    tuple(get_wrapped(j,k) if k == i else coordinates[k] for k in range(len(coordinates))),shape)
 
 
 def get_max_neigbbours(shape = (4,5)):
@@ -153,6 +156,7 @@ def get_energy_magnetism(sigma, shape=(4,4), periodic=False):
     E = -sum([sigma[i] * sigma[j] for i,j in generate_edges(shape=shape,periodic=periodic)])
     M = sum(sigma)
     return E,M
+
 
 class NbrTest(TestCase):
     '''
@@ -204,6 +208,29 @@ class NbrTest(TestCase):
     def test_max_neighbours(self):
         self.assertEqual(4, get_max_neigbbours())
 
+class Nbr3dTest(TestCase):
+    '''
+    Test finding neighbours in 3D
+
+    Test data correspond to
+         15  16  17  18  19
+         10  11  12  13  14
+          5   6   7   8   9
+          0   1   2   3   4
+
+          plus 2 similar matrices stacked on top
+    '''
+    def testNbr8P(self):
+        Nbrs = list(Nbr(8,shape = (3,4,5),periodic=True))
+        self.assertCountEqual([3,13,7,9,8+20,8+2*20], Nbrs)
+
+    def testNbr8(self):
+        Nbrs = list(Nbr(8,shape = (3,4,5),periodic=False))
+        self.assertCountEqual([3,13,7,9,8+20], Nbrs)
+
+    def testNbr28(self):
+        Nbrs = list(Nbr(28,shape = (3,4,5),periodic=False))
+        self.assertCountEqual([23,33,27,29,48,8], Nbrs)
 
 class EdgeTest(TestCase):
     '''
