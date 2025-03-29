@@ -289,5 +289,6 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 
 File|Description
 ----------|---------------------------------------------------------------------------------------
+bench42.sh|Benchmark effect of Issue #42
 backends.py|List graphics backends
 walker.py|Used to create README.MD from file tree
