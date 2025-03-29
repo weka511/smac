@@ -36,10 +36,29 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
     return parser.parse_args()
 
+def get_range(T,deltaT=0.1):
+    '''
+    Used to convert temperature (specified in args) to a range
+
+    Parameters:
+        T       [start, ]stop, [step, ]
+    '''
+    match (len(T)):
+        case 1:
+            return T
+        case 2:
+            return np.arange(T[0],T[1],deltaT)
+        case 3:
+            return np.arange(T[0],T[1]+T[2],T[2])
+
+    raise ValueError(f'Parameter T must have length of 1,2, or 3')
+
+
 class ClusterIsing:
-    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5,beta=0.001):
+    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001):
         self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
         self.rng = rng
         self.m = shape[0]
@@ -48,8 +67,8 @@ class ClusterIsing:
         self.periodic = periodic
         self.beta = beta
         self.p  = 1.0 - np.exp(-2.0*beta)
-        self.E = defaultdict(lambda: 0)
-        self.M = defaultdict(lambda: 0)
+        self.E = np.zeros((4*self.N+1))
+        self.M = np.zeros((2*self.N+1))
 
     def step(self,sigma):
         j = self.rng.integers(self.N)
@@ -68,13 +87,13 @@ class ClusterIsing:
         get_em = lambda sigma:get_energy_magnetism(sigma, shape=(self.m,self.n), periodic=self.periodic)
         sigma = self.rng.choice([-1,1],size=self.N)
         E,M = get_em(sigma)
-        self.E[E] += 1
-        self.M[M] += 1
+        self.E[2*self.N + E] += 1
+        self.M[self.N + M] += 1
         for i in range(Nsteps):
             self.step(sigma)
             E,M = get_em(sigma)
-            self.E[E] += 1
-            self.M[M] += 1
+            self.E[2*self.N + E] += 1
+            self.M[self.N + M] += 1
 
 def get_file_name(args,default_ext='.png',seq=None):
     '''
@@ -97,15 +116,24 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,Niterations=5,beta=10)
-    markov.run(Nsteps=args.Nsteps)
-
+    T_range = get_range(args.T)
     fig = figure(figsize=(12,12))
-    ax = fig.add_subplot(1,1,1)
-    Es = sorted(list(markov.E.keys()))
-    Ms = sorted(list(markov.M.keys()))
-    ax.plot(Es,[markov.E[e] for e in Es],color='blue')
-    ax.plot(Ms,[markov.M[m] for m in Ms],color='red')
+    fig.suptitle(f'After {args.Nsteps} Steps')
+    ax1 = fig.add_subplot(2,1,1)
+    ax2 = fig.add_subplot(2,1,2)
+    N = args.m * args.n
+    width = 5/len(T_range)
+    for i,T in enumerate(T_range):
+        markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
+        markov.run(Nsteps=args.Nsteps)
+        ax1.bar(np.array(list(range(-2*N,2*N+1)))+i*width,markov.E,width=width,label=f'T={T}')
+        ax2.bar(np.array(list(range(-N,N+1)))+i*width,markov.M,width=width,label=f'T={T}')
+
+    ax1.set_title('Energy')
+    ax2.set_title('Magnetization')
+    ax1.legend()
+    ax2.legend()
+    fig.tight_layout(pad=2)
     fig.savefig(get_file_name(args))
     elapsed = time() - start
     minutes = int(elapsed/60)
