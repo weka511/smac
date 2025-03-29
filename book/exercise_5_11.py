@@ -24,7 +24,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from ising import Nbr, get_energy_magnetism
+from ising import Nbr, get_energy_magnetism, Neighbours
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -35,8 +35,10 @@ def parse_arguments():
     parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
-    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('--show', default=False, action = 'store_true', help   = 'Show plot')
     parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
+    parser.add_argument('--Tc',default=False,action = 'store_true', help   = 'Include critical temperature')
+    parser.add_argument('--cache',default=False,action = 'store_true', help  = 'Cache Neighbours')
     return parser.parse_args()
 
 def get_range(T,deltaT=0.1):
@@ -58,7 +60,10 @@ def get_range(T,deltaT=0.1):
 
 
 class ClusterIsing:
-    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001):
+    '''
+    Algoorithm 9.9 Cluster Ising
+    '''
+    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001,cache=False):
         self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
         self.rng = rng
         self.m = shape[0]
@@ -69,13 +74,17 @@ class ClusterIsing:
         self.p  = 1.0 - np.exp(-2.0*beta)
         self.E = np.zeros((4*self.N+1))
         self.M = np.zeros((2*self.N+1))
+        if cache:
+            self.neighbours = Neighbours(shape=shape,periodic=periodic)
+        self.cache = cache
 
     def step(self,sigma):
         j = self.rng.integers(self.N)
         Pocket, Cluster = [j], [j]
         while Pocket != []:
             k = self.rng.choice(Pocket)
-            for l in self.Nbr(k):
+            neighbours = [nn for nn in self.neighbours[k,:] if nn > -1] if self.cache else self.Nbr(k)
+            for l in neighbours:#self.Nbr(k):
                 if sigma[l] == sigma[k] and l not in Cluster and self.rng.uniform() < self.p:
                     Pocket.append(l)
                     Cluster.append(l)
@@ -111,6 +120,9 @@ def get_file_name(args,default_ext='.png',seq=None):
         base = f'{base}{seq}'
     return join(args.figs,f'{base}{ext}')
 
+def get_periodic(periodic):
+    return 'with periodic boundary conditions,' if periodic else ''
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -118,16 +130,18 @@ if __name__=='__main__':
     args = parse_arguments()
     T_range = get_range(args.T)
     fig = figure(figsize=(12,12))
-    fig.suptitle(f'After {args.Nsteps} Steps')
+    fig.suptitle(rf'Cluster Ising {args.m}$\times${args.n}, {get_periodic(args.periodic)} after {args.Nsteps} Steps')
     ax1 = fig.add_subplot(2,1,1)
     ax2 = fig.add_subplot(2,1,2)
-    N = args.m * args.n
+    N = args.m*args.n
     width = 5/len(T_range)
+    if args.Tc:
+        T_range = sorted(list(T_range) + [2/np.log(1+np.sqrt(2))])
     for i,T in enumerate(T_range):
-        markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
+        markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T,cache=args.cache)
         markov.run(Nsteps=args.Nsteps)
-        ax1.bar(np.array(list(range(-2*N,2*N+1)))+i*width,markov.E,width=width,label=f'T={T}')
-        ax2.bar(np.array(list(range(-N,N+1)))+i*width,markov.M,width=width,label=f'T={T}')
+        ax1.bar(np.array(list(range(-2*N,2*N+1)))+i*width,markov.E,width=width,label=f'T={T:.3}')
+        ax2.bar(np.array(list(range(-N,N+1)))+i*width,markov.M,width=width,label=f'T={T:.3}')
 
     ax1.set_title('Energy')
     ax2.set_title('Magnetization')

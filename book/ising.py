@@ -126,10 +126,22 @@ def get_max_neigbbours(shape = (4,5)):
     Parameters:
         shape    Shape of space
     Returns:
-        2**d, where d i the dimension of the space
+        2**d, where d is the dimension of the space
     '''
     d = len(shape)
     return 2**d
+
+class Neighbours:
+    def __init__(self,shape = (4,5), periodic = False):
+        N = np.prod(shape)
+        d = get_max_neigbbours(shape=shape)   #FIXME
+        self.neighbours = -1 * np.ones((N,d+1),dtype=int)
+        for i in range(N):
+            for j,neighbour in enumerate(Nbr(i,shape=shape,periodic=periodic)):
+                self.neighbours[i,j] = neighbour
+
+    def __getitem__(self,index):
+        return self.neighbours[index]
 
 def generate_edges(shape=(4,4), periodic=False):
     '''
@@ -164,6 +176,21 @@ def get_energy_magnetism(sigma, shape=(4,4), periodic=False):
     M = sum(sigma)
     return E,M
 
+class NeighboursTest(TestCase):
+    '''
+    '''
+    def setUp(self):
+        self.neighbours = Neighbours()
+        self.neighboursP = Neighbours(periodic=True)
+
+    def test8(self):
+        self.assertCountEqual([3,13,7,9,-1], self.neighbours[8])
+
+    def test14(self):
+        self.assertCountEqual([9,19,13,-1,-1], self.neighbours[14])
+
+    def testNbrP14(self):
+        self.assertCountEqual([9,19,13,10,-1], self.neighboursP[14])
 
 class NbrTest(TestCase):
     '''
@@ -176,19 +203,19 @@ class NbrTest(TestCase):
           0   1   2   3   4
     '''
 
-    def testNbr0(self):
+    def testNbr8(self):
         Nbrs = list(Nbr(8))
         self.assertCountEqual([3,13,7,9], Nbrs)
 
-    def testNbr1(self):
+    def testNbr12(self):
         Nbrs = list(Nbr(12))
         self.assertCountEqual([7,17,11,13], Nbrs)
 
-    def testNbr2(self):
+    def testNbr14(self):
         Nbrs = list(Nbr(14))
         self.assertCountEqual([9,19,13], Nbrs)
 
-    def testNbr3(self):
+    def testNbr15(self):
         Nbrs = list(Nbr(15))
         self.assertCountEqual([10,16], Nbrs)
 
@@ -196,15 +223,15 @@ class NbrTest(TestCase):
         Nbrs = list(Nbr(4))
         self.assertCountEqual([9,3], Nbrs)
 
-    def testNbrP1(self):
+    def testNbrP12(self):
         Nbrs = list(Nbr(12,periodic=True))
         self.assertCountEqual([7,17,11,13], Nbrs)
 
-    def testNbrP2(self):
+    def testNbrP14(self):
         Nbrs = list(Nbr(14,periodic=True))
         self.assertCountEqual([9,19,13,10], Nbrs)
 
-    def testNbrP3(self):
+    def testNbrP15(self):
         Nbrs = list(Nbr(15,periodic=True))
         self.assertCountEqual([10,0,19,16], Nbrs)
 
