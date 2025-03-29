@@ -281,6 +281,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 5.2||exercise_5_10.py|Exercise 5.10: Test Local Metropolis algorithm for the Ising model
 -||exercise_5_11.py|Exercise 5-11/Algorithm 5-9-cluster ising
 -||markov_ising.py|Algorithm 5.7: Local Metropolis algorithm for the Ising model
+-||bench42.sh|Benchmark effect of [Issue #42](https://github.com/weka511/smac/issues/42)
 5.3|||Generalized Ising models
 6|||Entropic Forces
 7|||Dynamic Monte Carlo Methods
@@ -289,6 +290,5 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 
 File|Description
 ----------|---------------------------------------------------------------------------------------
-bench42.sh|Benchmark effect of Issue #42
 backends.py|List graphics backends
 walker.py|Used to create README.MD from file tree
