@@ -132,6 +132,11 @@ def get_max_neighbours(shape = (4,5)):
     return 2**d
 
 class Neighbours:
+    '''
+    This class allows neighbours to be looked up from a table,
+    with one row for each site, comprising the neighbours,
+    # and using -1 as the marker for end of neighbours
+    '''
     def __init__(self,shape = (4,5), periodic = False):
         N = np.prod(shape)
         d = get_max_neighbours(shape=shape)
@@ -178,6 +183,7 @@ def get_energy_magnetism(sigma, shape=(4,4), periodic=False):
 
 class NeighboursTest(TestCase):
     '''
+    Test looking neighbours up from table
     '''
     def setUp(self):
         self.neighbours = Neighbours()
