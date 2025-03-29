@@ -118,7 +118,7 @@ def Nbr(index, shape = (4,5), periodic = False):
                 yield np.ravel_multi_index(create_neighbour(i,j,coordinates),shape) # Ravel neighbour back to an index
 
 
-def get_max_neigbbours(shape = (4,5)):
+def get_max_neighbours(shape = (4,5)):
     '''
     Used to determine the maximum number of energy or magnetization steps
     possible
@@ -134,7 +134,7 @@ def get_max_neigbbours(shape = (4,5)):
 class Neighbours:
     def __init__(self,shape = (4,5), periodic = False):
         N = np.prod(shape)
-        d = get_max_neigbbours(shape=shape)   #FIXME
+        d = get_max_neighbours(shape=shape)
         self.neighbours = -1 * np.ones((N,d+1),dtype=int)
         for i in range(N):
             for j,neighbour in enumerate(Nbr(i,shape=shape,periodic=periodic)):
@@ -240,7 +240,7 @@ class NbrTest(TestCase):
         self.assertCountEqual([19,9,3,0], Nbrs)
 
     def test_max_neighbours(self):
-        self.assertEqual(4, get_max_neigbbours())
+        self.assertEqual(4, get_max_neighbours())
 
 class Nbr3dTest(TestCase):
     '''

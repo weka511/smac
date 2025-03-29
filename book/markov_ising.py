@@ -25,7 +25,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from ising import Nbr,get_energy_magnetism,get_max_neigbbours
+from ising import Nbr,get_energy_magnetism,get_max_neighbours
 from enumerate_ising import get_initial_energy
 
 class Datum(Enum):
@@ -124,7 +124,7 @@ class MarkovIsing:
         self.periodic = periodic
         self.beta = beta
         self.data = IsingData(Niterations=Niterations,N=self.N)
-        self.weights = Weights(beta,get_max_neigbbours(shape))
+        self.weights = Weights(beta,get_max_neighbours(shape))
 
     def step(self,sigma,E,M):
         '''
