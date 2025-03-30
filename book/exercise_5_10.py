@@ -43,7 +43,7 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-T', '--T', type=float, default=2.0,help='Temperature')
-    parser.add_argument('--cache',default=False,action = 'store_true', help  = 'Cache Neighbours')
+    parser.add_argument('--nocache',default=False,action = 'store_true', help='Do not Cache Neighbours')
     return parser.parse_args()
 
 
@@ -73,7 +73,7 @@ if __name__=='__main__':
 
     markov = MarkovIsing(Nbr=Nbr,rng = np.random.default_rng(args.seed),
                          shape=(args.m,args.n),periodic=args.periodic,
-                         Niterations=args.Niterations,beta=beta,cache=args.cache)
+                         Niterations=args.Niterations,beta=beta,cache=not args.nocache)
     e = np.zeros((args.Niterations))
     cV = np.zeros((args.Niterations))
     for i in range(args.Niterations):

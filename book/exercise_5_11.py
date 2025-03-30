@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#   Copyright (C) 2024-2025 Simon Crase
+#   Copyright (C) 2025 Simon Crase
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ def parse_arguments():
     parser.add_argument('--show', default=False, action = 'store_true', help   = 'Show plot')
     parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
     parser.add_argument('--Tc',default=False,action = 'store_true', help   = 'Include critical temperature')
-    parser.add_argument('--cache',default=False,action = 'store_true', help  = 'Cache Neighbours')
+    parser.add_argument('--nocache',default=False,action = 'store_true', help='Do not Cache Neighbours')
     return parser.parse_args()
 
 def get_range(T,deltaT=0.1):
@@ -50,7 +50,7 @@ def get_range(T,deltaT=0.1):
     '''
     match (len(T)):
         case 1:
-            return T
+            return [T]
         case 2:
             return np.arange(T[0],T[1],deltaT)
         case 3:
@@ -61,7 +61,7 @@ def get_range(T,deltaT=0.1):
 
 class ClusterIsing:
     '''
-    Algoorithm 9.9 Cluster Ising
+    Algorithm 5.9 Cluster Ising
     '''
     def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001,cache=False):
         self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
@@ -138,7 +138,7 @@ if __name__=='__main__':
     if args.Tc:
         T_range = sorted(list(T_range) + [2/np.log(1+np.sqrt(2))])
     for i,T in enumerate(T_range):
-        markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T,cache=args.cache)
+        markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T,cache=not args.nocache)
         markov.run(Nsteps=args.Nsteps)
         ax1.bar(np.array(list(range(-2*N,2*N+1)))+i*width,markov.E,width=width,label=f'T={T:.3}')
         ax2.bar(np.array(list(range(-N,N+1)))+i*width,markov.M,width=width,label=f'T={T:.3}')

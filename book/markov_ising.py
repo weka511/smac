@@ -223,7 +223,7 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', default=False, action = 'store_true', help = 'Show plot')
     parser.add_argument('--lowest', default=False, action = 'store_true', help = 'Initialize to all spins down at the start of each run')
-    parser.add_argument('--cache',default=False,action = 'store_true', help  = 'Cache Neighbours')
+    parser.add_argument('--nocache',default=False,action = 'store_true', help='Do not Cache Neighbours')
     return parser.parse_args()
 
 
@@ -306,7 +306,7 @@ if __name__=='__main__':
         beta = 1/T
 
         markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,
-                             Niterations=args.Niterations,beta=beta,cache=args.cache)
+                             Niterations=args.Niterations,beta=beta,cache=not args.nocache)
         for i in range(args.Niterations):
             markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
 
