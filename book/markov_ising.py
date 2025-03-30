@@ -25,7 +25,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from ising import Nbr,get_energy_magnetism,get_max_neighbours
+from ising import Nbr,get_energy_magnetism,get_max_neighbours,Neighbours
 from enumerate_ising import get_initial_energy
 
 class Datum(Enum):
@@ -115,7 +115,7 @@ class MarkovIsing:
         magnetization  Store counts for each magnetization
         beta           Inverse temperature
     '''
-    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5,beta=0.001):
+    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5,beta=0.001,cache=False):
         self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
         self.rng = rng
         self.m = shape[0]
@@ -125,6 +125,9 @@ class MarkovIsing:
         self.beta = beta
         self.data = IsingData(Niterations=Niterations,N=self.N)
         self.weights = Weights(beta,get_max_neighbours(shape))
+        if cache:
+            self.neighbours = Neighbours(shape=shape,periodic=periodic)
+        self.cache = cache
 
     def step(self,sigma,E,M):
         '''
@@ -141,7 +144,8 @@ class MarkovIsing:
             M         Magnetization afterstep
         '''
         k = self.rng.integers(self.N)
-        h = sum(sigma[i] for i in self.Nbr(k))
+        neighbours = [nn for nn in self.neighbours[k,:] if nn > -1] if self.cache else self.Nbr(k)
+        h = sum(sigma[i] for i in neighbours)
         deltaE = 2*h*sigma[k]
         Upsilon = self.weights.get_upsilon(deltaE)
         if deltaE <= 0 or self.rng.random() < Upsilon:
@@ -219,6 +223,7 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', default=False, action = 'store_true', help = 'Show plot')
     parser.add_argument('--lowest', default=False, action = 'store_true', help = 'Initialize to all spins down at the start of each run')
+    parser.add_argument('--cache',default=False,action = 'store_true', help  = 'Cache Neighbours')
     return parser.parse_args()
 
 
@@ -300,7 +305,8 @@ if __name__=='__main__':
     for j,T in enumerate(T_range):
         beta = 1/T
 
-        markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,Niterations=args.Niterations,beta=beta)
+        markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,
+                             Niterations=args.Niterations,beta=beta,cache=args.cache)
         for i in range(args.Niterations):
             markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
 
