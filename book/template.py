@@ -34,21 +34,25 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_file_name(args,default_ext='.png',seq=None):
+def get_file_name(name,default_ext='png',seq=None):
     '''
     Used to create file names
 
     Parameters:
-        args
-        default_ext
-        seq
+        name          Basis for file name
+        default_ext   Extension if non specified
+        seq           Used if there are multiple files
     '''
-    base,ext = splitext(args.out)
+    base,ext = splitext(name)
     if len(ext) == 0:
         ext = default_ext
     if seq != None:
         base = f'{base}{seq}'
-    return join(args.figs,f'{base}{ext}')
+    qualified_name = f'{base}.{ext}'
+    if ext == 'png':
+        return join(args.figs,qualified_name)
+    else:
+        return qualified_name
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -58,7 +62,7 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize=(12,12))
 
-    fig.savefig(get_file_name(args))
+    fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
