@@ -34,6 +34,7 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('-f', '--frequency',type = int, default = 100, help = 'How often to report progress')
     return parser.parse_args()
 
 
@@ -53,15 +54,15 @@ def get_file_name(args,default_ext='.png',seq=None):
         base = f'{base}{seq}'
     return join(args.figs,f'{base}{ext}')
 
-def create_spins(N):
-    Spins = np.zeros((2**N,N))
+def generate_spins(N):
+    Spins = np.zeros((N))
     for i in range(2**N):
         j = i
         k = 0
         while j > 0:
             k -= 1
-            j,Spins[i,k] = divmod(j,2)
-    return Spins
+            j,Spins[k] = divmod(j,2)
+        yield Spins
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -70,7 +71,10 @@ if __name__=='__main__':
     args = parse_arguments()
 
     N = args.m*args.n
-    print (create_spins(N))
+    print (2**N)
+    for i,s in enumerate(generate_spins(N)):
+        if i%args.frequency == 0:
+            print (f'{i/(2**N)} {time() - start:2}')
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize=(12,12))
 
