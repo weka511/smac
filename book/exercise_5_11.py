@@ -167,6 +167,7 @@ if __name__=='__main__':
     width = 5/len(T_range)  # Established empirically
 
     with open(get_file_name(args.out,default_ext='csv'),'w') as out:
+        out.write(f'{N},{len(T_range)}\n')
         for i,T in enumerate(T_range):
             markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
             markov.run(Nsteps=args.Nsteps)
