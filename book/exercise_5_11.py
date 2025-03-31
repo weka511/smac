@@ -83,8 +83,8 @@ class ClusterIsing:
         self.periodic = periodic
         self.beta = beta
         self.p  = 1.0 - np.exp(-2.0*beta) # Makes acceptance probability == 1 - (5.22)
-        self.E = np.zeros((4*self.N+1))
-        self.M = np.zeros((2*self.N+1))
+        self.E = np.zeros((4*self.N+1),dtype=np.int64)
+        self.M = np.zeros((2*self.N+1),dtype=np.int64)
         self.neighbours = Neighbours(shape=shape,periodic=periodic)
 
     def step(self,sigma):
@@ -124,21 +124,25 @@ class ClusterIsing:
             self.E[2*self.N + E] += 1
             self.M[self.N + M] += 1
 
-def get_file_name(args,default_ext='.png',seq=None):
+def get_file_name(name,default_ext='png',seq=None):
     '''
     Used to create file names
 
-    Parameters:
-        args
-        default_ext
-        seq
+       Parameters:
+        name          Basis for file name
+        default_ext   Extension if non specified
+        seq           Used if there are multiple files
     '''
-    base,ext = splitext(args.out)
+    base,ext = splitext(name)
     if len(ext) == 0:
         ext = default_ext
     if seq != None:
         base = f'{base}{seq}'
-    return join(args.figs,f'{base}{ext}')
+    qualified_name = f'{base}.{ext}'
+    if ext == 'png':
+        return join(args.figs,qualified_name)
+    else:
+        return qualified_name
 
 def get_periodic(periodic):
     '''
@@ -160,20 +164,29 @@ if __name__=='__main__':
     ax1 = fig.add_subplot(2,1,1)
     ax2 = fig.add_subplot(2,1,2)
     N = args.m*args.n
-    width = 5/len(T_range)
+    width = 5/len(T_range)  # Established empirically
 
-    for i,T in enumerate(T_range):
-        markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
-        markov.run(Nsteps=args.Nsteps)
-        ax1.bar(np.array(list(range(-2*N,2*N+1)))+i*width,markov.E,width=width,label=f'T={T:.3}')
-        ax2.bar(np.array(list(range(-N,N+1)))+i*width,markov.M,width=width,label=f'T={T:.3}')
+    with open(get_file_name(args.out,default_ext='csv'),'w') as out:
+        for i,T in enumerate(T_range):
+            markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
+            markov.run(Nsteps=args.Nsteps)
+            ax1.bar(np.array(list(range(-2*N,2*N+1)))+i*width,markov.E,width=width,label=f'T={T:.3}')
+            ax2.bar(np.array(list(range(-N,N+1)))+i*width,markov.M,width=width,label=f'T={T:.3}')
+            for i in range(-2*N,2*N+1):
+                out.write(f'{T},{i},{markov.E[i+2*N]}\n')
+            for i in range(-N,N+1):
+                out.write(f'{T},{i},{markov.M[i+N]}\n')
+        print(f'Data written to {out.name}')
 
     ax1.set_title('Energy')
     ax2.set_title('Magnetization')
     ax1.legend()
     ax2.legend()
     fig.tight_layout(pad=2)
-    fig.savefig(get_file_name(args))
+    fig.savefig(get_file_name(args.out))
+
+
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
