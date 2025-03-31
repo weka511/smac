@@ -265,7 +265,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 5.1||energy_ising.py|5.1: Compute energy of a simple Ising configuration
 -||edge_ising.py|Algorithm 5.5 edge-ising. Gray code enumeration of the loop configurations in Figure 5.8
 -||enumerate_ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
--||Exercise 2-2. Generate configurations from binary representation
+-||Exercise 2-2. Generate configurations from binary representation (incomplete)
 -||exercise_5.7.py|Exercise 5.7. Compute Partition function using loop configurations as described in 5.1.3
 -||ising.py|Shared code for Ising model: Algorithm 5.2, Gray code for spins; generate neighbours of a spin; calculate energy for a configuration.
 -||ising_enum.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
