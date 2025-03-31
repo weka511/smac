@@ -64,7 +64,6 @@ class ClusterIsing:
     Algorithm 5.9 Cluster Ising
     '''
     def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001,cache=False):
-        self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
         self.rng = rng
         self.m = shape[0]
         self.n = shape[1]
@@ -74,18 +73,33 @@ class ClusterIsing:
         self.p  = 1.0 - np.exp(-2.0*beta)
         self.E = np.zeros((4*self.N+1))
         self.M = np.zeros((2*self.N+1))
+        self.cache = cache
         if cache:
             self.neighbours = Neighbours(shape=shape,periodic=periodic)
-        self.cache = cache
+        else:
+            self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
+
 
     def step(self,sigma):
+        '''
+        Construct Cluster and the Pocket, a subset that will be used to expand the Cluster.
+        Initially each of them contains the same randomly selected spin. We extend the Cluster
+        by selecting one element from the pocket repeatedly, and growing both sets by randomly selecting
+        neighbours with the same spin.
+        '''
+        def get_neighbours(k):
+            if self.cache:
+                return [l for l in self.neighbours[k,:] if l > -1]
+            else:
+                return self.Nbr(k)
         j = self.rng.integers(self.N)
         Pocket, Cluster = [j], [j]
         while Pocket != []:
             k = self.rng.choice(Pocket)
-            neighbours = [nn for nn in self.neighbours[k,:] if nn > -1] if self.cache else self.Nbr(k)
-            for l in neighbours:#self.Nbr(k):
-                if sigma[l] == sigma[k] and l not in Cluster and self.rng.uniform() < self.p:
+            for l in get_neighbours(k):
+                if (sigma[l] == sigma[k]
+                    and l not in Cluster
+                    and self.rng.uniform() < self.p):
                     Pocket.append(l)
                     Cluster.append(l)
             Pocket.remove(k)
@@ -93,6 +107,9 @@ class ClusterIsing:
             sigma[k] *= -1
 
     def run(self,Nsteps=1000):
+        '''
+        Construct one chain
+        '''
         get_em = lambda sigma:get_energy_magnetism(sigma, shape=(self.m,self.n), periodic=self.periodic)
         sigma = self.rng.choice([-1,1],size=self.N)
         E,M = get_em(sigma)
@@ -121,6 +138,9 @@ def get_file_name(args,default_ext='.png',seq=None):
     return join(args.figs,f'{base}{ext}')
 
 def get_periodic(periodic):
+    '''
+    Used to construct tile for plot
+    '''
     return 'with periodic boundary conditions,' if periodic else ''
 
 if __name__=='__main__':
