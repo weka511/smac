@@ -106,7 +106,7 @@ class MarkovIsing:
     This class uses Markov Chain Monte Carlo (MCMC) to sample an Ising Model
 
     Attributes:
-        Nbr Used to iterate through neighbours of a location
+        neighbours     Table used to iterate through neighbours of a location
         m              Number of rows
         n              Number of columns
         N              Number of sites
@@ -115,7 +115,7 @@ class MarkovIsing:
         magnetization  Store counts for each magnetization
         beta           Inverse temperature
     '''
-    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5,beta=0.001,cache=False):
+    def __init__(self,rng=np.random.default_rng(),shape=(4,5),periodic=False,Niterations=5,beta=0.001):
         self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
         self.rng = rng
         self.m = shape[0]
@@ -125,9 +125,8 @@ class MarkovIsing:
         self.beta = beta
         self.data = IsingData(Niterations=Niterations,N=self.N)
         self.weights = Weights(beta,get_max_neighbours(shape))
-        if cache:
-            self.neighbours = Neighbours(shape=shape,periodic=periodic)
-        self.cache = cache
+        self.neighbours = Neighbours(shape=shape,periodic=periodic)
+
 
     def step(self,sigma,E,M):
         '''
@@ -144,7 +143,7 @@ class MarkovIsing:
             M         Magnetization afterstep
         '''
         k = self.rng.integers(self.N)
-        neighbours = [nn for nn in self.neighbours[k,:] if nn > -1] if self.cache else self.Nbr(k)
+        neighbours = [nn for nn in self.neighbours[k,:] if nn > -1]
         h = sum(sigma[i] for i in neighbours)
         deltaE = 2*h*sigma[k]
         Upsilon = self.weights.get_upsilon(deltaE)
@@ -223,7 +222,6 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', default=False, action = 'store_true', help = 'Show plot')
     parser.add_argument('--lowest', default=False, action = 'store_true', help = 'Initialize to all spins down at the start of each run')
-    parser.add_argument('--nocache',default=False,action = 'store_true', help='Do not Cache Neighbours')
     return parser.parse_args()
 
 
@@ -305,8 +303,8 @@ if __name__=='__main__':
     for j,T in enumerate(T_range):
         beta = 1/T
 
-        markov = MarkovIsing(Nbr=Nbr,rng = rng,shape=(args.m,args.n),periodic=args.periodic,
-                             Niterations=args.Niterations,beta=beta,cache=not args.nocache)
+        markov = MarkovIsing(rng = rng,shape=(args.m,args.n),periodic=args.periodic,
+                             Niterations=args.Niterations,beta=beta)
         for i in range(args.Niterations):
             markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
 

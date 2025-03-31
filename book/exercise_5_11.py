@@ -38,7 +38,7 @@ def parse_arguments():
     parser.add_argument('--show', default=False, action = 'store_true', help   = 'Show plot')
     parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
     parser.add_argument('--Tc',default=False,action = 'store_true', help   = 'Include critical temperature')
-    parser.add_argument('--nocache',default=False,action = 'store_true', help='Do not Cache Neighbours')
+
     return parser.parse_args()
 
 def get_range(T,deltaT=0.1):
@@ -62,23 +62,30 @@ def get_range(T,deltaT=0.1):
 class ClusterIsing:
     '''
     Algorithm 5.9 Cluster Ising
+
+    Attributes:
+        rng         Generator for
+        neighbours  Table used to iterate through neighbours of a location
+        m           Number of rows
+        n           Number of columns
+        N           Number of sites
+        periodic    Use periodic boundary conditions
+        beta        Inverse temperature
+        p           See discussion following (5.22)
+        E           Used to store counts for energy
+        M           Used to store counts for magnetization
     '''
-    def __init__(self,Nbr=Nbr,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001,cache=False):
+    def __init__(self,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001):
         self.rng = rng
         self.m = shape[0]
         self.n = shape[1]
         self.N = self.m*self.n
         self.periodic = periodic
         self.beta = beta
-        self.p  = 1.0 - np.exp(-2.0*beta)
+        self.p  = 1.0 - np.exp(-2.0*beta) # Makes acceptance probability == 1 - (5.22)
         self.E = np.zeros((4*self.N+1))
         self.M = np.zeros((2*self.N+1))
-        self.cache = cache
-        if cache:
-            self.neighbours = Neighbours(shape=shape,periodic=periodic)
-        else:
-            self.Nbr = lambda k:Nbr(k,shape=shape,periodic=periodic)
-
+        self.neighbours = Neighbours(shape=shape,periodic=periodic)
 
     def step(self,sigma):
         '''
@@ -87,16 +94,12 @@ class ClusterIsing:
         by selecting one element from the pocket repeatedly, and growing both sets by randomly selecting
         neighbours with the same spin.
         '''
-        def get_neighbours(k):
-            if self.cache:
-                return [l for l in self.neighbours[k,:] if l > -1]
-            else:
-                return self.Nbr(k)
         j = self.rng.integers(self.N)
         Pocket, Cluster = [j], [j]
         while Pocket != []:
             k = self.rng.choice(Pocket)
-            for l in get_neighbours(k):
+            for l in self.neighbours[k,:]:
+                if l == -1: break
                 if (sigma[l] == sigma[k]
                     and l not in Cluster
                     and self.rng.uniform() < self.p):
@@ -149,16 +152,18 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     T_range = get_range(args.T)
+    if args.Tc:
+        T_range = sorted(list(T_range) + [2/np.log(1+np.sqrt(2))])
+
     fig = figure(figsize=(12,12))
     fig.suptitle(rf'Cluster Ising {args.m}$\times${args.n}, {get_periodic(args.periodic)} after {args.Nsteps} Steps')
     ax1 = fig.add_subplot(2,1,1)
     ax2 = fig.add_subplot(2,1,2)
     N = args.m*args.n
     width = 5/len(T_range)
-    if args.Tc:
-        T_range = sorted(list(T_range) + [2/np.log(1+np.sqrt(2))])
+
     for i,T in enumerate(T_range):
-        markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T,cache=not args.nocache)
+        markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
         markov.run(Nsteps=args.Nsteps)
         ax1.bar(np.array(list(range(-2*N,2*N+1)))+i*width,markov.E,width=width,label=f'T={T:.3}')
         ax2.bar(np.array(list(range(-N,N+1)))+i*width,markov.M,width=width,label=f'T={T:.3}')
