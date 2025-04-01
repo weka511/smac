@@ -23,7 +23,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-
+from thermo import thermo
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -89,34 +89,6 @@ def read_data(file_name):
                         i = 0
 
 
-def thermo(E,N,beta=1.0,NObservations= None):
-    '''
-    Algorithm 5.4 Calculate thermodynamic quantities
-
-    Parameters:
-        E             Energies that are present in data
-        N             Count of each energy
-        beta          Inverse temperature
-        NObservations Total number of States (exact enumeration) or data points (MCMC)
-
-    Returns:
-        Z      Partition function
-        Emean  Mean energy
-        cV     Specific heat capacity
-    '''
-    Emin = E.min()
-    Eprime = E - Emin
-    weights = np.exp(-beta*Eprime) *N
-    Z = np.sum(weights)
-    Emean = np.average(Eprime,weights=weights)
-    EVariance = np.average((Eprime-Emean)**2,weights=weights)
-    if NObservations == None:
-        NObservations = len(N)-1
-    return (
-         Z*np.exp(-beta*Emin),                # Partition function
-          (Emean + Emin)/NObservations,        # Mean energy e.g. 37-1!
-          beta**2 * EVariance/NObservations    # Specific heat capacity
-     )
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -125,7 +97,7 @@ if __name__=='__main__':
     args = parse_arguments()
 
     for N,T,E,M in read_data(get_file_name(args.input,default_ext='csv')):
-        Z,e,c =thermo(E[:,0],E[:,1],beta=1/T)
+        Z,e,c =thermo(E[:,0],E[:,1],beta=1/T,NObservations=N)
         print (T,Z,e,c)
 
     rng = np.random.default_rng(args.seed)

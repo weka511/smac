@@ -283,6 +283,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -||exercise_5_11.py|Exercise 5-11/Algorithm 5-9-cluster ising
 -||thermo_ising.py|Exercise 5-11: calculate thermodynamic quantities
 -||markov_ising.py|Algorithm 5.7: Local Metropolis algorithm for the Ising model
+-||thermo.py|Exercise 5-11: calculate thermodynamic quantities
 -||bench42.sh|Benchmark effect of [Issue #42](https://github.com/weka511/smac/issues/42)
 5.3|||Generalized Ising models
 6|||Entropic Forces

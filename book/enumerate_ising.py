@@ -31,7 +31,7 @@ def get_initial_energy(N,m,n,periodic=True):
     else:
         return -2 * N + m + n
 
-def enumerate_ising(shape, periodic=True,frequency=10000):
+def enumerate_ising(shape, periodic=True,frequency=0):
     '''
     Algorithm 5.3: single flip enumeration for the Ising model.
 
@@ -54,7 +54,7 @@ def enumerate_ising(shape, periodic=True,frequency=10000):
     # Visit all configurations and adjust E and M
 
     for i, (k,_) in enumerate(gray_flip(N)):
-        if i%frequency ==0: print (f'{i:,}')
+        if frequency != 0 and i%frequency ==0: print (f'{i:,}')
         k -= 1                                #k starts at 1 (following The Book), convert to 0-based
                                               # so we can use as an array index
         # Calculate field on site k and use it to update E
