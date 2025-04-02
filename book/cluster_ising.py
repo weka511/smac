@@ -27,8 +27,10 @@ class IsingData:
     This class stores the Energy and Magnetization
 
     Attributes:
-        E
-        M
+        E   Array of counts, one for each energy.
+            Energies are all even, so we need only half as many
+        M   Array of counts, one for each Magnetization
+        N   Number of points in lattice
     '''
     def __init__(self,N):
         self.N = N
@@ -52,11 +54,12 @@ class IsingData:
     def store(self,E,M):
         '''
         Update counts of energy and magnetization
+
+        Parameters:
+            E       Energy to be updated
+            M       Magnetization to be updated
         '''
-        assert E%2 == 0
-        assert self.N + E//2 >= 0
-        assert self.N + M >= 0
-        self.E[self.N+E//2] += 1
+        self.E[self.N + E//2] += 1
         self.M[self.N + M] += 1
 
 class ClusterIsing:
@@ -89,25 +92,29 @@ class ClusterIsing:
         '''
         Construct Cluster and the Pocket, a subset that will be used to expand the Cluster.
         Initially each of them contains the same randomly selected spin. We extend the Cluster
-        by selecting one element from the pocket repeatedly, and growing both sets by randomly selecting
+        by selecting one element from the Pocket repeatedly, and growing both sets by randomly selecting
         neighbours with the same spin.
         '''
-        j = self.rng.integers(self.N)
+        j = self.rng.integers(self.N)    # Start with this randomly selected site
         Pocket, Cluster = [j], [j]
         while Pocket != []:
-            k = self.rng.choice(Pocket)
-            for l in self.neighbours[k,:]:
-                if l == -1: break
-                if (sigma[l] == sigma[k]
-                    and l not in Cluster
-                    and self.rng.uniform() < self.p):
+            k = self.rng.choice(Pocket)  # Process one site from pocket
+            Pocket.remove(k)
+            for l in self.neighbours[k,:]:             # Consider all neighbours
+                if l == -1: break                      # Sentinel indicates that we have exhausted neighbours
+                if (sigma[l] == sigma[k]               # Only add if spins match
+                    and l not in Cluster               # Don't match if already in Cluster
+                    and self.rng.uniform() < self.p):  # Add tocluster with probabiilty p
                     Pocket.append(l)
                     Cluster.append(l)
-            Pocket.remove(k)
-        for k in Cluster:
+
+        for k in Cluster:        # Flip the completed cluster
             sigma[k] *= -1
 
     def get_energy_magnetism(self,sigma):
+        '''
+        Calculate eneryy and magnetizaion using neighbours
+        '''
         def get_energy():
             E = 0
             for i in range(self.N):
