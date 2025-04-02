@@ -42,7 +42,7 @@ class IsingDatabase:
         out.seek(0)
         return np.load(out)
 
-    def __init__(self,file='test.db',run_table='run',verbose=True):
+    def __init__(self,file='test.db',run_table='run',verbose=False):
         base,_ = splitext(file)
         sqlite3.register_adapter(np.ndarray, IsingDatabase.adapt_array)
         sqlite3.register_converter('array', IsingDatabase.convert_array)
