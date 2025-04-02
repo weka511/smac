@@ -20,7 +20,7 @@
 from unittest import TestCase, main
 import numpy as np
 
-def thermo(E,N,beta=1.0,NObservations= None):
+def thermo(E,N,beta=1.0):
     '''
     Algorithm 5.4 Calculate thermodynamic quantities
 
@@ -41,8 +41,8 @@ def thermo(E,N,beta=1.0,NObservations= None):
     Z = np.sum(weights)
     Emean = np.average(Eprime,weights=weights)
     EVariance = np.average((Eprime-Emean)**2,weights=weights)
-    if NObservations == None:
-        NObservations = len(N)-1
+
+    NObservations = len(N) - 1
     return (
          Z*np.exp(-beta*Emin),                # Partition function
           (Emean + Emin)/NObservations,        # Mean energy e.g. 37-1!
@@ -111,6 +111,14 @@ class TestThermo(TestCase):
         _,e,cV =thermo(self.density[:,0],self.density[:,1],beta=1/4)
         self.assertAlmostEqual(-0.566, e,delta=0.001)
         self.assertAlmostEqual(0.18704,cV,places=5)
+
+    def test2_5(self):
+        '''
+        T = 2.5
+        '''
+        _,e,cV =thermo(self.density[:,0],self.density[:,1],beta=2/5)
+        self.assertAlmostEqual(-1.280, e,delta=0.001)
+        self.assertAlmostEqual(1.00623,cV,places=5)
 
     def test2_0(self):
         '''
