@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Store paramters in a database'''
+'''Store parameters in a database'''
 
 from os.path import  splitext
 import numpy as np
@@ -51,13 +51,14 @@ class IsingDatabase:
         self.run_table = run_table
         self.verbose = verbose
         try:
-            self.execute(f'CREATE TABLE {self.run_table}(Temperature FLOAT PRIMARY KEY, iterations INTEGER, sigma array)')
+            self.execute(f'CREATE TABLE {self.run_table}(Temperature FLOAT, m INTEGER, n INTEGER, iterations INTEGER, sigma array, Energy array, Magnetization array)')
             if self.verbose:
                 print (f'Created table {self.run_table}')
         except sqlite3.OperationalError as e:
-            print (f'Table {self.run_table} exists already')
+            print (e)
         for row in  self.execute('SELECT name FROM sqlite_master'):
-            print (row)
+            if self.verbose:
+                print (row)
 
     def execute(self,sql_string):
         return self.cur.execute(sql_string)
@@ -70,29 +71,30 @@ class IsingDatabase:
 
     def __getitem__(self,key):
         count = 0
-        T = None
-        M = None
-        s = None
-        for T,M,s in self.execute(f'SELECT Temperature, iterations, sigma FROM {self.run_table} WHERE Temperature={key}'):
+        T,m,n = key
+        for NIterations,s,E,M in self.execute(f'SELECT iterations, sigma, Energy, Magnetization FROM {self.run_table} WHERE Temperature={T} AND m={m} AND n={n}'):
             count += 1
-        return count,T,M,s
+        if count == 1:
+            return NIterations,s,E,M
+        elif count == 0:
+            raise KeyError(f'{key} not found')
 
-    def __setitem__(self,T,value):
+
+    def __setitem__(self,key,value):
         count = 0
-        for T,M,s in self.execute(f'SELECT Temperature, iterations, sigma FROM {self.run_table} WHERE Temperature={T}'):
+        T,m,n = key
+        for _,_,_ in self.execute(f'SELECT Temperature, m,n FROM {self.run_table} WHERE Temperature={T} AND m={m} AND n={n}'):
             count += 1
-        M,s = value
-        if count == 0:
-            data = [(T, M, s)]
-            self.executemany(f'INSERT INTO {self.run_table} VALUES(?, ?, ?)', data)
-            self.commit()
-        else:
-            self.execute(f'UPDATE {self.run_table} SET M = {M} WHERE Temperature={T}')
+        if count > 0:
+            self.execute(f'DELETE FROM {self.run_table} WHERE Temperature={T}')
+        NIterations,s,E,M = value
+        self.executemany(f'INSERT INTO {self.run_table} VALUES(?, ?, ?, ? ,?, ?, ?)',  [(T, m,n, NIterations, s, E, M)])
+        self.commit()
+
 
 if __name__=='__main__':
-    db = IsingDatabase('baz')
-    db[1.0] = 666,np.array([1,1,-1,-1])
-    # count,T,M,s = db[1.0]
-
+    db = IsingDatabase(__file__)
+    db[(1.0,2,2)] = 1066,np.array([1,1,-1,-1]),np.array([[-72,1],[-68,4]]),np.array([[-36,1],[+36,4]])
+    NIterations,s,E,M = db[(1.0,2,2)]
     z=0
-
+    _ = db[(1.0,3,2)]
