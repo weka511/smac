@@ -123,7 +123,7 @@ class ClusterIsing:
 
         return get_energy(), sum(sigma)
 
-    def run(self,Nsteps=1000):
+    def run(self,Nsteps=1000,database=None):
         '''
         Construct one chain
         '''
@@ -134,6 +134,8 @@ class ClusterIsing:
             self.step(sigma)
             E,M = self.get_energy_magnetism(sigma)
             self.data.store(E,M)
+        if database != None:
+            database[1/self.beta, self.m, self.n] = (Nsteps, sigma, self.data.E, self.data.M)
 
 class ClusterIsingTests(TestCase):
     def test_all_down(self):

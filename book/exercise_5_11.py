@@ -25,6 +25,7 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from cluster_ising import ClusterIsing
+from ising_db import IsingDatabase
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -89,6 +90,8 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
+
+    database = IsingDatabase(__file__)
     T_range = get_range(args.T)
     if args.Tc:
         T_range = sorted(list(T_range) + [2/np.log(1+np.sqrt(2))])
@@ -104,7 +107,7 @@ if __name__=='__main__':
         out.write(f'{N},{len(T_range)}\n')
         for i,T in enumerate(T_range):
             markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
-            markov.run(Nsteps=args.Nsteps)
+            markov.run(Nsteps=args.Nsteps,database=database)
             E = []
             NE = []
             for e,n in markov.data.generate_E():
@@ -119,10 +122,6 @@ if __name__=='__main__':
                 out.write(f'{T},{m},{n}\n')
             ax1.bar(np.array(E)+width*i,NE,width=width,label=f'T={T:.3}')
             ax2.bar(np.array(M)+i*width,NM,width=width,label=f'T={T:.3}')
-            # for i in range(-N,N+1):
-                # out.write(f'{T},{2*i},{markov.E[i+N]}\n')
-            # for i in range(-N,N+1):
-                # out.write(f'{T},{i},{markov.M[i+N]}\n')
         print(f'Data written to {out.name}')
 
     ax1.set_title('Energy')
