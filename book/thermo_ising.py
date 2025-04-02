@@ -66,7 +66,7 @@ def read_data(file_name):
                 case 0:
                     N = int(data[0])
                     nT = int(data[1])
-                    E = np.zeros((4*N+1,2),dtype=np.int64)
+                    E = np.zeros((2*N+1,2),dtype=np.int64)
                     M = np.zeros((2*N+1,2),dtype=np.int64)
                     state = 1
                     i = 0
@@ -74,7 +74,7 @@ def read_data(file_name):
                     T = float(data[0])
                     E[i,:] = [int(data[i]) for i in [1,2]]
                     i += 1
-                    if i == 4*N+1:
+                    if i == 2*N+1:
                         state = 2
                         i = 0
                 case 2:
@@ -95,10 +95,12 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-
-    for N,T,E,M in read_data(get_file_name(args.input,default_ext='csv')):
-        Z,e,c =thermo(E[:,0],E[:,1],beta=1/T,NObservations=N)
-        print (T,Z,e,c)
+    for NObservations,T,E,M in read_data(get_file_name(args.input,default_ext='csv')):
+        beta = 1/T
+        Emean = np.average(E[:,0],weights=E[:,1])
+        e = Emean/NObservations
+        cV = beta**2 * np.average((E[:,0]-Emean)**2,weights=E[:,1])/NObservations
+        print (T,e,cV)
 
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize=(12,12))
