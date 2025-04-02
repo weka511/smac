@@ -24,7 +24,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from ising import Nbr, get_energy_magnetism, Neighbours
+from cluster_ising import ClusterIsing
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -50,79 +50,13 @@ def get_range(T,deltaT=0.1):
     '''
     match (len(T)):
         case 1:
-            return [T]
+            return T
         case 2:
             return np.arange(T[0],T[1],deltaT)
         case 3:
             return np.arange(T[0],T[1]+T[2],T[2])
 
     raise ValueError(f'Parameter T must have length of 1,2, or 3')
-
-
-class ClusterIsing:
-    '''
-    Algorithm 5.9 Cluster Ising
-
-    Attributes:
-        rng         Generator for
-        neighbours  Table used to iterate through neighbours of a location
-        m           Number of rows
-        n           Number of columns
-        N           Number of sites
-        periodic    Use periodic boundary conditions
-        beta        Inverse temperature
-        p           See discussion following (5.22)
-        E           Used to store counts for energy
-        M           Used to store counts for magnetization
-    '''
-    def __init__(self,rng=np.random.default_rng(),shape=(4,5),periodic=False,beta=0.001):
-        self.rng = rng
-        self.m = shape[0]
-        self.n = shape[1]
-        self.N = self.m*self.n
-        self.periodic = periodic
-        self.beta = beta
-        self.p  = 1.0 - np.exp(-2.0*beta) # Makes acceptance probability == 1 - (5.22)
-        self.E = np.zeros((4*self.N+1),dtype=np.int64)
-        self.M = np.zeros((2*self.N+1),dtype=np.int64)
-        self.neighbours = Neighbours(shape=shape,periodic=periodic)
-
-    def step(self,sigma):
-        '''
-        Construct Cluster and the Pocket, a subset that will be used to expand the Cluster.
-        Initially each of them contains the same randomly selected spin. We extend the Cluster
-        by selecting one element from the pocket repeatedly, and growing both sets by randomly selecting
-        neighbours with the same spin.
-        '''
-        j = self.rng.integers(self.N)
-        Pocket, Cluster = [j], [j]
-        while Pocket != []:
-            k = self.rng.choice(Pocket)
-            for l in self.neighbours[k,:]:
-                if l == -1: break
-                if (sigma[l] == sigma[k]
-                    and l not in Cluster
-                    and self.rng.uniform() < self.p):
-                    Pocket.append(l)
-                    Cluster.append(l)
-            Pocket.remove(k)
-        for k in Cluster:
-            sigma[k] *= -1
-
-    def run(self,Nsteps=1000):
-        '''
-        Construct one chain
-        '''
-        get_em = lambda sigma:get_energy_magnetism(sigma, shape=(self.m,self.n), periodic=self.periodic)
-        sigma = self.rng.choice([-1,1],size=self.N)
-        E,M = get_em(sigma)
-        self.E[2*self.N + E] += 1
-        self.M[self.N + M] += 1
-        for i in range(Nsteps):
-            self.step(sigma)
-            E,M = get_em(sigma)
-            self.E[2*self.N + E] += 1
-            self.M[self.N + M] += 1
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -171,12 +105,24 @@ if __name__=='__main__':
         for i,T in enumerate(T_range):
             markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
             markov.run(Nsteps=args.Nsteps)
-            ax1.bar(np.array(list(range(-2*N,2*N+1)))+i*width,markov.E,width=width,label=f'T={T:.3}')
-            ax2.bar(np.array(list(range(-N,N+1)))+i*width,markov.M,width=width,label=f'T={T:.3}')
-            for i in range(-2*N,2*N+1):
-                out.write(f'{T},{i},{markov.E[i+2*N]}\n')
-            for i in range(-N,N+1):
-                out.write(f'{T},{i},{markov.M[i+N]}\n')
+            E = []
+            NE = []
+            for e,n in markov.data.generate_E():
+                E.append(e)
+                NE.append(n)
+                out.write(f'{T},{e},{n}\n')
+            M = []
+            NM = []
+            for m,n in markov.data.generate_M():
+                M.append(m)
+                NM.append(n)
+                out.write(f'{T},{m},{n}\n')
+            ax1.bar(np.array(E)+width*i,NE,width=width,label=f'T={T:.3}')
+            ax2.bar(np.array(M)+i*width,NM,width=width,label=f'T={T:.3}')
+            # for i in range(-N,N+1):
+                # out.write(f'{T},{2*i},{markov.E[i+N]}\n')
+            # for i in range(-N,N+1):
+                # out.write(f'{T},{i},{markov.M[i+N]}\n')
         print(f'Data written to {out.name}')
 
     ax1.set_title('Energy')
@@ -185,8 +131,6 @@ if __name__=='__main__':
     ax2.legend()
     fig.tight_layout(pad=2)
     fig.savefig(get_file_name(args.out))
-
-
 
     elapsed = time() - start
     minutes = int(elapsed/60)
