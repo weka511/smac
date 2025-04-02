@@ -23,7 +23,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from thermo import thermo
+# from thermo import thermo
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -88,24 +88,41 @@ def read_data(file_name):
                         state = 1
                         i = 0
 
-
+def thermo(E,N,beta=1,NObservations=36):
+    Emean = np.average(E,weights=N)
+    e = Emean/NObservations
+    cV = beta**2 * np.average((E-Emean)**2,weights=N)/NObservations
+    return e, cV
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
+    Ts = []
+    es = []
+    cVs = []
     for NObservations,T,E,M in read_data(get_file_name(args.input,default_ext='csv')):
-        beta = 1/T
-        Emean = np.average(E[:,0],weights=E[:,1])
-        e = Emean/NObservations
-        cV = beta**2 * np.average((E[:,0]-Emean)**2,weights=E[:,1])/NObservations
+        e,cV = thermo(E[:,0],E[:,1],beta=1/T,NObservations=NObservations)
         print (T,e,cV)
+        Ts.append(T)
+        es.append(e)
+        cVs.append(cV)
 
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize=(12,12))
-
+    ax = fig.add_subplot(1,1,1)
+    plt1 = ax.plot(Ts,es,color='blue',label='e')
+    ax.set_xlabel('T')
+    ax.set_ylabel('e')
+    axt = ax.twinx()
+    plt2 = axt.plot(Ts,cVs,color='red',label=r'$c_V$')
+    axt.set_ylabel(r'$c_V$')
+    lns = plt1 + plt2
+    labs = [l.get_label() for l in lns]
+    ax.legend(lns, labs, loc=0)
     fig.savefig(get_file_name(args.out))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
