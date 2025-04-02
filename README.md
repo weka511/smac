@@ -279,8 +279,9 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -|ising|test-gray.cpp|Tests for gray.hpp
 -|ising|test-nbr.cpp|Tests for nbr.cpp
 -|ising|tests.cpp|Test harness for enumerate-ising.cpp
-5.2||exercise_5_10.py|Exercise 5.10: Test Local Metropolis algorithm for the Ising model
--||exercise_5_11.py|Exercise 5-11/Algorithm 5-9-cluster ising
+5.2||cluster_ising.py|Algorithm 5-9: cluster ising
+-||exercise_5_10.py|Exercise 5.10: Test Local Metropolis algorithm for the Ising model
+-||exercise_5_11.py|Exercise 5-11/Algorithm 5-9: cluster ising
 -||thermo_ising.py|Exercise 5-11: calculate thermodynamic quantities
 -||markov_ising.py|Algorithm 5.7: Local Metropolis algorithm for the Ising model
 -||thermo.py|Exercise 5-11: calculate thermodynamic quantities
