@@ -25,7 +25,6 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from ising import Nbr
 from markov_ising import MarkovIsing
 
 def parse_arguments():
@@ -43,7 +42,6 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-T', '--T', type=float, default=2.0,help='Temperature')
-    parser.add_argument('--nocache',default=False,action = 'store_true', help='Do not Cache Neighbours')
     return parser.parse_args()
 
 
@@ -71,9 +69,9 @@ if __name__=='__main__':
     NObservations = args.m*args.n
     beta = 1/args.T
 
-    markov = MarkovIsing(Nbr=Nbr,rng = np.random.default_rng(args.seed),
+    markov = MarkovIsing(rng = np.random.default_rng(args.seed),
                          shape=(args.m,args.n),periodic=args.periodic,
-                         Niterations=args.Niterations,beta=beta,cache=not args.nocache)
+                         Niterations=args.Niterations,beta=beta)
     e = np.zeros((args.Niterations))
     cV = np.zeros((args.Niterations))
     for i in range(args.Niterations):
