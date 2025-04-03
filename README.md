@@ -284,6 +284,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -||exercise_5_11.py|Exercise 5-11/Algorithm 5-9: cluster ising
 -||ising_db.py|Exercise 5-11: a library to facilite reuseing data from previous runs
 -||thermo_ising.py|Exercise 5-11: calculate thermodynamic quantities
+-||thermo_db.py|Exercise 5-11: calculate thermodynamic quantities from database
 -||markov_ising.py|Algorithm 5.7: Local Metropolis algorithm for the Ising model
 -||thermo.py|Exercise 5-11: calculate thermodynamic quantities
 -||bench42.sh|Benchmark effect of [Issue #42](https://github.com/weka511/smac/issues/42)

@@ -86,6 +86,13 @@ class IsingDatabase:
                 if self.verbose:
                     print (row)
 
+    def generate_keys(self):
+        '''
+        Iterate through all keys in database
+        '''
+        with ContextManager(self.file_name) as con:
+            for T,m,n in con.execute(f'SELECT Temperature,m,n FROM {self.run_table} ORDER BY Temperature'):
+                yield T,m,n
 
     def __getitem__(self,key):
         '''
@@ -97,7 +104,8 @@ class IsingDatabase:
         count = 0
         T,m,n = key
         with ContextManager(self.file_name) as con:
-            for NIterations,s,E,M in con.execute(f'SELECT iterations, sigma, Energy, Magnetization FROM {self.run_table} WHERE Temperature={T} AND m={m} AND n={n}'):
+            for NIterations,s,E,M in con.execute(f'SELECT iterations, sigma, Energy, Magnetization FROM {self.run_table} '
+                                                 f'WHERE Temperature={T} AND m={m} AND n={n}'):
                 count += 1
             if count == 1:
                 return NIterations,s,E,M
