@@ -22,8 +22,11 @@
 
 from unittest import main
 
-from ising import NbrTest, GrayGeneratorTest, GrayFlipTest
+from ising import NbrTest, GrayGeneratorTest, GrayFlipTest, NeighboursTest, Nbr3dTest, EdgeTest, EM_Test
 from enumerate_ising import TestIsing
 from geometry import TestHistogram
+from cluster_ising import ClusterIsingTests
+from ising_db import DbTest
+from thermo import TestThermo
 
 main()
