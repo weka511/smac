@@ -62,6 +62,10 @@ class IsingData:
         self.E[self.N + E//2] += 1
         self.M[self.N + M] += 1
 
+    def intialize(self,E,M):
+        np.copyto(self.E,E)
+        np.copyto(self.M,M)
+
 class ClusterIsing:
     '''
     Algorithm 5.9 Cluster Ising
@@ -110,6 +114,7 @@ class ClusterIsing:
 
         for k in Cluster:        # Flip the completed cluster
             sigma[k] *= -1
+        return sigma
 
     def get_energy_magnetism(self,sigma):
         '''
@@ -127,7 +132,18 @@ class ClusterIsing:
         '''
         Construct one chain
         '''
-        sigma = self.rng.choice([-1,1],size=self.N)
+        if database != None:
+            try :
+                NIterations,sigma,E0,M0 = database[1/self.beta, self.m, self.n]
+                print (1/self.beta,sigma)
+                self.data.intialize(E0,M0)
+            except KeyError:
+                NIterations = 0
+                sigma = self.rng.choice([-1,1],size=self.N)
+        else:
+            NIterations = 0
+            sigma = self.rng.choice([-1,1],size=self.N)
+
         E,M = self.get_energy_magnetism(sigma)
         self.data.store(E,M)
         for i in range(Nsteps):
@@ -135,7 +151,10 @@ class ClusterIsing:
             E,M = self.get_energy_magnetism(sigma)
             self.data.store(E,M)
         if database != None:
-            database[1/self.beta, self.m, self.n] = (Nsteps, sigma, self.data.E, self.data.M)
+            database[1/self.beta, self.m, self.n] = (Nsteps+NIterations, sigma, self.data.E, self.data.M)
+            # print (sigma)
+            # print (database[1/self.beta, self.m, self.n])
+
 
 class ClusterIsingTests(TestCase):
     def test_all_down(self):

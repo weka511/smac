@@ -19,9 +19,10 @@
 
 from os.path import  splitext
 import numpy as np
+from  numpy.testing import assert_array_equal
 import sqlite3
 from io import BytesIO
-
+from unittest import main, TestCase
 class IsingDatabase:
     def adapt_array(arr):
         '''
@@ -55,7 +56,8 @@ class IsingDatabase:
             if self.verbose:
                 print (f'Created table {self.run_table}')
         except sqlite3.OperationalError as e:
-            print (e)
+            if self.verbose:
+                print (e)
         for row in  self.execute('SELECT name FROM sqlite_master'):
             if self.verbose:
                 print (row)
@@ -91,10 +93,17 @@ class IsingDatabase:
         self.executemany(f'INSERT INTO {self.run_table} VALUES(?, ?, ?, ? ,?, ?, ?)',  [(T, m,n, NIterations, s, E, M)])
         self.commit()
 
-
+class DbTest(TestCase):
+    def test1(self):
+        db = IsingDatabase(__file__)
+        db[(1.0,2,2)] = 1066,np.array([1,1,-1,-1]),np.array([[-72,1],[-68,4]]),np.array([[-36,1],[+36,4]])
+        NIterations,s,E,M = db[(1.0,2,2)]
+        self.assertEqual(1066,NIterations)
+        assert_array_equal(np.array([1,1,-1,-1]),s)
+        try:
+            _ = db[(1.0,3,2)]
+            self.fail('Exception not thrown')
+        except KeyError:
+            pass
 if __name__=='__main__':
-    db = IsingDatabase(__file__)
-    db[(1.0,2,2)] = 1066,np.array([1,1,-1,-1]),np.array([[-72,1],[-68,4]]),np.array([[-36,1],[+36,4]])
-    NIterations,s,E,M = db[(1.0,2,2)]
-    z=0
-    _ = db[(1.0,3,2)]
+    main()

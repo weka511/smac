@@ -81,7 +81,7 @@ def get_file_name(name,default_ext='png',seq=None):
 
 def get_periodic(periodic):
     '''
-    Used to construct tile for plot
+    Used to construct title for plot
     '''
     return 'with periodic boundary conditions,' if periodic else ''
 
