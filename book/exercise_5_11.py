@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 5-11/Algorithm 5-9-cluster ising'''
+'''Exercise 5-11/Algorithm 5-9: cluster ising'''
 
 from argparse import ArgumentParser
 from collections import defaultdict
@@ -97,7 +97,7 @@ if __name__=='__main__':
         T_range = sorted(list(T_range) + [2/np.log(1+np.sqrt(2))])
 
     fig = figure(figsize=(12,12))
-    fig.suptitle(rf'Cluster Ising {args.m}$\times${args.n}, {get_periodic(args.periodic)} after {args.Nsteps} Steps')
+    fig.suptitle(rf'Cluster Ising {args.m}$\times${args.n}, {get_periodic(args.periodic)}')
     ax1 = fig.add_subplot(2,1,1)
     ax2 = fig.add_subplot(2,1,2)
     N = args.m*args.n
@@ -107,7 +107,7 @@ if __name__=='__main__':
         out.write(f'{N},{len(T_range)}\n')
         for i,T in enumerate(T_range):
             markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
-            markov.run(Nsteps=args.Nsteps,database=database)
+            nIterations = markov.run(Nsteps=args.Nsteps,database=database)
             E = []
             NE = []
             for e,n in markov.data.generate_E():
@@ -120,8 +120,8 @@ if __name__=='__main__':
                 M.append(m)
                 NM.append(n)
                 out.write(f'{T},{m},{n}\n')
-            ax1.bar(np.array(E)+width*i,NE,width=width,label=f'T={T:.3}')
-            ax2.bar(np.array(M)+i*width,NM,width=width,label=f'T={T:.3}')
+            ax1.bar(np.array(E)+width*i,NE,width=width,label=f'T={T:.3},Nsteps={nIterations}')
+            ax2.bar(np.array(M)+i*width,NM,width=width,label=f'T={T:.3},Nsteps={nIterations}')
         print(f'Data written to {out.name}')
 
     ax1.set_title('Energy')

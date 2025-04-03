@@ -135,7 +135,6 @@ class ClusterIsing:
         if database != None:
             try :
                 NIterations,sigma,E0,M0 = database[1/self.beta, self.m, self.n]
-                print (1/self.beta,sigma)
                 self.data.intialize(E0,M0)
             except KeyError:
                 NIterations = 0
@@ -152,8 +151,9 @@ class ClusterIsing:
             self.data.store(E,M)
         if database != None:
             database[1/self.beta, self.m, self.n] = (Nsteps+NIterations, sigma, self.data.E, self.data.M)
-            # print (sigma)
-            # print (database[1/self.beta, self.m, self.n])
+
+        return Nsteps+NIterations
+
 
 
 class ClusterIsingTests(TestCase):
