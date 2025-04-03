@@ -23,7 +23,7 @@ from io import BytesIO
 from os import remove
 from unittest import main, TestCase
 import numpy as np
-from  numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal
 
 class ContextManager:
     '''
@@ -34,10 +34,16 @@ class ContextManager:
         self.file_name = file_name
 
     def __enter__(self):
+        '''
+        Connect to database when we enter context
+        '''
         self.con = sqlite3.connect(self.file_name,detect_types=sqlite3.PARSE_DECLTYPES)
         return self.con
 
     def __exit__(self, exc_type, exc_value, exc_tb):
+        '''
+        Automagically disconnect when we leave
+        '''
         self.con.close()
 
 class IsingDatabase:
@@ -67,24 +73,45 @@ class IsingDatabase:
         out.seek(0)
         return np.load(out)
 
-    def __init__(self,file='test.db',run_table='run',verbose=False):
+    def __init__(self,file='test.db',run_table='run',
+                 spins_table='Spins',energies_table='energies',magnetization_table='magnetization',verbose=False):
         sqlite3.register_adapter(np.ndarray, IsingDatabase.adapt_array)
         sqlite3.register_converter('array', IsingDatabase.convert_array)
         base,_ = splitext(file)
         self.file_name = f'{base}.db'
         self.run_table = run_table
+        self.spins_table = spins_table
+        self.energies_table = energies_table
+        self.magnetization_table = magnetization_table
         self.verbose = verbose
+        self.ensure_table_exists(self.run_table,
+                                 '(Temperature FLOAT NOT NULL, m INTEGER NOT NULL, n INTEGER NOT NULL, iterations INTEGER,'
+                                 'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n))')
+        self.ensure_table_exists(self.spins_table,
+                                 '(Temperature FLOAT NOT NULL, m INTEGER NOT NULL, n INTEGER NOT NULL, site INTEGER NOT NULL,'
+                                 ' spin INTEGER NOT NULL,'
+                                 'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n,site))')
+        self.ensure_table_exists(self.energies_table,
+                                 '(Temperature FLOAT NOT NULL, m INTEGER NOT NULL, n INTEGER NOT NULL, Value INTEGER NOT NULL,'
+                                 ' Count INTEGER NOT NULL,'
+                                 'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n,Value))')
+        self.ensure_table_exists(self.magnetization_table,
+                                 '(Temperature FLOAT NOT NULL, m INTEGER NOT NULL, n INTEGER NOT NULL, Value INTEGER NOT NULL,'
+                                 ' Count INTEGER NOT NULL,'
+                                 'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n,Value))')
+
+    def ensure_table_exists(self,table,columns):
         with ContextManager(self.file_name) as con:
             try:
-                con.execute(f'CREATE TABLE {self.run_table}(Temperature FLOAT, m INTEGER, n INTEGER, iterations INTEGER, sigma array, Energy array, Magnetization array)')
+                con.execute(f'CREATE TABLE {table} {columns}')
                 if self.verbose:
-                    print (f'Created table {self.run_table}')
+                    print (f'Created table {table}')
             except sqlite3.OperationalError as e:
                 if self.verbose:
                     print (e)
             for row in  con.execute('SELECT name FROM sqlite_master'):
                 if self.verbose:
-                    print (row)
+                    print ('name:', row)
 
     def generate_keys(self):
         '''
@@ -101,19 +128,26 @@ class IsingDatabase:
         Parameters:
             key     T,m,n
         '''
+        def create_spins(table):
+            spins = [spin for _,spin in con.execute(f'SELECT site,spin FROM {table} '
+                                                 f'WHERE Temperature={T} AND m={m} AND n={n} ORDER BY site')]
+            return np.array(spins,dtype=int)
+        def create_EM(table):
+            energies = [pair for pair in con.execute(f'SELECT value,count FROM {table} '
+                                                 f'WHERE Temperature={T} AND m={m} AND n={n} ORDER BY value')]
+            return np.array(energies,dtype=int)
         count = 0
         T,m,n = key
         with ContextManager(self.file_name) as con:
-            for NIterations,s,E,M in con.execute(f'SELECT iterations, sigma, Energy, Magnetization FROM {self.run_table} '
+            for NIterations, in con.execute(f'SELECT iterations FROM {self.run_table} '
                                                  f'WHERE Temperature={T} AND m={m} AND n={n}'):
                 count += 1
             if count == 1:
-                return NIterations,s,E,M
+                return NIterations,create_spins(self.spins_table),create_EM(self.energies_table),create_EM(self.magnetization_table)
             elif count == 0:
                 raise KeyError(f'{key} not found')
             else:
                 raise ValueError(f'Multiple records found for {key}')
-
 
     def __setitem__(self,key,value):
         '''
@@ -123,24 +157,36 @@ class IsingDatabase:
             key     T,m,n
             value   NIterations, s, E, M
         '''
-        count = 0
         T,m,n = key
         with ContextManager(self.file_name) as con:
-            for _,_,_ in con.execute(f'SELECT Temperature, m,n FROM {self.run_table} WHERE Temperature={T} AND m={m} AND n={n}'):
-                count += 1
-            if count > 0:
-                con.execute(f'DELETE FROM {self.run_table} WHERE Temperature={T}')
-            NIterations,s,E,M = value
-            con.executemany(f'INSERT INTO {self.run_table} VALUES(?, ?, ?, ? ,?, ?, ?)',  [(T, m,n, NIterations, s, E, M)])
+            self.remove_old(self.run_table,con,T,m,n)
+            self.remove_old(self.spins_table,con,T,m,n)
+            self.remove_old(self.energies_table,con,T,m,n)
+            self.remove_old(self.magnetization_table,con,T,m,n)
+            NIterations,spins,E,M = value
+            con.executemany(f'INSERT INTO {self.run_table} VALUES(?, ?, ?, ? )',  [(T, m,n, NIterations)])
+            for i in range(len(spins)):
+                con.executemany(f'INSERT INTO {self.spins_table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, i, int(spins[i]))])
+            for i in range(len(E)):
+                con.executemany(f'INSERT INTO {self.energies_table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, i, int(E[i]))])
+            for i in range(len(M)):
+                con.executemany(f'INSERT INTO {self.magnetization_table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, i, int(M[i]))])
             con.commit()
+
+    def remove_old(self,table,con,T,m,n):
+        count = 0
+        for _,_,_ in con.execute(f'SELECT Temperature, m,n FROM {table} WHERE Temperature={T} AND m={m} AND n={n}'):
+            count += 1
+        if count > 0:
+            con.execute(f'DELETE FROM {table} WHERE Temperature={T} AND m={m} AND n={n}')
+
 
 class DbTest(TestCase):
     def setUp(self):
         self.db = IsingDatabase(__file__)
 
     def test1(self):
-
-        self.db[(1.0,2,2)] = 1066,np.array([1,1,-1,-1]),np.array([[-72,1],[-68,4]]),np.array([[-36,1],[+36,4]])
+        self.db[(1.0,2,2)] = 1066,np.array([1,1,-1,-1],dtype=int),np.array([1,4],dtype=int),np.array([12,4],dtype=int)
         NIterations,s,E,M = self.db[(1.0,2,2)]
         self.assertEqual(1066,NIterations)
         assert_array_equal(np.array([1,1,-1,-1]),s)

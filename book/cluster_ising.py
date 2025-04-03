@@ -62,9 +62,12 @@ class IsingData:
         self.E[self.N + E//2] += 1
         self.M[self.N + M] += 1
 
-    def intialize(self,E,M):
-        np.copyto(self.E,E)
-        np.copyto(self.M,M)
+    def initialize(self,E,M):
+        '''
+        Used at the start of a run to initialize data from stored values
+        '''
+        np.copyto(self.E,E[:,1])
+        np.copyto(self.M,M[:,1])
 
 class ClusterIsing:
     '''
@@ -135,7 +138,7 @@ class ClusterIsing:
         if database != None:
             try :
                 NIterations,sigma,E0,M0 = database[1/self.beta, self.m, self.n]
-                self.data.intialize(E0,M0)
+                self.data.initialize(E0,M0)
             except KeyError:
                 NIterations = 0
                 sigma = self.rng.choice([-1,1],size=self.N)
@@ -149,10 +152,11 @@ class ClusterIsing:
             self.step(sigma)
             E,M = self.get_energy_magnetism(sigma)
             self.data.store(E,M)
+
         if database != None:
             database[1/self.beta, self.m, self.n] = (Nsteps+NIterations, sigma, self.data.E, self.data.M)
 
-        return Nsteps+NIterations
+        return Nsteps + NIterations
 
 
 

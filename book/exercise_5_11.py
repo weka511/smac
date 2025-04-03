@@ -35,11 +35,12 @@ def parse_arguments():
     parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
     parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
+    parser.add_argument('-d', '--database', default = basename(splitext(__file__)[0]),help='Name ofdatabase')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', default=False, action = 'store_true', help   = 'Show plot')
     parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
     parser.add_argument('--Tc',default=False,action = 'store_true', help   = 'Include critical temperature')
-
+    parser.add_argument('--verbose', default=False, action = 'store_true', help   = 'More messages')
     return parser.parse_args()
 
 def get_range(T,deltaT=0.1):
@@ -91,7 +92,7 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
 
-    database = IsingDatabase(__file__)
+    database = IsingDatabase(args.database,verbose=args.verbose)
     T_range = get_range(args.T)
     if args.Tc:
         T_range = sorted(list(T_range) + [2/np.log(1+np.sqrt(2))])
