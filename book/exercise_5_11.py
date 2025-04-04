@@ -102,29 +102,19 @@ if __name__=='__main__':
     ax1 = fig.add_subplot(2,1,1)
     ax2 = fig.add_subplot(2,1,2)
     N = args.m*args.n
-    width = 5/len(T_range)  # Established empirically
+    width = 25/len(T_range)  # Established empirically
 
     for i,T in enumerate(T_range):
         markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
         nIterations = markov.run(Nsteps=args.Nsteps,database=database)
-        E = []
-        NE = []
-        for e,n in markov.data.generate_E():
-            E.append(e)
-            NE.append(n)
+        E = np.array([[e,n] for e,n in markov.data.generate_E()],dtype=int)
+        ax1.bar(E[:,0],E[:,1],width=width,label=f'T={T:.3},Nsteps={nIterations}')
+        M = np.array([[m,n] for m,n in markov.data.generate_M()],dtype=int)
+        ax2.bar(M[:,0],M[:,1],width=width,label=f'T={T:.3},Nsteps={nIterations}')
 
-        M = []
-        NM = []
-        for m,n in markov.data.generate_M():
-            M.append(m)
-            NM.append(n)
-
-        ax1.bar(np.array(E)+width*i,NE,width=width,label=f'T={T:.3},Nsteps={nIterations}')
-        ax2.bar(np.array(M)+i*width,NM,width=width,label=f'T={T:.3},Nsteps={nIterations}')
-
-    ax1.set_xlim(E[0],E[-1])
+    ax1.set_xlim(E[0,0],E[-1,0])
     ax1.set_title('Energy')
-    ax2.set_xlim(M[0],M[-1])
+    ax2.set_xlim(M[0,0],M[-1,0])
     ax2.set_title('Magnetization')
     ax1.legend()
     ax2.legend()
