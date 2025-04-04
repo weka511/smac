@@ -34,8 +34,7 @@ def parse_arguments():
     parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
     parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
     parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
-    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
-    parser.add_argument('-d', '--database', default = basename(splitext(__file__)[0]),help='Name ofdatabase')
+    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output files')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', default=False, action = 'store_true', help   = 'Show plot')
     parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
@@ -92,7 +91,7 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
 
-    database = IsingDatabase(args.database,verbose=args.verbose)
+    database = IsingDatabase(args.out,verbose=args.verbose)
     T_range = get_range(args.T)
     if args.Tc:
         T_range = sorted(list(T_range) + [2/np.log(1+np.sqrt(2))])
@@ -104,26 +103,23 @@ if __name__=='__main__':
     N = args.m*args.n
     width = 5/len(T_range)  # Established empirically
 
-    with open(get_file_name(args.out,default_ext='csv'),'w') as out:
-        out.write(f'{N},{len(T_range)}\n')
-        for i,T in enumerate(T_range):
-            markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
-            nIterations = markov.run(Nsteps=args.Nsteps,database=database)
-            E = []
-            NE = []
-            for e,n in markov.data.generate_E():
-                E.append(e)
-                NE.append(n)
-                out.write(f'{T},{e},{n}\n')
-            M = []
-            NM = []
-            for m,n in markov.data.generate_M():
-                M.append(m)
-                NM.append(n)
-                out.write(f'{T},{m},{n}\n')
-            ax1.bar(np.array(E)+width*i,NE,width=width,label=f'T={T:.3},Nsteps={nIterations}')
-            ax2.bar(np.array(M)+i*width,NM,width=width,label=f'T={T:.3},Nsteps={nIterations}')
-        print(f'Data written to {out.name}')
+    for i,T in enumerate(T_range):
+        markov = ClusterIsing(rng=np.random.default_rng(args.seed),shape=(args.m,args.n),periodic=args.periodic,beta=1/T)
+        nIterations = markov.run(Nsteps=args.Nsteps,database=database)
+        E = []
+        NE = []
+        for e,n in markov.data.generate_E():
+            E.append(e)
+            NE.append(n)
+
+        M = []
+        NM = []
+        for m,n in markov.data.generate_M():
+            M.append(m)
+            NM.append(n)
+
+        ax1.bar(np.array(E)+width*i,NE,width=width,label=f'T={T:.3},Nsteps={nIterations}')
+        ax2.bar(np.array(M)+i*width,NM,width=width,label=f'T={T:.3},Nsteps={nIterations}')
 
     ax1.set_title('Energy')
     ax2.set_title('Magnetization')
