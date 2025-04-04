@@ -192,5 +192,14 @@ class ClusterIsingTests(TestCase):
         self.assertEqual(+72,E)
         self.assertEqual(0,M)
 
+    def test_data_generate(self):
+        '''
+        Verify that IsingData.generate_E() starts at the correct place
+        '''
+        data = IsingData(36)
+        for e,c in data.generate_E():
+            self.assertEqual(-72,e)
+            break
+
 if __name__=='__main__':
     main()
