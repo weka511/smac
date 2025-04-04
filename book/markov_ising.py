@@ -34,7 +34,7 @@ class Datum(Enum):
 
 class IsingData:
     '''
-    This class is responsible for keeping track of energies and megnetization
+    This class is responsible for keeping track of energies and magnetization
     '''
     def __init__(self,Niterations=5,N=16):
         self.N = N
