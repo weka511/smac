@@ -101,6 +101,9 @@ class IsingDatabase:
                                  'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n,Value))')
 
     def ensure_table_exists(self,table,columns):
+        '''
+        When we create dataase, this is used to create the necessary tables.
+        '''
         with ContextManager(self.file_name) as con:
             try:
                 con.execute(f'CREATE TABLE {table} {columns}')
@@ -157,6 +160,12 @@ class IsingDatabase:
             key     T,m,n
             value   NIterations, s, E, M
         '''
+        def insert_2d(EM,table):
+            nrows,_ = EM.shape
+            for i in range(nrows):
+                value,count = EM[i,:]
+                con.executemany(f'INSERT INTO {table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, int(value), int(count))])
+
         T,m,n = key
         with ContextManager(self.file_name) as con:
             for table in [self.run_table, self.spins_table, self.energies_table, self.magnetization_table]:
@@ -166,19 +175,20 @@ class IsingDatabase:
             con.executemany(f'INSERT INTO {self.run_table} VALUES(?, ?, ?, ? )',  [(T, m,n, NIterations)])
             for i in range(len(spins)):
                 con.executemany(f'INSERT INTO {self.spins_table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, i, int(spins[i]))])
-            for i in range(len(E)):
-                con.executemany(f'INSERT INTO {self.energies_table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, i, int(E[i]))])
-            for i in range(len(M)):
-                con.executemany(f'INSERT INTO {self.magnetization_table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, i, int(M[i]))])
+            insert_2d(E,self.energies_table)
+            insert_2d(M,self.magnetization_table)
+
+            # for i in range(len(M)):
+                # con.executemany(f'INSERT INTO {self.magnetization_table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, i, int(M[i]))])
             con.commit()
 
     def remove_old_entries(self,table,con,T,m,n):
         '''
-        Used to remove old data that is the be replaced
+        Used to remove old data that is to be replaced
         '''
-        for count, in con.execute(f'SELECT COUNT(*) FROM {table} WHERE Temperature={T} AND m={m} AND n={n}'):
-            if count > 0:
-                con.execute(f'DELETE FROM {table} WHERE Temperature={T} AND m={m} AND n={n}')
+        # for count, in con.execute(f'SELECT COUNT(*) FROM {table} WHERE Temperature={T} AND m={m} AND n={n}'):
+            # if count > 0:
+        con.execute(f'DELETE FROM {table} WHERE Temperature={T} AND m={m} AND n={n}')
 
 
 class DbTest(TestCase):
@@ -186,8 +196,11 @@ class DbTest(TestCase):
         self.db = IsingDatabase(__file__)
 
     def test1(self):
-        self.db[(1.0,2,2)] = 1066,np.array([1,1,-1,-1],dtype=int),np.array([1,4],dtype=int),np.array([12,4],dtype=int)
-        NIterations,s,E,M = self.db[(1.0,2,2)]
+        spins = np.array([1,1,-1,-1],dtype=int)
+        E = np.array([[-72,2],[-70,4],[-68,6]],dtype=int)
+        M = np.array([[12,4],[-12,5]],dtype=int)
+        self.db[(1.0,2,2)] = 1066,spins,E,M
+        NIterations,s,E1,M1 = self.db[(1.0,2,2)]
         self.assertEqual(1066,NIterations)
         assert_array_equal(np.array([1,1,-1,-1]),s)
         try:
@@ -195,7 +208,7 @@ class DbTest(TestCase):
             self.fail('Exception not thrown')
         except KeyError:
             pass
-        self.db[(1.0,2,2)] = 1067,np.array([1,1,-1,-1],dtype=int),np.array([1,4],dtype=int),np.array([12,4],dtype=int)
+        self.db[(1.0,2,2)] = 1067,spins,E,M
 
     def tearDown(self):
         remove(self.db.file_name)

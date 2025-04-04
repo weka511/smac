@@ -35,6 +35,7 @@ def parse_arguments():
     parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
     parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output files')
+    parser.add_argument('-d', '--database', default = basename(splitext(__file__)[0]),help='Name of database')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', default=False, action = 'store_true', help   = 'Show plot')
     parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
@@ -91,7 +92,7 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
 
-    database = IsingDatabase(args.out,verbose=args.verbose)
+    database = IsingDatabase(args.database,verbose=args.verbose)
     T_range = get_range(args.T)
     if args.Tc:
         T_range = sorted(list(T_range) + [2/np.log(1+np.sqrt(2))])
@@ -121,7 +122,9 @@ if __name__=='__main__':
         ax1.bar(np.array(E)+width*i,NE,width=width,label=f'T={T:.3},Nsteps={nIterations}')
         ax2.bar(np.array(M)+i*width,NM,width=width,label=f'T={T:.3},Nsteps={nIterations}')
 
+    ax1.set_xlim(E[0],E[-1])
     ax1.set_title('Energy')
+    ax2.set_xlim(M[0],M[-1])
     ax2.set_title('Magnetization')
     ax1.legend()
     ax2.legend()

@@ -154,7 +154,10 @@ class ClusterIsing:
             self.data.store(E,M)
 
         if database != None:
-            database[1/self.beta, self.m, self.n] = (Nsteps+NIterations, sigma, self.data.E, self.data.M)
+            database[1/self.beta, self.m, self.n] = (Nsteps+NIterations,
+                                                     sigma,
+                                                     np.array([[e,n] for e,n in self.data.generate_E()],dtype=int),
+                                                     np.array([[m,n] for m,n in self.data.generate_M()],dtype=int))
 
         return Nsteps + NIterations
 
