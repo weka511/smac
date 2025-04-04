@@ -85,45 +85,23 @@ class IsingDatabase:
         self.energies_table = energies_table
         self.magnetization_table = magnetization_table
         self.verbose = verbose
-        if fresh:
-            try:
-                send2trash(self.file_name)
-                if verbose:
-                    print (f'Recycled {self.file_name}')
-            except FileNotFoundError:
-                if verbose:
-                    print (f'Could not find {self.file_name}')
-        self.ensure_table_exists(self.run_table,
+        if fresh: self.__ensure_fresh()
+
+        self.__ensure_table_exists(self.run_table,
                                  '(Temperature FLOAT NOT NULL, m INTEGER NOT NULL, n INTEGER NOT NULL, iterations INTEGER,'
                                  'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n))')
-        self.ensure_table_exists(self.spins_table,
+        self.__ensure_table_exists(self.spins_table,
                                  '(Temperature FLOAT NOT NULL, m INTEGER NOT NULL, n INTEGER NOT NULL, site INTEGER NOT NULL,'
                                  ' spin INTEGER NOT NULL,'
                                  'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n,site))')
-        self.ensure_table_exists(self.energies_table,
+        self.__ensure_table_exists(self.energies_table,
                                  '(Temperature FLOAT NOT NULL, m INTEGER NOT NULL, n INTEGER NOT NULL, Value INTEGER NOT NULL,'
                                  ' Count INTEGER NOT NULL,'
                                  'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n,Value))')
-        self.ensure_table_exists(self.magnetization_table,
+        self.__ensure_table_exists(self.magnetization_table,
                                  '(Temperature FLOAT NOT NULL, m INTEGER NOT NULL, n INTEGER NOT NULL, Value INTEGER NOT NULL,'
                                  ' Count INTEGER NOT NULL,'
                                  'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n,Value))')
-
-    def ensure_table_exists(self,table,columns):
-        '''
-        When we create dataase, this is used to create the necessary tables.
-        '''
-        with ContextManager(self.file_name) as con:
-            try:
-                con.execute(f'CREATE TABLE {table} {columns}')
-                if self.verbose:
-                    print (f'Created table {table}')
-            except sqlite3.OperationalError as e:
-                if self.verbose:
-                    print (e)
-            for row in  con.execute('SELECT name FROM sqlite_master'):
-                if self.verbose:
-                    print ('name:', row)
 
     def generate_keys(self):
         '''
@@ -178,7 +156,7 @@ class IsingDatabase:
         T,m,n = key
         with ContextManager(self.file_name) as con:
             for table in [self.run_table, self.spins_table, self.energies_table, self.magnetization_table]:
-                self.remove_old_entries(table,con,T,m,n)
+                self.__remove_old_entries(table,con,T,m,n)
 
             NIterations,spins,E,M = value
             con.executemany(f'INSERT INTO {self.run_table} VALUES(?, ?, ?, ? )',  [(T, m,n, NIterations)])
@@ -187,16 +165,41 @@ class IsingDatabase:
             insert_2d(E,self.energies_table)
             insert_2d(M,self.magnetization_table)
 
-            # for i in range(len(M)):
-                # con.executemany(f'INSERT INTO {self.magnetization_table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, i, int(M[i]))])
             con.commit()
 
-    def remove_old_entries(self,table,con,T,m,n):
+    def __ensure_fresh(self):
+        '''
+        Used to ensure a fresh database (usually for testing)
+        Recycle the old database to be safe!
+        '''
+        try:
+            send2trash(self.file_name)
+            if self.verbose:
+                print (f'Recycled {self.file_name}')
+        except FileNotFoundError:
+            if self.verbose:
+                print (f'Could not find {self.file_name}')
+
+    def __ensure_table_exists(self,table,columns):
+        '''
+        When we create dataase, this is used to create the necessary tables.
+        '''
+        with ContextManager(self.file_name) as con:
+            try:
+                con.execute(f'CREATE TABLE {table} {columns}')
+                if self.verbose:
+                    print (f'Created table {table}')
+            except sqlite3.OperationalError as e:
+                if self.verbose:
+                    print (e)
+            for row in  con.execute('SELECT name FROM sqlite_master'):
+                if self.verbose:
+                    print ('name:', row)
+
+    def __remove_old_entries(self,table,con,T,m,n):
         '''
         Used to remove old data that is to be replaced
         '''
-        # for count, in con.execute(f'SELECT COUNT(*) FROM {table} WHERE Temperature={T} AND m={m} AND n={n}'):
-            # if count > 0:
         con.execute(f'DELETE FROM {table} WHERE Temperature={T} AND m={m} AND n={n}')
 
 
