@@ -22,6 +22,7 @@ import sqlite3
 from io import BytesIO
 from os import remove
 from unittest import main, TestCase
+from send2trash import send2trash
 import numpy as np
 from numpy.testing import assert_array_equal
 
@@ -74,7 +75,7 @@ class IsingDatabase:
         return np.load(out)
 
     def __init__(self,file='test.db',run_table='run',
-                 spins_table='Spins',energies_table='energies',magnetization_table='magnetization',verbose=False):
+                 spins_table='Spins',energies_table='energies',magnetization_table='magnetization',verbose=False,fresh=False):
         sqlite3.register_adapter(np.ndarray, IsingDatabase.adapt_array)
         sqlite3.register_converter('array', IsingDatabase.convert_array)
         base,_ = splitext(file)
@@ -84,6 +85,14 @@ class IsingDatabase:
         self.energies_table = energies_table
         self.magnetization_table = magnetization_table
         self.verbose = verbose
+        if fresh:
+            try:
+                send2trash(self.file_name)
+                if verbose:
+                    print (f'Recycled {self.file_name}')
+            except FileNotFoundError:
+                if verbose:
+                    print (f'Could not find {self.file_name}')
         self.ensure_table_exists(self.run_table,
                                  '(Temperature FLOAT NOT NULL, m INTEGER NOT NULL, n INTEGER NOT NULL, iterations INTEGER,'
                                  'CONSTRAINT PK_run PRIMARY KEY (Temperature,m,n))')
