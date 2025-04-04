@@ -30,7 +30,6 @@ from markov_ising import MarkovIsing
 def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument('--periodic', default=False, action = 'store_true', help = 'Use periodic boundary conditions')
-    parser.add_argument('--lowest', default=False, action = 'store_true', help = 'Initialize to all spins down at the start of each run')
     parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
     parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
     parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
@@ -75,7 +74,7 @@ if __name__=='__main__':
     e = np.zeros((args.Niterations))
     cV = np.zeros((args.Niterations))
     for i in range(args.Niterations):
-        markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
+        markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
         E, N = markov.data.get_data(iteration=i)
         Emean = np.average(E,weights=N)
         e[i] = Emean/NObservations

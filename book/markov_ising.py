@@ -155,7 +155,7 @@ class MarkovIsing:
 
 
 
-    def run(self,Nsteps=100000,Nburn=100,frequency=10000,iteration=0,lowest=False):
+    def run(self,Nsteps=100000,Nburn=100,frequency=10000,iteration=0):
         '''
         Initialize configuration and carry out a specified number of steps
 
@@ -164,22 +164,9 @@ class MarkovIsing:
              Nburn      Number of steps to be performed at start and not recorded
              frequency  Report to user after this many steps
              iteration  Iteration number: used for storing data and reporting
-             lowest     Use lowest energy (instead of random) for initialization
         '''
-        def initialize():
-            '''
-            Set Spins, Energy, and Magnetization at the start of a run
-            '''
-            if lowest:
-                E = get_initial_energy(self.N,self.m,self.n,periodic=self.periodic)
-                sigma = [-1] *self.N
-                M = - self.N
-            else:
-                sigma = self.rng.choice([-1,1],size=self.N)
-                E,M = get_energy_magnetism(sigma, shape=(self.m,self.n), periodic=self.periodic)
-            return sigma,E,M
-
-        sigma,E,M = initialize()
+        sigma = self.rng.choice([-1,1],size=self.N)
+        E,M = get_energy_magnetism(sigma, shape=(self.m,self.n), periodic=self.periodic)
 
         Ns = defaultdict(lambda: 0)
         Ns[E] = 1
@@ -221,7 +208,6 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', default=False, action = 'store_true', help = 'Show plot')
-    parser.add_argument('--lowest', default=False, action = 'store_true', help = 'Initialize to all spins down at the start of each run')
     return parser.parse_args()
 
 
@@ -264,11 +250,6 @@ def get_boundary_conditions(periodic):
     '''
     return 'Periodic boundary conditions' if periodic else 'Bounded'
 
-def get_initial_conditions(lowest):
-    '''
-    Used to format suptitle
-    '''
-    return 'Start at lowest energy' if lowest else 'Random starting configuration'
 
 def get_scaled_means(means,m=4,n=4):
     '''
@@ -306,13 +287,13 @@ if __name__=='__main__':
         markov = MarkovIsing(rng = rng,shape=(args.m,args.n),periodic=args.periodic,
                              Niterations=args.Niterations,beta=beta)
         for i in range(args.Niterations):
-            markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i,lowest=args.lowest)
+            markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
 
         Es,means, stds,M,magnetization = markov.get_stats()
 
         fig = figure(figsize=(12,12))
-        fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, {get_initial_conditions(args.lowest)}:' +
-                     fr' {args.m}$\times${args.n} sites, $\beta=${beta:.3g}')
+        fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, ' +
+                     fr'{args.m}$\times${args.n} sites, $\beta=${beta:.3g}')
 
         ax1 = fig.add_subplot(2,1,1)
         ax1.bar(Es,get_scaled_means(means,m=args.m,n=args.n),color='blue')
