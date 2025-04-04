@@ -159,10 +159,9 @@ class IsingDatabase:
         '''
         T,m,n = key
         with ContextManager(self.file_name) as con:
-            self.remove_old(self.run_table,con,T,m,n)
-            self.remove_old(self.spins_table,con,T,m,n)
-            self.remove_old(self.energies_table,con,T,m,n)
-            self.remove_old(self.magnetization_table,con,T,m,n)
+            for table in [self.run_table, self.spins_table, self.energies_table, self.magnetization_table]:
+                self.remove_old_entries(table,con,T,m,n)
+
             NIterations,spins,E,M = value
             con.executemany(f'INSERT INTO {self.run_table} VALUES(?, ?, ?, ? )',  [(T, m,n, NIterations)])
             for i in range(len(spins)):
@@ -173,12 +172,13 @@ class IsingDatabase:
                 con.executemany(f'INSERT INTO {self.magnetization_table} VALUES(?, ?, ?, ? ,?)',  [(T, m,n, i, int(M[i]))])
             con.commit()
 
-    def remove_old(self,table,con,T,m,n):
-        count = 0
-        for _,_,_ in con.execute(f'SELECT Temperature, m,n FROM {table} WHERE Temperature={T} AND m={m} AND n={n}'):
-            count += 1
-        if count > 0:
-            con.execute(f'DELETE FROM {table} WHERE Temperature={T} AND m={m} AND n={n}')
+    def remove_old_entries(self,table,con,T,m,n):
+        '''
+        Used to remove old data that is the be replaced
+        '''
+        for count, in con.execute(f'SELECT COUNT(*) FROM {table} WHERE Temperature={T} AND m={m} AND n={n}'):
+            if count > 0:
+                con.execute(f'DELETE FROM {table} WHERE Temperature={T} AND m={m} AND n={n}')
 
 
 class DbTest(TestCase):
@@ -195,6 +195,7 @@ class DbTest(TestCase):
             self.fail('Exception not thrown')
         except KeyError:
             pass
+        self.db[(1.0,2,2)] = 1067,np.array([1,1,-1,-1],dtype=int),np.array([1,4],dtype=int),np.array([12,4],dtype=int)
 
     def tearDown(self):
         remove(self.db.file_name)
