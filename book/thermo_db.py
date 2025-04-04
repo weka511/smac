@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#   Copyright (C) 2024-2025 Simon Crase
+#   Copyright (C) 2025 Simon Crase
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
+from matplotlib.patches import Patch
 from ising_db import IsingDatabase
 from cluster_ising import IsingData
 
@@ -74,17 +75,16 @@ if __name__=='__main__':
     es = []
     cVs = []
     database = IsingDatabase(args.input)
+    lines = ['T,e,\t$c_V$']
     for T,m,n in database.generate_keys():
         if args.m != None and m != args.m: continue
         if args.n != None and n != args.m: continue
         NIterations,s,N,_ = database[T,m,n]
-        ising_data = IsingData(m*n)
-        E = [E for E,_ in ising_data.generate_E()]
-        e,cV = thermo(E,N,beta=1/T,NObservations=m*n)
-        print (T,NIterations,e,cV)
+        e,cV = thermo(N[:,0],N[:,1],beta=1/T,NObservations=m*n)
         Ts.append(T)
         es.append(e)
         cVs.append(cV)
+        lines.append(f'{T:.1f},\t{e:.3f},\t{cV:.5f}')
 
     if len(Ts) == 0:
         print ('No data')
@@ -99,8 +99,9 @@ if __name__=='__main__':
     plt2 = axt.plot(Ts,cVs,color='red',label=r'$c_V$')
     axt.set_ylabel(r'$c_V$')
     lns = plt1 + plt2
-    labs = [l.get_label() for l in lns]
-    ax.legend(lns, labs, loc=0)
+    ax.legend(lns, [l.get_label() for l in lns], loc='upper left')
+    axt.legend([Patch(color='white')]*len(lines),  lines,loc='center left')
+    ax.set_title(fr'{m}$\times${n} Grid, after {NIterations} Iterations')
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
