@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 Greenweaves Software Limited
+ * Copyright (C) 2019-2025 Greenweaves Software Limited
  *
  * This is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
 	bool wrapped  = false;
 	bool progress = false;
 	string path   = "out.txt";
+	string periodic = "aperiodic";
 	while ((c = getopt (argc, argv, "n:wpo:")) != -1)
 		switch(c) {
 			case 'n':
@@ -49,6 +50,7 @@ int main(int argc, char **argv) {
 				break;
 			case 'w':
 				wrapped = true;
+				periodic = "periodic";
 				break;
 			case 'p':
 				progress = true;
@@ -59,7 +61,7 @@ int main(int argc, char **argv) {
 
 	ofstream out;
 	out.open (path);
-	out<<"n="<<n<<endl;
+	out << "n=" << n << "," << periodic << endl;
 	enumerate_ising(n,out,wrapped,progress);
 	out.close();
 	return 0;

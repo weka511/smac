@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 Greenweaves Software Limited
+ * Copyright (C) 2019-2025 Greenweaves Software Limited
  *
  * This is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,9 @@
 
 using namespace std;
 
+/**
+ * This class provides an iterator for generating Gray coded numbers
+ */
 class Gray {
   private:
 	const int         		_n;
@@ -43,6 +46,9 @@ class Gray {
 			_tau[i] = i+1;
 	}
 	
+	/**
+	 * Return next value in Gray coded enumeration
+	 */
 	int next() {
 		if (_i++>_max) return -1;
 		if (_frequency>0 && _i%_frequency==0) 
