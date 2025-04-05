@@ -267,7 +267,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -||enumerate_ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
 -||Exercise 5-2. Generate configurations from binary representation (incomplete)
 -||Exercise 5-4: Implement thermo-ising for mean energ and cV
--||Exercise 5-6.Plot magnetization
+-||Exercise 5-6.Plot magnetization as a function of temperature
 -||exercise_5.7.py|Exercise 5.7. Compute Partition function using loop configurations as described in 5.1.3
 -||ising.py|Shared code for Ising model: Algorithm 5.2, Gray code for spins; generate neighbours of a spin; calculate energy for a configuration.
 -||ising_enum.py|Algorithm 5.3: Single spin-slip enumeration for Ising model

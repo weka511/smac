@@ -95,7 +95,7 @@ def get_probabilities(data,beta=1.0):
     Z = weights.sum()
     probabilities = weights * data[:,2]/Z
     indices = np.argsort(data[:,1])
-    return indices,probabilities[indices]
+    return data[indices,1],probabilities[indices]
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -106,10 +106,14 @@ if __name__=='__main__':
     data = get_data(args.input)
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
-    for T in [2.5,5]:
+    for T in np.arange(1,5,0.5):
         M,P = get_probabilities(data,beta=1/T)
-        Ms,product=create_M(M,P)
-        ax1.plot(Ms,product)
+        Ms,probabilities=create_M(M,P)
+        ax1.plot(Ms,probabilities/probabilities.sum(),label=f'T={T}')
+    ax1.set_xlabel('M')
+    ax1.set_ylabel(r'$\pi$')
+    ax1.set_title('Exercise 2.6')
+    ax1.legend()
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
