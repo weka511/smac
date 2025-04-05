@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+'''Exercise 5.6'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -27,13 +27,29 @@ from matplotlib.pyplot import figure, show
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
-    parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-i', '--input', default = r'C:\cygwin64\home\Weka\smac\book\ising\out.txt',help='Name of input file')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('-T', '--T', default=[0.5,4,0.5], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
     return parser.parse_args()
 
+def get_range(T,deltaT=0.1):
+    '''
+    Used to convert temperature (specified in args) to a range
+
+    Parameters:
+        T       [start, ]stop, [step, ]
+    '''
+    match (len(T)):
+        case 1:
+            return T
+        case 2:
+            return np.arange(T[0],T[1],deltaT)
+        case 3:
+            return np.arange(T[0],T[1]+T[2],T[2])
+
+    raise ValueError(f'Parameter T must have length of 1,2, or 3')
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -57,19 +73,23 @@ def get_file_name(name,default_ext='png',seq=None):
 
 def get_data(file_name):
     data = []
+    n = None
+    periodic = False
     with open(file_name) as input:
         i = 0
         data = []
         for line in input:
             match (i):
                 case 0:
-                    pass
+                    parts = line.strip().split(',')
+                    n = int(parts[0][2:])
+                    periodic = parts[1].lower() == 'periodic'
                 case 1:
                     pass
                 case _:
                     data.append([int(j) for j in line.split(',')])
             i += 1
-        return np.array(data,dtype=np.int64)
+        return n,periodic,np.array(data,dtype=np.int64)
 
 def create_M(M,P):
     def get_upper_limit(i):
@@ -97,22 +117,25 @@ def get_probabilities(data,beta=1.0):
     indices = np.argsort(data[:,1])
     return data[indices,1],probabilities[indices]
 
+def get_boundary_conditions(periodic):
+    return ' with periodic boundary conditions' if periodic else ''
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    rng = np.random.default_rng(args.seed)
-    data = get_data(args.input)
+
+    n,periodic,data = get_data(args.input)
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
-    for T in np.arange(1,5,0.5):
+    for T in get_range(args.T):
         M,P = get_probabilities(data,beta=1/T)
         Ms,probabilities=create_M(M,P)
         ax1.plot(Ms,probabilities/probabilities.sum(),label=f'T={T}')
     ax1.set_xlabel('M')
     ax1.set_ylabel(r'$\pi$')
-    ax1.set_title('Exercise 2.6')
+    ax1.set_title(fr'Exercise 2.6: {n}$\times${n} grid {get_boundary_conditions(periodic)}')
     ax1.legend()
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
