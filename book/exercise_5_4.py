@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#   Copyright (C) 2024-2025 Simon Crase
+#   Copyright (C) 2025 Simon Crase
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ def thermo(E,N,beta=1,NObservations=36):
     weights = np.exp(-beta*E) *N
     Emean = np.average(E,weights=weights)
     e = Emean/NObservations
-    cV = beta**2 * np.average((E-Emean)**2,weights=N)/NObservations
+    cV = beta**2 * np.average((E-Emean)**2,weights=weights)/NObservations
     return e, cV
 
 if __name__=='__main__':
