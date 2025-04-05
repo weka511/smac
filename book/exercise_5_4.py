@@ -15,14 +15,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+''' Exercise 5.4: implement thermo-ising'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
-from matplotlib import rc
-from matplotlib.pyplot import figure, show
+
 
 
 def parse_arguments():
@@ -57,19 +56,23 @@ def get_file_name(name,default_ext='png',seq=None):
 
 def get_data(file_name):
     data = []
+    n = None
+    periodic = False
     with open(file_name) as input:
         i = 0
         data = []
         for line in input:
             match (i):
                 case 0:
-                    pass
+                    parts = line.strip().split(',')
+                    n = int(parts[0][2:])
+                    periodic = parts[1].lower() == 'periodic'
                 case 1:
                     pass
                 case _:
                     data.append([int(j) for j in line.split(',')])
             i += 1
-        return np.array(data,dtype=np.int64)
+        return n,periodic,np.array(data,dtype=np.int64)
 
 def create_E(data):
     def get_upper_limit(i):
@@ -91,19 +94,16 @@ def thermo(E,N,beta=1,NObservations=36):
     return e, cV
 
 if __name__=='__main__':
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    data = get_data(args.input)
+    _,_,data = get_data(args.input)
 
     E = create_E(data)
     for T in [0.5, 1.0, 1.5, 1.0, 2.5, 3, 3.5,4.0]:
         e,cV = thermo(E[:,0],E[:,1],beta=1/T)
         print (T,e,cV)
-    fig = figure(figsize=(12,12))
-    fig.savefig(get_file_name(args.out))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
