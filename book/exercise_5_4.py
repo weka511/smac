@@ -69,7 +69,7 @@ def get_data(file_name):
                 case _:
                     data.append([int(j) for j in line.split(',')])
             i += 1
-        return np.array(data,dtype=int)
+        return np.array(data,dtype=np.int64)
 
 def create_E(data):
     def get_upper_limit(i):
@@ -77,11 +77,18 @@ def create_E(data):
 
     m,_ = data.shape
     Es,indices = np.unique(data[:,0],return_index=True)
-    product = np.zeros((len(Es),2),dtype=int)
+    product = np.zeros((len(Es),2),dtype=np.int64)
     for i in range(len(Es)):
         product[i,0] = Es[i]
         product[i,1] = sum(data[j,2] for j in range(indices[i],get_upper_limit(i)))
     return product
+
+def thermo(E,N,beta=1,NObservations=36):
+    weights = np.exp(-beta*E) *N
+    Emean = np.average(E,weights=weights)
+    e = Emean/NObservations
+    cV = beta**2 * np.average((E-Emean)**2,weights=N)/NObservations
+    return e, cV
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -92,9 +99,10 @@ if __name__=='__main__':
     data = get_data(args.input)
 
     E = create_E(data)
-    print (E)
+    for T in [0.5, 1.0, 1.5, 1.0, 2.5, 3, 3.5,4.0]:
+        e,cV = thermo(E[:,0],E[:,1],beta=1/T)
+        print (T,e,cV)
     fig = figure(figsize=(12,12))
-
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
