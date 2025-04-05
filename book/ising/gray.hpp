@@ -24,7 +24,8 @@
 using namespace std;
 
 /**
- * This class provides an iterator for generating Gray coded numbers
+ * This class provides an iterator for flipping spins using Gray coding
+ * See Krauth, Algorithm 5.2
  */
 class Gray {
   private:
@@ -47,7 +48,7 @@ class Gray {
 	}
 	
 	/**
-	 * Return next value in Gray coded enumeration
+	 * Return next index to be flipped in Gray coded enumeration
 	 */
 	int next() {
 		if (_i++>_max) return -1;
@@ -55,7 +56,7 @@ class Gray {
 			cout << setprecision(2) <<(100*(double)_i)/_max <<"%"<<endl;
 		int k = _tau[0];
 		if (k>_n) return -1;
-		_tau[k-1]	=_tau[k];
+		_tau[k-1]	= _tau[k];
 		_tau[k] 	= k+1;
 		if (k != 1) 
 			_tau[0] = 1;
