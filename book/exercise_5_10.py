@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#   Copyright (C) 2024-2025 Simon Crase
+#   Copyright (C) 2025 Simon Crase
 
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -16,7 +16,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 '''
-    Exercise 5.10 Implement Local Metropolis algorithm and test it against the specific heat capacity.
+    Exercise 5.10
+         (a) Implement Local Metropolis algorithm and test it against the specific heat capacity.
+         (b)  Plot M against T
 '''
 
 from argparse import ArgumentParser
@@ -36,7 +38,7 @@ def parse_arguments():
     parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
     parser.add_argument('--Nburn', type = int, default = 0, help = 'Number of steps for burn in')
     parser.add_argument('--Niterations', type = int, default = 5, help = 'Number of iterations of Markov chain')
-    parser.add_argument('-f', '--frequency',type = int, default = 100, help = 'How often to report progress')
+    parser.add_argument('-f', '--frequency',type = int, default = 1000, help = 'How often to report progress')
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
@@ -91,10 +93,18 @@ if __name__=='__main__':
     ax2 = fig.add_subplot(2,1,2)
     ax2t = ax2.twinx()
     plt1 = ax2.plot(e,label=fr'e: {e.mean():.03f}, $\pm${e.std():.03g}',color='blue')
+    ax2.axhline(y=e.mean()+e.std(), xmin=0, xmax=1, color='blue', ls=':')
+    ax2.axhline(y=e.mean()-e.std(), xmin=0, xmax=1, color='blue', ls=':')
     plt2 = ax2t.plot(cV,label=fr'$c_V$: {cV.mean():.05f}, $\pm${cV.std():.03g}',color='red')
+    ax2t.axhline(y=cV.mean()+cV.std(), xmin=0, xmax=1, color='red', ls=':')
+    ax2t.axhline(y=cV.mean()-cV.std(), xmin=0, xmax=1, color='red', ls=':')
     lns = plt1 + plt2
     ax2.legend(lns, [l.get_label() for l in lns], loc='upper left')
-
+    ax2.set_xlabel('Iteration')
+    ax2.set_ylabel('e')
+    ax2t.set_ylabel('$c_V$')
+    ax2.set_title(f'T={args.T}')
+    fig.tight_layout(pad=3)
     fig.savefig(get_file_name(args))
 
     elapsed = time() - start
