@@ -26,6 +26,7 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from markov_ising import MarkovIsing
+from thermo_db import thermo
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -69,30 +70,30 @@ if __name__=='__main__':
     beta = 1/args.T
 
     markov = MarkovIsing(rng = np.random.default_rng(args.seed),
-                         shape=(args.m,args.n),periodic=args.periodic,
-                         Niterations=args.Niterations,beta=beta)
+                         shape=(args.m,args.n),
+                         periodic=args.periodic,
+                         Niterations=args.Niterations,
+                         beta=beta)
     e = np.zeros((args.Niterations))
     cV = np.zeros((args.Niterations))
     for i in range(args.Niterations):
         markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
         E, N = markov.data.get_data(iteration=i)
-        Emean = np.average(E,weights=N)
-        e[i] = Emean/NObservations
-        cV[i] = beta**2 * np.average((E-Emean)**2,weights=N)/NObservations
-        print (f'e={e[i]:.03f},cV={cV[i]:.05f}')
-    print (f'e: {e.mean():.03f} {e.std():.03g}')
-    print (f'cV: {cV.mean():.05f} {cV.std():.03g}')
+        e[i],cV[i] = thermo(E,N,beta=beta,NObservations=args.m*args.n)
+
     fig = figure(figsize=(12,12))
-    ax = fig.add_subplot(2,1,1)
-    ax.bar(E,N)
-    ax.set_title(fr'$\beta=${beta}')
+    ax1 = fig.add_subplot(2,1,1)
+    ax1.bar(E,N/N.sum())
+    ax1.set_title(fr'$\beta=${beta}')
+    ax1.set_xlabel('E')
+    ax1.set_ylabel('Frequency')
 
     ax2 = fig.add_subplot(2,1,2)
-    ax2.plot(e,label='e',color='blue')
-    ax2.legend(loc='upper left')
     ax2t = ax2.twinx()
-    ax2t.plot(cV,label='$c_V$',color='red')
-    ax2t.legend(loc='upper right')
+    plt1 = ax2.plot(e,label=fr'e: {e.mean():.03f}, $\pm${e.std():.03g}',color='blue')
+    plt2 = ax2t.plot(cV,label=fr'$c_V$: {cV.mean():.05f}, $\pm${cV.std():.03g}',color='red')
+    lns = plt1 + plt2
+    ax2.legend(lns, [l.get_label() for l in lns], loc='upper left')
 
     fig.savefig(get_file_name(args))
 
