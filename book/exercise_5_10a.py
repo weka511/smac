@@ -16,9 +16,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 '''
-    Exercise 5.10
-         (a) Implement Local Metropolis algorithm and test it against the specific heat capacity.
-         (b)  Plot M against T
+    Exercise 5.10 Implement Local Metropolis algorithm and test it against the specific heat capacity.
 '''
 
 from argparse import ArgumentParser

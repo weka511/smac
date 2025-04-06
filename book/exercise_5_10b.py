@@ -15,7 +15,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+'''
+    Exercise 5.10  Plot M against T
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
