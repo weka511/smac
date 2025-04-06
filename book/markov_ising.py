@@ -179,7 +179,7 @@ class MarkovIsing:
             if i < Nburn: continue
             Ns[E] += 1
             NMs[M] += 1
-            if frequency > 0 and i%frequency == 0:
+            if frequency > 0 and i%frequency == 0 and i > 0:
                 print (f'Iteration {iteration}, step {i}')
 
         self.data.store_data(table=Datum.ENERGY,iteration=iteration,Ns=Ns)
@@ -189,7 +189,7 @@ class MarkovIsing:
     def get_stats(self):
         '''
         Extract mean and standard deviation for those energies
-        that have appered at least once in MCMC
+        that have appeared at least once in MCMC
         '''
         return self.data.get_stats()
 
@@ -282,10 +282,11 @@ if __name__=='__main__':
     T_range = get_range(args.T)
 
     for j,T in enumerate(T_range):
-        beta = 1/T
-
-        markov = MarkovIsing(rng = rng,shape=(args.m,args.n),periodic=args.periodic,
-                             Niterations=args.Niterations,beta=beta)
+        markov = MarkovIsing(rng=rng,
+                             shape=(args.m,args.n),
+                             periodic=args.periodic,
+                             Niterations=args.Niterations,
+                             beta=1/T)
         for i in range(args.Niterations):
             markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
 
@@ -293,7 +294,7 @@ if __name__=='__main__':
 
         fig = figure(figsize=(12,12))
         fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, ' +
-                     fr'{args.m}$\times${args.n} sites, $\beta=${beta:.3g}')
+                     fr'{args.m}$\times${args.n} sites, T={T}')
 
         ax1 = fig.add_subplot(2,1,1)
         ax1.bar(Es,get_scaled_means(means,m=args.m,n=args.n),color='blue')
