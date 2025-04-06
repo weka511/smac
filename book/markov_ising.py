@@ -126,6 +126,7 @@ class MarkovIsing:
         self.data = IsingData(Niterations=Niterations,N=self.N)
         self.weights = Weights(beta,get_max_neighbours(shape))
         self.neighbours = Neighbours(shape=shape,periodic=periodic)
+        self.accepted_moves = 0
 
 
     def step(self,sigma,E,M):
@@ -151,6 +152,7 @@ class MarkovIsing:
             sigma[k] *= -1
             E += deltaE
             M += 2*sigma[k]
+            self.accepted_moves += 1
         return sigma,E,M
 
 
@@ -165,6 +167,7 @@ class MarkovIsing:
              frequency  Report to user after this many steps
              iteration  Iteration number: used for storing data and reporting
         '''
+        self.accepted_moves = 0
         sigma = self.rng.choice([-1,1],size=self.N)
         E,M = get_energy_magnetism(sigma, shape=(self.m,self.n), periodic=self.periodic)
 
@@ -287,14 +290,15 @@ if __name__=='__main__':
                              periodic=args.periodic,
                              Niterations=args.Niterations,
                              beta=1/T)
+        accepted = 0
         for i in range(args.Niterations):
             markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
+            accepted += markov.accepted_moves
 
         Es,means, stds,M,magnetization = markov.get_stats()
-
         fig = figure(figsize=(12,12))
         fig.suptitle(fr'{get_boundary_conditions(args.periodic)}, ' +
-                     fr'{args.m}$\times${args.n} sites, T={T}')
+                     fr'{args.m}$\times${args.n} sites, T={T}, accepted={accepted/(args.Niterations*args.Nsteps)} ')
 
         ax1 = fig.add_subplot(2,1,1)
         ax1.bar(Es,get_scaled_means(means,m=args.m,n=args.n),color='blue')

@@ -33,7 +33,7 @@ def parse_arguments():
     parser.add_argument('--Nsteps', type = int, default = 10000, help = 'Number of steps')
     parser.add_argument('--Nburn', type = int, default = 0, help = 'Number of steps for burn in')
     parser.add_argument('--Niterations', type = int, default = 5, help = 'Number of iterations of Markov chain')
-    parser.add_argument('-f', '--frequency',type = int, default = 100, help = 'How often to report progress')
+    parser.add_argument('-f', '--frequency',type = int, default = 0, help = 'How often to report progress')
     parser.add_argument('-T', '--T', default=[1000], nargs='+', type=float, help = 'Range for temperature: [start, ]stop, [step, ]')
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
@@ -94,24 +94,26 @@ if __name__=='__main__':
     T_range = get_range(args.T)
     fig = figure(figsize=(12,12))
     fig.suptitle(fr'{get_boundary_conditions(args.periodic)} , ' +
-                 fr'{args.m}$\times${args.n} sites, {args.Niterations}$\times${args.Nsteps} steps')
+                 fr'{args.m}$\times${args.n} sites, {args.Niterations} iterations $\times$ {args.Nsteps} steps')
 
-    ax2 = fig.add_subplot(1,1,1)
+    ax = fig.add_subplot(1,1,1)
     for j,T in enumerate(T_range):
         markov = MarkovIsing(rng=rng,
                              shape=(args.m,args.n),
                              periodic=args.periodic,
                              Niterations=args.Niterations,
                              beta=1/T)
+        accepted = 0
         for i in range(args.Niterations):
             markov.run(Nsteps=args.Nsteps,Nburn=args.Nburn,frequency=args.frequency,iteration=i)
+            accepted += markov.accepted_moves
 
         Es,means, stds,M,magnetization = markov.get_stats()
-        ax2.bar(M,magnetization,width=0.8,label=f'T={T}')
-        ax2.set_xlabel('$M$')
-        ax2.set_ylabel('Magnetization')
-        ax2.set_title('Magnetization')
-        ax2.legend(loc='upper left')
+        ax.bar(M,magnetization,width=0.8,label=fr'T={T}, accepted={100*accepted/(args.Niterations*args.Nsteps):.1f}\%')
+        ax.set_xlabel('$M$')
+        ax.set_ylabel('Magnetization')
+        ax.set_title('Magnetization')
+        ax.legend(loc='upper left')
 
         fig.tight_layout(h_pad=4,pad=2)
         fig.savefig(get_file_name(args.out))
