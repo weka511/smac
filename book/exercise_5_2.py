@@ -21,8 +21,7 @@ from argparse import ArgumentParser
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
-from matplotlib import rc
-from matplotlib.pyplot import figure, show
+
 
 
 def parse_arguments():
@@ -30,29 +29,9 @@ def parse_arguments():
     parser.add_argument('--periodic', default=False, action = 'store_true', help = 'Use periodic boundary conditions')
     parser.add_argument('-m', type = int, default = 4, help = 'Number of rows')
     parser.add_argument('-n', type = int, default = 4, help = 'Number of columns')
-    parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
-    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
-    parser.add_argument('--figs', default = './figs')
-    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-f', '--frequency',type = int, default = 100, help = 'How often to report progress')
     return parser.parse_args()
 
-
-def get_file_name(args,default_ext='.png',seq=None):
-    '''
-    Used to create file names
-
-    Parameters:
-        args
-        default_ext
-        seq
-    '''
-    base,ext = splitext(args.out)
-    if len(ext) == 0:
-        ext = default_ext
-    if seq != None:
-        base = f'{base}{seq}'
-    return join(args.figs,f'{base}{ext}')
 
 def generate_spins(N):
     Spins = np.zeros((N))
@@ -65,8 +44,6 @@ def generate_spins(N):
         yield Spins
 
 if __name__=='__main__':
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
 
@@ -75,14 +52,8 @@ if __name__=='__main__':
     for i,s in enumerate(generate_spins(N)):
         if i%args.frequency == 0:
             print (f'{i/(2**N)} {time() - start:2}')
-    rng = np.random.default_rng(args.seed)
-    fig = figure(figsize=(12,12))
 
-    fig.savefig(get_file_name(args))
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
     print (f'Elapsed Time {minutes} m {seconds:.2f} s')
-
-    if args.show:
-        show()
