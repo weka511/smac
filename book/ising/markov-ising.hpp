@@ -25,18 +25,26 @@ class MarkovIsing {
 	private:
 	     Neighbours * neighbours;
 		 std::mt19937_64 mt{ static_cast<std::mt19937::result_type>(
-		std::chrono::steady_clock::now().time_since_epoch().count()
-		) };
+								std::chrono::steady_clock::now().time_since_epoch().count())
+							};
+		
 		int * sigma;
 		int N;
+		int E;
+		int M;
+		float beta = 4.0;
 		
 	public:
 		MarkovIsing(int m=6,int n=6,bool wrapped=true);
 		
 		void prepare();
 		
-		void step();
+		void step(int k, float rr);
 
+		void run();
+		
+		int get_field(int i); 
+		
 		virtual ~MarkovIsing();
 };
 #endif

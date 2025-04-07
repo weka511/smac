@@ -83,6 +83,9 @@ using namespace std;
 			}
 		}
 		
+		int get_neighbour(int i,int j) {return _neighbours[i][j];}
+		
+		int get_d() {return _d;}
 		virtual ~Neighbours() {
 			 for(int i = 0; i < N; ++i)
 				 delete [] _neighbours[i];
