@@ -15,7 +15,28 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef _ENUMERATE_ISING_HPP_
-#define _ENUMERATE_ISING_HPP_
+#ifndef _MARKOV_ISING_HPP_
+#define _MARKOV_ISING_HPP_
+#include <random>
+#include <chrono>
+using namespace std;
 
+class MarkovIsing {
+	private:
+	     Neighbours * neighbours;
+		 std::mt19937_64 mt{ static_cast<std::mt19937::result_type>(
+		std::chrono::steady_clock::now().time_since_epoch().count()
+		) };
+		int * sigma;
+		int N;
+		
+	public:
+		MarkovIsing(int m=6,int n=6,bool wrapped=true);
+		
+		void prepare();
+		
+		void step();
+
+		virtual ~MarkovIsing();
+};
 #endif

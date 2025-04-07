@@ -29,8 +29,30 @@
 
 using namespace std;
 
+MarkovIsing::MarkovIsing(int m,int n,bool wrapped) : N(m*n) {
+			neighbours = new Neighbours(m,n,wrapped);
+			sigma = new int[m*n];
+		};
+
+void MarkovIsing::prepare() {
+	for (int i=0;i<N;i++) 
+		sigma[i] = 2*(mt()%2)-1;
+}		
+void MarkovIsing::step() {
+
+
+}
+
+
+
+MarkovIsing::~MarkovIsing(){
+	delete neighbours;
+	delete [] sigma;
+};
+
 int main(int argc, char **argv) {
 	std::cout << "Hello Markov" << std::endl;
-	const int n=4;
-	Neighbours neighbours(n,n,true);
+	MarkovIsing markov(6,6,true);
+	markov.prepare();
+	markov.step();
 }

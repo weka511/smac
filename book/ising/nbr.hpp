@@ -80,7 +80,6 @@ using namespace std;
 				_neighbours[i] = new int[2*_d+1];
 				for (int j=0;j<2*_d+1;j++)
 					_neighbours[i][j] = nbr(i+1,j+1, n, wrapped);
-				std:cout << _neighbours[i][0] <<", " << _neighbours[i][1] << ", " << _neighbours[i][2] <<", " <<  _neighbours[i][3]<<", "  << _neighbours[i][4]<<std::endl;
 			}
 		}
 		
