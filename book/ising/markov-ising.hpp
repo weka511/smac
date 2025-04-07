@@ -39,7 +39,7 @@ class MarkovIsing {
 		
 		void prepare();
 		
-		void step(int k, float rr);
+		void step(int k, float rr,float * Upsilon);
 
 		void run();
 		
