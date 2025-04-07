@@ -51,7 +51,7 @@ void MarkovIsing::step(int k, float rr, float * Upsilon) {
 	std::uniform_real_distribution<float> dt(0,1);
 	int h = get_field(k);
 	int deltaE = 2 * h * sigma[k];
-	if (deltaE >= 0 and rr < Upsilon[deltaE/2]){
+	if (deltaE <= 0 or rr < Upsilon[deltaE/2]){
 		sigma[k] *= -1;
 		E += deltaE;
 		M -= sigma[k];
