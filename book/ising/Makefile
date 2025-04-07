@@ -1,4 +1,4 @@
-# Copyright (C) 2019-2022 Greenweaves Software Limited
+# Copyright (C) 2019-2025 Greenweaves Software Limited
 #
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -71,6 +71,10 @@ $(TEST_MAIN): $(OBJS) tests.o $(TEST_OBJS)
 
 $(MARKOV): $(OBJS) markov-ising.o 
 	${CXX} $(LDFLAGS) -o $(MARKOV) markov-ising.o ${OBJS} ${LDLIBS}
+
+mi : $(MARKOV)
+	 ./markov-ising.exe -n6 -w
+
 	
 distclean: clean
 	$(RM) *~ .depend
