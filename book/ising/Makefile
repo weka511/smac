@@ -36,7 +36,9 @@ THREADING = threading.exe
 
 MAIN      = enumerate-ising.exe
 TEST_MAIN = tests.exe
-TARGETS   = $(MAIN) 
+MARKOV = markov-ising.exe
+
+TARGETS   = $(MAIN) $(MARKOV)
 
 all : $(TARGETS) $(TEST_OBJS) $(MD)
 
@@ -67,7 +69,8 @@ $(MAIN): $(OBJS) enumerate-ising.o
 $(TEST_MAIN): $(OBJS) tests.o $(TEST_OBJS)
 	${CXX} $(LDFLAGS) -o $(TEST_MAIN) tests.o ${OBJS} $(TEST_OBJS) ${LDLIBS}
 
-
+$(MARKOV): $(OBJS) markov-ising.o 
+	${CXX} $(LDFLAGS) -o $(MARKOV) markov-ising.o ${OBJS} ${LDLIBS}
 	
 distclean: clean
 	$(RM) *~ .depend

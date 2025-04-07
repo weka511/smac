@@ -88,7 +88,7 @@ using namespace std;
 			 for(int i = 0; i < N; ++i)
 				 delete [] _neighbours[i];
 			 delete [] _neighbours;
-			 std::cout << "Hello World!" << std::endl;
+			 std::cout << "Cleaned up" << std::endl;
 		 }
 	 
 
