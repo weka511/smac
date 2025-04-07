@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 Greenweaves Software Limited
+ * Copyright (C) 2019-2025 Greenweaves Software Limited
  *
  * This is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 #ifndef _NBR_HPP_
 #define _NBR_HPP_
  
+using namespace std;
+#include <iostream>
  /**
   * Find neighbours of specified cell. Layout is shown in Figure 5-2.
   * E.g. for 3x3 case:
@@ -48,6 +50,8 @@
 		 case 4:
 			row--;
 			break;
+		case 5:
+			return -1;
 	 }
 	 
 	 if (wrapped) {
@@ -62,5 +66,32 @@
 	return (row-1)*n+column;
  }
  
+ class Neighbours{
+	private:
+		const int _d;
+		const int N;
+		int ** _neighbours;
+	public:
+		Neighbours(const int m,
+					const int n,
+					bool wrapped=false) : _d(2), N(m*n){
+			_neighbours = new int*[N];
+			for(int i = 0; i < N; ++i){
+				_neighbours[i] = new int[2*_d+1];
+				for (int j=0;j<2*_d+1;j++)
+					_neighbours[i][j] = nbr(i+1,j+1, n, wrapped);
+				std:cout << _neighbours[i][0] <<", " << _neighbours[i][1] << ", " << _neighbours[i][2] <<", " <<  _neighbours[i][3]<<", "  << _neighbours[i][4]<<std::endl;
+			}
+		}
+		
+		virtual ~Neighbours() {
+			 for(int i = 0; i < N; ++i)
+				 delete [] _neighbours[i];
+			 delete [] _neighbours;
+			 std::cout << "Hello World!" << std::endl;
+		 }
+	 
+
+ };
  #endif
  
