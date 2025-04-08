@@ -32,30 +32,38 @@ int main(int argc, char **argv) {
 	int n = 4;
 	bool wrapped  = false;
 	string path   = "markov-out.txt";
-	while ((c = getopt (argc, argv, "n:wpo:")) != -1)
-	switch(c) {
-		case 'n':
-			n = atoi(optarg);
-			break;
-		case 'w':
-			wrapped = true;
-			break;
-		case 'o':
-			path = optarg;
-			break;
-		default: 
-			abort();
-	}
+	int frequency = 0;
+	float beta = 2.0;
+	
+	while ((c = getopt (argc, argv, "n:wpo:f:b:")) != -1)
+		switch(c) {
+			case 'n':
+				n = atoi(optarg);
+				break;
+			case 'f':
+				frequency = atoi(optarg);
+				break;
+			case 'w':
+				wrapped = true;
+				break;
+			case 'o':
+				path = optarg;
+				break;
+			case 'b':
+				beta = atof(optarg);
+				break;
+			default: 
+				abort();
+		}
 
-	std::cout << "Hello Markov " << n <<std::endl;
 	if (wrapped)
 		std::cout <<"periodic" << std::endl;
 	else
 		std::cout <<"not periodic" << std::endl;
 	ofstream out;
 	out.open (path);
-	MarkovIsing markov(n,n,wrapped,out);
-	markov.run();
+	MarkovIsing markov(n,n,wrapped,out,beta=beta);
+	markov.run(frequency=frequency);
 	out.close();
 	return 0;
 }

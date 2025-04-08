@@ -33,16 +33,18 @@ class MarkovIsing {
 		int N;
 		int E;
 		int M;
-		float beta = 4.0;
-		ofstream &out;
+		ofstream & out;
+		float beta;
+		float * Upsilon; 
+			
 	public:
-		MarkovIsing(int ,int n,bool wrapped,ofstream &out);
+		MarkovIsing(int ,int n,bool wrapped,ofstream &out, float beta=2.0);
 		
 		void prepare();
 		
-		void step(int k, float rr,float * Upsilon);
+		void step(int k, float rr);
 
-		void run(int max_steps=100000, int frequency=1000);
+		void run(int max_steps=100000, int frequency=0);
 		
 		int get_field(int i); 
 		

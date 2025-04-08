@@ -29,10 +29,14 @@
 
 using namespace std;
 
-MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out) : N(m*n),out(out) {
-			neighbours = new Neighbours(m,n,wrapped);
-		 	sigma = new int[m*n]; 
-		};
+MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
+			out(out), beta(beta),N(m*n) {
+	neighbours = new Neighbours(m,n,wrapped);
+	sigma = new int[m*n]; 
+	Upsilon = new float[5];
+	for (int E=0;E<=8;E++)
+		Upsilon[E/2] = exp(-beta*E);
+}
 
 void MarkovIsing::prepare() {
 	M = 0;
@@ -43,11 +47,10 @@ void MarkovIsing::prepare() {
 		M += sigma[i];
 		int h = get_field(i);
 		E += sigma[i] * h;
-
 	}
 }	
 	
-void MarkovIsing::step(int k, float rr, float * Upsilon) {
+void MarkovIsing::step(int k, float rr) {
 	std::uniform_real_distribution<float> dt(0,1);
 	int h = get_field(k);
 	int deltaE = 2 * h * sigma[k];
@@ -55,23 +58,19 @@ void MarkovIsing::step(int k, float rr, float * Upsilon) {
 		sigma[k] *= -1;
 		E += deltaE;
 		M -= sigma[k];
-		out << "k=" <<k << ", E="<< E <<", M="<<M<<std::endl;
 	}
 }
 
 
 void MarkovIsing::run(int max_steps, int frequency) {
-	std::uniform_real_distribution<float> dt(0,1);
-	std::uniform_int_distribution<int> d(0,N-1);
-	float Upsilon[5]; 
-	for (int E=0;E<=8;E++)
-		Upsilon[E/2] = exp(-beta*E);
+	std::uniform_real_distribution<float> dt(0,1);	
+	std::uniform_int_distribution<int> d(0,_N-1);
+
 	prepare();
-	out <<Upsilon[0]<<","<<Upsilon[1]<<","<<Upsilon[2]<<","<<Upsilon[3]<<","<<Upsilon[4]<<","<<std::endl;
 	for (int i=0;i<max_steps;i++){
 		if (frequency > 0 && i > 0 && i%frequency ==0)
 			std::cout << i << std::endl;
-		step(d(mt),dt(mt),Upsilon);
+		step(d(mt),dt(mt));
 	}
 }
 
@@ -82,40 +81,9 @@ int MarkovIsing::get_field(int i) {
 			h += sigma[neighbours->get_neighbour(i,j)];
 	return h;
 }
+
 MarkovIsing::~MarkovIsing(){
 	delete neighbours;
 	delete [] sigma;
 };
-
-// int main(int argc, char **argv) {
-	// int c;
-	// int n = 4;
-	// bool wrapped  = false;
-	// string path   = "markov-out.txt";
-	// while ((c = getopt (argc, argv, "n:wpo:")) != -1)
-	// switch(c) {
-		// case 'n':
-			// n = atoi(optarg);
-			// break;
-		// case 'w':
-			// wrapped = true;
-			// break;
-		// case 'o':
-			// path = optarg;
-			// break;
-		// default: 
-			// abort();
-	// }
-	// std::cout << "Hello Markov " << n <<std::endl;
-	// if (wrapped)
-		// std::cout <<"periodic" << std::endl;
-	// else
-		// std::cout <<"not periodic" << std::endl;
-	// ofstream out;
-	// out.open (path);
-	// MarkovIsing markov(n,n,wrapped,out);
-	// markov.run();
-	// out.close();
-	// return 0;
-// }
 
