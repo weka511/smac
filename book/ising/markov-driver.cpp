@@ -13,11 +13,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
+ *
+ *     Driver program for MCMC Ising
  */
  
-#include <iostream>
-#include <map>
-#include <utility>
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
@@ -27,6 +26,9 @@
 
 using namespace std;
 
+/**
+ * Parse command line parameters and execute MCMC model.
+ */
 int main(int argc, char **argv) {
 	int c;
 	int n = 4;
@@ -60,14 +62,13 @@ int main(int argc, char **argv) {
 				abort();
 		}
 
-	if (wrapped)
-		std::cout <<"periodic" << std::endl;
-	else
-		std::cout <<"not periodic" << std::endl;
+	std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations << std::endl;
+
 	ofstream out;
 	out.open (path);
 	MarkovIsing markov(n,n,wrapped,out,beta=beta);
 	markov.run(iterations,frequency);
 	out.close();
+	
 	return 0;
 }
