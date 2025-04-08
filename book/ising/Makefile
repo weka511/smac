@@ -38,7 +38,7 @@ THREADING = threading.exe
 
 MAIN      = enumerate-ising.exe
 TEST_MAIN = tests.exe
-MARKOV = markov-driver.exe
+MARKOV    = markov-driver.exe
 
 TARGETS   = $(MAIN) $(MARKOV)
 
@@ -60,7 +60,7 @@ depend: .depend
 install: rebuild
 	cp $(MAIN) /usr/local/bin
 	
-.depend: $(SRCS)  enumerate-ising.cpp $(TESTS) tests.cpp markov-driver.cpp
+.depend: $(SRCS)  enumerate-ising.cpp $(TESTS) tests.cpp markov-driver.cpp Makefile
 	$(RM) ./.depend
 	$(CXX) $(CPPFLAGS) -MM $^>>./.depend;
 	sed -i -e 's/\/home\/Weka\/smac\/book\///$g' .depend
@@ -75,7 +75,7 @@ $(MARKOV): $(OBJS) markov-driver.o
 	${CXX} $(LDFLAGS) -o $(MARKOV) markov-driver.o ${OBJS} ${LDLIBS}
 
 mi : all
-	 ./markov-driver.exe -n6 -w
+	 .$(MARKOV) -n6 -w
 
 	
 distclean: clean
