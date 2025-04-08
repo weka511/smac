@@ -32,39 +32,9 @@ using namespace std;
  int nbr(	const int cell,
 			const int seq,
 			const int n,
-			bool wrapped=false) ;//{
+			bool wrapped=false) ;
 				
-	 // int column = cell%n; if (column==0) column = n;
-	 // int row = cell/n;    if (column<n) row+=1;
-	 
-	 // switch (seq) {
-		 // case 1:
-			// column++;
-			// break;
-		 // case 2:
-			// row++;
-			// break;
-		 // case 3:
-			// column--;
-			// break;
-		 // case 4:
-			// row--;
-			// break;
-		// case 5:
-			// return -1;
-	 // }
-	 
-	 // if (wrapped) {
-		 // if (row<1) row       = n;
-		 // if (row>n) row       = 1;
-		 // if (column<1) column = n;
-		 // if (column>n) column = 1;
-	 // } else
-		// if (row<1 || row>n || column<1 ||column>n)
-			// return -1;
 	
-	// return (row-1)*n+column;
- // }
  
  class Neighbours{
 	private:
