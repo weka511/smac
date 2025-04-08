@@ -34,10 +34,9 @@ MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
 	neighbours = new Neighbours(m,n,wrapped);
 	sigma = new int[m*n]; 
 	Upsilon = new float[5];
-	for (int E=0;E<=8;E++) {
+	for (int E=0;E<=8;E++)
 		Upsilon[E/2] = exp(-beta*E);
-		std::cout << E << ", " << Upsilon[E/2] << std::endl;
-	}
+
 	EnergyCounts = new int[2*N +1];
 	MagnetizationCounts = new int[N+1];
 }
@@ -97,10 +96,8 @@ void MarkovIsing::run(int max_steps, int frequency) {
 int MarkovIsing::get_field(int i,int * spins) {
 	int h = 0;
 	for (int j=0;j<2*neighbours->get_d() + 1;j++) 
-		if (neighbours->get_neighbour(i,j) > -1){
+		if (neighbours->get_neighbour(i,j) > -1)
 			h += spins[neighbours->get_neighbour(i,j)];
-			std::cout << "i=" << i << ", j=" << j << ", nbr==" << neighbours->get_neighbour(i,j) << ":" << spins[neighbours->get_neighbour(i,j)] <<std::endl;
-		}
 	return h;
 }
 

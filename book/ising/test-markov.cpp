@@ -37,7 +37,9 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		spins[0] = +1;
 		REQUIRE(-4 == markov.get_field(4,spins));
 		spins[1] = +1;
-		REQUIRE(-3 == markov.get_field(4,spins));		
+		REQUIRE(-2 == markov.get_field(4,spins));	
+		spins[7] = +1;
+		REQUIRE(0 == markov.get_field(4,spins));		
 	}
 	
 	

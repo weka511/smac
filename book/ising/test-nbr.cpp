@@ -103,5 +103,10 @@ TEST_CASE( "NBR Tests", "[nbr]" ) {
 	
 	SECTION("Test Neighbours"){
 		Neighbours neighbours(3,3,true);
+		REQUIRE(neighbours.get_neighbour(4,0) == 5);
+		REQUIRE(neighbours.get_neighbour(4,1) == 7);
+		REQUIRE(neighbours.get_neighbour(4,2) == 3);
+		REQUIRE(neighbours.get_neighbour(4,3) == 1);
+		REQUIRE(neighbours.get_neighbour(4,4) == -1);
 	}
 }

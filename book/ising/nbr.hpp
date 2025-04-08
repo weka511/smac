@@ -35,35 +35,30 @@ using namespace std;
 			bool wrapped=false) ;
 				
 	
- 
+ /**
+  * This class caches the neighbours of all specified cells, shifted by one, e.g.
+  *                   6-7-8
+  *                   | | |
+  *                   3-4-5
+  *                   | | |
+  *                   0-1-2
+  */
  class Neighbours{
 	private:
-		const int _d;
+		const int d;
 		const int N;
-		int ** _neighbours;
+		int ** neighbours;
 	public:
 		Neighbours(const int m,
 					const int n,
-					bool wrapped=false) : _d(2), N(m*n){
-			_neighbours = new int*[N];
-			for(int i = 0; i < N; ++i){
-				_neighbours[i] = new int[2*_d+1];
-				for (int j=0;j<2*_d+1;j++)
-					_neighbours[i][j] = nbr(i+1,j+1, n, wrapped);
-			}
-		}
+					bool wrapped=false);
 		
-		int get_neighbour(int i,int j) {return _neighbours[i][j];}
+		int get_neighbour(int i,int j) {return neighbours[i][j];}
 		
-		int get_d() {return _d;}
-		virtual ~Neighbours() {
-			 for(int i = 0; i < N; ++i)
-				 delete [] _neighbours[i];
-			 delete [] _neighbours;
-			 std::cout << "Cleaned up" << std::endl;
-		 }
-	 
-
+		int get_d() {return d;}
+		
+		virtual ~Neighbours();
  };
- #endif
+ 
+ #endif //_NBR_HPP_
  

@@ -73,3 +73,20 @@ using namespace std;
 	
 	return (row-1)*n+column;
  }
+ 
+Neighbours::Neighbours(const int m,
+						const int n,
+						bool wrapped) : d(2), N(m*n){
+	neighbours = new int*[N];
+	for(int i = 0; i < N; ++i){
+		neighbours[i] = new int[2*d+1];
+		for (int j=0;j<2*d+1;j++)
+			neighbours[i][j] = std::max(nbr(i+1,j+1, n, wrapped)-1, -1);
+	}
+}
+		
+Neighbours::~Neighbours() {
+	for(int i = 0; i < N; ++i)
+		 delete [] neighbours[i];
+	 delete [] neighbours;
+ }
