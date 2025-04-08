@@ -19,7 +19,7 @@
 #define _NBR_HPP_
  
 using namespace std;
-#include <iostream>
+
  /**
   * Find neighbours of specified cell. Layout is shown in Figure 5-2.
   * E.g. for 3x3 case:

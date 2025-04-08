@@ -15,14 +15,7 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
  
-#include <iostream>
-#include <map>
-#include <utility>
-#include <getopt.h>
-#include <iostream>
-#include <fstream>
-#include <string>
-
+#include <algorithm>
 #include "nbr.hpp"
 
 

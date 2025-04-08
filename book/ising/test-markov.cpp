@@ -25,7 +25,7 @@
 
 TEST_CASE( "Markov Tests", "[markov]" ) {
 	
-	SECTION("Test nbr against SMAC fig 5-2"){
+	SECTION("Test MarkovIsing.get_field()"){
 		ofstream out;
 		out.open ("dummy.txt");
 		MarkovIsing markov(3,3,false,out);
@@ -43,6 +43,17 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 	}
 	
 	
-	
+	SECTION("Test MarkovIsing.get_field()"){
+		ofstream out;
+		out.open ("dummy.txt");
+		MarkovIsing markov(3,3,false,out);
+		int spins[9] = {-1, +1, -1,
+						+1, -1, +1,
+						-1, +1, -1
+						};
+		REQUIRE(+4 == markov.get_field(4,spins));
+		spins[4] = -1;
+		REQUIRE(+4 == markov.get_field(4,spins));
+	}
 	
 }

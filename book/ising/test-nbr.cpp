@@ -101,12 +101,39 @@ TEST_CASE( "NBR Tests", "[nbr]" ) {
 		REQUIRE(nbr(9,4,3,true)==6);
 	}	
 	
-	SECTION("Test Neighbours"){
+	SECTION("Test Neighbours wrapped"){
 		Neighbours neighbours(3,3,true);
 		REQUIRE(neighbours.get_neighbour(4,0) == 5);
 		REQUIRE(neighbours.get_neighbour(4,1) == 7);
 		REQUIRE(neighbours.get_neighbour(4,2) == 3);
 		REQUIRE(neighbours.get_neighbour(4,3) == 1);
 		REQUIRE(neighbours.get_neighbour(4,4) == -1);
+		
+		REQUIRE(neighbours.get_neighbour(3,0) == 4);
+		REQUIRE(neighbours.get_neighbour(3,1) == 6);
+		REQUIRE(neighbours.get_neighbour(3,2) == 5);
+		REQUIRE(neighbours.get_neighbour(3,3) == 0);
+		REQUIRE(neighbours.get_neighbour(3,4) == -1);
+		
+		REQUIRE(neighbours.get_neighbour(5,0) == 3);
+		REQUIRE(neighbours.get_neighbour(5,1) == 8);
+		REQUIRE(neighbours.get_neighbour(5,2) == 4);
+		REQUIRE(neighbours.get_neighbour(5,3) == 2);
+		REQUIRE(neighbours.get_neighbour(5,4) == -1);
+	}
+	
+	SECTION("Test Neighbours not wrapped"){
+		Neighbours neighbours(3,3,false);
+		REQUIRE(neighbours.get_neighbour(4,0) == 5);
+		REQUIRE(neighbours.get_neighbour(4,1) == 7);
+		REQUIRE(neighbours.get_neighbour(4,2) == 3);
+		REQUIRE(neighbours.get_neighbour(4,3) == 1);
+		REQUIRE(neighbours.get_neighbour(4,4) == -1);
+		
+		REQUIRE(neighbours.get_neighbour(3,0) == 4);
+		REQUIRE(neighbours.get_neighbour(3,1) == 6);
+		REQUIRE(neighbours.get_neighbour(3,2) == -1);
+		REQUIRE(neighbours.get_neighbour(3,3) == 0);
+		REQUIRE(neighbours.get_neighbour(3,4) == -1);
 	}
 }
