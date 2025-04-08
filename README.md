@@ -276,8 +276,12 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -|ising|enumerate-ising.cpp|Algorithm 5.3: single flip enumeration for the Ising model.
 -|ising|enumerate-ising.hpp|Algorithm 5.3: single flip enumeration for the Ising model.
 -|ising|gray.hpp|Greycode for enumerate-ising.cpp, plus iterator for neighbours
--|ising|Makefile|Makefile for enumerate-ising.cpp
--|ising|nbr.hpp|Calculate neighbours for enumerate-ising.cpp
+-|ising|Makefile|Makefile for enumerate-ising.cpp and markov-driver.cpp
+-|ising|markov-driver.cpp|Execute MCMC
+-|ising|markov-ising.cpp|MCMC for Ising
+-|ising|markov-ising.hpp|MCMC for Ising
+-|ising|nbr.cpp|Calculate neighbours
+-|ising|nbr.hpp|Calculate neighbours
 -|ising|test-gray.cpp|Tests for gray.hpp
 -|ising|test-nbr.cpp|Tests for nbr.cpp
 -|ising|tests.cpp|Test harness for enumerate-ising.cpp
