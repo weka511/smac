@@ -19,6 +19,7 @@
 #define _MARKOV_ISING_HPP_
 #include <random>
 #include <chrono>
+#include "nbr.hpp"
 using namespace std;
 
 class MarkovIsing {

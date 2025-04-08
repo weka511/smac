@@ -87,34 +87,35 @@ MarkovIsing::~MarkovIsing(){
 	delete [] sigma;
 };
 
-int main(int argc, char **argv) {
-	int c;
-	int n = 4;
-	bool wrapped  = false;
-	string path   = "markov-out.txt";
-	while ((c = getopt (argc, argv, "n:wpo:")) != -1)
-	switch(c) {
-		case 'n':
-			n = atoi(optarg);
-			break;
-		case 'w':
-			wrapped = true;
-			break;
-		case 'o':
-			path = optarg;
-			break;
-		default: 
-			abort();
-	}
-	std::cout << "Hello Markov " << n <<std::endl;
-	if (wrapped)
-		std::cout <<"periodic" << std::endl;
-	else
-		std::cout <<"not periodic" << std::endl;
-	ofstream out;
-	out.open (path);
-	MarkovIsing markov(n,n,wrapped,out);
-	markov.run();
-	out.close();
-	return 0;
-}
+// int main(int argc, char **argv) {
+	// int c;
+	// int n = 4;
+	// bool wrapped  = false;
+	// string path   = "markov-out.txt";
+	// while ((c = getopt (argc, argv, "n:wpo:")) != -1)
+	// switch(c) {
+		// case 'n':
+			// n = atoi(optarg);
+			// break;
+		// case 'w':
+			// wrapped = true;
+			// break;
+		// case 'o':
+			// path = optarg;
+			// break;
+		// default: 
+			// abort();
+	// }
+	// std::cout << "Hello Markov " << n <<std::endl;
+	// if (wrapped)
+		// std::cout <<"periodic" << std::endl;
+	// else
+		// std::cout <<"not periodic" << std::endl;
+	// ofstream out;
+	// out.open (path);
+	// MarkovIsing markov(n,n,wrapped,out);
+	// markov.run();
+	// out.close();
+	// return 0;
+// }
+

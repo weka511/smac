@@ -23,7 +23,7 @@ CC        = gcc
 CXX       = g++
 RM        = rm -f
 MKDIR     = mkdir
-SRCS      =
+SRCS      = markov-ising.cpp nbr.cpp
 
 TESTS     = 	test-gray.cpp	\
 		        test-nbr.cpp
@@ -36,7 +36,7 @@ THREADING = threading.exe
 
 MAIN      = enumerate-ising.exe
 TEST_MAIN = tests.exe
-MARKOV = markov-ising.exe
+MARKOV = markov-driver.exe
 
 TARGETS   = $(MAIN) $(MARKOV)
 
@@ -58,7 +58,7 @@ depend: .depend
 install: rebuild
 	cp $(MAIN) /usr/local/bin
 	
-.depend: $(SRCS)  enumerate-ising.cpp $(TESTS) tests.cpp markov-ising.cpp
+.depend: $(SRCS)  enumerate-ising.cpp $(TESTS) tests.cpp markov-driver.cpp
 	$(RM) ./.depend
 	$(CXX) $(CPPFLAGS) -MM $^>>./.depend;
 	sed -i -e 's/\/home\/Weka\/smac\/book\///$g' .depend
@@ -69,10 +69,10 @@ $(MAIN): $(OBJS) enumerate-ising.o
 $(TEST_MAIN): $(OBJS) tests.o $(TEST_OBJS)
 	${CXX} $(LDFLAGS) -o $(TEST_MAIN) tests.o ${OBJS} $(TEST_OBJS) ${LDLIBS}
 
-$(MARKOV): $(OBJS) markov-ising.o 
-	${CXX} $(LDFLAGS) -o $(MARKOV) markov-ising.o ${OBJS} ${LDLIBS}
+$(MARKOV): $(OBJS) markov-driver.o 
+	${CXX} $(LDFLAGS) -o $(MARKOV) markov-driver.o ${OBJS} ${LDLIBS}
 
-mi : $(MARKOV)
+mi : all
 	 ./markov-ising.exe -n6 -w
 
 	
