@@ -73,7 +73,7 @@ $(MARKOV): $(OBJS) markov-driver.o
 	${CXX} $(LDFLAGS) -o $(MARKOV) markov-driver.o ${OBJS} ${LDLIBS}
 
 mi : all
-	 ./markov-ising.exe -n6 -w
+	 ./markov-driver.exe -n6 -w
 
 	
 distclean: clean
