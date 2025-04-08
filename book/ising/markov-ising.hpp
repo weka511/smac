@@ -22,6 +22,10 @@
 #include "nbr.hpp"
 using namespace std;
 
+/**
+ * Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
+ * from Statistical Mechanics, Algorithms and Computations by Werner Karuth
+ */
 class MarkovIsing {
 	private:
 	     Neighbours * neighbours;
@@ -36,18 +40,28 @@ class MarkovIsing {
 		ofstream & out;
 		float beta;
 		float * Upsilon; 
+		int * EnergyCounts;
+		int * MagnetizationCounts;
 			
 	public:
-		MarkovIsing(int ,int n,bool wrapped,ofstream &out, float beta=2.0);
+		MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta=2.0);
 		
 		void prepare();
 		
-		void step(int k, float rr);
+		/**
+		 * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
+		 */	
+		bool step(int k, float rr);
 
 		void run(int max_steps=100000, int frequency=0);
-		
-		int get_field(int i); 
+
+		/**
+		 * Calculate field at a particular site
+		 */		
+		int get_field(int i, int * spins); 
 		
 		virtual ~MarkovIsing();
 };
-#endif
+
+#endif //_MARKOV_ISING_HPP_
+

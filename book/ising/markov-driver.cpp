@@ -34,8 +34,9 @@ int main(int argc, char **argv) {
 	string path   = "markov-out.txt";
 	int frequency = 0;
 	float beta = 2.0;
+	int iterations = 100000;
 	
-	while ((c = getopt (argc, argv, "n:wpo:f:b:")) != -1)
+	while ((c = getopt (argc, argv, "n:wpo:f:b:i:")) != -1)
 		switch(c) {
 			case 'n':
 				n = atoi(optarg);
@@ -52,6 +53,9 @@ int main(int argc, char **argv) {
 			case 'b':
 				beta = atof(optarg);
 				break;
+			case 'i':
+				iterations = atoi(optarg);
+				break;
 			default: 
 				abort();
 		}
@@ -63,7 +67,7 @@ int main(int argc, char **argv) {
 	ofstream out;
 	out.open (path);
 	MarkovIsing markov(n,n,wrapped,out,beta=beta);
-	markov.run(frequency=frequency);
+	markov.run(iterations,frequency);
 	out.close();
 	return 0;
 }
