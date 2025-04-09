@@ -68,7 +68,6 @@ int main(int argc, char **argv) {
 	out.open (path);
 	MarkovIsing markov(n,n,wrapped,out,beta=beta);
 	markov.run(iterations,frequency);
-	out.close();
 	
 	return 0;
 }
