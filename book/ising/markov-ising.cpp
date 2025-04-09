@@ -101,6 +101,7 @@ void MarkovIsing::run(int max_steps, int frequency) {
 	}
 	std::cout << "beta="<<beta<<", acceptance="<<(100.0*total_accepted)/max_steps <<"%"<< std::endl;
 	dump(out);
+	out << "beta="<<beta<<", acceptance="<<(100.0*total_accepted)/max_steps <<"%"<< std::endl;
 }
 
 /**
