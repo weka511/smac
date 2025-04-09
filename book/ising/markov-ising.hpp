@@ -17,6 +17,7 @@
 
 #ifndef _MARKOV_ISING_HPP_
 #define _MARKOV_ISING_HPP_
+
 #include <random>
 #include <chrono>
 #include <utility>
@@ -36,18 +37,38 @@ class MarkovIsing {
 								std::chrono::steady_clock::now().time_since_epoch().count())
 							};
 		
-		int * sigma;
-		int N;
+		vector<int> sigma;
+		const int N;
+		
+		/**
+		 * Current energy
+		 */
 		int E;
+		
+		/**
+		 * Current magnetization
+		 */
 		int M;
+		
+		/**
+		 * Used to record data
+		 */
 		ofstream & out;
-		float beta;
-		float * Upsilon; 
+		
+		/**
+		 * Inverse temperature
+		 */
+		const float beta;
+		
+		vector<float> Upsilon; 
 		vector<pair<int,int>> Magnetization;
 		vector<pair<int,int>> Energies;
 		
+		/**
+		 * Used to increment Energies or Magnetization
+		 */
 		void increment(vector<pair<int,int>> & Field,const int k){
-			int i = Field[k].first;
+			const int i = Field[k].first;
 			int j = Field[k].second;
 			j++;
 			Field[k] = make_pair(i,j);
@@ -73,8 +94,11 @@ class MarkovIsing {
 		/**
 		 * Calculate field at a particular site
 		 */		
-		int get_field(int i, int * spins); 
+		int get_field(int i, vector<int> spins); 
 		
+		/**
+		 * Output energy and magnetization
+		 */
 		void dump(ofstream & out);
 		
 		virtual ~MarkovIsing();

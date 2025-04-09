@@ -28,26 +28,23 @@ using namespace std;
 MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
 			out(out), beta(beta),N(m*n) {
 	neighbours = new Neighbours(m,n,wrapped);
-	
-	sigma = new int[m*n]; 
-	
-	Upsilon = new float[5];
-	for (int E=0;E<=2*neighbours->get_d();E++)
-		Upsilon[E/2] = exp(-beta*E);
-		
-	for (int i=0;i<2*N +1;i++)
-		Energies.push_back(make_pair(2*i-2*N,0));
-	for (int i=0;i<2*N+1;i++)
-		Magnetization.push_back(make_pair(i-N,0));
-
+	out << "m="<<m <<",n="<<n<<",periodic="<<wrapped<<",beta="<<beta <<std::endl;
 }
 
 /**
  * This method is used to initialize the spins, E, M, and the counts at the start of each run.
  */
 void MarkovIsing::prepare() {
+	for (int E=0;E<=2*neighbours->get_d();E+=2)
+		Upsilon.push_back(exp(-beta*E));
+		
+	for (int i=0;i<2*N +1;i++)
+		Energies.push_back(make_pair(2*i-2*N,0));
+	for (int i=0;i<2*N+1;i++)
+		Magnetization.push_back(make_pair(i-N,0));
+	
 	for (int i=0;i<N;i++) 
-		sigma[i] = 2*(mt()%2) - 1;
+		sigma.push_back(2*(mt()%2) - 1);
 	
 	M = 0;
 	for (int i=0;i<N;i++)
@@ -71,7 +68,7 @@ bool MarkovIsing::step(int k, float rr) {
 	const int h = get_field(k,sigma);
 	const int deltaE = 2 * h * sigma[k];
 	const bool accepted = (deltaE <= 0 or rr < Upsilon[deltaE/2]);
-	// std::cout << "k="<< k << ", deltaE=" << deltaE <<", Upsilon[deltaE/2]=" << Upsilon[deltaE/2]<< ", rr=" << rr <<", accepted=" << accepted << std::endl;
+	
 	if (accepted){
 		sigma[k] *= -1;
 		E += deltaE;
@@ -97,14 +94,14 @@ void MarkovIsing::run(int max_steps, int frequency) {
 		if (step(d(mt),dt(mt)))
 			total_accepted += 1;
 	}
-	std::cout << beta<<", "<<((float)total_accepted)/max_steps << std::endl;
+	std::cout << "beta="<<beta<<", acceptance"<<(100*(float)total_accepted)/max_steps <<"%"<< std::endl;
 	dump(out);
 }
 
 /**
  * Calculate field at a particular site
  */
-int MarkovIsing::get_field(int i,int * spins) {
+int MarkovIsing::get_field(int i,vector<int> spins) {
 	int h = 0;
 	for (int j=0;j<2*neighbours->get_d() + 1;j++) 
 		if (neighbours->get_neighbour(i,j) > -1)
@@ -114,15 +111,16 @@ int MarkovIsing::get_field(int i,int * spins) {
 
 MarkovIsing::~MarkovIsing(){
 	delete neighbours;
-	delete [] sigma;
-	// delete [] EnergyCounts;
-	// delete [] MagnetizationCounts;
-	delete [] Upsilon;
 };
 
+/**
+ * Output energy and magnetization
+ */
 void MarkovIsing::dump(ofstream & out) {
+	out << "E,N" <<std::endl;
 	for (vector<pair<int,int>>::const_iterator i = Energies.begin(); i < Energies.end(); i++) 
-        out << i->first << " "<< i->second << std::endl;
+        out << i->first << ","<< i->second << std::endl;
+	out << "M,N" <<std::endl;
 	for (vector<pair<int,int>>::const_iterator i = Magnetization.begin(); i < Magnetization.end(); i++) 
-        out << i->first << " "<< i->second << std::endl;
+        out << i->first << ","<< i->second << std::endl;
 }

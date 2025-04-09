@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  *
- * This file tests the neighbour function
+ * This file tests methods of MarkovIsing
  */
  
- #include <iostream>
+#include <iostream>
 #include <fstream>
+#include <vector>
 #include "catch.hpp"
 #include "markov-ising.hpp"
-
 
 TEST_CASE( "Markov Tests", "[markov]" ) {
 	
@@ -29,10 +29,10 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		ofstream out;
 		out.open ("dummy.txt");
 		MarkovIsing markov(3,3,false,out);
-		int spins[9] = {-1, -1, -1,
-						-1, -1, -1,
-						-1, -1, -1
-						};
+		vector<int> spins = {-1, -1, -1,
+							-1, -1, -1,
+							-1, -1, -1
+							};
 		REQUIRE(-4 == markov.get_field(4,spins));
 		spins[0] = +1;
 		REQUIRE(-4 == markov.get_field(4,spins));
@@ -47,10 +47,10 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		ofstream out;
 		out.open ("dummy.txt");
 		MarkovIsing markov(3,3,false,out);
-		int spins[9] = {-1, +1, -1,
-						+1, -1, +1,
-						-1, +1, -1
-						};
+		vector<int> spins = {-1, +1, -1,
+							+1, -1, +1,
+							-1, +1, -1
+							};
 		REQUIRE(+4 == markov.get_field(4,spins));
 		spins[4] = -1;
 		REQUIRE(+4 == markov.get_field(4,spins));
