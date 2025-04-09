@@ -17,7 +17,7 @@
  
 #include <iostream>
 #include <fstream>
-#include <string>
+#include <cassert>
 
 #include "gray.hpp"
 #include "nbr.hpp"
@@ -56,7 +56,8 @@ void MarkovIsing::prepare() {
 		int h = get_field(i,sigma);
 		E += sigma[i] * h;
 	}
-	
+	assert(E%4==0);
+	E /= 2;
 	increment(Energies,E/2+N);
 	increment(Magnetization,(M+N));
 }	
@@ -68,15 +69,15 @@ bool MarkovIsing::step() {
 	const int k = d(mt);
 	const int h = get_field(k,sigma);
 	const int deltaE = 2 * h * sigma[k];
-	const bool accepted = (deltaE <= 0 or dt(mt) < Upsilon[deltaE/2]);
-	std::cout << k << ", " << dt(mt) <<std::endl;
+	const bool accepted = deltaE <= 0 or dt(mt) < Upsilon[deltaE/2];
+	
 	if (accepted){
 		sigma[k] *= -1;
 		E += deltaE;
-		M -= sigma[k];
+		M += 2*sigma[k];
 	}
 	increment(Energies,E/2+N);
-	increment(Magnetization,(M+N));
+	increment(Magnetization,M+N);
 	return accepted;
 }
 
@@ -87,13 +88,14 @@ void MarkovIsing::run(int max_steps, int frequency) {
 
 	prepare();
 	int total_accepted = 0;
+	
 	for (int i=0;i<max_steps;i++){
 		if (frequency > 0 && i > 0 && i%frequency ==0)
 			std::cout << i << std::endl;
 		if (step())
-			total_accepted += 1;
+			total_accepted++;
 	}
-	std::cout << "beta="<<beta<<", acceptance="<<(100*(float)total_accepted)/max_steps <<"%"<< std::endl;
+	std::cout << "beta="<<beta<<", acceptance="<<(100.0*total_accepted)/max_steps <<"%"<< std::endl;
 	dump(out);
 }
 
@@ -108,10 +110,6 @@ int MarkovIsing::get_field(int i,vector<int> spins) {
 	return h;
 }
 
-MarkovIsing::~MarkovIsing(){
-	delete neighbours;
-};
-
 /**
  * Output energy and magnetization
  */
@@ -122,4 +120,8 @@ void MarkovIsing::dump(ofstream & out) {
 	out << "M,N" <<std::endl;
 	for (vector<pair<int,int>>::const_iterator i = Magnetization.begin(); i < Magnetization.end(); i++) 
         out << i->first << ","<< i->second << std::endl;
+}
+
+MarkovIsing::~MarkovIsing(){
+	delete neighbours;
 }
