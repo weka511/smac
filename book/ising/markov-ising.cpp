@@ -35,9 +35,10 @@ MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
  * This method is used to initialize the spins, E, M, and the counts at the start of each run.
  */
 void MarkovIsing::prepare() {
-	
-	for (int E=0;E<=2*neighbours->get_d();E+=2)
-		Upsilon.push_back(exp(-beta*E));
+	for (int i=1;i<=2*neighbours->get_d();i++){
+		const int deltaE = 2*i;
+		Upsilon.push_back(exp(-beta*deltaE));
+	}
 		
 	std::uniform_int_distribution<int> bits(0,1);
 	for (int i=0;i<N;i++) 

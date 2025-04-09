@@ -111,6 +111,8 @@ class MarkovIsing {
 		 */
 		void dump(ofstream & out);
 		
+		float get_upsilon(int i) {return Upsilon[i];};
+		
 		virtual ~MarkovIsing();
 };
 

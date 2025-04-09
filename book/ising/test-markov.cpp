@@ -56,4 +56,14 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		REQUIRE(+4 == markov.get_field(4,spins));
 	}
 	
+	SECTION("Test MarkovIsing.Upsilon (based on Python version)"){
+		ofstream out;
+		out.open ("dummy.txt");
+		MarkovIsing markov(6,6,true,out,0.25);
+		markov.prepare();
+		REQUIRE(markov.get_upsilon(0) == Approx(0.60653066).epsilon(0.0000001) );
+		REQUIRE(markov.get_upsilon(1) == Approx(0.36787944).epsilon(0.0000001) );
+		REQUIRE(markov.get_upsilon(2) == Approx(0.22313016).epsilon(0.0000001) );
+		REQUIRE(markov.get_upsilon(3) == Approx(0.13533528).epsilon(0.0000001) );
+	}
 }
