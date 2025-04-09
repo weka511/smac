@@ -27,7 +27,7 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 	
 	SECTION("Test MarkovIsing.get_field()"){
 		ofstream out;
-		out.open ("dummy.txt");
+		out.open ("/dev/null");
 		MarkovIsing markov(3,3,false,out);
 		vector<int> spins = {-1, -1, -1,
 							-1, -1, -1,
@@ -45,7 +45,7 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 	
 	SECTION("Test MarkovIsing.get_field()"){
 		ofstream out;
-		out.open ("dummy.txt");
+		out.open ("/dev/null");
 		MarkovIsing markov(3,3,false,out);
 		vector<int> spins = {-1, +1, -1,
 							+1, -1, +1,
@@ -58,7 +58,7 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 	
 	SECTION("Test MarkovIsing.Upsilon (based on Python version)"){
 		ofstream out;
-		out.open ("dummy.txt");
+		out.open ("/dev/null");
 		MarkovIsing markov(6,6,true,out,0.25);
 		markov.prepare();
 		REQUIRE(markov.get_upsilon(0) == Approx(0.60653066).epsilon(0.0000001) );
