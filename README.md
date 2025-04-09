@@ -272,20 +272,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -||ising.py|Shared code for Ising model: Algorithm 5.2, Gray code for spins; generate neighbours of a spin; calculate energy for a configuration.
 -||ising_enum.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
 -||ising-stats.py|Figure 6.6 - plot data from ising.py
--|ising|catch.hpp|Support for Test harness for enumerate-ising.cpp
--|ising|enumerate-ising.cpp|Algorithm 5.3: single flip enumeration for the Ising model.
--|ising|enumerate-ising.hpp|Algorithm 5.3: single flip enumeration for the Ising model.
--|ising|gray.hpp|Greycode for enumerate-ising.cpp, plus iterator for neighbours
--|ising|Makefile|Makefile for enumerate-ising.cpp and markov-driver.cpp
--|ising|markov-driver.cpp|Execute MCMC
--|ising|markov-ising.cpp|MCMC for Ising
--|ising|markov-ising.hpp|MCMC for Ising
--|ising|nbr.cpp|Calculate neighbours
--|ising|nbr.hpp|Calculate neighbours
--|ising|test-gray.cpp|Tests for gray.hpp
--|ising|test-nbr.cpp|Tests for nbr.cpp
--|ising|test-markov.cpp|Tests for markov-ising.cpp
--|ising|tests.cpp|Test harness for enumerate-ising.cpp
+-|ising|-|C++ implementations of Algorithm 5.3 (single flip enumeration for the Ising model) and 5.7 (MCMC)
 5.2||cluster_ising.py|Algorithm 5-9: cluster ising
 -||exercise_5_10a.py|Exercise 5.10: Implement Local Metropolis algorithm and test it against the specific heat capacity.
 -||exercise_5_10b.py|Exercise 5.10: Plot M against T
