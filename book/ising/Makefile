@@ -53,12 +53,14 @@ tests : $(TEST_MAIN)
 clean :
 	${RM} *.o *.stackdump
 
-rebuild: clean all
+rebuild: clean all tests
 
 depend: .depend
 
 install: rebuild
 	cp $(MAIN) /usr/local/bin
+
+grand: all tests
 	
 .depend: $(SRCS)  enumerate-ising.cpp $(TESTS) tests.cpp markov-driver.cpp Makefile
 	$(RM) ./.depend
