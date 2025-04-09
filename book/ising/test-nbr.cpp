@@ -136,4 +136,43 @@ TEST_CASE( "NBR Tests", "[nbr]" ) {
 		REQUIRE(neighbours.get_neighbour(3,3) == 0);
 		REQUIRE(neighbours.get_neighbour(3,4) == -1);
 	}
+	
+	/**
+	 *  This corresponds to the examples in Krauth
+	 */
+	SECTION("Test Neighbours 6x6 wrapped"){
+		Neighbours neighbours(6,6,true);
+		REQUIRE(neighbours.get_neighbour(20,0) == 21);
+		REQUIRE(neighbours.get_neighbour(20,1) == 26);
+		REQUIRE(neighbours.get_neighbour(20,2) == 19);
+		REQUIRE(neighbours.get_neighbour(20,3) == 14);
+		REQUIRE(neighbours.get_neighbour(20,4) == -1);	
+		
+		REQUIRE(neighbours.get_neighbour(35,0) == 30);
+		REQUIRE(neighbours.get_neighbour(35,1) == 5);
+		REQUIRE(neighbours.get_neighbour(35,2) == 34);
+		REQUIRE(neighbours.get_neighbour(35,3) == 29);
+		REQUIRE(neighbours.get_neighbour(35,4) == -1);	
+		
+		REQUIRE(neighbours.get_neighbour(12,0) == 13);
+		REQUIRE(neighbours.get_neighbour(12,1) == 18);
+		REQUIRE(neighbours.get_neighbour(12,2) == 17);
+		REQUIRE(neighbours.get_neighbour(12,3) == 6);
+		REQUIRE(neighbours.get_neighbour(12,4) == -1);	
+	}
+	
+	SECTION("Test Neighbours 6x6 not wrapped"){
+		Neighbours neighbours(6,6,false);
+		REQUIRE(neighbours.get_neighbour(20,0) == 21);
+		REQUIRE(neighbours.get_neighbour(20,1) == 26);
+		REQUIRE(neighbours.get_neighbour(20,2) == 19);
+		REQUIRE(neighbours.get_neighbour(20,3) == 14);
+		REQUIRE(neighbours.get_neighbour(20,4) == -1);	
+		
+		REQUIRE(neighbours.get_neighbour(35,0) == -1);
+		REQUIRE(neighbours.get_neighbour(35,1) == -1);
+		REQUIRE(neighbours.get_neighbour(35,2) == 34);
+		REQUIRE(neighbours.get_neighbour(35,3) == 29);
+		REQUIRE(neighbours.get_neighbour(35,4) == -1);	
+	}
 }
