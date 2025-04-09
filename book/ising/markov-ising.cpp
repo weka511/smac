@@ -74,7 +74,7 @@ bool MarkovIsing::step() {
 	const int k = d(mt);
 	const int h = get_field(k,sigma);
 	const int deltaE = 2 * h * sigma[k];
-	const bool accepted = deltaE <= 0 or dt(mt) < Upsilon[deltaE/2];
+	const bool accepted = deltaE <= 0 or dt(mt) < Upsilon[deltaE/2-1];
 	
 	if (accepted){
 		sigma[k] *= -1;
@@ -110,9 +110,11 @@ void MarkovIsing::run(int max_steps, int frequency) {
  */
 int MarkovIsing::get_field(int i,vector<int> spins) {
 	int h = 0;
-	for (int j=0;j<2*neighbours->get_d() + 1;j++) 
-		if (neighbours->get_neighbour(i,j) > -1)
-			h += spins[neighbours->get_neighbour(i,j)];
+	for (int j=0;j<2*neighbours->get_d() + 1;j++) {
+		const int ij_neighbour = neighbours->get_neighbour(i,j);
+		if (ij_neighbour > -1)
+			h += spins[ij_neighbour];
+	}
 	return h;
 }
 
