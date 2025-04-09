@@ -1,6 +1,6 @@
 # Ising
 
-C++ implemntations of Algorithm 5.3 (single flip enumeration for the Ising model) and 5.7 (MCMC)
+C++ implementations of Algorithm 5.3 (single flip enumeration for the Ising model) and 5.7 (MCMC)
 
 File|Description
 ------------------|-----------------------------------------------------------------------------------------------------------------------
