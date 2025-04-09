@@ -35,30 +35,34 @@ MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
  * This method is used to initialize the spins, E, M, and the counts at the start of each run.
  */
 void MarkovIsing::prepare() {
+	
 	for (int E=0;E<=2*neighbours->get_d();E+=2)
 		Upsilon.push_back(exp(-beta*E));
 		
-	for (int i=0;i<2*N +1;i++)
-		Energies.push_back(make_pair(2*i-2*N,0));
-	for (int i=0;i<2*N+1;i++)
-		Magnetization.push_back(make_pair(i-N,0));
-	
 	std::uniform_int_distribution<int> bits(0,1);
 	for (int i=0;i<N;i++) 
 		sigma.push_back(2*bits(mt) - 1);
-	
-	M = 0;
-	for (int i=0;i<N;i++)
-		M += sigma[i];
 
+	for (int i=0;i<2*N +1;i++)
+		Energies.push_back(make_pair(2*i-2*N,0));
+	
 	E = 0;
 	for (int i=0;i<N;i++)  {
 		int h = get_field(i,sigma);
 		E += sigma[i] * h;
 	}
+	
 	assert(E%4==0);
 	E /= 2;
 	increment(Energies,E/2+N);
+
+	for (int i=0;i<2*N+1;i++)
+			Magnetization.push_back(make_pair(i-N,0));
+	
+	M = 0;
+	for (int i=0;i<N;i++)
+		M += sigma[i];
+	
 	increment(Magnetization,(M+N));
 }	
 
