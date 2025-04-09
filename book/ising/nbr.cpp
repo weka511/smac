@@ -69,7 +69,8 @@ using namespace std;
  
 Neighbours::Neighbours(const int m,
 						const int n,
-						bool wrapped) : d(2), N(m*n){
+						bool wrapped) 
+						: d(2), N(m*n){
 	neighbours = new int*[N];
 	for(int i = 0; i < N; ++i){
 		neighbours[i] = new int[2*d+1];

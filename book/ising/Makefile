@@ -75,7 +75,7 @@ $(MARKOV): $(OBJS) markov-driver.o
 	${CXX} $(LDFLAGS) -o $(MARKOV) markov-driver.o ${OBJS} ${LDLIBS}
 
 mi : all
-	 .$(MARKOV) -n6 -w
+	 ./$(MARKOV) -n6 -w
 
 	
 distclean: clean

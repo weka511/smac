@@ -284,6 +284,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 -|ising|nbr.hpp|Calculate neighbours
 -|ising|test-gray.cpp|Tests for gray.hpp
 -|ising|test-nbr.cpp|Tests for nbr.cpp
+-|ising|test-markov.cpp|Tests for markov-ising.cpp
 -|ising|tests.cpp|Test harness for enumerate-ising.cpp
 5.2||cluster_ising.py|Algorithm 5-9: cluster ising
 -||exercise_5_10a.py|Exercise 5.10: Implement Local Metropolis algorithm and test it against the specific heat capacity.

@@ -19,7 +19,10 @@
 #define _MARKOV_ISING_HPP_
 #include <random>
 #include <chrono>
+#include <utility>
+#include <vector>
 #include "nbr.hpp"
+
 using namespace std;
 
 /**
@@ -40,12 +43,21 @@ class MarkovIsing {
 		ofstream & out;
 		float beta;
 		float * Upsilon; 
-		int * EnergyCounts;
-		int * MagnetizationCounts;
-			
+		vector<pair<int,int>> Magnetization;
+		vector<pair<int,int>> Energies;
+		
+		void increment(vector<pair<int,int>> & Field,const int k){
+			int i = Field[k].first;
+			int j = Field[k].second;
+			j++;
+			Field[k] = make_pair(i,j);
+		}
 	public:
 		MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta=2.0);
 		
+		/**
+		 * This method is used to initialize the spins, E, M, and the counts at the start of each run.
+		 */
 		void prepare();
 		
 		/**
@@ -53,12 +65,17 @@ class MarkovIsing {
 		 */	
 		bool step(int k, float rr);
 
+	    /**
+		 * Execute the entirity of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
+		 */	
 		void run(int max_steps=100000, int frequency=0);
 
 		/**
 		 * Calculate field at a particular site
 		 */		
 		int get_field(int i, int * spins); 
+		
+		void dump(ofstream & out);
 		
 		virtual ~MarkovIsing();
 };

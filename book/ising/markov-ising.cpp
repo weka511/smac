@@ -16,10 +16,6 @@
  */
  
 #include <iostream>
-#include <map>
-#include <utility>
-#include <getopt.h>
-#include <iostream>
 #include <fstream>
 #include <string>
 
@@ -32,27 +28,39 @@ using namespace std;
 MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
 			out(out), beta(beta),N(m*n) {
 	neighbours = new Neighbours(m,n,wrapped);
+	
 	sigma = new int[m*n]; 
+	
 	Upsilon = new float[5];
-	for (int E=0;E<=8;E++)
+	for (int E=0;E<=2*neighbours->get_d();E++)
 		Upsilon[E/2] = exp(-beta*E);
+		
+	for (int i=0;i<2*N +1;i++)
+		Energies.push_back(make_pair(2*i-2*N,0));
+	for (int i=0;i<2*N+1;i++)
+		Magnetization.push_back(make_pair(i-N,0));
 
-	EnergyCounts = new int[2*N +1];
-	MagnetizationCounts = new int[N+1];
 }
 
+/**
+ * This method is used to initialize the spins, E, M, and the counts at the start of each run.
+ */
 void MarkovIsing::prepare() {
-	M = 0;
-	E = 0;
 	for (int i=0;i<N;i++) 
 		sigma[i] = 2*(mt()%2) - 1;
-	for (int i=0;i<N;i++)  {
+	
+	M = 0;
+	for (int i=0;i<N;i++)
 		M += sigma[i];
+	
+	E = 0;
+	for (int i=0;i<N;i++)  {
 		int h = get_field(i,sigma);
 		E += sigma[i] * h;
 	}
-	MagnetizationCounts[(M+N)/2] += 1;
-	EnergyCounts[M/2+N] += 1;
+	std::cout << E << ", " << M <<std::endl;
+	increment(Energies,E/2+N);
+	increment(Magnetization,(M+N));
 }	
 
 /**
@@ -60,21 +68,23 @@ void MarkovIsing::prepare() {
  */	
 bool MarkovIsing::step(int k, float rr) {
 	std::uniform_real_distribution<float> dt(0,1);
-	int h = get_field(k,sigma);
-	int deltaE = 2 * h * sigma[k];
-	bool accepted = (deltaE <= 0 or rr < Upsilon[deltaE/2]);
-	std::cout << "k="<< k << ", deltaE=" << deltaE <<", Upsilon[deltaE/2]=" << Upsilon[deltaE/2]<< ", rr=" << rr <<", accepted=" << accepted << std::endl;
+	const int h = get_field(k,sigma);
+	const int deltaE = 2 * h * sigma[k];
+	const bool accepted = (deltaE <= 0 or rr < Upsilon[deltaE/2]);
+	// std::cout << "k="<< k << ", deltaE=" << deltaE <<", Upsilon[deltaE/2]=" << Upsilon[deltaE/2]<< ", rr=" << rr <<", accepted=" << accepted << std::endl;
 	if (accepted){
 		sigma[k] *= -1;
 		E += deltaE;
 		M -= sigma[k];
 	}
-	MagnetizationCounts[(M+N)/2] += 1;
-	EnergyCounts[M/2+N] += 1;
+	increment(Energies,E/2+N);
+	increment(Magnetization,(M+N));
 	return accepted;
 }
 
-
+/**
+ * Execute the entirity of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
+ */	
 void MarkovIsing::run(int max_steps, int frequency) {
 	std::uniform_real_distribution<float> dt(0,1);	
 	std::uniform_int_distribution<int> d(0,_N-1);
@@ -88,6 +98,7 @@ void MarkovIsing::run(int max_steps, int frequency) {
 			total_accepted += 1;
 	}
 	std::cout << beta<<", "<<((float)total_accepted)/max_steps << std::endl;
+	dump(out);
 }
 
 /**
@@ -104,7 +115,14 @@ int MarkovIsing::get_field(int i,int * spins) {
 MarkovIsing::~MarkovIsing(){
 	delete neighbours;
 	delete [] sigma;
-	delete [] EnergyCounts;
-	delete [] MagnetizationCounts;
+	// delete [] EnergyCounts;
+	// delete [] MagnetizationCounts;
+	delete [] Upsilon;
 };
 
+void MarkovIsing::dump(ofstream & out) {
+	for (vector<pair<int,int>>::const_iterator i = Energies.begin(); i < Energies.end(); i++) 
+        out << i->first << " "<< i->second << std::endl;
+	for (vector<pair<int,int>>::const_iterator i = Magnetization.begin(); i < Magnetization.end(); i++) 
+        out << i->first << " "<< i->second << std::endl;
+}
