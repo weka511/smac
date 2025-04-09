@@ -26,7 +26,7 @@
 using namespace std;
 
 MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
-			out(out), beta(beta),N(m*n) {
+			out(out), beta(beta), N(m*n), dt(0,1), d(0,m*n-1) {
 	neighbours = new Neighbours(m,n,wrapped);
 	out << "m="<<m <<",n="<<n<<",periodic="<<wrapped<<",beta="<<beta <<std::endl;
 }
@@ -43,19 +43,20 @@ void MarkovIsing::prepare() {
 	for (int i=0;i<2*N+1;i++)
 		Magnetization.push_back(make_pair(i-N,0));
 	
+	std::uniform_int_distribution<int> bits(0,1);
 	for (int i=0;i<N;i++) 
-		sigma.push_back(2*(mt()%2) - 1);
+		sigma.push_back(2*bits(mt) - 1);
 	
 	M = 0;
 	for (int i=0;i<N;i++)
 		M += sigma[i];
-	
+
 	E = 0;
 	for (int i=0;i<N;i++)  {
 		int h = get_field(i,sigma);
 		E += sigma[i] * h;
 	}
-	std::cout << E << ", " << M <<std::endl;
+	
 	increment(Energies,E/2+N);
 	increment(Magnetization,(M+N));
 }	
@@ -63,12 +64,12 @@ void MarkovIsing::prepare() {
 /**
  * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
  */	
-bool MarkovIsing::step(int k, float rr) {
-	std::uniform_real_distribution<float> dt(0,1);
+bool MarkovIsing::step() {
+	const int k = d(mt);
 	const int h = get_field(k,sigma);
 	const int deltaE = 2 * h * sigma[k];
-	const bool accepted = (deltaE <= 0 or rr < Upsilon[deltaE/2]);
-	
+	const bool accepted = (deltaE <= 0 or dt(mt) < Upsilon[deltaE/2]);
+	std::cout << k << ", " << dt(mt) <<std::endl;
 	if (accepted){
 		sigma[k] *= -1;
 		E += deltaE;
@@ -83,18 +84,16 @@ bool MarkovIsing::step(int k, float rr) {
  * Execute the entirity of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
  */	
 void MarkovIsing::run(int max_steps, int frequency) {
-	std::uniform_real_distribution<float> dt(0,1);	
-	std::uniform_int_distribution<int> d(0,_N-1);
 
 	prepare();
 	int total_accepted = 0;
 	for (int i=0;i<max_steps;i++){
 		if (frequency > 0 && i > 0 && i%frequency ==0)
 			std::cout << i << std::endl;
-		if (step(d(mt),dt(mt)))
+		if (step())
 			total_accepted += 1;
 	}
-	std::cout << "beta="<<beta<<", acceptance"<<(100*(float)total_accepted)/max_steps <<"%"<< std::endl;
+	std::cout << "beta="<<beta<<", acceptance="<<(100*(float)total_accepted)/max_steps <<"%"<< std::endl;
 	dump(out);
 }
 

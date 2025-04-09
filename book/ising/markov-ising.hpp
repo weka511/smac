@@ -33,9 +33,6 @@ using namespace std;
 class MarkovIsing {
 	private:
 	     Neighbours * neighbours;
-		 std::mt19937_64 mt{ static_cast<std::mt19937::result_type>(
-								std::chrono::steady_clock::now().time_since_epoch().count())
-							};
 		
 		vector<int> sigma;
 		const int N;
@@ -60,8 +57,13 @@ class MarkovIsing {
 		 */
 		const float beta;
 		
+		/**
+		 * Cache relevant values of exp(-beta*deltaE)
+		 */
 		vector<float> Upsilon; 
+		
 		vector<pair<int,int>> Magnetization;
+		
 		vector<pair<int,int>> Energies;
 		
 		/**
@@ -73,6 +75,14 @@ class MarkovIsing {
 			j++;
 			Field[k] = make_pair(i,j);
 		}
+		
+		std::mt19937_64 mt{ static_cast<std::mt19937::result_type>(
+							std::chrono::steady_clock::now().time_since_epoch().count())
+							};
+							
+		std::uniform_real_distribution<float> dt;
+		std::uniform_int_distribution<int> d;
+		
 	public:
 		MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta=2.0);
 		
@@ -84,7 +94,7 @@ class MarkovIsing {
 		/**
 		 * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
 		 */	
-		bool step(int k, float rr);
+		bool step();
 
 	    /**
 		 * Execute the entirity of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
