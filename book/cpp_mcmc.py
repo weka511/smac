@@ -24,6 +24,7 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from re import compile
+from thermo_db import thermo
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -102,14 +103,14 @@ if __name__=='__main__':
     args = parse_arguments()
 
     m,n,is_periodic,beta,E,M,accept,max_steps = read_file(args.path,args.input)
-
+    e,cV =thermo(E[:,0],E[:,1],beta=beta,NObservations=m*n)
     fig = figure(figsize=(12,12))
     fig.suptitle(fr'{max_steps} steps, {m}$\times${n},{get_periodic(is_periodic)},$\beta=${beta},acceptance={100* accept/max_steps}\%')
     ax1 = fig.add_subplot(2,1,1)
     ax1.bar(E[:,0],E[:,1]/E[:,1].sum())
     ax1.set_xlabel('E')
     ax1.set_ylabel('Frequency')
-
+    ax1.set_title(f'e={e:.3f},$c_V=${cV:.5f}')
     ax2 = fig.add_subplot(2,1,2)
     ax2.bar(M[:,0],M[:,1]/M[:,1].sum())
     ax2.set_xlabel('M')
