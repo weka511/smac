@@ -27,7 +27,7 @@ using namespace std;
 
 MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
 			out(out), beta(beta), N(m*n), dt(0,1), d(0,m*n-1) {
-	neighbours = new Neighbours(m,n,wrapped);
+	neighbours.prepare(m,n,wrapped);
 	out << "m="<<m <<",n="<<n<<",periodic="<<wrapped<<",beta="<<beta <<std::endl;
 }
 
@@ -35,7 +35,7 @@ MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
  * This method is used to initialize the spins, E, M, and the counts at the start of each run.
  */
 void MarkovIsing::prepare() {
-	for (int i=1;i<=2*neighbours->get_d();i++){
+	for (int i=1;i<=2*neighbours.get_d();i++){
 		const int deltaE = 2*i;
 		Upsilon.push_back(exp(-beta*deltaE));
 	}
@@ -110,8 +110,8 @@ void MarkovIsing::run(int max_steps, int frequency) {
  */
 int MarkovIsing::get_field(int i,vector<int> spins) {
 	int h = 0;
-	for (int j=0;j<2*neighbours->get_d() + 1;j++) {
-		const int ij_neighbour = neighbours->get_neighbour(i,j);
+	for (int j=0;j<2*neighbours.get_d() + 1;j++) {
+		const int ij_neighbour = neighbours.get_neighbour(i,j);
 		if (ij_neighbour > -1)
 			h += spins[ij_neighbour];
 	}
@@ -128,8 +128,4 @@ void MarkovIsing::dump(ofstream & out) {
 	out << "M,N" <<std::endl;
 	for (vector<pair<int,int>>::const_iterator i = Magnetization.begin(); i < Magnetization.end(); i++) 
         out << i->first << ","<< i->second << std::endl;
-}
-
-MarkovIsing::~MarkovIsing(){
-	delete neighbours;
 }

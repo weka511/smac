@@ -102,7 +102,8 @@ TEST_CASE( "NBR Tests", "[nbr]" ) {
 	}	
 	
 	SECTION("Test Neighbours wrapped"){
-		Neighbours neighbours(3,3,true);
+		Neighbours neighbours;
+		neighbours.prepare(3,3,true);
 		REQUIRE(neighbours.get_neighbour(4,0) == 5);
 		REQUIRE(neighbours.get_neighbour(4,1) == 7);
 		REQUIRE(neighbours.get_neighbour(4,2) == 3);
@@ -123,7 +124,8 @@ TEST_CASE( "NBR Tests", "[nbr]" ) {
 	}
 	
 	SECTION("Test Neighbours not wrapped"){
-		Neighbours neighbours(3,3,false);
+		Neighbours neighbours;
+		neighbours.prepare(3,3,false);
 		REQUIRE(neighbours.get_neighbour(4,0) == 5);
 		REQUIRE(neighbours.get_neighbour(4,1) == 7);
 		REQUIRE(neighbours.get_neighbour(4,2) == 3);
@@ -141,7 +143,8 @@ TEST_CASE( "NBR Tests", "[nbr]" ) {
 	 *  This corresponds to the examples in Krauth
 	 */
 	SECTION("Test Neighbours 6x6 wrapped"){
-		Neighbours neighbours(6,6,true);
+		Neighbours neighbours;
+		neighbours.prepare(6,6,true);
 		REQUIRE(neighbours.get_neighbour(20,0) == 21);
 		REQUIRE(neighbours.get_neighbour(20,1) == 26);
 		REQUIRE(neighbours.get_neighbour(20,2) == 19);
@@ -162,7 +165,8 @@ TEST_CASE( "NBR Tests", "[nbr]" ) {
 	}
 	
 	SECTION("Test Neighbours 6x6 not wrapped"){
-		Neighbours neighbours(6,6,false);
+		Neighbours neighbours;
+		neighbours.prepare(6,6,false);
 		REQUIRE(neighbours.get_neighbour(20,0) == 21);
 		REQUIRE(neighbours.get_neighbour(20,1) == 26);
 		REQUIRE(neighbours.get_neighbour(20,2) == 19);

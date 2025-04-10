@@ -67,11 +67,12 @@ using namespace std;
 	return (row-1)*n+column;
  }
  
-Neighbours::Neighbours(const int m,
-						const int n,
-						bool wrapped) 
-						: d(2), N(m*n){
-
+		
+void Neighbours::prepare(const int m,
+					const int n,
+					bool wrapped) {
+	d = 2;
+	N =m*n;
 	for(int i = 0; i < N; ++i){
 		vector<int> v1;
 		neighbours.push_back(v1);
@@ -79,4 +80,3 @@ Neighbours::Neighbours(const int m,
 			neighbours[i].push_back(std::max(nbr(i+1,j+1, n, wrapped)-1, -1));
 	}
 }
-		

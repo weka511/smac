@@ -32,7 +32,7 @@ using namespace std;
  */
 class MarkovIsing {
 	private:
-	     Neighbours * neighbours;
+	     Neighbours neighbours;
 		
 		vector<int> sigma;
 		const int N;
@@ -113,7 +113,6 @@ class MarkovIsing {
 		
 		float get_upsilon(int i) {return Upsilon[i];};
 		
-		virtual ~MarkovIsing();
 };
 
 #endif //_MARKOV_ISING_HPP_

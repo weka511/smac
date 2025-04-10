@@ -45,19 +45,18 @@ using namespace std;
   */
  class Neighbours{
 	private:
-		const int d;
-		const int N;
+		int d;
+		int N;
 		vector<vector<int>> neighbours;
 	public:
-		Neighbours(const int m,
+	
+		void prepare(const int m,
 					const int n,
 					bool wrapped=false);
-		
+					
 		int get_neighbour(int i,int j) {return neighbours[i][j];}
 		
 		int get_d() {return d;}
-		
-	
  };
  
  #endif //_NBR_HPP_
