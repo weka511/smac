@@ -57,8 +57,9 @@ def get_file_name(name,default_ext='png',seq=None):
 
 def read_file(path,input):
     state = 0
-    pattern1 = compile(r'm=(\d+),n=(\d+),periodic=(\d),beta=([0-9.]*)')
-    pattern2 = compile(r'beta=([0-9.]*), acceptance=([0-9.]*)%')
+    pattern1 = compile(r'm=(\d+),n=(\d+),periodic=(\d),beta=([0-9.]+)')
+    pattern2 = compile(r'beta=([0-9.]*), total_accepted=(\d+), max_steps=(\d+)')
+    #total_accepted=256845, max_steps=1000000
     with open(join(path,input)) as input_file:
         for line in input_file:
             line = line.strip()
@@ -86,9 +87,10 @@ def read_file(path,input):
                         Ms.append((int(parts[0]),int(parts[1])))
                     except ValueError:
                         match = pattern2.match(line)
-                        accept = float(match.group(2))
+                        accept = int(match.group(2))
+                        max_steps = int(match.group(3))
 
-    return m,n,periodic,beta,np.array(Es),np.array(Ms),accept
+    return m,n,periodic,beta,np.array(Es),np.array(Ms),accept,max_steps
 
 def get_periodic(is_periodic):
     return 'periodic' if is_periodic == 'periodic' else 'aperiodic'
@@ -99,10 +101,10 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
 
-    m,n,is_periodic,beta,E,M,accept = read_file(args.path,args.input)
+    m,n,is_periodic,beta,E,M,accept,max_steps = read_file(args.path,args.input)
 
     fig = figure(figsize=(12,12))
-    fig.suptitle(fr'{m}$\times${n},{get_periodic(is_periodic)},$\beta=${beta},acceptance={accept}')
+    fig.suptitle(fr'{max_steps} steps, {m}$\times${n},{get_periodic(is_periodic)},$\beta=${beta},acceptance={100* accept/max_steps}\%')
     ax1 = fig.add_subplot(2,1,1)
     ax1.bar(E[:,0],E[:,1]/E[:,1].sum())
     ax1.set_xlabel('E')
