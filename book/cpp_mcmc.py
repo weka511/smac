@@ -105,7 +105,7 @@ if __name__=='__main__':
     m,n,is_periodic,beta,E,M,accept,max_steps = read_file(args.path,args.input)
     e,cV =thermo(E[:,0],E[:,1],beta=beta,NObservations=m*n)
     fig = figure(figsize=(12,12))
-    fig.suptitle(fr'{max_steps} steps, {m}$\times${n},{get_periodic(is_periodic)},$\beta=${beta},acceptance={100* accept/max_steps}\%')
+    fig.suptitle(fr'{max_steps:,} steps, {m}$\times${n}, {get_periodic(is_periodic)}, $\beta=${beta}, acceptance={100* accept/max_steps}\%')
     ax1 = fig.add_subplot(2,1,1)
     ax1.bar(E[:,0],E[:,1]/E[:,1].sum())
     ax1.set_xlabel('E')
