@@ -24,10 +24,12 @@ CXX       = g++
 RM        = rm -f
 MKDIR     = mkdir
 SRCS      = markov-ising.cpp    \
-            nbr.cpp
+            nbr.cpp              \
+			enumerate-ising.cpp
 
-TESTS     = 	test-gray.cpp	\
-		        test-nbr.cpp    \
+TESTS     = 	test-gray.cpp  	   \
+		        test-nbr.cpp       \
+				test-enumerate.cpp \
 				test-markov.cpp
 		
 OBJS1     = $(subst .cpp,.o,$(SRCS)) 
@@ -36,7 +38,7 @@ TEST_OBJS = $(subst .cpp,.o,$(TESTS))
 
 THREADING = threading.exe
 
-MAIN      = enumerate-ising.exe
+MAIN      = enumerate.exe
 TEST_MAIN = tests.exe
 MARKOV    = markov-driver.exe
 
@@ -62,13 +64,13 @@ install: rebuild
 
 grand: all tests
 	
-.depend: $(SRCS)  enumerate-ising.cpp $(TESTS) tests.cpp markov-driver.cpp Makefile
+.depend: $(SRCS)  enumerate.cpp $(TESTS) tests.cpp markov-driver.cpp Makefile
 	$(RM) ./.depend
 	$(CXX) $(CPPFLAGS) -MM $^>>./.depend;
 	sed -i -e 's/\/home\/Weka\/smac\/book\///$g' .depend
 	
-$(MAIN): $(OBJS) enumerate-ising.o 
-	${CXX} $(LDFLAGS) -o $(MAIN) enumerate-ising.o ${OBJS} ${LDLIBS}
+$(MAIN): $(OBJS) enumerate.o 
+	${CXX} $(LDFLAGS) -o $(MAIN) enumerate.o ${OBJS} ${LDLIBS}
 	
 $(TEST_MAIN): $(OBJS) tests.o $(TEST_OBJS)
 	${CXX} $(LDFLAGS) -o $(TEST_MAIN) tests.o ${OBJS} $(TEST_OBJS) ${LDLIBS}

@@ -33,39 +33,39 @@ using namespace std;
 /**
  * Main program. 
  */
-int main(int argc, char **argv) {
-	int c;
-	int n         = 4;
-	bool wrapped  = false;
-	bool progress = false;
-	string path   = "out.txt";
-	string periodic = "aperiodic";
-	while ((c = getopt (argc, argv, "n:wpo:")) != -1)
-		switch(c) {
-			case 'n':
-				n = atoi(optarg);
-				break;
-			case 'o':
-				path = optarg;
-				break;
-			case 'w':
-				wrapped = true;
-				periodic = "periodic";
-				break;
-			case 'p':
-				progress = true;
-				break;
-			default:
-				abort();
-	}
+// int main(int argc, char **argv) {
+	// int c;
+	// int n         = 4;
+	// bool wrapped  = false;
+	// bool progress = false;
+	// string path   = "out.txt";
+	// string periodic = "aperiodic";
+	// while ((c = getopt (argc, argv, "n:wpo:")) != -1)
+		// switch(c) {
+			// case 'n':
+				// n = atoi(optarg);
+				// break;
+			// case 'o':
+				// path = optarg;
+				// break;
+			// case 'w':
+				// wrapped = true;
+				// periodic = "periodic";
+				// break;
+			// case 'p':
+				// progress = true;
+				// break;
+			// default:
+				// abort();
+	// }
 
-	ofstream out;
-	out.open (path);
-	out << "n=" << n << "," << periodic << endl;
-	enumerate_ising(n,out,wrapped,progress);
-	out.close();
-	return 0;
-}
+	// ofstream out;
+	// out.open (path);
+	// out << "n=" << n << "," << periodic << endl;
+	// enumerate_ising(n,out,wrapped,progress);
+	// out.close();
+	// return 0;
+// }
 
 /**
  *  Compute molecular field at location k, i.e.
