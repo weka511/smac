@@ -17,7 +17,7 @@
  
 #ifndef _NBR_HPP_
 #define _NBR_HPP_
- 
+#include <vector> 
 using namespace std;
 
  /**
@@ -47,7 +47,7 @@ using namespace std;
 	private:
 		const int d;
 		const int N;
-		int ** neighbours;
+		vector<vector<int>> neighbours;
 	public:
 		Neighbours(const int m,
 					const int n,
@@ -57,7 +57,7 @@ using namespace std;
 		
 		int get_d() {return d;}
 		
-		virtual ~Neighbours();
+	
  };
  
  #endif //_NBR_HPP_
