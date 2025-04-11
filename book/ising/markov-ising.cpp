@@ -44,27 +44,19 @@ void MarkovIsing::prepare() {
 	for (int i=0;i<N;i++) 
 		sigma.push_back(2*bits(mt) - 1);
 
-	for (int i=0;i<2*N +1;i++)
-		Energies.push_back(make_pair(2*i-2*N,0));
-	
+	Energies.prepare(-2*N,2*N,2);		
 	E = 0;
-	for (int i=0;i<N;i++)  {
-		int h = get_field(i,sigma);
-		E += sigma[i] * h;
-	}
+	for (int i=0;i<N;i++)
+		E += sigma[i] * get_field(i,sigma);
 	
 	assert(E%4==0);
-	E /= 2;
-	increment(Energies,E/2+N);
+	Energies.increment(E);
 
-	for (int i=0;i<2*N+1;i++)
-			Magnetization.push_back(make_pair(i-N,0));
-	
+	Magnetization.prepare(-N,N,1);
 	M = 0;
 	for (int i=0;i<N;i++)
 		M += sigma[i];
-	
-	increment(Magnetization,(M+N));
+	Magnetization.increment(M);
 }	
 
 /**
@@ -81,8 +73,10 @@ bool MarkovIsing::step() {
 		E += deltaE;
 		M += 2*sigma[k];
 	}
-	increment(Energies,E/2+N);
-	increment(Magnetization,M+N);
+
+	Energies.increment(M);
+	Magnetization.increment(M);
+
 	return accepted;
 }
 
@@ -122,10 +116,22 @@ int MarkovIsing::get_field(int i,vector<int> spins) {
  * Output energy and magnetization
  */
 void MarkovIsing::dump(ofstream & out) {
-	out << "E,N" <<std::endl;
-	for (vector<pair<int,int>>::const_iterator i = Energies.begin(); i < Energies.end(); i++) 
-        out << i->first << ","<< i->second << std::endl;
-	out << "M,N" <<std::endl;
-	for (vector<pair<int,int>>::const_iterator i = Magnetization.begin(); i < Magnetization.end(); i++) 
-        out << i->first << ","<< i->second << std::endl;
+	Energies.dump(out,"E,N");
+	Magnetization.dump(out,"M,N");
+}
+
+void Field::increment(const int x){
+	const int k = (x-min)/step;
+	assert (0 <=k and k<container.size());
+	const int i = container[k].first;
+	int j = container[k].second;
+	j++;
+	container[k] = make_pair(i,j);
+}
+
+void Field::prepare(int min,int max,int step){
+	for (int i=min;i<=max;i+=step)
+		container.push_back(make_pair(i,0));
+	this->min = min;
+	this->step = step;
 }

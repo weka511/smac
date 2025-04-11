@@ -59,7 +59,8 @@ int main(int argc, char **argv) {
 				iterations = atoi(optarg);
 				break;
 			default: 
-				abort();
+				std::cout << "Unrecognized option: " << (char)c << std::endl;
+				exit(1);
 		}
 
 	std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations << std::endl;
@@ -68,6 +69,6 @@ int main(int argc, char **argv) {
 	out.open (path);
 	MarkovIsing markov(n,n,wrapped,out,beta=beta);
 	markov.run(iterations,frequency);
-	
+	out.close();
 	return 0;
 }

@@ -22,9 +22,34 @@
 #include <chrono>
 #include <utility>
 #include <vector>
+#include <cassert>
 #include "nbr.hpp"
 
 using namespace std;
+
+/**
+ *  This class is used to record counts of energy and magnetization
+ */
+class Field: public vector<pair<int,int>>{
+	private:
+		vector<pair<int,int>> container;
+		int min;
+		int step;
+		
+	public:
+		void prepare(int min,int max,int step);
+	
+		/**
+		 * Used to increment Energies or Magnetization
+		 */
+		void increment(const int k);
+		
+		void dump(ofstream & out,std::string header){
+			out << header << std::endl;
+			for (vector<pair<int,int>>::const_iterator i = container.begin(); i < container.end(); i++) 
+				out << i->first << ","<< i->second << std::endl;	
+		}
+};
 
 /**
  * Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
@@ -62,19 +87,9 @@ class MarkovIsing {
 		 */
 		vector<float> Upsilon; 
 		
-		vector<pair<int,int>> Magnetization;
+		Field Magnetization;
 		
-		vector<pair<int,int>> Energies;
-		
-		/**
-		 * Used to increment Energies or Magnetization
-		 */
-		void increment(vector<pair<int,int>> & Field,const int k){
-			const int i = Field[k].first;
-			int j = Field[k].second;
-			j++;
-			Field[k] = make_pair(i,j);
-		}
+		Field Energies;
 		
 		std::mt19937_64 mt{ static_cast<std::mt19937::result_type>(
 							std::chrono::steady_clock::now().time_since_epoch().count())
