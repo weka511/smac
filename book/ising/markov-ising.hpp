@@ -34,6 +34,7 @@ class Field: public vector<pair<int,int>>{
 	private:
 		vector<pair<int,int>> container;
 		int min;
+		int max;
 		int step;
 		
 	public:
@@ -44,11 +45,7 @@ class Field: public vector<pair<int,int>>{
 		 */
 		void increment(const int k);
 		
-		void dump(ofstream & out,std::string header){
-			out << header << std::endl;
-			for (vector<pair<int,int>>::const_iterator i = container.begin(); i < container.end(); i++) 
-				out << i->first << ","<< i->second << std::endl;	
-		}
+		void dump(ofstream & out,std::string header);
 };
 
 /**

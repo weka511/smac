@@ -44,7 +44,7 @@ void MarkovIsing::prepare() {
 	for (int i=0;i<N;i++) 
 		sigma.push_back(2*bits(mt) - 1);
 
-	Energies.prepare(-2*N,2*N,2);		
+	Energies.prepare(-4*N,4*N,2);		
 	E = 0;
 	for (int i=0;i<N;i++)
 		E += sigma[i] * get_field(i,sigma);
@@ -73,15 +73,15 @@ bool MarkovIsing::step() {
 		E += deltaE;
 		M += 2*sigma[k];
 	}
-
-	Energies.increment(M);
+	
+	Energies.increment(E);
 	Magnetization.increment(M);
 
 	return accepted;
 }
 
 /**
- * Execute the entirity of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
+ * Execute the entirety of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
  */	
 void MarkovIsing::run(int max_steps, int frequency) {
 
@@ -122,6 +122,10 @@ void MarkovIsing::dump(ofstream & out) {
 
 void Field::increment(const int x){
 	const int k = (x-min)/step;
+	if (k < 0 or k >= container.size()){
+		std::cout << "k="<<x <<",min="<< min <<",max="<<max<<",step="<<step<<std::endl;
+		return;
+	}
 	assert (0 <=k and k<container.size());
 	const int i = container[k].first;
 	int j = container[k].second;
@@ -134,4 +138,12 @@ void Field::prepare(int min,int max,int step){
 		container.push_back(make_pair(i,0));
 	this->min = min;
 	this->step = step;
+	this->max = max;
+}
+
+void Field::dump(ofstream & out,std::string header){
+	out << header << std::endl;
+	for (vector<pair<int,int>>::const_iterator i = container.begin(); i < container.end(); i++) 
+		if (i->second>0)
+			out << i->first << ","<< i->second << std::endl;	
 }
