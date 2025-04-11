@@ -23,55 +23,18 @@
 #include <fstream>
 #include <string>
 
-#include "gray.hpp"
-#include "nbr.hpp"
-#include "enumerate-ising.hpp"
 
 using namespace std;
 
-
-/**
- * Main program. 
- */
-// int main(int argc, char **argv) {
-	// int c;
-	// int n         = 4;
-	// bool wrapped  = false;
-	// bool progress = false;
-	// string path   = "out.txt";
-	// string periodic = "aperiodic";
-	// while ((c = getopt (argc, argv, "n:wpo:")) != -1)
-		// switch(c) {
-			// case 'n':
-				// n = atoi(optarg);
-				// break;
-			// case 'o':
-				// path = optarg;
-				// break;
-			// case 'w':
-				// wrapped = true;
-				// periodic = "periodic";
-				// break;
-			// case 'p':
-				// progress = true;
-				// break;
-			// default:
-				// abort();
-	// }
-
-	// ofstream out;
-	// out.open (path);
-	// out << "n=" << n << "," << periodic << endl;
-	// enumerate_ising(n,out,wrapped,progress);
-	// out.close();
-	// return 0;
-// }
+#include "gray.hpp"
+#include "nbr.hpp"
+#include "enumerate-ising.hpp"
 
 /**
  *  Compute molecular field at location k, i.e.
  *  the total contribution of all neighbours
  */
-int get_field(int sigma[],int k,int n,bool wrapped){
+int get_field(vector<int> sigma,int k,int n,bool wrapped){
 	int h=0;
 	for (int i=1;i<=4;i++) {
 		const int j = nbr(k,i,n,wrapped);
@@ -88,9 +51,10 @@ void enumerate_ising(int n,ofstream &out,bool wrapped,bool progress){
 
 	Gray gray(N,progress ? 100000000LL : 0LL);
 
-	int sigma[N];
+	vector<int> sigma;
+	
 	for (int i=0;i<N;i++)
-		sigma[i]=-1;
+		sigma.push_back(-1);//[i]=-1;
 	
 	int E = -2*N;
 	int M = -N;
