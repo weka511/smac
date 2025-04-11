@@ -25,44 +25,21 @@
 
 TEST_CASE( "Enumerate Ising Tests", "[eit]" ) {
 	
-	SECTION("Test nbr against SMAC fig 5-2"){
-		// REQUIRE(nbr(1,1,3)==2);
-		// REQUIRE(nbr(1,2,3)==4);
-		// REQUIRE(nbr(1,3,3)==-1);
-		// REQUIRE(nbr(1,4,3)==-1);
-		// REQUIRE(nbr(2,1,3)==3);
-		// REQUIRE(nbr(2,2,3)==5);
-		// REQUIRE(nbr(2,3,3)==1);
-		// REQUIRE(nbr(2,4,3)==-1);
-		// REQUIRE(nbr(3,1,3)==-1);
-		// REQUIRE(nbr(3,2,3)==6);
-		// REQUIRE(nbr(3,3,3)==2);
-		// REQUIRE(nbr(3,4,3)==-1);
-		// REQUIRE(nbr(4,1,3)==5);
-		// REQUIRE(nbr(4,2,3)==7);
-		// REQUIRE(nbr(4,3,3)==-1);
-		// REQUIRE(nbr(4,4,3)==1);
-		// REQUIRE(nbr(5,1,3)==6);
-		// REQUIRE(nbr(5,2,3)==8);
-		// REQUIRE(nbr(5,3,3)==4);
-		// REQUIRE(nbr(5,4,3)==2);
-		// REQUIRE(nbr(6,1,3)==-1);
-		// REQUIRE(nbr(6,2,3)==9);
-		// REQUIRE(nbr(6,3,3)==5);
-		// REQUIRE(nbr(6,4,3)==3);
-		// REQUIRE(nbr(7,1,3)==8);
-		// REQUIRE(nbr(7,2,3)==-1);
-		// REQUIRE(nbr(7,3,3)==-1);
-		// REQUIRE(nbr(7,4,3)==4);
-		// REQUIRE(nbr(8,1,3)==9);
-		// REQUIRE(nbr(8,2,3)==-1);
-		// REQUIRE(nbr(8,3,3)==7);
-		// REQUIRE(nbr(8,4,3)==5);
-		// REQUIRE(nbr(9,1,3)==-1);
-		// REQUIRE(nbr(9,2,3)==-1);
-		// REQUIRE(nbr(9,3,3)==8);
-		// REQUIRE(nbr(9,4,3)==6);
+	SECTION("Test get_field: wrapped"){
+		vector<int> sigma;
+		for (int i=0;i<9;i++)
+			sigma.push_back(-1);
+	
+		REQUIRE(get_field(sigma,5,3,true) == -4);
+		REQUIRE(get_field(sigma,4,3,true) == -4);
 	}
 	
+	SECTION("Test get_field: not wrapped"){
+		vector<int> sigma;
+		for (int i=0;i<9;i++)
+			sigma.push_back(-1);
 	
+		REQUIRE(get_field(sigma,5,3,false) == -4);
+		REQUIRE(get_field(sigma,4,3,false) == -3);
+	}
 }

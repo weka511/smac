@@ -21,14 +21,6 @@
 #include <vector>
 
 /**
- *  Enumerate energy levels
- */
-void enumerate_ising(	int n,
-						ofstream &out,
-						bool wrapped = false,
-						bool progress = false);
-
-/**
  *  Compute molecular field at location k,, i.e.
  *  the total contribution of all neighbours
  */					
@@ -36,5 +28,15 @@ int get_field(	vector<int> sigma,
 				int k,
 				int n,
 				bool wrapped = false);
+				
+/**
+ *  Enumerate energy levels
+ */
+void enumerate_ising(	int n,
+						ofstream &out,
+						bool wrapped = false,
+						bool progress = false);
+
+
 
 #endif //_ENUMERATE_ISING_HPP_
