@@ -94,7 +94,7 @@ def read_file(path,input):
     return m,n,periodic,beta,np.array(Es),np.array(Ms),accept,max_steps
 
 def get_periodic(is_periodic):
-    return 'periodic' if is_periodic == 'periodic' else 'aperiodic'
+    return 'periodic' if is_periodic  else 'aperiodic'
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
