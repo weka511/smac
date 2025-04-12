@@ -37,8 +37,8 @@ int main(int argc, char **argv) {
 	int frequency = 0;
 	float beta = 2.0;
 	int iterations = 100000;
-	
-	while ((c = getopt (argc, argv, "n:wpo:f:b:i:")) != -1)
+	int nruns = 1;
+	while ((c = getopt (argc, argv, "n:wpo:f:b:i:r:")) != -1)
 		switch(c) {
 			case 'n':
 				n = atoi(optarg);
@@ -58,6 +58,9 @@ int main(int argc, char **argv) {
 			case 'i':
 				iterations = atoi(optarg);
 				break;
+			case 'r':
+				nruns = atoi(optarg);
+				break;
 			default: 
 				std::cout << "Unrecognized option: " << (char)c << std::endl;
 				exit(1);
@@ -68,7 +71,13 @@ int main(int argc, char **argv) {
 	ofstream out;
 	out.open (path);
 	MarkovIsing markov(n,n,wrapped,out,beta=beta);
-	markov.run(iterations,frequency);
+	markov.initialize_counts(nruns);
+	
+	for (int i=0;i<nruns;i++) {
+		markov.prepare(i);
+		markov.run(iterations,frequency,i);
+	}
+	markov.dump(out);
 	out.close();
 	return 0;
 }

@@ -28,24 +28,40 @@
 using namespace std;
 
 /**
+ * This type represents a collection of counts from different runs
+ */
+typedef vector<int> row;
+
+/**
+ * This type represents a value (Energy or Magnetism), plus its collection of counts from different runs
+ */
+typedef pair<int,row> CountedData;
+/**
  *  This class is used to record counts of energy and magnetization
  */
 class Field: public vector<pair<int,int>>{
 	private:
-		vector<pair<int,int>> container;
+		vector<CountedData> container;
 		int min;
 		int max;
 		int step;
+		int width;
 		
-	public:
-		void prepare(int min,int max,int step);
+	public:	
+		void prepare(const int min, const int max, const int step, const int width);
 	
 		/**
 		 * Used to increment Energies or Magnetization
 		 */
-		void increment(const int k);
+		void increment(const int k,const int run=0);  // FIXME k?
 		
 		void dump(ofstream & out,std::string header);
+		
+		bool all_zero(row counts) {
+			for (vector<int>::const_iterator j = counts.begin(); j < counts.end(); j++)
+				if (*j > 0) return false;
+			return true;
+		}
 };
 
 /**
@@ -101,17 +117,21 @@ class MarkovIsing {
 		/**
 		 * This method is used to initialize the spins, E, M, and the counts at the start of each run.
 		 */
-		void prepare();
+		void initialize_counts(const int width=1);
+		/**
+		 * This method is used to initialize the spins, E, M, and the counts at the start of each run.
+		 */
+		void prepare(const int run=1);
 		
 		/**
 		 * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
 		 */	
-		bool step();
+		bool step(const int run);
 
 	    /**
-		 * Execute the entirity of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
+		 * Execute the entirety of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
 		 */	
-		void run(int max_steps=100000, int frequency=0);
+		void run(int max_steps=100000, int frequency=0, const int run=1);
 
 		/**
 		 * Calculate field at a particular site

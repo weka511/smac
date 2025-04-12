@@ -31,38 +31,43 @@ MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
 	out << "m="<<m <<",n="<<n<<",periodic="<<wrapped<<",beta="<<beta <<std::endl;
 }
 
-/**
- * This method is used to initialize the spins, E, M, and the counts at the start of each run.
- */
-void MarkovIsing::prepare() {
+
+void  MarkovIsing::initialize_counts(const int width){
+	Energies.prepare(-4*N,4*N,2,width);	
+	Magnetization.prepare(-N,N,1,width);		
 	for (int i=1;i<=2*neighbours.get_d();i++){
 		const int deltaE = 2*i;
 		Upsilon.push_back(exp(-beta*deltaE));
 	}
-		
+	for (int i=0;i<N;i++) 
+		sigma.push_back(0);
+}
+/**
+ * This method is used to initialize the spins, E, M, and the counts at the start of each run.
+ */
+void MarkovIsing::prepare(const int run) {
+	
 	std::uniform_int_distribution<int> bits(0,1);
 	for (int i=0;i<N;i++) 
-		sigma.push_back(2*bits(mt) - 1);
+		sigma[i] = 2*bits(mt) - 1;
 
-	Energies.prepare(-4*N,4*N,2);		
 	E = 0;
 	for (int i=0;i<N;i++)
 		E += sigma[i] * get_field(i,sigma);
 	
 	assert(E%4==0);
-	Energies.increment(E);
+	Energies.increment(E,run);
 
-	Magnetization.prepare(-N,N,1);
 	M = 0;
 	for (int i=0;i<N;i++)
 		M += sigma[i];
-	Magnetization.increment(M);
+	Magnetization.increment(M,run);
 }	
 
 /**
  * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
  */	
-bool MarkovIsing::step() {
+bool MarkovIsing::step(const int run) {
 	const int k = d(mt);
 	const int h = get_field(k,sigma);
 	const int deltaE = 2 * h * sigma[k];
@@ -74,8 +79,8 @@ bool MarkovIsing::step() {
 		M += 2*sigma[k];
 	}
 	
-	Energies.increment(E);
-	Magnetization.increment(M);
+	Energies.increment(E,run);
+	Magnetization.increment(M,run);
 
 	return accepted;
 }
@@ -83,19 +88,18 @@ bool MarkovIsing::step() {
 /**
  * Execute the entirety of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
  */	
-void MarkovIsing::run(int max_steps, int frequency) {
+void MarkovIsing::run(int max_steps, int frequency, const int run) {
 
-	prepare();
 	int total_accepted = 0;
 	
 	for (int i=0;i<max_steps;i++){
 		if (frequency > 0 && i > 0 && i%frequency ==0)
 			std::cout << i << std::endl;
-		if (step())
+		if (step(run))
 			total_accepted++;
 	}
 	std::cout << "beta="<<beta<<", acceptance="<<(100.0*total_accepted)/max_steps <<"%"<< std::endl;
-	dump(out);
+	
 	out << "beta="<<beta<<", total_accepted="<<total_accepted<<", max_steps="<<max_steps << std::endl;
 }
 
@@ -120,7 +124,7 @@ void MarkovIsing::dump(ofstream & out) {
 	Magnetization.dump(out,"M,N");
 }
 
-void Field::increment(const int x){
+void Field::increment(const int x,const int run){
 	const int k = (x-min)/step;
 	if (k < 0 or k >= container.size()){
 		std::cout << "k="<<x <<",min="<< min <<",max="<<max<<",step="<<step<<std::endl;
@@ -128,22 +132,31 @@ void Field::increment(const int x){
 	}
 	assert (0 <=k and k<container.size());
 	const int i = container[k].first;
-	int j = container[k].second;
-	j++;
-	container[k] = make_pair(i,j);
+	row r = container[k].second;
+	r[run]++;
+	container[k] = make_pair(i,r);
 }
 
-void Field::prepare(int min,int max,int step){
+void Field::prepare(const int min, const int max, const int step, const int width){
+	row zeros;
+	for (int j=0;j<width;j++)
+		zeros.push_back(0);
 	for (int i=min;i<=max;i+=step)
-		container.push_back(make_pair(i,0));
+		container.push_back(make_pair(i,zeros));
 	this->min = min;
 	this->step = step;
 	this->max = max;
 }
 
-void Field::dump(ofstream & out,std::string header){
+void Field::dump(ofstream & out,std::string header){ // FIXME
 	out << header << std::endl;
-	for (vector<pair<int,int>>::const_iterator i = container.begin(); i < container.end(); i++) 
-		if (i->second>0)
-			out << i->first << ","<< i->second << std::endl;	
+	for (vector<CountedData>::const_iterator i = container.begin(); i < container.end(); i++) {
+		row counts = i->second;
+		if (all_zero(counts))	continue;
+		
+		out << i->first;
+		for (vector<int>::const_iterator j = counts.begin(); j < counts.end(); j++)
+			out << "," << *j;
+		out  << std::endl;	
+	}
 }
