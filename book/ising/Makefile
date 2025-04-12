@@ -23,14 +23,16 @@ CC        = gcc
 CXX       = g++
 RM        = rm -f
 MKDIR     = mkdir
-SRCS      = markov-ising.cpp    \
+SRCS      = markov-ising.cpp     \
             nbr.cpp              \
-			enumerate-ising.cpp
+			enumerate-ising.cpp  \
+			field.cpp
 
-TESTS     = 	test-gray.cpp  	   \
-		        test-nbr.cpp       \
-				test-enumerate.cpp \
-				test-markov.cpp
+TESTS     = test-gray.cpp  	   \
+		    test-nbr.cpp       \
+			test-enumerate.cpp \
+			test-markov.cpp    \
+			test-field.cpp
 		
 OBJS1     = $(subst .cpp,.o,$(SRCS)) 
 OBJS      = $(subst .cc,.o,$(OBJS1)) 

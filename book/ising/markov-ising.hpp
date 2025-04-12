@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 Greenweaves Software Limited
+ * Copyright (C) 2025 Greenweaves Software Limited
  *
  * This is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,49 +20,14 @@
 
 #include <random>
 #include <chrono>
-#include <utility>
 #include <vector>
-#include <cassert>
+
 #include "nbr.hpp"
+#include "field.hpp"
 
 using namespace std;
 
-/**
- * This type represents a collection of counts from different runs
- */
-typedef vector<int> row;
 
-/**
- * This type represents a value (Energy or Magnetism), plus its collection of counts from different runs
- */
-typedef pair<int,row> CountedData;
-/**
- *  This class is used to record counts of energy and magnetization
- */
-class Field: public vector<pair<int,int>>{
-	private:
-		vector<CountedData> container;
-		int min;
-		int max;
-		int step;
-		int width;
-		
-	public:	
-		void prepare(const int min, const int max, const int step, const int width);
-	
-		/**
-		 * Used to increment Energies or Magnetization
-		 */
-		void increment(const int k,const int run=0);  // FIXME k?
-		
-		void dump(ofstream & out,std::string header);
-		
-		bool all_zero(row counts) {
-			for (vector<int>::const_iterator j = counts.begin(); j < counts.end(); j++)
-				if (*j > 0) return false;
-			return true;
-		}
-};
 
 /**
  * Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
@@ -72,7 +37,14 @@ class MarkovIsing {
 	private:
 	     Neighbours neighbours;
 		
+		/**
+		 * The spins
+		 */
 		vector<int> sigma;
+		
+		/**
+		 * Total number od spins
+		 */
 		const int N;
 		
 		/**
@@ -100,8 +72,14 @@ class MarkovIsing {
 		 */
 		vector<float> Upsilon; 
 		
+		/**
+		 *  Stored values of magnetization and their counts
+		 */
 		Field Magnetization;
 		
+		/**
+		 *  Stored values of energy and their counts
+		 */
 		Field Energies;
 		
 		std::mt19937_64 mt{ static_cast<std::mt19937::result_type>(
@@ -112,7 +90,7 @@ class MarkovIsing {
 		std::uniform_int_distribution<int> d;
 		
 	public:
-		MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta=2.0);
+		MarkovIsing(const int m,int const n,const bool wrapped, ofstream &out, const float beta=2.0, const int nruns=1);
 		
 		/**
 		 * This method is used to initialize the spins, E, M, and the counts at the start of each run.
@@ -143,6 +121,9 @@ class MarkovIsing {
 		 */
 		void dump(ofstream & out);
 		
+		/**
+		 * Access cached values of exp(-beta*deltaE)
+		 */
 		float get_upsilon(int i) {return Upsilon[i];};
 		
 };

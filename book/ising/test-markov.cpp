@@ -43,7 +43,7 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 	}
 	
 	
-	SECTION("Test MarkovIsing.get_field()"){
+	SECTION("Test MarkovIsing.get_field()1"){
 		ofstream out;
 		out.open ("/dev/null");
 		MarkovIsing markov(3,3,false,out);
@@ -60,7 +60,7 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		ofstream out;
 		out.open ("/dev/null");
 		MarkovIsing markov(6,6,true,out,0.25);
-		markov.prepare();
+		markov.initialize_counts(1);
 		REQUIRE(markov.get_upsilon(0) == Approx(0.60653066).epsilon(0.0000001) );
 		REQUIRE(markov.get_upsilon(1) == Approx(0.36787944).epsilon(0.0000001) );
 		REQUIRE(markov.get_upsilon(2) == Approx(0.22313016).epsilon(0.0000001) );

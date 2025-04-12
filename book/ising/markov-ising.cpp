@@ -25,10 +25,10 @@
 
 using namespace std;
 
-MarkovIsing::MarkovIsing(int m,int n,bool wrapped,ofstream &out, float beta) :
+MarkovIsing::MarkovIsing(const int m,const int n,const bool wrapped, ofstream &out, const float beta, const int nruns) :
 			out(out), beta(beta), N(m*n), dt(0,1), d(0,m*n-1) {
 	neighbours.prepare(m,n,wrapped);
-	out << "m="<<m <<",n="<<n<<",periodic="<<wrapped<<",beta="<<beta <<std::endl;
+	out << "m="<<m <<",n="<<n<<",periodic="<<wrapped<<",beta="<<beta <<",nruns=" << nruns<<std::endl;
 }
 
 
@@ -124,39 +124,39 @@ void MarkovIsing::dump(ofstream & out) {
 	Magnetization.dump(out,"M,N");
 }
 
-void Field::increment(const int x,const int run){
-	const int k = (x-min)/step;
-	if (k < 0 or k >= container.size()){
-		std::cout << "k="<<x <<",min="<< min <<",max="<<max<<",step="<<step<<std::endl;
-		return;
-	}
-	assert (0 <=k and k<container.size());
-	const int i = container[k].first;
-	row r = container[k].second;
-	r[run]++;
-	container[k] = make_pair(i,r);
-}
+// void Field::increment(const int x,const int run){
+	// const int k = (x-min)/step;
+	// if (k < 0 or k >= container.size()){
+		// std::cout << "k="<<x <<",min="<< min <<",max="<<max<<",step="<<step<<std::endl;
+		// return;
+	// }
+	// assert (0 <=k and k<container.size());
+	// const int i = container[k].first;
+	// row r = container[k].second;
+	// r[run]++;
+	// container[k] = make_pair(i,r);
+// }
 
-void Field::prepare(const int min, const int max, const int step, const int width){
-	row zeros;
-	for (int j=0;j<width;j++)
-		zeros.push_back(0);
-	for (int i=min;i<=max;i+=step)
-		container.push_back(make_pair(i,zeros));
-	this->min = min;
-	this->step = step;
-	this->max = max;
-}
+// void Field::prepare(const int min, const int max, const int step, const int width){
+	// row zeros;
+	// for (int j=0;j<width;j++)
+		// zeros.push_back(0);
+	// for (int i=min;i<=max;i+=step)
+		// container.push_back(make_pair(i,zeros));
+	// this->min = min;
+	// this->step = step;
+	// this->max = max;
+// }
 
-void Field::dump(ofstream & out,std::string header){ // FIXME
-	out << header << std::endl;
-	for (vector<CountedData>::const_iterator i = container.begin(); i < container.end(); i++) {
-		row counts = i->second;
-		if (all_zero(counts))	continue;
+// void Field::dump(ofstream & out,std::string header){
+	// out << header << std::endl;
+	// for (vector<CountedData>::const_iterator i = container.begin(); i < container.end(); i++) {
+		// row counts = i->second;
+		// if (all_zero(counts))	continue;
 		
-		out << i->first;
-		for (vector<int>::const_iterator j = counts.begin(); j < counts.end(); j++)
-			out << "," << *j;
-		out  << std::endl;	
-	}
-}
+		// out << i->first;
+		// for (vector<int>::const_iterator j = counts.begin(); j < counts.end(); j++)
+			// out << "," << *j;
+		// out  << std::endl;	
+	// }
+// }

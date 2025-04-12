@@ -14,7 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  *
- *     Driver program for MCMC Ising
+ *  This is the Driver program for MCMC Ising. It parses the command line
+ *  arguments, then executes Markov Ising as many times as required.
  */
  
 #include <getopt.h>
@@ -38,7 +39,8 @@ int main(int argc, char **argv) {
 	float beta = 2.0;
 	int iterations = 100000;
 	int nruns = 1;
-	while ((c = getopt (argc, argv, "n:wpo:f:b:i:r:")) != -1)
+
+	while ((c = getopt (argc, argv, "n:wo:f:b:i:r:")) != -1)
 		switch(c) {
 			case 'n':
 				n = atoi(optarg);
@@ -62,15 +64,15 @@ int main(int argc, char **argv) {
 				nruns = atoi(optarg);
 				break;
 			default: 
-				std::cout << "Unrecognized option: " << (char)c << std::endl;
+				std::cout << "Unrecognized option: " << char(c) << std::endl;
 				exit(1);
 		}
 
-	std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations << std::endl;
+	std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations <<",nruns="<< nruns<<std::endl;
 
 	ofstream out;
 	out.open (path);
-	MarkovIsing markov(n,n,wrapped,out,beta=beta);
+	MarkovIsing markov(n,n,wrapped,out,beta=beta,nruns=nruns);
 	markov.initialize_counts(nruns);
 	
 	for (int i=0;i<nruns;i++) {
