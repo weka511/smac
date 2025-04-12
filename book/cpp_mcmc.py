@@ -113,9 +113,12 @@ if __name__=='__main__':
 
     m,n,is_periodic,beta,E,M,accept,max_steps = read_file(args.path,args.input)
     e,cV =thermo(E[:,0],np.sum(E[:,1:],axis=1),beta=beta,NObservations=m*n)
+    acceptance_ratio = accept/max_steps
+
     fig = figure(figsize=(12,12))
-    fig.suptitle(fr'{max_steps:,} steps, {m}$\times${n}, {get_periodic(is_periodic)}, $\beta=${beta}')
-    ax1 = fig.add_subplot(2,2,1)
+    fig.suptitle(fr'{len(accept)}$\times${max_steps:,} steps, {m}$\times${n}, {get_periodic(is_periodic)}, $\beta=${beta},' +
+                 fr' acceptance ratio={acceptance_ratio.mean():.3f}$\pm${acceptance_ratio.std():.3}')
+    ax1 = fig.add_subplot(2,1,1)
     ax1.bar(E[:,0],np.max(E[:,1:],axis=1),label='max')
     ax1.bar(E[:,0],np.average(E[:,1:],axis=1),label='mean')
     ax1.bar(E[:,0],np.min(E[:,1:],axis=1),label='min')
@@ -124,17 +127,13 @@ if __name__=='__main__':
     ax1.set_xlabel('E')
     ax1.set_ylabel('Frequency')
 
-    ax2 = fig.add_subplot(2,2,2)
+    ax2 = fig.add_subplot(2,1,2)
     ax2.bar(M[:,0],np.max(M[:,1:],axis=1),label='max')
     ax2.bar(M[:,0],np.average(M[:,1:],axis=1),label='mean')
     ax2.bar(M[:,0],np.min(M[:,1:],axis=1),label='min')
     ax2.legend()
     ax2.set_xlabel('M')
     ax2.set_ylabel('Frequency')
-
-    ax3 = fig.add_subplot(2,2,3)
-    ax3.bar(range(len(accept)),accept/max_steps)
-    ax3.set_ylim(top=1)
 
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
