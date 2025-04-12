@@ -58,40 +58,49 @@ def get_file_name(name,default_ext='png',seq=None):
 
 def read_file(path,input):
     state = 0
-    pattern1 = compile(r'm=(\d+),n=(\d+),periodic=(\d),beta=([0-9.]+)')
-    pattern2 = compile(r'beta=([0-9.]*), total_accepted=(\d+), max_steps=(\d+)')
-    #total_accepted=256845, max_steps=1000000
+    max_steps = 0
+    pattern_parameters = compile(r'm=(\d+),n=(\d+),periodic=(\d),beta=([0-9.]+),nruns=(\d+)')
+    pattern_accepted = compile(r'beta=([0-9.]*), total_accepted=(\d+), max_steps=(\d+)')
+
     with open(join(path,input)) as input_file:
         for line in input_file:
             line = line.strip()
             match (state):
                 case 0:
-                    match = pattern1.match(line)
+                    match = pattern_parameters.match(line)
                     m = int(match.group(1))
                     n = int(match.group(2))
                     periodic = int(match.group(3)) == 1
                     beta = float(match.group(4))
+                    nruns = int(match.group(5))
                     state = 1
+                    accepted = []
+
                 case 1:
-                    state = 2
+                    match = pattern_accepted.match(line)
+                    if match:
+                        accepted.append(int(match.group(2)))
+                        max_steps = int(match.group(3))
+                    else:
+                        state = 2
                     Es = []
                     Ms = []
                 case 2:
-                    parts = line.split(',')
                     try:
-                        Es.append((int(parts[0]),int(parts[1])))
+                        Es.append([int(x) for x in line.split(',')])
                     except ValueError:
                         state = 3
                 case 3:
                     parts = line.split(',')
                     try:
-                        Ms.append((int(parts[0]),int(parts[1])))
+                        Ms.append([int(x) for x in line.split(',')])
                     except ValueError:
-                        match = pattern2.match(line)
-                        accept = int(match.group(2))
-                        max_steps = int(match.group(3))
+                        pass
+                        # match = pattern2.match(line)
+                        # accept = int(match.group(2))
+                        # max_steps = 0#int(match.group(3))
 
-    return m,n,periodic,beta,np.array(Es),np.array(Ms),accept,max_steps
+    return m,n,periodic,beta,np.array(Es),np.array(Ms),np.array(accepted),max_steps
 
 def get_periodic(is_periodic):
     return 'periodic' if is_periodic  else 'aperiodic'
@@ -103,18 +112,29 @@ if __name__=='__main__':
     args = parse_arguments()
 
     m,n,is_periodic,beta,E,M,accept,max_steps = read_file(args.path,args.input)
-    e,cV =thermo(E[:,0],E[:,1],beta=beta,NObservations=m*n)
+    e,cV =thermo(E[:,0],np.sum(E[:,1:],axis=1),beta=beta,NObservations=m*n)
     fig = figure(figsize=(12,12))
-    fig.suptitle(fr'{max_steps:,} steps, {m}$\times${n}, {get_periodic(is_periodic)}, $\beta=${beta}, acceptance={100* accept/max_steps}\%')
-    ax1 = fig.add_subplot(2,1,1)
-    ax1.bar(E[:,0],E[:,1]/E[:,1].sum())
+    fig.suptitle(fr'{max_steps:,} steps, {m}$\times${n}, {get_periodic(is_periodic)}, $\beta=${beta}')
+    ax1 = fig.add_subplot(2,2,1)
+    ax1.bar(E[:,0],np.max(E[:,1:],axis=1),label='max')
+    ax1.bar(E[:,0],np.average(E[:,1:],axis=1),label='mean')
+    ax1.bar(E[:,0],np.min(E[:,1:],axis=1),label='min')
+    ax1.legend()
+    ax1.set_title(f'e={e:.3f},$c_V=${cV:.5f}')
     ax1.set_xlabel('E')
     ax1.set_ylabel('Frequency')
-    ax1.set_title(f'e={e:.3f},$c_V=${cV:.5f}')
-    ax2 = fig.add_subplot(2,1,2)
-    ax2.bar(M[:,0],M[:,1]/M[:,1].sum())
+
+    ax2 = fig.add_subplot(2,2,2)
+    ax2.bar(M[:,0],np.max(M[:,1:],axis=1),label='max')
+    ax2.bar(M[:,0],np.average(M[:,1:],axis=1),label='mean')
+    ax2.bar(M[:,0],np.min(M[:,1:],axis=1),label='min')
+    ax2.legend()
     ax2.set_xlabel('M')
     ax2.set_ylabel('Frequency')
+
+    ax3 = fig.add_subplot(2,2,3)
+    ax3.bar(range(len(accept)),accept/max_steps)
+    ax3.set_ylim(top=1)
 
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
