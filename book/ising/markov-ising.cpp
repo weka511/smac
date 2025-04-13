@@ -122,39 +122,4 @@ void MarkovIsing::dump(ofstream & out) {
 	Magnetization.dump(out,"M,N");
 }
 
-// void Field::increment(const int x,const int run){
-	// const int k = (x-min)/step;
-	// if (k < 0 or k >= container.size()){
-		// std::cout << "k="<<x <<",min="<< min <<",max="<<max<<",step="<<step<<std::endl;
-		// return;
-	// }
-	// assert (0 <=k and k<container.size());
-	// const int i = container[k].first;
-	// row r = container[k].second;
-	// r[run]++;
-	// container[k] = make_pair(i,r);
-// }
 
-// void Field::prepare(const int min, const int max, const int step, const int width){
-	// row zeros;
-	// for (int j=0;j<width;j++)
-		// zeros.push_back(0);
-	// for (int i=min;i<=max;i+=step)
-		// container.push_back(make_pair(i,zeros));
-	// this->min = min;
-	// this->step = step;
-	// this->max = max;
-// }
-
-// void Field::dump(ofstream & out,std::string header){
-	// out << header << std::endl;
-	// for (vector<CountedData>::const_iterator i = container.begin(); i < container.end(); i++) {
-		// row counts = i->second;
-		// if (all_zero(counts))	continue;
-		
-		// out << i->first;
-		// for (vector<int>::const_iterator j = counts.begin(); j < counts.end(); j++)
-			// out << "," << *j;
-		// out  << std::endl;	
-	// }
-// }
