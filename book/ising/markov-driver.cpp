@@ -24,6 +24,7 @@
 #include <string>
 
 #include "markov-ising.hpp"
+#include "markov-driver.hpp"
 
 using namespace std;
 
@@ -69,16 +70,18 @@ int main(int argc, char **argv) {
 		}
 
 	std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations <<",nruns="<< nruns<<std::endl;
+	
+	execute(path, n, wrapped,  beta, iterations, nruns, frequency );
+}
 
+int execute(const string path, const int n, const bool wrapped, const float beta, const int iterations, const int nruns, const int frequency ){
 	ofstream out;
 	out.open (path);
-	MarkovIsing markov(n,n,wrapped,out,beta=beta,nruns=nruns);
-	markov.initialize_counts(nruns);
+	MarkovIsing markov(n,n,wrapped,out,beta,nruns);
 	
-	for (int i=0;i<nruns;i++) {
-		markov.prepare(i);
+	for (int i=0;i<nruns;i++) 
 		markov.run(iterations,frequency,i);
-	}
+		
 	markov.dump(out);
 	out.close();
 	return 0;

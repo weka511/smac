@@ -89,23 +89,19 @@ class MarkovIsing {
 		std::uniform_real_distribution<float> dt;
 		std::uniform_int_distribution<int> d;
 		
-	public:
-		MarkovIsing(const int m,int const n,const bool wrapped, ofstream &out, const float beta=2.0, const int nruns=1);
-		
 		/**
 		 * This method is used to initialize the spins, E, M, and the counts at the start of each run.
 		 */
-		void initialize_counts(const int width=1);
-		/**
-		 * This method is used to initialize the spins, E, M, and the counts at the start of each run.
-		 */
-		void prepare(const int run=1);
+		void reset(const int run=1);
 		
 		/**
 		 * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
 		 */	
 		bool step(const int run);
-
+		
+	public:
+		MarkovIsing(const int m,int const n,const bool wrapped, ofstream &out, const float beta=2.0, const int nruns=1);
+		
 	    /**
 		 * Execute the entirety of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
 		 */	
