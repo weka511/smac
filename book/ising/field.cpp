@@ -22,10 +22,10 @@
 
 using namespace std;
 
-void Field::increment(const int x,const int run){
-	const int k = (x-min)/step;
+void Field::increment(const int value,const int run){
+	const int k = (value - min)/step;
 	if (k < 0 or k >= container.size()){
-		std::cout << "k="<<x <<",min="<< min <<",max="<<max<<",step="<<step<<std::endl;
+		std::cout << "k="<<value <<",min="<< min <<",max="<<max<<",step="<<step<<std::endl;
 		return;
 	}
 	assert (0 <=k and k<container.size());

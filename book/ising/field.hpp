@@ -39,7 +39,7 @@ typedef pair<int,row> CountedData;
  */
 class Field: public vector<pair<int,int>>{
 	private:
-		vector<CountedData> container;
+		
 		/**
 		 * The next three fields record the allowable values of the firld, which
 		 * are min, min+step, ,,, max.
@@ -52,9 +52,10 @@ class Field: public vector<pair<int,int>>{
 		 * Number of columns in data table, one for each run.
 		 */ 
 		int width;
-	
+
+	public:		
 		/**
-		 * This method verifies that a particular row comprses all zeros.
+		 * This method verifies that a particular row comprises all zeros.
 		 */
 		bool all_zero(row counts) {
 			for (vector<int>::const_iterator j = counts.begin(); j < counts.end(); j++)
@@ -62,16 +63,16 @@ class Field: public vector<pair<int,int>>{
 			return true;
 		}
 		
-	public:	
+		vector<CountedData> container;
 	    /**
-		 * Used to initiialize data storage to all zeros
+		 * Used to initialize data storage to all zeros
 		 */
 		void prepare(const int min, const int max, const int step, const int width);
 	
 		/**
 		 * Used to increment Energies or Magnetization
 		 */
-		void increment(const int k,const int run=0);  // FIXME k?
+		void increment(const int value,const int run=0);
 		
 		/**
 		 * Used to output data

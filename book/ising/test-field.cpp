@@ -25,21 +25,23 @@
 
 TEST_CASE( "Markov Field", "[field]" ) {
 	
-	SECTION("Test MarkovIsing.get_field()"){
-		// ofstream out;
-		// out.open ("/dev/null");
-		// MarkovIsing markov(3,3,false,out);
-		// vector<int> spins = {-1, -1, -1,
-							// -1, -1, -1,
-							// -1, -1, -1
-							// };
-		// REQUIRE(-4 == markov.get_field(4,spins));
-		// spins[0] = +1;
-		// REQUIRE(-4 == markov.get_field(4,spins));
-		// spins[1] = +1;
-		// REQUIRE(-2 == markov.get_field(4,spins));	
-		// spins[7] = +1;
-		// REQUIRE(0 == markov.get_field(4,spins));		
+	SECTION("test field"){
+		Field field;
+		field.prepare(-16, 16, 2, 3);
+		for (vector<CountedData>::const_iterator i = field.container.begin(); i < field.container.end(); i++) {
+			row counts = i->second;
+			REQUIRE(field.all_zero(counts));
+		}
+		field.increment(-12,2);
+		int j = 0;
+		for (vector<CountedData>::const_iterator i = field.container.begin(); i < field.container.end(); i++) {
+			row counts = i->second;
+			if (j==2)
+				REQUIRE(!field.all_zero(counts));
+			else
+				REQUIRE(field.all_zero(counts));
+			j++;
+		}
 	}
 	
 	
