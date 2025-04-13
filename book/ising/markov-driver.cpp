@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <chrono>
 
 #include "markov-ising.hpp"
 #include "markov-driver.hpp"
@@ -70,7 +71,7 @@ int main(int argc, char **argv) {
 		}
 
 	if (n>0 && beta>0){
-		std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations <<",nruns="<< nruns<<std::endl;
+		std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations <<", nruns="<< nruns<<std::endl;
 		execute(path, n, wrapped,  beta, iterations, nruns, frequency );
 	} else{
 		std:cout<< "Both n and beta need to be specified" << std::endl;
@@ -79,6 +80,7 @@ int main(int argc, char **argv) {
 }
 
 int execute(const string path, const int n, const bool wrapped, const float beta, const int iterations, const int nruns, const int frequency ){
+	auto start = std::chrono::steady_clock::now();
 	ofstream out;
 	out.open (path);
 	MarkovIsing markov(n,n,wrapped,out,beta,nruns);
@@ -88,5 +90,8 @@ int execute(const string path, const int n, const bool wrapped, const float beta
 		
 	markov.dump(out);
 	out.close();
+	auto end = std::chrono::steady_clock::now();
+	int64_t elapsed = chrono::duration_cast<chrono::seconds>(end - start).count();
+	std:cout<< "Elapsed time="<<elapsed <<" seconds, average="<< ((float)elapsed)/nruns << " sec." << std::endl;
 	return 0;
 }

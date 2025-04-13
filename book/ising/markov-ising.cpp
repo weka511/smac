@@ -18,6 +18,7 @@
 #include <iostream>
 #include <fstream>
 #include <cassert>
+#include <chrono>
 
 #include "gray.hpp"
 #include "nbr.hpp"
@@ -87,6 +88,7 @@ bool MarkovIsing::step(const int run) {
  * Execute the entirety of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
  */	
 void MarkovIsing::run(int max_steps, int frequency, const int run) {
+	auto start = std::chrono::steady_clock::now();
 	reset(run);
 	int total_accepted = 0;
 	
@@ -96,7 +98,9 @@ void MarkovIsing::run(int max_steps, int frequency, const int run) {
 		if (step(run))
 			total_accepted++;
 	}
-	std::cout << "beta="<<beta<<", acceptance="<<(100.0*total_accepted)/max_steps <<"%"<< std::endl;
+	auto end = std::chrono::steady_clock::now();
+	std::cout << "beta="<<beta<<", acceptance="<<(100.0*total_accepted)/max_steps <<"%"<< " "
+				<< chrono::duration_cast<chrono::seconds>(end - start).count() << " sec" << std::endl;
 	
 	out << "beta="<<beta<<", total_accepted="<<total_accepted<<", max_steps="<<max_steps << std::endl;
 }
