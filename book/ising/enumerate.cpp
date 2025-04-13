@@ -58,7 +58,9 @@ int main(int argc, char **argv) {
 	ofstream out;
 	out.open (path);
 	out << "n=" << n << "," << periodic << endl;
-	enumerate_ising(n,out,wrapped,progress);
+	IsingEnumerator enumerator;
+	enumerator.enumerate_ising(n,wrapped,progress);
+	enumerator.output(out);
 	out.close();
 	return 0;
 }

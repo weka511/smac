@@ -19,24 +19,36 @@
 #define _ENUMERATE_ISING_HPP_
 
 #include <vector>
+#include <map>
+
 
 /**
- *  Compute molecular field at location k,, i.e.
- *  the total contribution of all neighbours
- */					
-int get_field(	vector<int> sigma,
-				int k,
-				int n,
-				bool wrapped = false);
-				
-/**
- *  Enumerate energy levels
+ *   This class is reposnsible for enumerating states and calculating Energy and Magnetization.
  */
-void enumerate_ising(	int n,
-						ofstream &out,
+class IsingEnumerator {
+		
+	public:
+		/**
+		 *  Compute molecular field at location k,, i.e.
+		 *  the total contribution of all neighbours
+		 */					
+		int get_field(	vector<int> sigma,
+						int k,
+						int n,
+						bool wrapped = false);
+						
+		/**
+		 *  Enumerate energy levels
+		 */
+		void enumerate_ising(	int n,
+						// ofstream &out,
 						bool wrapped = false,
 						bool progress = false);
+						
+		void output(ofstream &out);
+		
+		map<pair<int,int>, long long int> Ns;
 
-
-
+	
+};
 #endif //_ENUMERATE_ISING_HPP_

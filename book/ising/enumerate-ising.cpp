@@ -15,8 +15,6 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
  
-#include <iostream>
-#include <map>
 #include <utility>
 #include <getopt.h>
 #include <iostream>
@@ -45,8 +43,8 @@ int get_field(vector<int> sigma,int k,int n,bool wrapped){
 	return h;
 }
 
-void enumerate_ising(int n,ofstream &out,bool wrapped,bool progress){
-	map<pair<int,int>, long long int> Ns;
+void IsingEnumerator::enumerate_ising(int n,/*ofstream &out,*/bool wrapped,bool progress){
+
 	const int N = n*n;
 
 	Gray gray(N,progress ? 100000000LL : 0LL);
@@ -61,9 +59,9 @@ void enumerate_ising(int n,ofstream &out,bool wrapped,bool progress){
 	pair<int,int> key(E,M);
 	Ns[key] = 2;
  	while (true) {
-		int k = gray.next();
+		const int k = gray.next();
 		if (k==-1) break;
-		int h      = get_field(sigma,k,n,wrapped);
+		const int h = get_field(sigma,k,n,wrapped);
 		E          += 2* sigma[k-1]*h;
 		sigma[k-1] *= -1;
 		M          += 2*sigma[k - 1]; 
@@ -71,7 +69,9 @@ void enumerate_ising(int n,ofstream &out,bool wrapped,bool progress){
 		if (Ns.find(key)==Ns.end()) Ns[key]=0;
 		Ns[key]    += 2;
 	}
-	
+}
+
+void IsingEnumerator::output(ofstream &out){	
 	out << "E,M,N" << endl;
 	for (map<pair<int,int>, long long int>::iterator it = Ns.begin();it!=Ns.end();it++){
 		const pair<int,int> key = it->first;
@@ -80,6 +80,22 @@ void enumerate_ising(int n,ofstream &out,bool wrapped,bool progress){
 		out << E << ", " << M<< ", " << it->second<< endl;
 	}
 }
+
+/**
+ *  Compute molecular field at location k, i.e.
+ *  the total contribution of all neighbours
+ */
+int IsingEnumerator::get_field(vector<int> sigma,int k,int n,bool wrapped){
+	int h=0;
+	for (int i=1;i<=4;i++) {
+		const int j = nbr(k,i,n,wrapped);
+		if (j>-1)
+			h+=sigma[j-1];
+	}
+
+	return h;
+}
+
 
 
 

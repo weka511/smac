@@ -19,33 +19,44 @@
  
  using namespace std;
  
-#include "catch.hpp"
+ #include "catch.hpp"
 #include "enumerate-ising.hpp"
 
 
 TEST_CASE( "Enumerate Ising Tests", "[eit]" ) {
 	
 	SECTION("Test get_field: wrapped"){
+		IsingEnumerator enumerator;
 		vector<int> sigma;
 		for (int i=0;i<9;i++)
 			sigma.push_back(-1);
 	
-		REQUIRE(get_field(sigma,5,3,true) == -4);
-		REQUIRE(get_field(sigma,4,3,true) == -4);
+		REQUIRE(enumerator.get_field(sigma,5,3,true) == -4);
+		REQUIRE(enumerator.get_field(sigma,4,3,true) == -4);
 		sigma[1] = +1;
-		REQUIRE(get_field(sigma,5,3,true) == -2);
-		REQUIRE(get_field(sigma,4,3,true) == -4);
+		REQUIRE(enumerator.get_field(sigma,5,3,true) == -2);
+		REQUIRE(enumerator.get_field(sigma,4,3,true) == -4);
 	}
 	
 	SECTION("Test get_field: not wrapped"){
+		IsingEnumerator enumerator;
 		vector<int> sigma;
 		for (int i=0;i<9;i++)
 			sigma.push_back(-1);
 	
-		REQUIRE(get_field(sigma,5,3,false) == -4);
-		REQUIRE(get_field(sigma,4,3,false) == -3);
+		REQUIRE(enumerator.get_field(sigma,5,3,false) == -4);
+		REQUIRE(enumerator.get_field(sigma,4,3,false) == -3);
 		sigma[1] = +1;
 		sigma[5] = +1;
-		REQUIRE(get_field(sigma,5,3,false) == 0);
+		REQUIRE(enumerator.get_field(sigma,5,3,false) == 0);
+	}
+	
+	SECTION("Test enumeration"){
+		IsingEnumerator enumerator;
+		enumerator.enumerate_ising(4,true,false);
+		REQUIRE(enumerator.Ns[make_pair(8,0)] ==  4224);
+		REQUIRE(enumerator.Ns[make_pair(32,0)] ==  4);
+		REQUIRE(enumerator.Ns[make_pair(-32,16)] ==  2);
+		REQUIRE(enumerator.Ns[make_pair(0,4)] ==  5856);
 	}
 }
