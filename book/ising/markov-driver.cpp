@@ -33,11 +33,11 @@ using namespace std;
  */
 int main(int argc, char **argv) {
 	int c;
-	int n = 4;
+	int n = -1;
 	bool wrapped  = false;
 	string path   = "markov-out.txt";
 	int frequency = 0;
-	float beta = 2.0;
+	float beta = -1;
 	int iterations = 100000;
 	int nruns = 1;
 
@@ -69,9 +69,13 @@ int main(int argc, char **argv) {
 				exit(1);
 		}
 
-	std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations <<",nruns="<< nruns<<std::endl;
-	
-	execute(path, n, wrapped,  beta, iterations, nruns, frequency );
+	if (n>0 && beta>0){
+		std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations <<",nruns="<< nruns<<std::endl;
+		execute(path, n, wrapped,  beta, iterations, nruns, frequency );
+	} else{
+		std:cout<< "Both n and beta need to be specified" << std::endl;
+		exit(1);
+	}
 }
 
 int execute(const string path, const int n, const bool wrapped, const float beta, const int iterations, const int nruns, const int frequency ){
