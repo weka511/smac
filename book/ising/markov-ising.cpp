@@ -54,18 +54,16 @@ void MarkovIsing::reset(const int run) {
 		E += sigma[i] * get_field(i,sigma);
 	
 	assert(E%4==0);
-	Energies.increment(E,run);
 
 	M = 0;
 	for (int i=0;i<N;i++)
 		M += sigma[i];
-	Magnetization.increment(M,run);
 }	
 
 /**
  * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
  */	
-bool MarkovIsing::step(const int run) {
+bool MarkovIsing::step(const int run, const bool has_burned_in) {
 
 	const int k = d(mt);
 	const int h = get_field(k,sigma);
@@ -78,8 +76,10 @@ bool MarkovIsing::step(const int run) {
 		M += 2*sigma[k];
 	}
 	
-	Energies.increment(E,run);
-	Magnetization.increment(M,run);
+	if (has_burned_in) {
+		Energies.increment(E,run);
+		Magnetization.increment(M,run);
+	}
 
 	return accepted;
 }
@@ -87,15 +87,15 @@ bool MarkovIsing::step(const int run) {
 /**
  * Execute the entirety of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
  */	
-void MarkovIsing::run(int max_steps, int frequency, const int run) {
+void MarkovIsing::run(int max_steps, int frequency, const int run,const int burn_in) {
 	auto start = std::chrono::steady_clock::now();
 	reset(run);
 	int total_accepted = 0;
 	
-	for (int i=0;i<max_steps;i++){
+	for (int i=0;i<max_steps+burn_in;i++){
 		if (frequency > 0 && i > 0 && i%frequency ==0)
 			std::cout << i << std::endl;
-		if (step(run))
+		if (step(run,i>burn_in))
 			total_accepted++;
 	}
 	auto end = std::chrono::steady_clock::now();

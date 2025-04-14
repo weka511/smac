@@ -41,8 +41,8 @@ int main(int argc, char **argv) {
 	float beta = -1;
 	int iterations = 100000;
 	int nruns = 1;
-
-	while ((c = getopt (argc, argv, "n:wo:f:b:i:r:")) != -1)
+	int burn_in = -1;
+	while ((c = getopt (argc, argv, "n:wo:f:b:i:r:u:")) != -1)
 		switch(c) {
 			case 'n':
 				n = atoi(optarg);
@@ -65,28 +65,42 @@ int main(int argc, char **argv) {
 			case 'r':
 				nruns = atoi(optarg);
 				break;
+			case 'u':
+				burn_in = atoi(optarg);
+				break;
 			default: 
 				std::cout << "Unrecognized option: " << char(c) << std::endl;
 				exit(1);
 		}
 
+	if (burn_in<0)
+		burn_in = iterations/10;
+	
 	if (n>0 && beta>0){
-		std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" <<iterations <<", nruns="<< nruns<<std::endl;
-		execute(path, n, wrapped,  beta, iterations, nruns, frequency );
+		std::cout <<"n="<<n << ", periodic=" << wrapped <<", beta="<< beta<<", iterations=" 
+				<<iterations <<", nruns="<< nruns << ",burn in="<< burn_in<<std::endl;
+		execute(path, n, wrapped,  beta, iterations, nruns, frequency,burn_in);
 	} else{
 		std:cout<< "Both n and beta need to be specified" << std::endl;
 		exit(1);
 	}
 }
 
-int execute(const string path, const int n, const bool wrapped, const float beta, const int iterations, const int nruns, const int frequency ){
+int execute(const string path,
+			const int n,
+			const bool wrapped,
+			const float beta,
+			const int iterations,
+			const int nruns,
+			const int frequency,
+			const int burn_in){
 	auto start = std::chrono::steady_clock::now();
 	ofstream out;
 	out.open (path);
 	MarkovIsing markov(n,n,wrapped,out,beta,nruns);
 	
 	for (int i=0;i<nruns;i++) 
-		markov.run(iterations,frequency,i);
+		markov.run(iterations,frequency,i,burn_in);
 		
 	markov.dump(out);
 	out.close();

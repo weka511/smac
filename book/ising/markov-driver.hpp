@@ -23,7 +23,14 @@
 
 using namespace std;
 
- int  execute(const string path, const int n, const bool wrapped, const float beta, const int iterations, const int nruns, const int frequency );
+ int  execute(const string path, 
+				const int n,
+				const bool wrapped,
+				const float beta,
+				const int iterations,
+				const int nruns,
+				const int frequency,
+				const int burn_in=1000 );
  
  #endif //_MARKOV_DRIVER_HPP_
  
