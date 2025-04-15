@@ -91,9 +91,14 @@ class MarkovIsing {
 		std::uniform_int_distribution<int> d;
 		
 		/**
-		 * This method is used to initialize the spins, E, M, and the counts at the start of each run.
+		 * This method is used to randomize the spins at the start of each run.
 		 */
-		void reset(const int run=1);
+		void randomize_spins();
+		
+		/**
+		 * This method is used to initialize E, M, and their counts at the start of each run.
+		 */
+		void resetEM(const int run=1);
 		
 		/**
 		 * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model.
@@ -105,6 +110,11 @@ class MarkovIsing {
 		bool step(const int run,const bool has_burned_in);
 		
 	public:
+		/**
+		 * Initialize neighbour table and the data storage for energy and magnetization.  
+		 * Cache the exp(-beta*deltaE) and create a vector of spins (all zero). The spins
+		 * will be set correctly at the start of each run.
+		 */
 		MarkovIsing(const int m,int const n,const bool wrapped, ofstream &out, const float beta, const int nruns);
 		
 	    /**

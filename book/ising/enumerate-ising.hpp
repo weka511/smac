@@ -23,7 +23,7 @@
 
 
 /**
- *   This class is reposnsible for enumerating states and calculating Energy and Magnetization.
+ *   This class is responsible for enumerating states and calculating Energy and Magnetization.
  */
 class IsingEnumerator {
 		
@@ -32,20 +32,25 @@ class IsingEnumerator {
 		 *  Compute molecular field at location k,, i.e.
 		 *  the total contribution of all neighbours
 		 */					
-		int get_field(	vector<int> sigma,
-						int k,
-						int n,
-						bool wrapped);
+		int get_field(	const vector<int> sigma,
+						const int k,
+						const int n,
+						const bool wrapped);
 						
-		/**
+		/** 
 		 *  Enumerate energy levels
 		 */
-		void enumerate_ising(	int n,
-						bool wrapped ,
-						bool progress );
-						
+		void enumerate_ising(const int n,
+							const bool wrapped ,
+							const bool progress );
+		/**
+		 *  Output E, M, and their count
+		 */				
 		void output(ofstream &out);
 		
+		/**
+		 * Used to store the count of each E and M.
+		 */
 		map<pair<int,int>, long long int> Ns;
 
 	

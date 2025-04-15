@@ -21,7 +21,6 @@
 #include <fstream>
 #include <string>
 
-
 using namespace std;
 
 #include "gray.hpp"
@@ -43,7 +42,10 @@ int get_field(vector<int> sigma,int k,int n,bool wrapped){
 	return h;
 }
 
-void IsingEnumerator::enumerate_ising(int n,/*ofstream &out,*/bool wrapped,bool progress){
+/**
+ *  Enumerate energy levels
+ */
+void IsingEnumerator::enumerate_ising(const int n, const bool wrapped, const bool progress){
 
 	const int N = n*n;
 
@@ -71,6 +73,9 @@ void IsingEnumerator::enumerate_ising(int n,/*ofstream &out,*/bool wrapped,bool 
 	}
 }
 
+/**
+ *  Output E, M, and their count
+ */
 void IsingEnumerator::output(ofstream &out){	
 	out << "E,M,N" << endl;
 	for (map<pair<int,int>, long long int>::iterator it = Ns.begin();it!=Ns.end();it++){
@@ -85,7 +90,7 @@ void IsingEnumerator::output(ofstream &out){
  *  Compute molecular field at location k, i.e.
  *  the total contribution of all neighbours
  */
-int IsingEnumerator::get_field(vector<int> sigma,int k,int n,bool wrapped){
+int IsingEnumerator::get_field(const vector<int> sigma, const int k, const int n, const bool wrapped){
 	int h=0;
 	for (int i=1;i<=4;i++) {
 		const int j = nbr(k,i,n,wrapped);

@@ -26,6 +26,11 @@
 
 using namespace std;
 
+/**
+ * Initialize neighbour table and the data storage for energy and magnetization.  
+ * Cache the exp(-beta*deltaE) and create a vector of spins (all zero). The spins
+ * will be set correctly at the start of each run.
+ */
 MarkovIsing::MarkovIsing(const int m,const int n,const bool wrapped, ofstream &out, const float beta, const int nruns) :
 			out(out), beta(beta), N(m*n), dt(0,1), d(0,m*n-1) {
 	neighbours.prepare(m,n,wrapped);
@@ -42,18 +47,23 @@ MarkovIsing::MarkovIsing(const int m,const int n,const bool wrapped, ofstream &o
 
 
 /**
- * This method is used to initialize the spins, E, M, and the counts at the start of each run.
+ * This method is used to randomize the spins at the start of each run.
  */
-void MarkovIsing::reset(const int run) {
+void MarkovIsing::randomize_spins() {
 	std::uniform_int_distribution<int> bits(0,1);
 	for (int i=0;i<N;i++) 
 		sigma[i] = 2*bits(mt) - 1;
+}
 
+/**
+ * This method is used to initialize E, M, and their counts at the start of each run.
+ */
+void MarkovIsing::resetEM(const int run) {
 	E = 0;
 	for (int i=0;i<N;i++)
 		E += sigma[i] * get_field(i,sigma);
 	
-	assert(E%4==0);
+	assert(E%4 == 0);
 
 	M = 0;
 	for (int i=0;i<N;i++)
@@ -74,7 +84,7 @@ bool MarkovIsing::step(const int run, const bool has_burned_in) {
 	const int deltaE = 2 * h * sigma[k];
 	const bool accepted = deltaE <= 0 or dt(mt) < Upsilon[deltaE/2-1];
 	
-	if (accepted){
+	if (accepted){     // Move to new state
 		sigma[k] *= -1;
 		E += deltaE;
 		M += 2*sigma[k];
@@ -93,7 +103,8 @@ bool MarkovIsing::step(const int run, const bool has_burned_in) {
  */	
 void MarkovIsing::run(int max_steps, int frequency, const int run,const int burn_in) {
 	auto start = std::chrono::steady_clock::now();
-	reset(run);
+	randomize_spins();
+	resetEM(run);
 	int total_accepted = 0;
 	
 	for (int i=0;i<max_steps+burn_in;i++){

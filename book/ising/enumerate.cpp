@@ -27,8 +27,9 @@ using namespace std;
 
 
 /**
- * Main program. 
+ * Main program: enumerate states and calculate Energy and Magnetization.
  */
+ 
 int main(int argc, char **argv) {
 	int c;
 	int n         = 4;
