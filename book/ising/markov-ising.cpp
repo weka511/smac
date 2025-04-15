@@ -61,7 +61,11 @@ void MarkovIsing::reset(const int run) {
 }	
 
 /**
- * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
+ * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model.
+ * If burned in, store energy and momentu acceptem.
+ *
+ * Returns true iff we have burned in, and the proposed step has been accepted,
+ * so caller can calculate accpetance. 
  */	
 bool MarkovIsing::step(const int run, const bool has_burned_in) {
 
@@ -81,7 +85,7 @@ bool MarkovIsing::step(const int run, const bool has_burned_in) {
 		Magnetization.increment(M,run);
 	}
 
-	return accepted;
+	return has_burned_in and accepted;
 }
 
 /**

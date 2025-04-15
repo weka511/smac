@@ -95,7 +95,11 @@ class MarkovIsing {
 		void reset(const int run=1);
 		
 		/**
-		 * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
+		 * Execute one step of Algorithm 5.7, Local Metropolis algorithm for the Ising Model.
+		 * If burned in, store energy and momentu acceptem.
+		 *
+		 * Returns true iff we have burned in, and the proposed step has been accepted,
+		 * so caller can calculate accpetance. 
 		 */	
 		bool step(const int run,const bool has_burned_in);
 		
