@@ -28,7 +28,7 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 	SECTION("Test MarkovIsing.get_field()"){
 		ofstream out;
 		out.open ("/dev/null");
-		MarkovIsing markov(3,3,false,out);
+		MarkovIsing markov(3,3,false,out,2.0,1);
 		vector<int> spins = {-1, -1, -1,
 							-1, -1, -1,
 							-1, -1, -1
@@ -46,7 +46,7 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 	SECTION("Test MarkovIsing.get_field()1"){
 		ofstream out;
 		out.open ("/dev/null");
-		MarkovIsing markov(3,3,false,out);
+		MarkovIsing markov(3,3,false,out,2.0,1);
 		vector<int> spins = {-1, +1, -1,
 							+1, -1, +1,
 							-1, +1, -1

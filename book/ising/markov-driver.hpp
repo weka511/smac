@@ -30,7 +30,7 @@ using namespace std;
 				const int iterations,
 				const int nruns,
 				const int frequency,
-				const int burn_in=1000 );
+				const int burn_in );
  
  #endif //_MARKOV_DRIVER_HPP_
  

@@ -72,7 +72,7 @@ class Field: public vector<pair<int,int>>{
 		/**
 		 * Used to increment Energies or Magnetization
 		 */
-		void increment(const int value,const int run=0);
+		void increment(const int value,const int run);
 		
 		/**
 		 * Used to output data

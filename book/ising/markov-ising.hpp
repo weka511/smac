@@ -87,6 +87,7 @@ class MarkovIsing {
 							};
 							
 		std::uniform_real_distribution<float> dt;
+		
 		std::uniform_int_distribution<int> d;
 		
 		/**
@@ -104,12 +105,12 @@ class MarkovIsing {
 		bool step(const int run,const bool has_burned_in);
 		
 	public:
-		MarkovIsing(const int m,int const n,const bool wrapped, ofstream &out, const float beta=2.0, const int nruns=1);
+		MarkovIsing(const int m,int const n,const bool wrapped, ofstream &out, const float beta, const int nruns);
 		
 	    /**
 		 * Execute the entirety of Algorithm 5.7, Local Metropolis algorithm for the Ising Model,
 		 */	
-		void run(int max_steps=100000, int frequency=0, const int run=1,const int burn_in=1000);
+		void run(int max_steps, int frequency, const int run,const int burn_in);
 
 		/**
 		 * Calculate field at a particular site

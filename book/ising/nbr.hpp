@@ -32,7 +32,7 @@ using namespace std;
  int nbr(	const int cell,
 			const int seq,
 			const int n,
-			bool wrapped=false) ;
+			bool wrapped) ;
 				
 	
  /**
@@ -52,7 +52,7 @@ using namespace std;
 	
 		void prepare(const int m,
 					const int n,
-					bool wrapped=false);
+					bool wrapped);
 					
 		int get_neighbour(int i,int j) {return neighbours[i][j];}
 		
