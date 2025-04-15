@@ -78,6 +78,8 @@ class Field: public vector<pair<int,int>>{
 		 * Used to output data
 		 */
 		void dump(ofstream & out,std::string header);
+		
+		int get_count(const int value, const int run);
 };
 
 #endif //_MARKOV_FIELD_HPP_

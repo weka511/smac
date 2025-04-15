@@ -24,15 +24,20 @@ using namespace std;
 
 void Field::increment(const int value,const int run){
 	const int k = (value - min)/step;
-	if (k < 0 or k >= container.size()){
-		std::cout << "k="<<value <<",min="<< min <<",max="<<max<<",step="<<step<<std::endl;
-		return;
-	}
 	assert (0 <=k and k<container.size());
 	const int i = container[k].first;
 	row r = container[k].second;
 	r[run]++;
 	container[k] = make_pair(i,r);
+}
+
+int Field::get_count(const int value, const int run) {
+	const int k = (value - min)/step;
+	assert (0 <=k and k<container.size());
+	const int i = container[k].first;
+	assert(i == value);
+	row r = container[k].second;
+	return r[run];
 }
 
 void Field::prepare(const int min, const int max, const int step, const int width){
@@ -58,3 +63,4 @@ void Field::dump(ofstream & out,std::string header){
 		out  << std::endl;	
 	}
 }
+

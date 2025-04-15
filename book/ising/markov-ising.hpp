@@ -143,6 +143,8 @@ class MarkovIsing {
 		 */
 		float get_upsilon(int i) {return Upsilon[i];};
 		
+		int get_count(const int energy, const int run);
+		
 };
 
 #endif //_MARKOV_ISING_HPP_

@@ -143,4 +143,8 @@ void MarkovIsing::dump(ofstream & out) {
 	Magnetization.dump(out,"M,N");
 }
 
+int MarkovIsing::get_count(const int energy, const int run){
+	return Energies.get_count(energy, run);
+}
+
 
