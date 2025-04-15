@@ -37,7 +37,7 @@ class Gray {
 	
   public:
 	Gray(const int n, 
-		const signed long long frequency=0LL):
+		const signed long long frequency):
 		_n(n),_i(0),_max(1),_frequency(frequency) {
 		for (int i=0;i<n;i++)
 			_max*=2;

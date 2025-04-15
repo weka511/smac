@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2019 Greenweaves Software Limited
+ * Copyright (C) 2019-2025 Greenweaves Software Limited
  *
  * This is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  *
- * This file tests the grey code class
+ * This file tests the Gray code class
  */
  
 #include "catch.hpp"
@@ -23,7 +23,7 @@
 TEST_CASE( "Gray Tests", "[grey]" ) {
 	
 	SECTION("Iterate Gray"){
-		Gray gray(4);
+		Gray gray(4,0LL);
 		REQUIRE(gray.next()==1);
 		REQUIRE(gray.next()==2);
 		REQUIRE(gray.next()==1);
