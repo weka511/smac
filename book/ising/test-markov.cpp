@@ -65,4 +65,14 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		REQUIRE(markov.get_upsilon(2) == Approx(0.22313016).epsilon(0.0000001) );
 		REQUIRE(markov.get_upsilon(3) == Approx(0.13533528).epsilon(0.0000001) );
 	}
+	
+	SECTION("Test against numeration"){
+		ofstream out;
+		out.open ("/dev/null");
+		const double beta = 0.25;
+		MarkovIsing markov(4,4,true,out,beta,1);
+		markov.run(10000000,0,0,1000000);
+		std::cout << markov.get_count(0,0) << std::endl;;
+		//TODO load enumeration data
+	}
 }
