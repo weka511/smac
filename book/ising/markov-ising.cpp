@@ -81,9 +81,10 @@ bool MarkovIsing::step(const int run, const bool has_burned_in) {
 
 	const int k = d(mt);
 	const int h = get_field(k,sigma);
+	assert (h%2==0);
+	assert((-2*neighbours.get_d() <= h) && (h <= 2*neighbours.get_d()));
 	const int deltaE = 2 * h * sigma[k];
-	const bool accepted = deltaE <= 0 or dt(mt) < Upsilon[deltaE/2-1];
-	
+	const bool accepted = (deltaE <= 0) or (dt(mt) < Upsilon[deltaE/2-1]); // Upsilon = exp(-2 beta), exp(-4 beta), ...
 	if (accepted){     // Move to new state
 		sigma[k] *= -1;
 		E += deltaE;
@@ -130,6 +131,7 @@ int MarkovIsing::get_field(int i,vector<int> spins) {
 		if (ij_neighbour > -1)
 			h += spins[ij_neighbour];
 	}
+	
 	return h;
 }
 

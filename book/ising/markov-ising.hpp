@@ -69,6 +69,12 @@ class MarkovIsing {
 		
 		/**
 		 * Cache relevant values of exp(-beta*deltaE)
+		 *
+		 * Upsilon[0] = exp(-2 beta)
+		 * Upsilon[1] = exp(-4 beta)
+		 ...
+	  	 * Upsilon[2d-1] = exp(-4 d beta)
+		 *
 		 */
 		vector<float> Upsilon; 
 		
