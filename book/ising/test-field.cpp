@@ -32,7 +32,9 @@ TEST_CASE( "Markov Field", "[field]" ) {
 			row counts = i->second;
 			REQUIRE(field.all_zero(counts));
 		}
+		REQUIRE(field.get_count(0,0) == 0);
 		field.increment(-12,2);
+		REQUIRE(field.get_count(12,2) == 0);
 		int j = 0;
 		for (vector<CountedData>::const_iterator i = field.container.begin(); i < field.container.end(); i++) {
 			row counts = i->second;
