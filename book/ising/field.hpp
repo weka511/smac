@@ -81,7 +81,9 @@ class Field: public vector<pair<int,int>>{
 		int get_count(const int value, const int run);
 		
 		/**
-		 * Used to output data
+		 * Used to output data.
+		 *
+		 * Returns: Total of all counts
 		 */
 		int dump(ofstream & out,std::string header);
 		
