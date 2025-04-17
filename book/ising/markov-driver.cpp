@@ -102,8 +102,9 @@ int execute(const string path,
 	for (int i=0;i<nruns;i++) 
 		markov.run(iterations,frequency,i,burn_in);
 		
-	markov.dump(out);
+	markov.dump();
 	out.close();
+	
 	auto end = std::chrono::steady_clock::now();
 	int64_t elapsed = chrono::duration_cast<chrono::seconds>(end - start).count();
 	std:cout<< "Elapsed time="<<elapsed <<" seconds, average="<< ((float)elapsed)/nruns << " sec." << std::endl;

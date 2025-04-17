@@ -64,6 +64,7 @@ class Field: public vector<pair<int,int>>{
 		}
 		
 		vector<CountedData> container;
+		
 	    /**
 		 * Used to initialize data storage to all zeros
 		 */
@@ -75,11 +76,15 @@ class Field: public vector<pair<int,int>>{
 		void increment(const int value,const int run);
 		
 		/**
+		 * Accessor to retrieve count for a specified value
+		 */
+		int get_count(const int value, const int run);
+		
+		/**
 		 * Used to output data
 		 */
-		void dump(ofstream & out,std::string header);
+		int dump(ofstream & out,std::string header);
 		
-		int get_count(const int value, const int run);
 };
 
 #endif //_MARKOV_FIELD_HPP_

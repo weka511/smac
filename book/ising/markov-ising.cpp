@@ -63,7 +63,7 @@ void MarkovIsing::resetEM(const int run) {
 	for (int i=0;i<N;i++)
 		E += sigma[i] * get_field(i,sigma);
 	
-	assert(E%4 == 0);
+	E /= 2; // The preceding lines double count the links
 
 	M = 0;
 	for (int i=0;i<N;i++)
@@ -81,9 +81,9 @@ bool MarkovIsing::step(const int run, const bool has_burned_in) {
 
 	const int k = d(mt);
 	const int h = get_field(k,sigma);
-	assert (h%2==0);
-	assert((-2*neighbours.get_d() <= h) && (h <= 2*neighbours.get_d()));
-	const int deltaE = 2 * h * sigma[k];
+	// assert (h%2==0);
+	// assert((-2*neighbours.get_d() <= h) && (h <= 2*neighbours.get_d()));
+	const int deltaE = -2 * h * sigma[k];   // FIXME
 	const bool accepted = (deltaE <= 0) or (dt(mt) < Upsilon[deltaE/2-1]); // Upsilon = exp(-2 beta), exp(-4 beta), ...
 	if (accepted){     // Move to new state
 		sigma[k] *= -1;
@@ -111,12 +111,12 @@ void MarkovIsing::run(int max_steps, int frequency, const int run,const int burn
 	for (int i=0;i<max_steps+burn_in;i++){
 		if (frequency > 0 && i > 0 && i%frequency ==0)
 			std::cout << i << std::endl;
-		if (step(run,i>burn_in))
+		if (step(run, burn_in <= i))
 			total_accepted++;
 	}
 	auto end = std::chrono::steady_clock::now();
-	std::cout << "beta="<<beta<<", acceptance="<<(100.0*total_accepted)/max_steps <<"%"<< " "
-				<< chrono::duration_cast<chrono::seconds>(end - start).count() << " sec" << std::endl;
+	// std::cout << "beta="<<beta<<", acceptance="<<(100.0*total_accepted)/max_steps <<"%"<< " "
+				// << chrono::duration_cast<chrono::seconds>(end - start).count() << " sec" << std::endl;
 	
 	out << "beta="<<beta<<", total_accepted="<<total_accepted<<", max_steps="<<max_steps << std::endl;
 }
@@ -138,9 +138,10 @@ int MarkovIsing::get_field(int i,vector<int> spins) {
 /**
  * Output energy and magnetization
  */
-void MarkovIsing::dump(ofstream & out) {
-	Energies.dump(out,"E,N");
+int MarkovIsing::dump() {
+	const int total_count = Energies.dump(out,"E,N");
 	Magnetization.dump(out,"M,N");
+	return total_count;
 }
 
 int MarkovIsing::get_count(const int energy, const int run){

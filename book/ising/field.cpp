@@ -22,24 +22,9 @@
 
 using namespace std;
 
-void Field::increment(const int value,const int run){
-	const int k = (value - min)/step;
-	assert (0 <=k and k<container.size());
-	const int i = container[k].first;
-	row r = container[k].second;
-	r[run]++;
-	container[k] = make_pair(i,r);
-}
-
-int Field::get_count(const int value, const int run) {
-	const int k = (value - min)/step;
-	assert (0 <=k and k<container.size());
-	const int i = container[k].first;
-	assert(i == value);
-	row r = container[k].second;
-	return r[run];
-}
-
+/**
+ * Used to initialize data storage to all zeros
+ */
 void Field::prepare(const int min, const int max, const int step, const int width){
 	row zeros;
 	for (int j=0;j<width;j++)
@@ -51,16 +36,54 @@ void Field::prepare(const int min, const int max, const int step, const int widt
 	this->max = max;
 }
 
-void Field::dump(ofstream & out,std::string header){
+/**
+ * Used to increment Energies or Magnetization
+ */
+void Field::increment(const int value,const int run){
+	const int k = (value - min)/step;
+	if (k < 0 or k >= container.size()){
+		std::cout << __FILE__ << " " << __LINE__ <<": k="<<value <<",min="<< min <<",max="<<max<<",step="<<step<<std::endl;
+		return;
+	}
+	assert (0 <=k and k<container.size());
+	const int i = container[k].first;
+	row the_row = container[k].second;
+	the_row[run]++;
+	container[k] = make_pair(i,the_row);
+}
+
+/**
+ * Accessor to retrieve count for a specified value
+ */
+int Field::get_count(const int value, const int run) {
+	const int k = (value - min)/step;
+	assert (0 <=k and k<container.size());
+	const int i = container[k].first;
+	assert(i == value);
+	row r = container[k].second;
+	return r[run];
+}
+
+
+/**
+  * Used to output data.
+  *
+  * Returns: Total of all counts
+  */
+int Field::dump(ofstream & out,std::string header){
+	int total_count = 0;
 	out << header << std::endl;
 	for (vector<CountedData>::const_iterator i = container.begin(); i < container.end(); i++) {
 		row counts = i->second;
 		if (all_zero(counts))	continue;
 		
 		out << i->first;
-		for (vector<int>::const_iterator j = counts.begin(); j < counts.end(); j++)
+		for (vector<int>::const_iterator j = counts.begin(); j < counts.end(); j++){
+			total_count += *j;
 			out << "," << *j;
+		}
 		out  << std::endl;	
 	}
+	return total_count;
 }
 

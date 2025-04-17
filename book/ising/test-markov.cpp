@@ -23,6 +23,12 @@
 #include "catch.hpp"
 #include "markov-ising.hpp"
 
+float get_mean_count(MarkovIsing &markov, const int value, const int nruns) {
+	float raw_count = 0;
+	for (int i=0;i<nruns;i++)
+		raw_count += markov.get_count(value,i);
+	return raw_count / nruns;
+}
 TEST_CASE( "Markov Tests", "[markov]" ) {
 	
 	SECTION("Test MarkovIsing.get_field()"){
@@ -66,13 +72,27 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		REQUIRE(markov.get_upsilon(3) == Approx(0.13533528).epsilon(0.0000001) );
 	}
 	
-	SECTION("Test against numeration"){
+	SECTION("Test against enumeration"){
+		const int nsteps = 1000000;
+		const int nruns = 100;
+		const int nburn = 100000;
 		ofstream out;
-		out.open ("/dev/null");
-		const double beta = 0.25;
-		MarkovIsing markov(4,4,true,out,beta,1);
-		markov.run(10000000,0,0,1000000);
-		std::cout << markov.get_count(0,0) << std::endl;;
+		out.open ("foo.txt");
+		const double beta = 0.;
+		MarkovIsing markov(4,4,true,out,beta,nruns);
+		for (int i=0;i<nruns;i++)
+			markov.run(nsteps,0,i,nburn);
+		// markov.dump();
+		REQUIRE(markov.dump() == nsteps*nruns);
+		const float raw_count4n = 65536 *get_mean_count(markov,-4,nruns)/nsteps;
+		const float raw_count0 = 65536 *get_mean_count(markov,0,nruns)/nsteps;
+		const float raw_count4 = 65536 *get_mean_count(markov,4,nruns)/nsteps;
+		std::cout <<  raw_count4n <<", " <<raw_count0 << ", " << raw_count4<<std::endl;
+		REQUIRE(get_mean_count(markov,-4,nruns)/nsteps == Approx(13568/65536.).epsilon(100.0/65536) );
+		REQUIRE(get_mean_count(markov,0,nruns)/nsteps == Approx(20524/65536.).epsilon(100.0/65536) );
+		REQUIRE(get_mean_count(markov,4,nruns)/nsteps == Approx(13568/65536.).epsilon(100.0/65536) );
+		// const float scaled_count = 65536 * raw_count/nsteps;
+;
 		//TODO load enumeration data
 	}
 }

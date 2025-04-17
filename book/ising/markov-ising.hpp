@@ -136,7 +136,7 @@ class MarkovIsing {
 		/**
 		 * Output energy and magnetization
 		 */
-		void dump(ofstream & out);
+		int dump();
 		
 		/**
 		 * Access cached values of exp(-beta*deltaE)
