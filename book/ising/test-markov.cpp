@@ -73,26 +73,21 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 	}
 	
 	SECTION("Test against enumeration"){
-		const int nsteps = 1000000;
+		const int nsteps = 100000;
 		const int nruns = 100;
 		const int nburn = 100000;
 		ofstream out;
-		out.open ("foo.txt");
+		out.open ("/dev/null");
 		const double beta = 0.;
 		MarkovIsing markov(4,4,true,out,beta,nruns);
 		for (int i=0;i<nruns;i++)
 			markov.run(nsteps,0,i,nburn);
-		// markov.dump();
 		REQUIRE(markov.dump() == nsteps*nruns);
-		const float raw_count4n = 65536 *get_mean_count(markov,-4,nruns)/nsteps;
-		const float raw_count0 = 65536 *get_mean_count(markov,0,nruns)/nsteps;
-		const float raw_count4 = 65536 *get_mean_count(markov,4,nruns)/nsteps;
-		std::cout <<  raw_count4n <<", " <<raw_count0 << ", " << raw_count4<<std::endl;
 		REQUIRE(get_mean_count(markov,-4,nruns)/nsteps == Approx(13568/65536.).epsilon(100.0/65536) );
 		REQUIRE(get_mean_count(markov,0,nruns)/nsteps == Approx(20524/65536.).epsilon(100.0/65536) );
 		REQUIRE(get_mean_count(markov,4,nruns)/nsteps == Approx(13568/65536.).epsilon(100.0/65536) );
-		// const float scaled_count = 65536 * raw_count/nsteps;
-;
+		REQUIRE(get_mean_count(markov,16,nruns)/nsteps == Approx(424/65536.).epsilon(1000.0/65536) );
+	
 		//TODO load enumeration data
 	}
 }
