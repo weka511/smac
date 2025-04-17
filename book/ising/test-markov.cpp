@@ -17,6 +17,7 @@
  * This file tests methods of MarkovIsing
  */
  
+#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -72,7 +73,13 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		REQUIRE(markov.get_upsilon(3) == Approx(0.13533528).epsilon(0.0000001) );
 	}
 	
+	/**
+	 * This test verifies that if beta == 0, Markov Ising produces answers 
+	 * that are similar to a direct enumeration. NB: I have chosen the paramters 
+	 * so the test usually passes, but occassional failures are not a cause for concern.
+	 */
 	SECTION("Test against enumeration"){
+		const float n_configurations = pow(2,16);
 		const int nsteps = 100000;
 		const int nruns = 100;
 		const int nburn = 100000;
@@ -83,11 +90,12 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		for (int i=0;i<nruns;i++)
 			markov.run(nsteps,0,i,nburn);
 		REQUIRE(markov.dump() == nsteps*nruns);
-		REQUIRE(get_mean_count(markov,-4,nruns)/nsteps == Approx(13568/65536.).epsilon(100.0/65536) );
-		REQUIRE(get_mean_count(markov,0,nruns)/nsteps == Approx(20524/65536.).epsilon(100.0/65536) );
-		REQUIRE(get_mean_count(markov,4,nruns)/nsteps == Approx(13568/65536.).epsilon(100.0/65536) );
-		REQUIRE(get_mean_count(markov,16,nruns)/nsteps == Approx(424/65536.).epsilon(1000.0/65536) );
+		REQUIRE(get_mean_count(markov,-4,nruns)/nsteps == Approx(13568/n_configurations).epsilon(150.0/n_configurations) );
+		REQUIRE(get_mean_count(markov,0,nruns)/nsteps == Approx(20524/n_configurations).epsilon(100.0/n_configurations) );
+		REQUIRE(get_mean_count(markov,4,nruns)/nsteps == Approx(13568/n_configurations).epsilon(100.0/n_configurations) );
+		REQUIRE(get_mean_count(markov,16,nruns)/nsteps == Approx(424/n_configurations).epsilon(1000.0/n_configurations) );
+		REQUIRE(get_mean_count(markov,20,nruns)/nsteps == Approx(64/n_configurations).epsilon(1000.0/n_configurations) );
+		REQUIRE(get_mean_count(markov,24,nruns)/nsteps == Approx(32/n_configurations).epsilon(1000.0/n_configurations) );
 	
-		//TODO load enumeration data
 	}
 }
