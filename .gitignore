@@ -69,4 +69,7 @@ target/
 *.o
 *.stackdump
 
+*.db
+
+
 
