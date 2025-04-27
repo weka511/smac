@@ -96,6 +96,25 @@ TEST_CASE( "Markov Tests", "[markov]" ) {
 		REQUIRE(get_mean_count(markov,16,nruns)/nsteps == Approx(424/n_configurations).epsilon(1000.0/n_configurations) );
 		REQUIRE(get_mean_count(markov,20,nruns)/nsteps == Approx(64/n_configurations).epsilon(1000.0/n_configurations) );
 		REQUIRE(get_mean_count(markov,24,nruns)/nsteps == Approx(32/n_configurations).epsilon(1000.0/n_configurations) );
+	}
 	
+		SECTION("Test against enumeration 6x6"){
+		const float n_configurations = pow(2,36);
+		const int nsteps = 100000;
+		const int nruns = 100;
+		const int nburn = 100000;
+		ofstream out;
+		out.open ("/dev/null");
+		const double beta = 0.;
+		MarkovIsing markov(6,6,true,out,beta,nruns);
+		for (int i=0;i<nruns;i++)
+			markov.run(nsteps,0,i,nburn);
+		REQUIRE(markov.dump() == nsteps*nruns);
+		// REQUIRE(get_mean_count(markov,-4,nruns)/nsteps == Approx(13568/n_configurations).epsilon(150.0/n_configurations) );
+		REQUIRE(get_mean_count(markov,0,nruns)/nsteps == Approx(13172279424/n_configurations).epsilon(0.002) );
+		// REQUIRE(get_mean_count(markov,4,nruns)/nsteps == Approx(13568/n_configurations).epsilon(100.0/n_configurations) );
+		// REQUIRE(get_mean_count(markov,16,nruns)/nsteps == Approx(424/n_configurations).epsilon(1000.0/n_configurations) );
+		// REQUIRE(get_mean_count(markov,20,nruns)/nsteps == Approx(64/n_configurations).epsilon(1000.0/n_configurations) );
+		// REQUIRE(get_mean_count(markov,24,nruns)/nsteps == Approx(32/n_configurations).epsilon(1000.0/n_configurations) );
 	}
 }
