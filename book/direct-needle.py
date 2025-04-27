@@ -24,9 +24,31 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 
-def direct_needle(N,a,b,rnd=np.random.default_rng(None)):
+def direct_needle(N=10000,a=1.0,b=2.0,rng=np.random.default_rng(None)):
     n_hits = 0
+    for _ in range(N):
+        x0 = rng.uniform(0,b/2)
+        phi = rng.uniform(0,np.pi/2)
+        x1 = x0 - (a/2)*np.cos(phi)
+        if x1 < 0:
+            n_hits += 1
     return n_hits
+
+def direct_needle_patch(N=10000,a=1.0,b=2.0,rng=np.random.default_rng(None)):
+    def direct_needle_one_step():
+        x0 = rng.uniform(0,b/2)
+        Upsilon = 2
+        while Upsilon > 1:
+            Delta_x = rng.uniform(0,1)
+            Delta_y = rng.uniform(0,1)
+            Upsilon = np.sqrt(Delta_x**2 + Delta_y**2)
+        x1 = x0 - (a/2) * Delta_x/Upsilon
+        return 1 if x1 < 0 else 0
+    N_hits = 0
+    for _ in range(N):
+        N_hits += direct_needle_one_step()
+    return N_hits
+
 
 
 def parse_arguments():
@@ -59,18 +81,21 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 if __name__=='__main__':
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
-    start  = time()
-    args = parse_arguments()
-    rng = np.random.default_rng(args.seed)
-    fig = figure(figsize=(12,12))
+    x = direct_needle(N=1000000)
+    y = direct_needle_patch(N=1000000)
+    z=0
+    # rc('font',**{'family':'serif','serif':['Palatino']})
+    # rc('text', usetex=True)
+    # start  = time()
+    # args = parse_arguments()
+    # rng = np.random.default_rng(args.seed)
+    # fig = figure(figsize=(12,12))
 
-    fig.savefig(get_file_name(args.out))
-    elapsed = time() - start
-    minutes = int(elapsed/60)
-    seconds = elapsed - 60*minutes
-    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
+    # fig.savefig(get_file_name(args.out))
+    # elapsed = time() - start
+    # minutes = int(elapsed/60)
+    # seconds = elapsed - 60*minutes
+    # print (f'Elapsed Time {minutes} m {seconds:.2f} s')
 
-    if args.show:
-        show()
+    # if args.show:
+        # show()
