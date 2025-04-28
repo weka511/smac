@@ -24,15 +24,29 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 
-def direct_needle(a=1.0,b=2.0,rng=np.random.default_rng(None)):
+def direct_needle(a=1.0,b=1.0,rng=np.random.default_rng(None)):
+    '''
+    Algorithm 1.4 direct needle
+
+    Parameters:
+        a        Length of needle
+        b        Distance between cracks
+    '''
     x0 = rng.uniform(0,b/2)
     phi = rng.uniform(0,np.pi/2)
     x1 = x0 - (a/2)*np.cos(phi)
     return 1 if x1 < 0 else 0
 
-def direct_needle_patch(a=1.0,b=2.0,rng=np.random.default_rng(None)):
+def direct_needle_patch(a=1.0,b=1.0,rng=np.random.default_rng(None)):
+    '''
+    Algorithm 1.4 direct needle (patch)
+
+    Parameters:
+        a        Length of needle
+        b        Distance between cracks
+    '''
     x0 = rng.uniform(0,b/2)
-    Upsilon = 2
+    Upsilon = np.inf
     while Upsilon > 1:
         Delta_x = rng.uniform(0,1)
         Delta_y = rng.uniform(0,1)
@@ -41,17 +55,20 @@ def direct_needle_patch(a=1.0,b=2.0,rng=np.random.default_rng(None)):
     return 1 if x1 < 0 else 0
 
 def driver(N,fn,m=1):
+    '''
+    Use either direct needle or direct needle (patch) to popululate an array with estimates
+    '''
     xs = np.zeros((N))
-    xs[0] =  fn(None)
+    xs[0] =  fn()
     for i in range(1,N):
-        xs[i] = xs[i-1] + fn(None)
+        xs[i] = xs[i-1] + fn()
     return xs[m:]/np.array(range(m,N))
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-a','--a',type=float,default=1.0,help='Length of needle')
-    parser.add_argument('-b','--b',type=float,default=2.0,help='Distance between cracks')
+    parser.add_argument('-b','--b',type=float,default=1.0,help='Distance between cracks')
     parser.add_argument('-N','--N',type=int,default=10000,help='Number of trials')
     parser.add_argument('-m','--m',type=int,default=1000,help='Burn in')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
@@ -86,14 +103,15 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    xs = driver(args.N + args.m,lambda t:direct_needle(a=args.a,b=args.b,rng=rng),m=args.m)
-    ys = driver(args.N + args.m,lambda t:direct_needle_patch(a=args.a,b=args.b,rng=rng),m=args.m)
+    xs = driver(args.N + args.m,lambda :direct_needle(a=args.a,b=args.b,rng=rng),m=args.m)
+    ys = driver(args.N + args.m,lambda :direct_needle_patch(a=args.a,b=args.b,rng=rng),m=args.m)
 
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
-    ax.plot(xs,label='direct needle')
-    ax.plot(ys,label='direct needle patch')
+    ax.plot(xs,label=f'direct needle {2/xs[-1]}')
+    ax.plot(ys,label=f'direct needle (patch) {2/ys[-1]}')
     ax.legend()
+    ax.set_title(r'Buffon Estimates for $\pi$, using ' f'N={args.N}, a={args.a}, b={args.b}')
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
