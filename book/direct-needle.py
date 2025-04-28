@@ -24,36 +24,36 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 
-def direct_needle(N=10000,a=1.0,b=2.0,rng=np.random.default_rng(None)):
-    n_hits = 0
-    for _ in range(N):
-        x0 = rng.uniform(0,b/2)
-        phi = rng.uniform(0,np.pi/2)
-        x1 = x0 - (a/2)*np.cos(phi)
-        if x1 < 0:
-            n_hits += 1
-    return n_hits
+def direct_needle(a=1.0,b=2.0,rng=np.random.default_rng(None)):
+    x0 = rng.uniform(0,b/2)
+    phi = rng.uniform(0,np.pi/2)
+    x1 = x0 - (a/2)*np.cos(phi)
+    return 1 if x1 < 0 else 0
 
-def direct_needle_patch(N=10000,a=1.0,b=2.0,rng=np.random.default_rng(None)):
-    def direct_needle_one_step():
-        x0 = rng.uniform(0,b/2)
-        Upsilon = 2
-        while Upsilon > 1:
-            Delta_x = rng.uniform(0,1)
-            Delta_y = rng.uniform(0,1)
-            Upsilon = np.sqrt(Delta_x**2 + Delta_y**2)
-        x1 = x0 - (a/2) * Delta_x/Upsilon
-        return 1 if x1 < 0 else 0
-    N_hits = 0
-    for _ in range(N):
-        N_hits += direct_needle_one_step()
-    return N_hits
+def direct_needle_patch(a=1.0,b=2.0,rng=np.random.default_rng(None)):
+    x0 = rng.uniform(0,b/2)
+    Upsilon = 2
+    while Upsilon > 1:
+        Delta_x = rng.uniform(0,1)
+        Delta_y = rng.uniform(0,1)
+        Upsilon = np.sqrt(Delta_x**2 + Delta_y**2)
+    x1 = x0 - (a/2) * Delta_x/Upsilon
+    return 1 if x1 < 0 else 0
 
-
+def driver(N,fn,m=1):
+    xs = np.zeros((N))
+    xs[0] =  fn(None)
+    for i in range(1,N):
+        xs[i] = xs[i-1] + fn(None)
+    return xs[m:]/np.array(range(m,N))
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
+    parser.add_argument('-a','--a',type=float,default=1.0,help='Length of needle')
+    parser.add_argument('-b','--b',type=float,default=2.0,help='Distance between cracks')
+    parser.add_argument('-N','--N',type=int,default=10000,help='Number of trials')
+    parser.add_argument('-m','--m',type=int,default=1000,help='Burn in')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
@@ -81,21 +81,24 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 if __name__=='__main__':
-    x = direct_needle(N=1000000)
-    y = direct_needle_patch(N=1000000)
-    z=0
-    # rc('font',**{'family':'serif','serif':['Palatino']})
-    # rc('text', usetex=True)
-    # start  = time()
-    # args = parse_arguments()
-    # rng = np.random.default_rng(args.seed)
-    # fig = figure(figsize=(12,12))
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
+    start  = time()
+    args = parse_arguments()
+    rng = np.random.default_rng(args.seed)
+    xs = driver(args.N + args.m,lambda t:direct_needle(a=args.a,b=args.b,rng=rng),m=args.m)
+    ys = driver(args.N + args.m,lambda t:direct_needle_patch(a=args.a,b=args.b,rng=rng),m=args.m)
 
-    # fig.savefig(get_file_name(args.out))
-    # elapsed = time() - start
-    # minutes = int(elapsed/60)
-    # seconds = elapsed - 60*minutes
-    # print (f'Elapsed Time {minutes} m {seconds:.2f} s')
+    fig = figure(figsize=(12,12))
+    ax = fig.add_subplot(1,1,1)
+    ax.plot(xs,label='direct needle')
+    ax.plot(ys,label='direct needle patch')
+    ax.legend()
+    fig.savefig(get_file_name(args.out))
+    elapsed = time() - start
+    minutes = int(elapsed/60)
+    seconds = elapsed - 60*minutes
+    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
 
-    # if args.show:
-        # show()
+    if args.show:
+        show()
