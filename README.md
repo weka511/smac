@@ -5,7 +5,7 @@ Code from the course: [Statistical Mechanics and Computations](https://www.cours
 
 #|Folder|File|Description
 --|---------|------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-&nbsp;|[book](https://github.com/weka511/smac/tree/master)||Exercises and algorithms from the book
+&nbsp;|[book](https://github.com/weka511/smac/tree/master)||Exercises and algorithms from the [book](https://global.oup.com/ukhe/product/statistical-mechanics-algorithms-and-computations-9780198515364?cc=ca&lang=en&)
 1|||Monte Carlo Algorithms: Direct Sampling & Markov Chain sampling
 &nbsp;|[Lecture](https://github.com/weka511/smac/tree/master/lecture_1)|direct_pi.py|Algorithm 1.1 - compute pi using direct sampling
 &nbsp;|&nbsp;|direct_pi_multirun.py|Compute pi using multiple runs of direct sampling
