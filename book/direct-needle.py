@@ -31,6 +31,8 @@ def direct_needle(a=1.0,b=1.0,rng=np.random.default_rng(None)):
     Parameters:
         a        Length of needle
         b        Distance between cracks
+
+    Returns:    Number of hits
     '''
     x0 = rng.uniform(0,b/2)
     phi = rng.uniform(0,np.pi/2)
@@ -44,13 +46,16 @@ def direct_needle_patch(a=1.0,b=1.0,rng=np.random.default_rng(None)):
     Parameters:
         a        Length of needle
         b        Distance between cracks
+
+    Returns:    Number of hits
     '''
     x0 = rng.uniform(0,b/2)
-    Upsilon = np.inf
-    while Upsilon > 1:
+    Upsilon2 = np.inf
+    while Upsilon2 > 1:
         Delta_x = rng.uniform(0,1)
         Delta_y = rng.uniform(0,1)
-        Upsilon = np.sqrt(Delta_x**2 + Delta_y**2)
+        Upsilon2 = Delta_x**2 + Delta_y**2
+    Upsilon = np.sqrt(Upsilon2)
     x1 = x0 - (a/2) * Delta_x/Upsilon
     return 1 if x1 < 0 else 0
 
@@ -63,6 +68,17 @@ def driver(N,fn,m=1):
     for i in range(1,N):
         xs[i] = xs[i-1] + fn()
     return xs[m:]/np.array(range(m,N))
+
+def get_pi(x,a,b):
+    '''
+    Estimate pi using fraction of hits
+
+    Parameters:
+        x        Ratio of hits to trials
+        a        Length of needle
+        b        Distance between cracks
+    '''
+    return (2*a/b)/x
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -97,6 +113,8 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
+
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -108,10 +126,10 @@ if __name__=='__main__':
 
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
-    ax.plot(xs,label=f'direct needle {2/xs[-1]}')
-    ax.plot(ys,label=f'direct needle (patch) {2/ys[-1]}')
+    ax.plot(xs,label=f'direct needle {get_pi(xs[-1],args.a,args.b)}')
+    ax.plot(ys,label=f'direct needle (patch) {get_pi(ys[-1],args.a,args.b)}')
     ax.legend()
-    ax.set_title(r'Buffon Estimates for $\pi$, using ' f'N={args.N}, a={args.a}, b={args.b}')
+    ax.set_title(r'Buffon Estimates for $\pi$, using ' f'N={args.N:,}, burn={args.m:,}, a={args.a}, b={args.b}')
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
