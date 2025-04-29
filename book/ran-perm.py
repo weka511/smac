@@ -29,22 +29,29 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
+from scipy.stats import chisquare
 
 def ran_perm(K,rng=np.random.default_rng()):
+    '''
+    Sample permutations using algoritm 1.11
+    '''
     P = np.array(range(K))
     for k in range(K):
         l = rng.integers(k,K)
         P[k],P[l] = P[l],P[k]
     return P
 
-def get_Frequencies(N,K=5,rng=np.random.default_rng()):
+def get_frequencies(N,K=5,rng=np.random.default_rng()):
+    '''
+    Find frequencies of each permutation and each cyele
+    '''
     Freqs = defaultdict(lambda:0)
-    Cycles = np.zeros((5))
+    Cycles = np.zeros((K+1))
     for _ in range(N):
         P = ran_perm(K,rng=rng)
         Product = factorize(P)
         for cycle in Product:
-            Cycles[len(cycle)-1] += 1
+            Cycles[len(cycle)] += 1
         Freqs[str(P)] += 1
     return Freqs, Cycles
 
@@ -97,23 +104,31 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 if __name__=='__main__':
-    # print(factorize([3,1,4,6,5,2,7,0]))
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    Freqs,Cycles = get_Frequencies(args.N,rng=rng)
+    Freqs,Cycles = get_frequencies(args.N,rng=rng)
+    chi2 = chisquare([v for v in Freqs.values()])
     n = len(Freqs.keys())
+
     fig = figure(figsize=(12,12))
+    fig.suptitle(f'Number of permutations={args.N:,}')
     ax1 = fig.add_subplot(2,2,1)
-    ax1.bar(range(n),Freqs.values(),color='b')
-    ax1.set_title(f'Number of permutations={args.N}, {n}')
+    ax1.bar(range(n),Freqs.values(),color='r')
+    ax1.set_title(fr'n={n}, $\chi^2=${chi2.statistic:.2f}, pvalue={chi2.pvalue:.4f}')
+
     ax2 = fig.add_subplot(2,2,2)
-    ax2.hist(Freqs.values())
+    ax2.hist(Freqs.values(),color='g')
+    ax2.set_title('Histogram of frequencies')
+
     ax3 = fig.add_subplot(2,2,3)
-    ax3.bar(range(1,len(Cycles)+1),Cycles,color='b')
+    ax3.bar(range(0,len(Cycles)),Cycles,color='b')
+    ax3.set_title('Cycles')
+    ax3.set_xlabel('Length')
     fig.savefig(get_file_name(args.out))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
