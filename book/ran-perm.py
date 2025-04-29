@@ -16,8 +16,10 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 '''
-   Exercise 1.9: sample permutations using algoritm 1.11 and check that this algorithm generates all 120
+   Exercise 1.9
+   (a) Sample permutations using algoritm 1.11 and check that this algorithm generates all 120
    permutations if 5 elements equally often.
+   (b) Determine the cycle representation of each permutation that is generated.
 '''
 
 from argparse import ArgumentParser
@@ -34,6 +36,35 @@ def ran_perm(K,rng=np.random.default_rng()):
         l = rng.integers(k,K)
         P[k],P[l] = P[l],P[k]
     return P
+
+def get_Frequencies(N,K=5,rng=np.random.default_rng()):
+    Freqs = defaultdict(lambda:0)
+    Cycles = np.zeros((5))
+    for _ in range(N):
+        P = ran_perm(K,rng=rng)
+        Product = factorize(P)
+        for cycle in Product:
+            Cycles[len(cycle)-1] += 1
+        Freqs[str(P)] += 1
+    return Freqs, Cycles
+
+def factorize(P):
+    '''Factorize a permutation into a product of non-trivial cycles'''
+    closed = []
+    Product = []
+    for i in range(len(P)):
+        if i in closed: continue
+        closed.append(i)
+        cycle = [i]
+        j = i
+        while P[j] not in cycle:
+            cycle.append(P[j])
+            j = P[j]
+            closed.append(j)
+        if len(cycle) > 1:
+            Product.append(cycle)
+
+    return Product
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -66,20 +97,22 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 if __name__=='__main__':
+    # print(factorize([3,1,4,6,5,2,7,0]))
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    Freqs = defaultdict(lambda:0)
-    for _ in range(args.N):
-        P = ran_perm(5,rng=rng)
-        key = str(P)
-        Freqs[key] += 1
-    nn = len(Freqs.keys())
+    Freqs,Cycles = get_Frequencies(args.N,rng=rng)
+    n = len(Freqs.keys())
     fig = figure(figsize=(12,12))
-    ax = fig.add_subplot(1,1,1)
-    ax.bar(range(nn),Freqs.values())
+    ax1 = fig.add_subplot(2,2,1)
+    ax1.bar(range(n),Freqs.values(),color='b')
+    ax1.set_title(f'Number of permutations={args.N}, {n}')
+    ax2 = fig.add_subplot(2,2,2)
+    ax2.hist(Freqs.values())
+    ax3 = fig.add_subplot(2,2,3)
+    ax3.bar(range(1,len(Cycles)+1),Cycles,color='b')
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
