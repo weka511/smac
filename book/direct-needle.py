@@ -87,6 +87,8 @@ def parse_arguments():
     parser.add_argument('-b','--b',type=float,default=1.0,help='Distance between cracks')
     parser.add_argument('-N','--N',type=int,default=10000,help='Number of trials')
     parser.add_argument('-m','--m',type=int,default=1000,help='Burn in')
+    parser.add_argument('-r','--rows',type=int,default=1000,help='Number of rows for landing pad')
+    parser.add_argument('-c','--columns',type=int,default=1000,help='Number of columns for landing pad')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
@@ -114,6 +116,13 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 
+def hits(i,j,m,n,a,b):
+    '''
+    Used to calculate number of hits at each position in heatmap
+    '''
+    x = j * (b/2) /m
+    phi = i * (np.pi/2) / n
+    return 1 if x < a/2 and abs(phi) < np.arccos(x/(1/2)) else 0
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -125,11 +134,27 @@ if __name__=='__main__':
     ys = driver(args.N + args.m,lambda :direct_needle_patch(a=args.a,b=args.b,rng=rng),m=args.m)
 
     fig = figure(figsize=(12,12))
-    ax = fig.add_subplot(1,1,1)
-    ax.plot(xs,label=f'direct needle {get_pi(xs[-1],args.a,args.b)}')
-    ax.plot(ys,label=f'direct needle (patch) {get_pi(ys[-1],args.a,args.b)}')
-    ax.legend()
-    ax.set_title(r'Buffon Estimates for $\pi$, using ' f'N={args.N:,}, burn={args.m:,}, a={args.a}, b={args.b}')
+
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.plot(xs,label=f'direct needle {get_pi(xs[-1],args.a,args.b)}')
+    ax1.plot(ys,label=f'direct needle (patch) {get_pi(ys[-1],args.a,args.b)}')
+    ax1.legend()
+    ax1.set_title(r'Buffon Estimates for $\pi$, using ' f'N={args.N:,}, burn={args.m:,}, a={args.a}, b={args.b}')
+
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.imshow(
+        np.fromfunction(
+            np.vectorize(lambda i,j:hits(i,j,args.rows,args.columns,args.a,args.b)),
+            (args.rows,args.columns)),
+        origin='lower',
+        cmap='autumn',
+        interpolation='nearest')
+    ax2.set_title('Number of hits')
+    ax2.set_xlabel('$x_{center}$')
+    ax2.set_ylabel(r'$\phi$')
+    ax2.get_xaxis().set_ticks([])
+    ax2.get_yaxis().set_ticks([])
+
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
