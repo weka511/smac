@@ -18,7 +18,7 @@
 '''
    Exercise 1.9
    (a) Sample permutations using algoritm 1.11 and check that this algorithm generates all 120
-   permutations if 5 elements equally often.
+   permutations of 5 elements equally often.
    (b) Determine the cycle representation of each permutation that is generated.
 '''
 
