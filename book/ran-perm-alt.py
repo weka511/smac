@@ -81,11 +81,11 @@ if __name__=='__main__':
     n = len(Freqs.keys())
     fig = figure(figsize=(12,12))
     fig.suptitle(f'Number of permutations={args.N:,}')
-    ax1 = fig.add_subplot(2,2,1)
+    ax1 = fig.add_subplot(2,1,1)
     ax1.bar(range(n),Freqs.values(),color='r')
     ax1.set_title(fr'n={n}, $\chi^2=${chi2.statistic:.2f}, pvalue={chi2.pvalue:.4f}')
 
-    ax2 = fig.add_subplot(2,2,2)
+    ax2 = fig.add_subplot(2,1,2)
     ax2.hist(Freqs.values(),color='g')
     ax2.set_title('Histogram of frequencies')
 

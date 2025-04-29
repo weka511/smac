@@ -17,6 +17,7 @@
 -|naivegauss.py|1.12 Gauss
 -|direct-surface.py|Monte Carlo simulation of Exercise 2.11 of Chaosbook: in higher dimensions, any two vectors are nearly orthogonal
 -|ran-perm.py|Exercise 1.9 (a) Sample permutations using algoritm 1.11 and check that this algorithm generates all 120 permutations of 5 elements equally often.  (b) Determine the cycle representation of each permutation that is generated.
+-|ran-perm-alt.py|Exercise 1.9 (c) Alternative algorithm
 1.3|binomialconvolution.py|1.18 Binomial Convolution
 1.4.2|direct-gamma.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
 -|direct-gamma-zeta.py|
