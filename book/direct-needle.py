@@ -122,7 +122,7 @@ def hits(i,j,m,n,a,b):
     '''
     x = j * (b/2) /m
     phi = i * (np.pi/2) / n
-    return 1 if x < a/2 and abs(phi) < np.arccos(x/(1/2)) else 0
+    return 1 if x < a/2 and abs(phi) < np.arccos(x/(a/2)) else 0
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
