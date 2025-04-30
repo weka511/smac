@@ -139,12 +139,12 @@ if __name__=='__main__':
                     np.vectorize(lambda i,j:hits(i,j,args.rows,args.columns,args.a,args.b)),
                     (args.rows,args.columns))
     fig = figure(figsize=(12,12))
-
+    fig.suptitle("Buffon's needle")
     ax1 = fig.add_subplot(1,2,1)
     ax1.plot(xs,color='r',label=f'direct needle {get_pi(xs[-1],args.a,args.b)}')
     ax1.plot(ys,color='b',label=f'direct needle (patch) {get_pi(ys[-1],args.a,args.b)}')
     ax1.legend()
-    ax1.set_title(r'Buffon Estimates for $\pi$, using ' f'N={args.N:,}, burn={m:,}, a={args.a}, b={args.b}')
+    ax1.set_title(r'Estimates for $\pi$, using ' f'N={args.N:,}, burn={m:,}, a={args.a}, b={args.b}')
 
     ax2 = fig.add_subplot(1,2,2)
     Bounds = np.unique(nhits)
