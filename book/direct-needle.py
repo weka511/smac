@@ -88,7 +88,7 @@ def parse_arguments():
     parser.add_argument('-a','--a',type=float,default=1.0,help='Length of needle')
     parser.add_argument('-b','--b',type=float,default=1.0,help='Distance between cracks')
     parser.add_argument('-N','--N',type=int,default=10000,help='Number of trials')
-    parser.add_argument('-m','--m',type=int,default=1000,help='Burn in')
+    parser.add_argument('-m','--m',type=int,default=None,help='Burn in')
     parser.add_argument('-r','--rows',type=int,default=1000,help='Number of rows for landing pad')
     parser.add_argument('-c','--columns',type=int,default=1000,help='Number of columns for landing pad')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
@@ -132,8 +132,9 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    xs = driver(args.N + args.m,lambda :direct_needle(a=args.a,b=args.b,rng=rng),m=args.m)
-    ys = driver(args.N + args.m,lambda :direct_needle_patch(a=args.a,b=args.b,rng=rng),m=args.m)
+    m = args.N//4 if args.m==None else args.m
+    xs = driver(args.N + m,lambda :direct_needle(a=args.a,b=args.b,rng=rng),m=m)
+    ys = driver(args.N + m,lambda :direct_needle_patch(a=args.a,b=args.b,rng=rng),m=m)
     nhits = np.fromfunction(
                     np.vectorize(lambda i,j:hits(i,j,args.rows,args.columns,args.a,args.b)),
                     (args.rows,args.columns))
@@ -143,7 +144,7 @@ if __name__=='__main__':
     ax1.plot(xs,color='r',label=f'direct needle {get_pi(xs[-1],args.a,args.b)}')
     ax1.plot(ys,color='b',label=f'direct needle (patch) {get_pi(ys[-1],args.a,args.b)}')
     ax1.legend()
-    ax1.set_title(r'Buffon Estimates for $\pi$, using ' f'N={args.N:,}, burn={args.m:,}, a={args.a}, b={args.b}')
+    ax1.set_title(r'Buffon Estimates for $\pi$, using ' f'N={args.N:,}, burn={m:,}, a={args.a}, b={args.b}')
 
     ax2 = fig.add_subplot(1,2,2)
     Bounds = np.unique(nhits)
