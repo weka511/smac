@@ -118,13 +118,33 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 
-def hits(i,j,m,n,a,b):
+def get_hits(a,b,x,phi):
     '''
     Used to calculate number of hits at each position in heatmap
+
+    Parameters:
+        a       Lenght of needle
+        b       Distance between cracks
+        x       x coordinate of centre
+        phi     Angle to horizontal
     '''
-    x = j * (b/2) /m
-    phi = i * (np.pi/2) / n
     return 1 if x < a/2 and abs(phi) < np.arccos(x/(a/2)) else 0
+
+def hits(i,j,nrows,ncolumns,a,b):
+    '''
+    Adapter for get_hits(...), used to calculate number of hits at each position in heatmap
+
+    Parameters:
+        i         Row number in heatmap
+        j         Columns number in heatmap
+        nrows     Number of rows in heatmap
+        ncolumns  Number of columns in heatmap
+        a         Length of needle
+        b         Distance between cracks
+    '''
+    x = j * (b/2) / ncolumns
+    phi = i * (np.pi/2) / nrows
+    return get_hits(a,b,x,phi)
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
