@@ -22,7 +22,9 @@ from os.path import basename, join, splitext
 from time import time
 import numpy as np
 from matplotlib import rc
-from matplotlib.pyplot import figure, show
+from matplotlib.pyplot import figure, show, colorbar
+from matplotlib.cm import autumn, ScalarMappable
+from matplotlib.colors import BoundaryNorm
 
 def direct_needle(a=1.0,b=1.0,rng=np.random.default_rng(None)):
     '''
@@ -132,23 +134,27 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
     xs = driver(args.N + args.m,lambda :direct_needle(a=args.a,b=args.b,rng=rng),m=args.m)
     ys = driver(args.N + args.m,lambda :direct_needle_patch(a=args.a,b=args.b,rng=rng),m=args.m)
-
+    nhits = np.fromfunction(
+                    np.vectorize(lambda i,j:hits(i,j,args.rows,args.columns,args.a,args.b)),
+                    (args.rows,args.columns))
     fig = figure(figsize=(12,12))
 
     ax1 = fig.add_subplot(1,2,1)
-    ax1.plot(xs,label=f'direct needle {get_pi(xs[-1],args.a,args.b)}')
-    ax1.plot(ys,label=f'direct needle (patch) {get_pi(ys[-1],args.a,args.b)}')
+    ax1.plot(xs,color='r',label=f'direct needle {get_pi(xs[-1],args.a,args.b)}')
+    ax1.plot(ys,color='b',label=f'direct needle (patch) {get_pi(ys[-1],args.a,args.b)}')
     ax1.legend()
     ax1.set_title(r'Buffon Estimates for $\pi$, using ' f'N={args.N:,}, burn={args.m:,}, a={args.a}, b={args.b}')
 
     ax2 = fig.add_subplot(1,2,2)
-    ax2.imshow(
-        np.fromfunction(
-            np.vectorize(lambda i,j:hits(i,j,args.rows,args.columns,args.a,args.b)),
-            (args.rows,args.columns)),
-        origin='lower',
-        cmap='autumn',
-        interpolation='nearest')
+    Bounds = np.unique(nhits)
+    heatmap = ax2.imshow(nhits,
+                         origin = 'lower',
+                         cmap = autumn,
+                         norm = BoundaryNorm(Bounds, autumn.N, extend='max'),
+                         interpolation = 'nearest')
+    colorbar(heatmap,
+             ticks = np.linspace(start=Bounds[0],stop=Bounds[-1],endpoint=True,num=len(Bounds)),
+             shrink = 0.625)
     ax2.set_title('Number of hits')
     ax2.set_xlabel('$x_{center}$')
     ax2.set_ylabel(r'$\phi$')
