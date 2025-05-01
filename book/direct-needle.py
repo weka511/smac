@@ -23,9 +23,9 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show, colorbar
-from matplotlib.cm import autumn, ScalarMappable
+from matplotlib.cm import gist_rainbow, ScalarMappable
 from matplotlib.colors import BoundaryNorm
-
+from buffon import get_hits
 def direct_needle(a=1.0,b=1.0,rng=np.random.default_rng(None)):
     '''
     Algorithm 1.4 direct needle
@@ -63,7 +63,7 @@ def direct_needle_patch(a=1.0,b=1.0,rng=np.random.default_rng(None)):
 
 def driver(N,fn,m=1):
     '''
-    Use either direct needle or direct needle (patch) to popululate an array with estimates
+    Use either direct needle or direct needle (patch) to populate an array with estimates
     '''
     xs = np.zeros((N))
     xs[0] =  fn()
@@ -118,33 +118,28 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 
-def get_hits(a,b,x,phi):
+def get_hits(a,b,x=0,phi=0):
     '''
     Used to calculate number of hits at each position in heatmap
 
     Parameters:
-        a       Lenght of needle
+        a       Length of needle
         b       Distance between cracks
         x       x coordinate of centre
         phi     Angle to horizontal
     '''
-    return 1 if x < a/2 and abs(phi) < np.arccos(x/(a/2)) else 0
+    def get_n(x):
+        projection = (a/2) * np.cos(phi) + x
+        if projection < b/2:
+            return 0
+        else:
+            projection -= (b/2)
+            return int(projection//b) + 1
 
-def hits(i,j,nrows,ncolumns,a,b):
-    '''
-    Adapter for get_hits(...), used to calculate number of hits at each position in heatmap
-
-    Parameters:
-        i         Row number in heatmap
-        j         Columns number in heatmap
-        nrows     Number of rows in heatmap
-        ncolumns  Number of columns in heatmap
-        a         Length of needle
-        b         Distance between cracks
-    '''
-    x = j * (b/2) / ncolumns
-    phi = i * (np.pi/2) / nrows
-    return get_hits(a,b,x,phi)
+    if a < b:
+        return 1 if x < a/2 and abs(phi) < np.arccos(x/(a/2)) else 0
+    else:
+        return get_n(x) + get_n(b/2-x)
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -153,10 +148,10 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
     m = args.N//4 if args.m==None else args.m
-    xs = driver(args.N + m,lambda :direct_needle(a=args.a,b=args.b,rng=rng),m=m)
-    ys = driver(args.N + m,lambda :direct_needle_patch(a=args.a,b=args.b,rng=rng),m=m)
+    xs = driver(args.N + m,lambda : direct_needle(a=args.a,b=args.b,rng=rng),m=m)
+    ys = driver(args.N + m,lambda : direct_needle_patch(a=args.a,b=args.b,rng=rng),m=m)
     nhits = np.fromfunction(
-                    np.vectorize(lambda i,j:hits(i,j,args.rows,args.columns,args.a,args.b)),
+                    np.vectorize(lambda i,j:get_hits(args.a,args.b,x=j*(args.b/2)/args.columns,phi=i*(np.pi/2)/args.rows)),
                     (args.rows,args.columns))
     fig = figure(figsize=(12,12))
     fig.suptitle("Buffon's needle")
@@ -170,8 +165,8 @@ if __name__=='__main__':
     Bounds = np.unique(nhits)
     heatmap = ax2.imshow(nhits,
                          origin = 'lower',
-                         cmap = autumn,
-                         norm = BoundaryNorm(Bounds, autumn.N, extend='max'),
+                         cmap = gist_rainbow,
+                         norm = BoundaryNorm(Bounds, gist_rainbow.N, extend='max'),
                          interpolation = 'nearest')
     colorbar(heatmap,
              ticks = np.linspace(start=Bounds[0],stop=Bounds[-1],endpoint=True,num=len(Bounds)),
