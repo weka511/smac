@@ -26,6 +26,7 @@ from matplotlib.pyplot import figure, show, colorbar
 from matplotlib.cm import gist_rainbow, ScalarMappable
 from matplotlib.colors import BoundaryNorm
 from buffon import get_hits
+
 def direct_needle(a=1.0,b=1.0,rng=np.random.default_rng(None)):
     '''
     Algorithm 1.4 direct needle

@@ -45,14 +45,28 @@ def get_hits(a,b,x=0,phi=0):
         return get_n(a,b,x,phi) + get_n(a,b,b/2-x,phi)
 
 class BuffonTest(TestCase):
+
     def test12(self):
-        self.assertEqual(1,get_hits(1,2,x=0,phi=0))
-        self.assertEqual(0,get_hits(1,2,x=2,phi=np.pi/2))
+        '''
+        Tests based on Krauth, Figure 1.8, a<b
+        '''
+        b = 2
+        a = 0.9*b
+        self.assertEqual(1,get_hits(a,b,x=0,phi=0))
+        self.assertEqual(0,get_hits(a,b,x=2,phi=np.pi/2))
+        self.assertEqual(0,get_hits(a,b,x=a/2+0.0001,phi=0))
+        self.assertEqual(1,get_hits(a,b,x=a/2-0.0001,phi=0))
 
     def testpi_2(self):
-        self.assertEqual(4,get_hits(np.pi,1,x=0,phi=0))
-        self.assertEqual(0,get_hits(np.pi,1,x=0.5,phi=np.pi/2))
-        self.assertEqual(0,get_n(np.pi,1,x=0.5,phi=np.pi/2))
+        '''
+        Tests based on Krauth, Figure 1.15, a > b
+        '''
+        b = 1
+        a = np.pi * b
+        self.assertEqual(4,get_hits(a,b,x=0,phi=0))
+        self.assertEqual(0,get_n(a,b,x=0.5,phi=np.pi/2))
+        self.assertEqual(0,get_hits(a,b,x=0.5,phi=np.pi/2))
+        self.assertEqual(0,get_n(a,b,x=0.01,phi=np.pi/2))
 
 if __name__=='__main__':
     main()
