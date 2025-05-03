@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 '''
-    Exercise 1.12. Implement noth naive Algorithm 1.17 (naive Gauss) and 1.18 (Box Muller).
+    Exercise 1.12. Implement both naive Algorithm 1.17 (naive Gauss) and 1.18 (Box Muller).
     For what value of K can you still detect statistially significant differences between
     the two algorithms?
 '''
@@ -30,8 +30,6 @@ from matplotlib.pyplot import figure, show
 from scipy.stats import kstest
 from exercise_1_12 import naive_gauss,gauss,gauss_patch
 
-
-
 def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
@@ -40,7 +38,7 @@ def parse_arguments():
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-m','--m',type=int,default=10)
     parser.add_argument('-n','--n',type=int,default=10000)
-    parser.add_argument('-K','--K',type=int,nargs=2, default=[5,12])
+    parser.add_argument('-K','--K',type=int,nargs='+', default=[5,12])
     parser.add_argument('-b','--bins',type=int,default=25)
     parser.add_argument('--sigma',type=float,default=1.0)
     parser.add_argument('--significance',type=float,default=0.05)
@@ -67,13 +65,11 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
-if __name__=='__main__':
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
-    start  = time()
-    args = parse_arguments()
-    rng = np.random.default_rng(args.seed)
-    kmax = args.K[1] + 1 - args.K[0]
+def get_rows_columns(kmax):
+    '''
+    Used when we want a number of subplots. Choose number of rows and
+    columns to make the array of plots be as square as possible.
+    '''
     nrows = int(np.sqrt(kmax))
     ncolumns = kmax // nrows
     if nrows * ncolumns < kmax:
@@ -81,9 +77,33 @@ if __name__=='__main__':
             nrows += 1
         else:
             ncolumns += 1
+    return nrows,ncolumns
 
+def get_range(K):
+    '''
+    Parse up to 3 parameters into a range.
+    '''
+    match len(K):
+        case 1:
+            return K
+        case 2:
+            return range(K[0],K[1]+1)
+        case 3:
+            return range(K[0],K[1]+K[2],K[2])
+        case _:
+            raise ValueError('K should have length 1, 2, or 3.')
+
+if __name__=='__main__':
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
+    start  = time()
+    args = parse_arguments()
+    rng = np.random.default_rng(args.seed)
+    Ks = get_range(args.K)
+    nrows,ncolumns = get_rows_columns(len(list(Ks)))
     fig = figure(figsize=(12,12))
-    for k,K in enumerate(range(args.K[0],args.K[1]+1)):
+    fig.suptitle(f'Kolmogorov Smirnov test, {args.m} iterations, {args.n:,} samples per iteration')
+    for k,K in enumerate(Ks):
         ax = fig.add_subplot(nrows,ncolumns,k+1)
         pvalues = np.zeros((args.m,3))
         for i in range(args.m):
@@ -101,7 +121,6 @@ if __name__=='__main__':
         ax.plot(np.sort(pvalues[:,2]),label='Naive Gauss/Gauss',color='b')
         ax.axhline(y=args.significance,label=f'p={args.significance}',color='m')
         ax.legend(title=f'K={K}')
-
 
     fig.savefig(get_file_name(args.out))
 
