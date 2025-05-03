@@ -15,7 +15,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+'''
+    Exercise 1.12. Implement noth naive Algorithm 1.17 (naive Gauss) and 1.18 (Box Muller).
+    For what value of K can you still detect statistially significant differences between
+    the two algorithms?
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -26,17 +30,34 @@ from matplotlib.pyplot import figure, show
 from scipy.stats import kstest
 
 def naive_gauss(K=3,rng=np.random.default_rng()):
+    '''Algorithm 1.17'''
     sigma = np.sqrt(K/12)
     while True:
         yield (rng.random(K) - 0.5).sum()/sigma
 
-def gauss(sigma,rng=np.random.default_rng()):
+def gauss(sigma=1,rng=np.random.default_rng()):
+    '''Algorithm 1.18'''
     while True:
         phi = 2*np.pi * rng.random()
         upsilon = -np.log(rng.random())
         r = sigma * np.sqrt(2 * upsilon)
         yield r * np.cos(phi)
         yield r * np.sin(phi)
+
+def gauss_patch(sigma=1,rng=np.random.default_rng()):
+    '''Algorithm 1.19'''
+    def get_sample():
+        while True:
+            x = -1 + 2* rng.random()
+            y = -1 + 2* rng.random()
+            upsilon1 = x**2 + y**2
+            if 0 < upsilon1 and upsilon1 < 1: return upsilon1,x,y
+    while True:
+        upsilon1,x,y = get_sample()
+        upsilon = - np.log(upsilon1)
+        upsilon2 = -sigma*np.sqrt(2*upsilon/upsilon1)
+        yield upsilon2*x
+        yield upsilon2*y
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -72,27 +93,50 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 if __name__=='__main__':
-    naive_gauss()
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    xs = np.zeros((args.n))
-    ys = np.zeros((args.n))
     naive = naive_gauss(K=args.K,rng=rng)
     g = gauss(args.sigma,rng=rng)
-    for i in range(args.n):
-        xs[i] = next(naive)
-        ys[i] = next(g)
+    patch = gauss_patch(args.sigma,rng=rng)
+    xs = np.fromfunction(np.vectorize(lambda i:next(naive)),(args.n,))
+    ys = np.fromfunction(np.vectorize(lambda i:next(g)),(args.n,))
+    zs = np.fromfunction(np.vectorize(lambda i:next(patch)),(args.n,))
 
-    ks1 = kstest(xs,ys)
+    ks12 = kstest(xs,ys)
+    ks31 = kstest(zs,xs)
+    ks23 = kstest(ys,zs)
 
     fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(1,1,1)
-    ax1.hist(xs,bins=args.bins,color='red',alpha=0.5,label=f'Naive K={args.K}')
+    fig.suptitle(f'Number of samples = {args.n:,}')
+    ax1 = fig.add_subplot(2,3,1)
     ax1.hist(ys,bins=args.bins,color='blue',alpha=0.5,label='Gauss')
-    ax1.set_title(f'K={args.K}, sigma={args.sigma}, pvalue={ks1.pvalue}')
+    ax1.legend()
+
+    ax2 = fig.add_subplot(2,3,2)
+    ax2.hist(zs,bins=args.bins,color='green',alpha=0.5,label='Gauss (patch)')
+    ax2.legend()
+
+    ax3 = fig.add_subplot(2,3,3)
+    ax3.hist(xs,bins=args.bins,color='red',alpha=0.5,label=f'Naive K={args.K}')
+    ax3.legend()
+
+    ax4 = fig.add_subplot(2,3,4)
+    ax4.hist(zs,bins=args.bins,color='green',alpha=0.5,label='Gauss (patch)')
+    ax4.set_title(f'pvalue={ks23.pvalue:.3}')
+    ax4.legend()
+
+    ax5 = fig.add_subplot(2,3,5)
+    ax5.hist(xs,bins=args.bins,color='red',alpha=0.5,label=f'Naive K={args.K}')
+    ax5.set_title(f'pvalue={ks31.pvalue:.3}')
+    ax5.legend()
+
+    ax6 = fig.add_subplot(2,3,6)
+    ax6.hist(ys,bins=args.bins,color='blue',alpha=0.5,label='Gauss')
+    ax6.set_title(f'pvalue={ks12.pvalue:.3}')
+    ax6.legend()
 
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
