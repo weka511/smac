@@ -131,10 +131,10 @@ def get_hits(a,b,x=0,cos_phi=0):
     if a < b:
         return 1 if x < a/2 and cos_phi > x/(a/2) else 0
     else:
-        if (0 < x and x < 1/2) and cos_phi < 2*x/np.pi: return 0
-        if (0 < x and x < 1/2) and cos_phi < (2 - 2*x)/np.pi: return 1
-        if (0 < x and x < 1/2) and cos_phi < (2 + 2*x)/np.pi: return 2
-        if (2 - np.pi/2 < x and x < 1/2) and cos_phi > (4 - 2*x)/np.pi: return 4
+        if (0 < x and x < b/2) and cos_phi < 2*x/np.pi*b: return 0
+        if (0 < x and x < b/2) and cos_phi < (2*b - 2*x)/np.pi*b: return 1
+        if (0 < x and x < b/2) and cos_phi < (2*b + 2*x)/np.pi*b: return 2
+        if (2*b - np.pi*b/2 < x and x < b/2) and cos_phi > (4*b - 2*x)/np.pi*b: return 4
         return 3
 
 if __name__=='__main__':
