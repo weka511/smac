@@ -25,7 +25,6 @@ from matplotlib import rc
 from matplotlib.pyplot import figure, show, colorbar
 from matplotlib.cm import gist_rainbow, ScalarMappable
 from matplotlib.colors import BoundaryNorm
-from buffon import get_hits
 
 def direct_needle(a=1.0,b=1.0,rng=np.random.default_rng(None)):
     '''
@@ -129,18 +128,25 @@ def get_hits(a,b,x=0,phi=0):
         x       x coordinate of centre
         phi     Angle to horizontal
     '''
-    def get_n(x):
-        projection = (a/2) * np.cos(phi) + x
-        if projection < b/2:
-            return 0
-        else:
-            projection -= (b/2)
-            return int(projection//b) + 1
+    # def get_n(x):
+        # projection = (a/2) * np.cos(phi) + x
+        # if projection < b/2:
+            # return 0
+        # else:
+            # projection -= (b/2)
+            # return int(projection//b) + 1
+
+    def get_n(x,cos_phi):
+        if (0 < x and x < 1/2) and cos_phi < 2*x/np.pi: return 0
+        if (0 < x and x < 1/2) and cos_phi < (2 - 2*x)/np.pi: return 1
+        if (0 < x and x < 1/2) and cos_phi < (2 + 2*x)/np.pi: return 2
+        if (2 - np.pi/2 < x and x < 1/2) and cos_phi > (4 - 2*x)/np.pi: return 4
+        return 3
 
     if a < b:
         return 1 if x < a/2 and abs(phi) < np.arccos(x/(a/2)) else 0
     else:
-        return get_n(x) + get_n(b/2-x)
+        return get_n(x,np.cos(phi))# + get_n(b/2-x)
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
