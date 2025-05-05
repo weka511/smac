@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 1.11'''
+'''Exercise 1.11: investigate the distribution of x**2 + x**2'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -55,20 +55,19 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
+def get_area(rng = np.random.default_rng(None)):
+    x = 2.0 * rng.random((2)) - 1
+    return x[0]**2 + x[1]**2
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    upsilon = np.zeros((args.N))
-    for i in range(args.N):
-        x = 2.0 * rng.random() - 1
-        y = 2.0 * rng.random() - 1
-        upsilon[i] = x**2 + y**2
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
-    ax.hist(upsilon,bins='stone',density='True',color='blue')
+    ax.hist(np.fromfunction(np.vectorize(lambda _:get_area(rng)),(args.N,)),bins=1000,density='True',color='blue')
     ax.set_xlabel(r'$\upsilon$')
     ax.set_ylabel('Frequency')
     ax.set_title(r'$\upsilon=x^2+y^2$' f' for {args.N:,} points')
