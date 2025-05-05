@@ -38,8 +38,8 @@ def direct_needle(a=1.0,b=1.0,rng=np.random.default_rng(None)):
     '''
     x0 = rng.uniform(0,b/2)
     phi = rng.uniform(0,np.pi/2)
-    x1 = x0 - (a/2)*np.cos(phi)
-    return 1 if x1 < 0 else 0
+    return get_hits(a,b,x0,np.cos(phi))
+
 
 def direct_needle_patch(a=1.0,b=1.0,rng=np.random.default_rng(None)):
     '''
@@ -58,8 +58,8 @@ def direct_needle_patch(a=1.0,b=1.0,rng=np.random.default_rng(None)):
         Delta_y = rng.uniform(0,1)
         Upsilon2 = Delta_x**2 + Delta_y**2
     Upsilon = np.sqrt(Upsilon2)
-    x1 = x0 - (a/2) * Delta_x/Upsilon
-    return 1 if x1 < 0 else 0
+    return get_hits(a,b,x0,Delta_x/Upsilon)
+
 
 def driver(N,fn,m=1):
     '''
