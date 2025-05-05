@@ -118,7 +118,7 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 
-def get_hits(a,b,x=0,phi=0):
+def get_hits(a,b,x=0,cos_phi=0):
     '''
     Used to calculate number of hits at each position in heatmap
 
@@ -128,25 +128,14 @@ def get_hits(a,b,x=0,phi=0):
         x       x coordinate of centre
         phi     Angle to horizontal
     '''
-    # def get_n(x):
-        # projection = (a/2) * np.cos(phi) + x
-        # if projection < b/2:
-            # return 0
-        # else:
-            # projection -= (b/2)
-            # return int(projection//b) + 1
-
-    def get_n(x,cos_phi):
+    if a < b:
+        return 1 if x < a/2 and cos_phi > x/(a/2) else 0
+    else:
         if (0 < x and x < 1/2) and cos_phi < 2*x/np.pi: return 0
         if (0 < x and x < 1/2) and cos_phi < (2 - 2*x)/np.pi: return 1
         if (0 < x and x < 1/2) and cos_phi < (2 + 2*x)/np.pi: return 2
         if (2 - np.pi/2 < x and x < 1/2) and cos_phi > (4 - 2*x)/np.pi: return 4
         return 3
-
-    if a < b:
-        return 1 if x < a/2 and abs(phi) < np.arccos(x/(a/2)) else 0
-    else:
-        return get_n(x,np.cos(phi))# + get_n(b/2-x)
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -158,7 +147,7 @@ if __name__=='__main__':
     xs = driver(args.N + m,lambda : direct_needle(a=args.a,b=args.b,rng=rng),m=m)
     ys = driver(args.N + m,lambda : direct_needle_patch(a=args.a,b=args.b,rng=rng),m=m)
     nhits = np.fromfunction(
-                    np.vectorize(lambda i,j:get_hits(args.a,args.b,x=j*(args.b/2)/args.columns,phi=i*(np.pi/2)/args.rows)),
+                    np.vectorize(lambda i,j:get_hits(args.a,args.b,x=j*(args.b/2)/args.columns,cos_phi=np.cos(i*(np.pi/2)/args.rows))),
                     (args.rows,args.columns))
     fig = figure(figsize=(12,12))
     fig.suptitle("Buffon's needle")
