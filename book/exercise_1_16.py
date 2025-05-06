@@ -24,16 +24,21 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 
-def reject_finite(Pi,rng = np.random.default_rng(None)):
-    pi_max = Pi.max()
-    K = len(Pi)
+def reject_finite(pi,rng = np.random.default_rng(None)):
+    '''Algorithm 1.13 Sample a finite distribution with a rejection algorithm'''
+    pi_max = pi.max()
+    K = len(pi)
     while True:
         k = rng.integers(K)
-        if rng.uniform(0,pi_max) < Pi[k]: yield k
+        if rng.uniform(0,pi_max) < pi[k]: yield k
 
 
-def tower_sample(Pi,rng = np.random.default_rng(None)):
-    pass
+def tower_sample(pi,rng = np.random.default_rng(None)):
+    '''Algorithm 1.14 Sample without rejection'''
+    Pi = pi.cumsum()
+    while True:
+        upsilon = rng.uniform(0,Pi[-1])
+        yield np.searchsorted(Pi,upsilon)
 
 def parse_arguments():
     parser = ArgumentParser(__doc__)
@@ -43,6 +48,7 @@ def parse_arguments():
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-K','--K',type=int,default=10000)
     parser.add_argument('-N','--N',type=int,default=1000)
+    parser.add_argument('-n','--n',type=int,default=100)
     parser.add_argument('--alpha',type=float,default=1.5)
     return parser.parse_args()
 
@@ -70,23 +76,42 @@ def get_file_name(name,default_ext='png',seq=None):
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    start  = time()
+
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    Pi = np.fromfunction(np.vectorize(lambda k:(k+1)**(-args.alpha)),(args.K,))
-    Pi /= Pi.sum()
+    pi = np.fromfunction(np.vectorize(lambda k:(k+1)**(-args.alpha)),(args.K,))
+    pi /= pi.sum()
+
+    start  = time()
     samples1 = np.zeros((args.N),dtype=int)
-    rf = reject_finite(Pi,rng=rng)
+    rf = reject_finite(pi,rng=rng)
     for i in range(args.N):
         samples1[i] = next(rf)
-    fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(1,1,1)
-    ax1.hist(samples1,bins=1000)
-    fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
-    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
+    print (f'Elapsed Time (reject_finite) {minutes} m {seconds:.2f} s')
+
+    start = time()
+    samples2 = np.zeros((args.N),dtype=int)
+    ts = tower_sample(pi,rng=rng)
+    for i in range(args.N):
+        samples2[i] = next(ts)
+    elapsed = time() - start
+    minutes = int(elapsed/60)
+    seconds = elapsed - 60*minutes
+    print (f'Elapsed Time (tower_sample) {minutes} m {seconds:.2f} s')
+
+    fig = figure(figsize=(12,12))
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.hist(samples1,bins=args.n,color='blue')
+    ax1.set_title('Sampling with Rejection')
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.hist(samples2,bins=args.n,color='red')
+    ax2.set_title('Sampling without Rejection')
+
+    fig.savefig(get_file_name(args.out))
+
 
     if args.show:
         show()
