@@ -67,11 +67,22 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
-    ax.hist(np.fromfunction(np.vectorize(lambda _:get_area(rng)),(args.N,)),bins=1000,density='True',color='blue')
+    ax.hist(np.fromfunction(np.vectorize(lambda _:get_area(rng)),
+                            (args.N,)),
+            bins=1000,
+            density=True,
+            cumulative=True,
+            color='blue',
+            label='Empirical')
+    xs = np.linspace(0,1,num=50,endpoint=True)
+    ys = np.linspace(0,0.8,num=50,endpoint=True)
+    ax.plot(xs,ys,color='red',label='Theoretical')
     ax.set_xlabel(r'$\upsilon$')
     ax.set_ylabel('Frequency')
     ax.set_title(r'$\upsilon=x^2+y^2$' f' for {args.N:,} points')
+    ax.legend(title='Cumulative distribution')
     fig.savefig(get_file_name(args.out))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
