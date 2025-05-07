@@ -20,6 +20,7 @@
 -|ran-perm-alt.py|Exercise 1.9 (c) Alternative algorithm
 -|exercise_1_12.py|Exercise 1.12. Implement both naive Algorithm 1.17 (naive Gauss) and 1.18 (Box Muller). For what value of K can you still detect statistially significant differences between the two algorithms?
 -|exercise_1_12a.py|Exercise 1.12 - plot results of KS test.
+-|exercise_1_14.py|Exercise 1.14. Sample random vectors on the surface of a sphere using Algorithm 1.22 and plot x[0]**2 + y[0]**2
 -|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algoritms 1.13 and 1.14
 1.3|binomialconvolution.py|1.18 Binomial Convolution
 1.4.2|direct-gamma.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.

@@ -15,7 +15,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 1.14 Sample random vectors on the surface of a sphere using Algorithm 1.22'''
+'''
+    Exercise 1.14 Sample random vectors on the surface of a sphere using Algorithm 1.22
+    and plot x[0]**2 + y[0]**2
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -37,7 +40,8 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-    parser.add_argument('-d','--d',type=int,default=3)
+    parser.add_argument('--rows',type=int,default=3)
+    parser.add_argument('--columns',type=int,default=3)
     parser.add_argument('-n','--n',type=int,default=1000)
     parser.add_argument('-m','--m',type=int,default=100)
     return parser.parse_args()
@@ -66,18 +70,19 @@ def get_file_name(name,default_ext='png',seq=None):
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    start  = time()
+    start = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-
-    I12 = np.zeros((args.n))
-    ds = direct_surface(args.d,rng=rng)
-    for i in range(args.n):
-        x = next(ds)
-        I12[i] = x[0]**2 + x[1]**2
     fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(1,1,1)
-    ax1.hist(I12,bins=args.m)
+    for i in range(args.rows*args.columns):
+        I12 = np.zeros((args.n))
+        ds = direct_surface(d=i+3,rng=rng)
+        for j in range(args.n):
+            x = next(ds)
+            I12[j] = x[0]**2 + x[1]**2
+        ax = fig.add_subplot(args.rows,args.columns,i+1)
+        ax.hist(I12,bins=args.m,color='blue',density=True)
+        ax.set_title(f'd={i+3}')
 
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
