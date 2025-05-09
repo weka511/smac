@@ -28,14 +28,14 @@ import argparse
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
-from scipy.stats import gaussian_kde
 from matplotlib.pyplot import figure, show
+from matplotlib import rc
 
-def direct_gamma(gamma,generator=False,K=10000,N=1000000, rng = np.random.default_rng()):
-    sigma = 0
-    for i in range(N):
-        sigma += rng.random()**gamma
-    return sigma/N
+def direct_gamma(gamma,N=10, rng = np.random.default_rng()):
+    '''Algorithm 1.29 Computing the gamma integral by direct sampling'''
+    sampled = rng.random(size=N)
+    exponentiated = sampled**gamma
+    return exponentiated.sum()/N
 
 def parse_arguments():
     parser = argparse.ArgumentParser(__doc__)
@@ -70,27 +70,35 @@ def get_file_name(name,default_ext='png',seq=None):
 
 if __name__ == '__main__':
     start = time()
-    args=parse_arguments()
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
+    args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    M = args.steps[0]
-    gamma = args.gamma
     bins = np.linspace(0,11.5,num=22,endpoint=True)
-    bins[-1] = 100000000000
-    fig = figure()
-    ax1 = fig.add_subplot(1,1,1)
-
+    scaled_bins = np.linspace(-8,3,num=22,endpoint=True)
+    fig = figure(figsize=(12,12))
+    ax1 = fig.add_subplot(1,2,1)
+    ax2 = fig.add_subplot(1,2,2)
     for N in args.N:
-        data = [direct_gamma(gamma,N=N) for m in range(M)]
-        density = gaussian_kde(data)
-        y,binEdges = np.histogram(data,density=True,bins=bins)
-        bincenters = 0.5*(binEdges[1:]+binEdges[:-1])
-        ax1.plot(bincenters,density(bincenters),label='N={0}'.format(N))
+        data = np.fromfunction(np.vectorize(lambda _:direct_gamma(args.gamma,N=N,rng=rng)),
+                               (args.steps[0],))
+        scaled = (data - 5)/(N**-0.2)
+        y,_ = np.histogram(data,density=True,bins=bins)
+        ax1.plot(bins[:-1],y,label=f'N={N}')
+        upsilon,_ = np.histogram(scaled,density=True,bins=scaled_bins)
+        ax2.plot(scaled_bins[:-1],upsilon,label=f'N={N}')
 
     ax1.set_xlim(1,10)
     ax1.set_xlabel(r'$\Sigma/N$')
-    ax1.set_xlabel(r'$\pi(\Sigma/N$)')
-    ax1.set_title(r'$Average\ {0}\ iterations$'.format(M))
+    ax1.set_ylabel(r'$\pi(\Sigma/N$)')
+    ax1.set_title('Average')
     ax1.legend()
+    ax2.set_xlabel(r'$\upsilon/N$')
+    ax2.set_ylabel(r'$\pi(\upsilon/N$)')
+    ax2.set_title('Rescaled Average')
+    ax2.legend()
+
+    fig.suptitle(r'$\gamma=$'f'{args.gamma}, after {args.steps[0]} iterations')
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
