@@ -15,7 +15,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 1.11: investigate the distribution of x**2 + x**2'''
+'''
+    Exercise 1.11: investigate the distribution of x**2 + y**2
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -30,7 +32,7 @@ def parse_arguments():
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs')
-    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('--show', action = 'store_true', help = 'Show plot')
     parser.add_argument('-N','--N', type=int, default=10000)
     return parser.parse_args()
 
@@ -55,9 +57,10 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
-def get_area(rng = np.random.default_rng(None)):
-    x = 2.0 * rng.random((2)) - 1
-    return x[0]**2 + x[1]**2
+def get_distribution(num=50):
+    xs = np.linspace(0,1,num=num,endpoint=True)
+    ys = np.linspace(0,np.pi/4,num=num,endpoint=True)
+    return xs,ys
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -67,16 +70,20 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
-    ax.hist(np.fromfunction(np.vectorize(lambda _:get_area(rng)),
-                            (args.N,)),
-            bins=1000,
-            density=True,
-            cumulative=True,
-            color='blue',
-            label='Empirical')
-    xs = np.linspace(0,1,num=50,endpoint=True)
-    ys = np.linspace(0,0.8,num=50,endpoint=True)
+    ax.hist(np.fromfunction(np.vectorize(lambda _:np.square(2.0 * rng.random((2)) - 1).sum()),(args.N,)),
+            bins = 1000,
+            density = True,
+            cumulative = True,
+            color = 'blue',
+            label = 'Empirical')
+
+    xs,ys = get_distribution()
     ax.plot(xs,ys,color='red',label='Theoretical')
+    x1s = np.linspace(1,2,num=10,endpoint=True)
+    dx = x1s[1] - x1s[0]
+    y1s =  dx*np.cumsum(np.array([(1-np.sqrt(x1s[i]-1))/x1s[i] for i in range(len(x1s))]))
+    y1s1 = y1s + (ys[-1] -y1s[0])
+    ax.plot(x1s,y1s1,color='cyan',label='Theoretical')
     ax.set_xlabel(r'$\upsilon$')
     ax.set_ylabel('Frequency')
     ax.set_title(r'$\upsilon=x^2+y^2$' f' for {args.N:,} points')
