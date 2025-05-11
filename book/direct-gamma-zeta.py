@@ -77,7 +77,6 @@ if __name__=="__main__":
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
 
-    # gammas = args.gammas#[2.0,1.0,0.0,-0.1,-0.4,-0.8]
     fig = figure(figsize=(12,12))
     fig.suptitle(f'n={args.n:,}')
     for i,zeta in enumerate(args.zetas):
