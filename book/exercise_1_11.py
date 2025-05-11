@@ -16,7 +16,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 '''
-    Exercise 1.11: investigate the distribution of x**2 + y**2
+    Exercise 1.11: investigate the distribution of x**2 + y**2.
+    Compare theoretical and empirical distributions.
 '''
 
 from argparse import ArgumentParser
