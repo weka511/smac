@@ -31,9 +31,10 @@ def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
-    parser.add_argument('--figs', default = './figs')
+    parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help = 'Show plot')
-    parser.add_argument('-N','--N', type=int, default=10000)
+    parser.add_argument('-N','--N', type=int, default=10000, help = 'Number of points')
+    parser.add_argument('-n','--n', type=int, default=1000, help = 'Number of bins for histogram')
     return parser.parse_args()
 
 
@@ -62,6 +63,12 @@ def get_distribution(num=50):
     ys = np.linspace(0,np.pi/4,num=num,endpoint=True)
     return xs,ys
 
+def get_distribution_extended(ys,num=50):
+    x1s = np.linspace(1,2,num=num,endpoint=True)
+    dx = (x1s[-1] - x1s[0])/num
+    y1s =  dx*np.cumsum(np.array([(1-np.sqrt(x1s[i]-1))/x1s[i] for i in range(len(x1s))]))
+    return x1s,y1s + (ys[-1] - y1s[0])
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -71,7 +78,7 @@ if __name__=='__main__':
     fig = figure(figsize=(12,12))
     ax = fig.add_subplot(1,1,1)
     ax.hist(np.fromfunction(np.vectorize(lambda _:np.square(2.0 * rng.random((2)) - 1).sum()),(args.N,)),
-            bins = 1000,
+            bins = np.linspace(0,2,num=args.n,endpoint=True),
             density = True,
             cumulative = True,
             color = 'blue',
@@ -79,11 +86,8 @@ if __name__=='__main__':
 
     xs,ys = get_distribution()
     ax.plot(xs,ys,color='red',label='Theoretical')
-    x1s = np.linspace(1,2,num=10,endpoint=True)
-    dx = x1s[1] - x1s[0]
-    y1s =  dx*np.cumsum(np.array([(1-np.sqrt(x1s[i]-1))/x1s[i] for i in range(len(x1s))]))
-    y1s1 = y1s + (ys[-1] -y1s[0])
-    ax.plot(x1s,y1s1,color='cyan',label='Theoretical')
+    x1s,y1s = get_distribution_extended(ys)
+    ax.plot(x1s,y1s,color='cyan',label='Theoretical')
     ax.set_xlabel(r'$\upsilon$')
     ax.set_ylabel('Frequency')
     ax.set_title(r'$\upsilon=x^2+y^2$' f' for {args.N:,} points')
