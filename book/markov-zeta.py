@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2015,2018 Greenweaves Software Limited
+# Copyright (C) 2015-2015 Greenweaves Software Limited
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,42 +14,92 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
-import random, matplotlib.pyplot as plt
+import argparse
+from os.path import basename, join, splitext
+from time import time
+import numpy as np
+from matplotlib.pyplot import figure, show
+from matplotlib import rc
 
-def markov_zeta(delta,zeta,x):
-    x_bar=x+2*delta*random.random()-delta
-    if 0<x_bar and x_bar<1:
-        p_accept=(x_bar/x)**zeta
-        if random.random()<p_accept: x=x_bar
+'''
+    Exercise 1.21
+'''
+def markov_zeta(x,delta = 0.005,zeta = -0.8,rng=np.random.default_rng()):
+    '''
+    Algorithm 1.31
+    '''
+    x_bar = x + 2*delta*rng.random() - delta
+    if 0 < x_bar and x_bar < 1:
+        p_accept = (x_bar/x)**zeta
+        if rng.random() < p_accept: x=x_bar
     return x
 
-if __name__=="__main__":
-    from matplotlib import rc
-    rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+def parse_arguments():
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument('-n', '--n', type=int, default=1000000,help='Number of steps for integral')
+    parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
+    parser.add_argument('--show', action = 'store_true', help = 'Show plot')
+    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
+    parser.add_argument('--figs', default = './figs',help='Folder for storing plot')
+    return parser.parse_args()
+
+def get_file_name(name,default_ext='png',seq=None):
+    '''
+    Used to create file names
+
+    Parameters:
+        name          Basis for file name
+        default_ext   Extension if non specified
+        seq           Used if there are multiple files
+    '''
+    base,ext = splitext(name)
+    if len(ext) == 0:
+        ext = default_ext
+    if seq != None:
+        base = f'{base}{seq}'
+    qualified_name = f'{base}.{ext}'
+    if ext == 'png':
+        return join(args.figs,qualified_name)
+    else:
+        return qualified_name
+
+if __name__=='__main__':
+
+    start = time()
+    rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    delta=0.005
-    n=1000000
-    x=1
-    zeta=-0.8
-    xs=[]
+    args = parse_arguments()
+    rng = np.random.default_rng(args.seed)
 
-    for i in range(0,n):
-        x=markov_zeta(delta,zeta,x)
-        xs.append(x)
-    plt.figure(1)
-    plt.plot(xs)
-    plt.title('$\zeta=-0.8$')
-    plt.savefig('markov-zeta-0-8.png')
+    # x = 1
 
-    x=1
-    zeta=-1.6
-    xs=[]
+    xs = np.zeros((args.n,2))
+    xs[0,0] = 1
+    for i in range(1,args.n):
+        xs[i,0] = markov_zeta(xs[i-1,0],zeta = -0.8,rng=rng)
+        # xs[i,0] = x
 
-    for i in range(0,n):
-        x=markov_zeta(delta,zeta,x)
-        xs.append(x)
-    plt.figure(2)
-    plt.plot(xs)
-    plt.title('$\zeta=-1.6$')
-    plt.savefig('markov-zeta-1-6.png')
-    plt.show()
+    # x = 1
+    xs[0,1] = 1
+
+    for i in range(1,args.n):
+        xs[i,1] = markov_zeta(xs[i-1,1],zeta = -1.6,rng=rng)
+        # xs[i,1] = x
+
+    fig = figure(figsize=(12,12))
+    ax1 = fig.add_subplot(1,2,1)
+
+    ax1.plot(xs[:,0])
+    ax1.set_title(r'$\zeta=-0.8$')
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.plot(xs[:,1])
+    ax2.set_title(r'$\zeta=-1.6$')
+    fig.savefig(get_file_name(args.out))
+
+    elapsed = time() - start
+    minutes = int(elapsed/60)
+    seconds = elapsed - 60*minutes
+    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
+
+    if args.show:
+        show()
