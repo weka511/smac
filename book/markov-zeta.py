@@ -22,11 +22,13 @@ from matplotlib.pyplot import figure, show
 from matplotlib import rc
 
 '''
-    Exercise 1.21
+    Algorithm 1.31 Markov-chain Monto Carlo algorithm for a point x on the interval [0,1]
+    with probability proportional to x**zeta
 '''
 def markov_zeta(x,delta = 0.005,zeta = -0.8,rng=np.random.default_rng()):
     '''
-    Algorithm 1.31
+    Algorithm 1.31 Markov-chain Monto Carlo algorithm for a point x on the interval [0,1]
+    with probability proportional to x**zeta
     '''
     x_bar = x + 2*delta*rng.random() - delta
     if 0 < x_bar and x_bar < 1:
