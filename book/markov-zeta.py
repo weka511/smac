@@ -71,20 +71,14 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
 
-    # x = 1
-
     xs = np.zeros((args.n,2))
     xs[0,0] = 1
     for i in range(1,args.n):
         xs[i,0] = markov_zeta(xs[i-1,0],zeta = -0.8,rng=rng)
-        # xs[i,0] = x
 
-    # x = 1
     xs[0,1] = 1
-
     for i in range(1,args.n):
         xs[i,1] = markov_zeta(xs[i-1,1],zeta = -1.6,rng=rng)
-        # xs[i,1] = x
 
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,2,1)
