@@ -24,7 +24,7 @@
 -|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algoritms 1.13 and 1.14
 1.3|binomialconvolution.py|1.18 Binomial Convolution
 1.4.2|direct-gamma.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
--|direct-gamma-zeta.py|
+-|direct-gamma-zeta.py|1.21 Implement Algorithm 1.31
 -|markov-zeta.py|Algorithm 1.31, use of Markov Chain to detect non-integrable singularity.
 1.4.4|levy-convolution.py|Algorithm 1.32
 2.1.4|spheres2.py|Exercise 2-4: Sinai's system of two large sphere in a box. Show histogram of positions.
