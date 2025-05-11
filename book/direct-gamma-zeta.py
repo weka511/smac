@@ -14,7 +14,9 @@
 '''
     Exercise 1.21, Algorithm 1.31.
 '''
-
+import argparse
+from os.path import basename, join, splitext
+from time import time
 import numpy as np
 from matplotlib.pyplot import figure, show
 from matplotlib import rc
@@ -37,27 +39,69 @@ def direct_gamma_zeta(gamma,zeta,n, rng=np.random.default_rng()):
     mean = sigma/n
     return (mean,np.sqrt(sigma2/n-mean*mean)/np.sqrt(n))
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument('-n', '--n', type=int, default=1000,help='Number of steps for integral')
+    parser.add_argument('--gammas', type=float, default= [2.0,1.0,0.0,-0.1,-0.4,-0.8], nargs='+')
+    parser.add_argument('--zetas', type=float, default= [0.0, -0.1, -0.7], nargs='+')
+    parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
+    parser.add_argument('--show', action = 'store_true', help = 'Show plot')
+    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
+    parser.add_argument('--figs', default = './figs',help='Folder for storing plot')
+    return parser.parse_args()
+
+def get_file_name(name,default_ext='png',seq=None):
+    '''
+    Used to create file names
+
+    Parameters:
+        name          Basis for file name
+        default_ext   Extension if non specified
+        seq           Used if there are multiple files
+    '''
+    base,ext = splitext(name)
+    if len(ext) == 0:
+        ext = default_ext
+    if seq != None:
+        base = f'{base}{seq}'
+    qualified_name = f'{base}.{ext}'
+    if ext == 'png':
+        return join(args.figs,qualified_name)
+    else:
+        return qualified_name
 
 if __name__=="__main__":
+    start = time()
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    rng = np.random.default_rng()
-    n = 1000
-    gammas = [2.0,1.0,0.0,-0.1,-0.4,-0.8]
+    args = parse_arguments()
+    rng = np.random.default_rng(args.seed)
+
+    # gammas = args.gammas#[2.0,1.0,0.0,-0.1,-0.4,-0.8]
     fig = figure(figsize=(12,12))
-    for i,zeta in enumerate([0.0, -0.1, -0.7]):
+    fig.suptitle(f'n={args.n:,}')
+    for i,zeta in enumerate(args.zetas):
         ax=fig.add_subplot(2,2,i+1)
-        y = np.zeros((len(gammas),3))
-        for j in range(len(gammas)):
-            (s,t) = direct_gamma_zeta(gammas[j],zeta,n,rng=rng)
+        y = np.zeros((len(args.gammas),3))
+        for j in range(len(args.gammas)):
+            (s,t) = direct_gamma_zeta(args.gammas[j],zeta,args.n,rng=rng)
             y[j,0] = s - t
             y[j,1] = s + t
-            y[j,2] = (zeta+1)/(gammas[j]+1)
-        ax.plot(gammas,y[:,0],label='Lower bound')
-        ax.plot(gammas,y[:,1],label='Upper bound')
-        ax.plot(gammas,y[:,2],label='Estimate')
+            y[j,2] = (zeta+1)/(args.gammas[j]+1)
+        ax.plot(args.gammas,y[:,0],label='Lower bound')
+        ax.plot(args.gammas,y[:,1],label='Upper bound')
+        ax.plot(args.gammas,y[:,2],label='Estimate')
         ax.set_xlabel(r'$\gamma$')
         ax.legend(title=r'$\zeta=$'f'{zeta}')
 
     fig.tight_layout(h_pad=3)
-    show()
+    fig.savefig(get_file_name(args.out))
+
+    elapsed = time() - start
+    minutes = int(elapsed/60)
+    seconds = elapsed - 60*minutes
+    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
+
+    if args.show:
+        show()
+

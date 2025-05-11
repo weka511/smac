@@ -30,6 +30,7 @@ from time import time
 import numpy as np
 from matplotlib.pyplot import figure, show
 from matplotlib import rc
+from scipy.interpolate import make_interp_spline, BSpline
 
 def direct_gamma(gamma,N=10, rng = np.random.default_rng()):
     '''Algorithm 1.29 Computing the gamma integral by direct sampling'''
@@ -84,9 +85,9 @@ if __name__ == '__main__':
                                (args.steps[0],))
         scaled = (data - 5)/(N**-0.2)
         y,_ = np.histogram(data,density=True,bins=bins)
-        ax1.plot(bins[:-1],y,label=f'N={N}')
+        ax1.plot(bins[:-1],y,label=f'N={N:,}')
         upsilon,_ = np.histogram(scaled,density=True,bins=scaled_bins)
-        ax2.plot(scaled_bins[:-1],upsilon,label=f'N={N}')
+        ax2.plot(scaled_bins[:-1],upsilon,label=f'N={N:,}')
 
     ax1.set_xlim(1,10)
     ax1.set_xlabel(r'$\Sigma/N$')
@@ -98,7 +99,7 @@ if __name__ == '__main__':
     ax2.set_title('Rescaled Average')
     ax2.legend()
 
-    fig.suptitle(r'$\gamma=$'f'{args.gamma}, after {args.steps[0]} iterations')
+    fig.suptitle(r'$\gamma=$'f'{args.gamma}, after {args.steps[0]:,} iterations')
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
