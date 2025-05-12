@@ -43,6 +43,28 @@ def markov_zeta(x,delta = 0.005,zeta = -0.25,rng=np.random.default_rng()):
             return x_bar,True
     return x,False
 
+def direct_gamma_zeta(gamma,zeta,n, delta = 0.005,rng=np.random.default_rng()):
+    def get_positive_sample():
+        while True:
+            x = rng.random()
+            if x > 0: return x
+
+    x = get_positive_sample()
+    sigma = 0
+    sigma2 = 0
+    n_accepted = 0
+    for i in range(n):
+        x,accepted = markov_zeta(x,delta = delta,zeta = zeta,rng=rng)
+        x2 = x**(gamma - zeta)
+        sigma += x2
+        sigma2 += x2**2
+        if accepted:
+            n_accepted += 1
+
+    mean = sigma/n
+    return (mean,np.sqrt(sigma2/n-mean*mean)/np.sqrt(n),n_accepted/n)
+
+
 def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
@@ -50,15 +72,8 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('--zeta', type=float, default=-0.25)
-    parser.add_argument('--delta', type=float,
-                        default=[
-                            0.0000625, 0.000125, 0.00025, 0.0005,
-                            0.000625, 0.00125, 0.0025, 0.005,
-                            0.0125, 0.025, 0.05, 0.125,
-                            0.25, 0.3125, 0.375, 0.4375,
-                            0.5],
-                        nargs='+')
-    parser.add_argument('--length', type=float, default=1.0)
+    parser.add_argument('--gamma', type=float, default=-0.8)
+    parser.add_argument('--N',type=int,default=1000)
     return parser.parse_args()
 
 
@@ -88,44 +103,22 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-
-    Rejection_rate = np.zeros_like(args.delta)
-    Means = np.zeros_like(args.delta)
-    Stds = np.zeros_like(args.delta)
-
-    for i in range(len(args.delta)):
-        N = int(args.length/args.delta[i])+1
-        X = np.zeros((N))
-        X[0] = 1
-        number_accepted = 0
-        for j in range(1,N):
-            X[j], accepted = markov_zeta(X[j-1],delta=args.delta[i],zeta=args.zeta,rng=rng)
-            if accepted:
-                number_accepted += 1
-        Rejection_rate[i] = 1 - number_accepted/(N-1)
-        Means[i] = X.mean()
-        Stds[i] = X.std()
+    Results = np.zeros((3,args.N))
+    for n in range(2,args.N):
+        Results[0,n], Results[1,n],Results[2,n] = direct_gamma_zeta(args.gamma,args.zeta,n, delta = 1/n,rng=rng)
 
     fig = figure(figsize=(12,12))
-    fig.suptitle(r'$\zeta=$'f'{args.zeta}')
-
+    fig.suptitle(r'$\zeta=$'f'{args.zeta}'r'$,\gamma=$'f'{args.gamma}')
     ax1 = fig.add_subplot(2,1,1)
-    plot1a = ax1.plot(args.delta,Rejection_rate,color='red',label='Rejection')
-    ax1.set_xlabel(r'$\delta$')
-    ax1.set_ylabel(r'$Rejection\ rate$')
-    ax1a = ax1.twinx()
-    plot1b = ax1a.plot(args.delta,Means,label=r'$\mu$',color='blue')
-    plot1c =  ax1a.plot(args.delta,Stds,label=r'$\sigma$',color='green')
-    plots = plot1a + plot1b + plot1c
-    labels = [p.get_label() for p in plots]
-    ax1.legend(plots,labels,loc='center left')
+    plot1 = ax1.plot(Results[0,5:],label='Mean',color='blue')
+    plot2 = ax1.plot(Results[1,5:],label='Var',color='green')
+    plot3 = ax1.axhline(1/(args.gamma+1),label='Ground Truth',color='magenta')
+    plot1a = ax1.twinx().plot(Results[2,5:],label='Acceptance',color='red')
+    plots = plot1 + plot2 + plot1a
+    ax1.legend(plots,[p.get_label() for p in plots])
 
     ax2 = fig.add_subplot(2,1,2)
-    ax2.scatter(Rejection_rate,Stds,label='Std',color='green')
-    ax2.set_ylabel(r'$\sigma$')
-    ax2.set_xlabel(r'$Rejection\ rate$')
-    ax2.set_title('Variance vs. rejection rate.')
-    fig.tight_layout(h_pad=3)
+    ax2.scatter(Results[2,2:],Results[0,2:]-1/(args.gamma+1))
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
