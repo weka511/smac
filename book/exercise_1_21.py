@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 '''
-    Exercise 1.21 Determine the mean value of x**(gamma-eta) in
+    Exercise 1.21 Determine the mean value of x**(gamma-zeta) in
     a simple implementation of Algorithm 1.31 (markov-zeta)
 '''
 
@@ -50,7 +50,14 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('--zeta', type=float, default=-0.25)
-    parser.add_argument('--delta', type=float, default=[0.001,0.005,0.01,0.05,0.1,0.5],nargs='+')
+    parser.add_argument('--delta', type=float,
+                        default=[
+                            0.0000625, 0.000125, 0.00025, 0.0005,
+                            0.000625, 0.00125, 0.0025, 0.005,
+                            0.0125, 0.025, 0.05, 0.125,
+                            0.25, 0.3125, 0.375, 0.4375,
+                            0.5],
+                        nargs='+')
     parser.add_argument('--length', type=float, default=1.0)
     return parser.parse_args()
 
@@ -83,6 +90,9 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
 
     Rejection_rate = np.zeros_like(args.delta)
+    Means = np.zeros_like(args.delta)
+    Stds = np.zeros_like(args.delta)
+
     for i in range(len(args.delta)):
         N = int(args.length/args.delta[i])+1
         X = np.zeros((N))
@@ -92,13 +102,30 @@ if __name__=='__main__':
             X[j], accepted = markov_zeta(X[j-1],delta=args.delta[i],zeta=args.zeta,rng=rng)
             if accepted:
                 number_accepted += 1
-        Rejection_rate[i] = 1 - number_accepted/(len(X)-1)
+        Rejection_rate[i] = 1 - number_accepted/(N-1)
+        Means[i] = X.mean()
+        Stds[i] = X.std()
 
     fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(1,1,1)
-    ax1.plot(args.delta,Rejection_rate)
+    fig.suptitle(r'$\zeta=$'f'{args.zeta}')
+
+    ax1 = fig.add_subplot(2,1,1)
+    plot1a = ax1.plot(args.delta,Rejection_rate,color='red',label='Rejection')
     ax1.set_xlabel(r'$\delta$')
-    ax1.set_ylabel(r'$Rejection\_rate$')
+    ax1.set_ylabel(r'$Rejection\ rate$')
+    ax1a = ax1.twinx()
+    plot1b = ax1a.plot(args.delta,Means,label=r'$\mu$',color='blue')
+    plot1c =  ax1a.plot(args.delta,Stds,label=r'$\sigma$',color='green')
+    plots = plot1a + plot1b + plot1c
+    labels = [p.get_label() for p in plots]
+    ax1.legend(plots,labels,loc='center left')
+
+    ax2 = fig.add_subplot(2,1,2)
+    ax2.scatter(Rejection_rate,Stds,label='Std',color='green')
+    ax2.set_ylabel(r'$\sigma$')
+    ax2.set_xlabel(r'$Rejection\ rate$')
+    ax2.set_title('Variance vs. rejection rate.')
+    fig.tight_layout(h_pad=3)
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
