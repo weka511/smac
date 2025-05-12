@@ -108,7 +108,7 @@ if __name__=='__main__':
         Results[0,n], Results[1,n],Results[2,n] = direct_gamma_zeta(args.gamma,args.zeta,n, delta = 1/n,rng=rng)
 
     fig = figure(figsize=(12,12))
-    fig.suptitle(r'$\zeta=$'f'{args.zeta}'r'$,\gamma=$'f'{args.gamma}')
+    fig.suptitle(r'$\zeta=$'f'{args.zeta}'r'$,\gamma=$'f'{args.gamma}'r',$N=$'f'{args.N}')
     ax1 = fig.add_subplot(2,1,1)
     plot1 = ax1.plot(Results[0,5:],label='Mean',color='blue')
     plot2 = ax1.plot(Results[1,5:],label='Var',color='green')
@@ -118,7 +118,9 @@ if __name__=='__main__':
     ax1.legend(plots,[p.get_label() for p in plots])
 
     ax2 = fig.add_subplot(2,1,2)
-    ax2.scatter(Results[2,2:],Results[0,2:]-1/(args.gamma+1))
+    ax2.scatter(Results[2,2:],Results[0,2:]-1/(args.gamma+1),color='magenta')
+    ax2.set_xlabel('Acceptance')
+    ax2.set_ylabel('Error')
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
