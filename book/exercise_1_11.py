@@ -77,7 +77,7 @@ def get_distribution(num=10):
 def get_distribution_extended(num=50):
     '''
     This function is used to calculate the empirical distribution of x**2 + y**2, on the assumption that
-    x**2 + y**2 >1 1. It is used in conjunction with get_distribution(...)
+    x**2 + y**2 >1 1. It is used in conjunction with get_distribution(...).
 
     Parameters:
         num    Number of points to be plotted
@@ -86,24 +86,26 @@ def get_distribution_extended(num=50):
         xs    An array, each of whose elements represents the area of a circle in the x-y plane
         ys    An array, each of whose elements, ys[i], represents the probability that x**2 + y**2<xs[i]
 
-    The probability is the sum of two areas, a triangle and a segment.
+    The probability is the sum of two areas, a triangle OAB and a sector OBC, as depicted in  notes and diagram in
+    SMAC notebook, page 59.
+
     '''
     def get_probability(R):
         def get_area_triangle():
             '''
-            Area of triangle
+            Area of triangle AOB
             '''
             return 0.5 * np.sqrt(R**2 - 1)
 
-        def get_area_segment():
+        def get_area_sector():
             '''
-            Area of segment
+            Area of sector OBC
             '''
             theta = np.arccos(1/R)
             theta_segment = np.pi/4 - theta
             return R**2 * theta_segment/2
 
-        return 2 * (get_area_triangle() + get_area_segment())
+        return 2 * (get_area_triangle() + get_area_sector())
 
     xs = np.linspace(1,2,num=num,endpoint=True)
     return xs, np.array([get_probability(np.sqrt(Area)) for Area in xs])
