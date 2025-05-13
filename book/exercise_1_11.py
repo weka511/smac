@@ -27,7 +27,6 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 
-
 def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
@@ -59,20 +58,53 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
-def get_distribution(num=50):
+def get_distribution(num=10):
+    '''
+    This function is used to calculate the empirical distribution of x**2 + y**2, on the assumption that
+    x**2 + y**2 < 1. It is used in conjunction with get_distribution_extended(...)
+
+    Parameters:
+        num    Number of points to be plotted
+
+    Returns:
+        xs    An array, each of whose elements represents the area of a circle in the x-y plane
+        ys    An array, each of whose elements, ys[i], represents the probability that x**2 + y**2<xs[i]
+    '''
     xs = np.linspace(0,1,num=num,endpoint=True)
     ys = np.linspace(0,np.pi/4,num=num,endpoint=True)
     return xs,ys
 
 def get_distribution_extended(num=50):
+    '''
+    This function is used to calculate the empirical distribution of x**2 + y**2, on the assumption that
+    x**2 + y**2 >1 1. It is used in conjunction with get_distribution(...)
+
+    Parameters:
+        num    Number of points to be plotted
+
+    Returns:
+        xs    An array, each of whose elements represents the area of a circle in the x-y plane
+        ys    An array, each of whose elements, ys[i], represents the probability that x**2 + y**2<xs[i]
+
+    The probability is the sum of two areas, a triangle and a segment.
+    '''
     def get_probability(R):
         def get_area_triangle():
+            '''
+            Area of triangle
+            '''
             return 0.5 * np.sqrt(R**2 - 1)
+
         def get_area_segment():
+            '''
+            Area of segment
+            '''
             theta = np.arccos(1/R)
             theta_segment = np.pi/4 - theta
             return R**2 * theta_segment/2
-        return 2*(get_area_triangle() + get_area_segment())
+
+        return 2 * (get_area_triangle() + get_area_segment())
+
     xs = np.linspace(1,2,num=num,endpoint=True)
     return xs, np.array([get_probability(np.sqrt(Area)) for Area in xs])
 
