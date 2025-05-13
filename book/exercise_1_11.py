@@ -64,23 +64,17 @@ def get_distribution(num=50):
     ys = np.linspace(0,np.pi/4,num=num,endpoint=True)
     return xs,ys
 
-def get_probability(R):
-    def get_area_triangle(R):
-        return 0.5 * np.sqrt(R**2 - 1)
-    def get_area_segment(R):
-        theta = np.arccos(1/R)
-        theta_segment = np.pi/4 - theta
-        return R**2 * theta_segment/2
-    return 2*(get_area_triangle(R) + get_area_segment(R))
-
-def get_distribution_extended(ys,num=50):
-    x1s = np.linspace(1,2,num=num,endpoint=True)
-    return x1s, np.array([get_probability(np.sqrt(R)) for R in x1s])
-    # dx = (x1s[-1] - x1s[0])/num
-    # y1s =  dx*np.cumsum(np.array([(1-np.sqrt(x1s[i]-1))/x1s[i] for i in range(len(x1s))]))
-    # return x1s,y1s + (ys[-1] - y1s[0])
-
-
+def get_distribution_extended(num=50):
+    def get_probability(R):
+        def get_area_triangle():
+            return 0.5 * np.sqrt(R**2 - 1)
+        def get_area_segment():
+            theta = np.arccos(1/R)
+            theta_segment = np.pi/4 - theta
+            return R**2 * theta_segment/2
+        return 2*(get_area_triangle() + get_area_segment())
+    xs = np.linspace(1,2,num=num,endpoint=True)
+    return xs, np.array([get_probability(np.sqrt(Area)) for Area in xs])
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -94,13 +88,13 @@ if __name__=='__main__':
             bins = np.linspace(0,2,num=args.n,endpoint=True),
             density = True,
             cumulative = True,
-            color = 'blue',
+            color = 'cyan',
             label = 'Empirical')
 
     xs,ys = get_distribution()
-    ax.plot(xs,ys,color='red',label='Theoretical')
-    x1s,y1s = get_distribution_extended(ys)
-    ax.plot(x1s,y1s,color='cyan',label='Theoretical')
+    ax.plot(xs,ys,color='red',label=r'$Theoretical\ (R\le 1)$')
+    x1s,y1s = get_distribution_extended()
+    ax.plot(x1s,y1s,color='blue',label=r'$Theoretical\ (R>1)$')
     ax.set_xlabel(r'$\upsilon$')
     ax.set_ylabel('Frequency')
     ax.set_title(r'$\upsilon=x^2+y^2$' f' for {args.N:,} points')
