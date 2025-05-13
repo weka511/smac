@@ -64,11 +64,23 @@ def get_distribution(num=50):
     ys = np.linspace(0,np.pi/4,num=num,endpoint=True)
     return xs,ys
 
+def get_probability(R):
+    def get_area_triangle(R):
+        return 0.5 * np.sqrt(R**2 - 1)
+    def get_area_segment(R):
+        theta = np.arccos(1/R)
+        theta_segment = np.pi/4 - theta
+        return R**2 * theta_segment/2
+    return 2*(get_area_triangle(R) + get_area_segment(R))
+
 def get_distribution_extended(ys,num=50):
     x1s = np.linspace(1,2,num=num,endpoint=True)
-    dx = (x1s[-1] - x1s[0])/num
-    y1s =  dx*np.cumsum(np.array([(1-np.sqrt(x1s[i]-1))/x1s[i] for i in range(len(x1s))]))
-    return x1s,y1s + (ys[-1] - y1s[0])
+    return x1s, np.array([get_probability(np.sqrt(R)) for R in x1s])
+    # dx = (x1s[-1] - x1s[0])/num
+    # y1s =  dx*np.cumsum(np.array([(1-np.sqrt(x1s[i]-1))/x1s[i] for i in range(len(x1s))]))
+    # return x1s,y1s + (ys[-1] - y1s[0])
+
+
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
