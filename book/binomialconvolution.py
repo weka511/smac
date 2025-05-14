@@ -61,16 +61,16 @@ def get_file_name(name,default_ext='png',seq=None):
 
 
 def binomial_convolution(theta = np.pi/4,N=9):
-    '''Algorithm 1.25 from Krauth'''
-    P = np.full((N,N),np.nan)   # P[N,k] - k hits in N trials
-    P[0,0] = 1
-    for n in range(1,N):
-        P[n,0] = (1-theta) * P[n-1,0]
-        for k in range(1,n):
-            P[n,k] = (1-theta) * P[n-1,k] +  theta* P[n-1,k-1]
-        P[n,n] = theta * P[n-1,n-1]
+    '''
+    Algorithm 1.25 from Krauth
 
-    return P
+    This function uses numpy's built-in convolution
+    '''
+    a = np.ones((1))
+    thetas = np.array([1-theta,theta])
+    for n in range(1,N):
+        a = np.convolve(a,thetas)
+    return a
 
 def direct_pi(m,rng = np.random.default_rng()):
     n_hits = 0
@@ -94,14 +94,14 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
 
     P = binomial_convolution(theta = args.theta,N=args.N)
-    imax = P[-1,:].argmax()
+    imax = P.argmax()
     frequency = run(args.M,args.m,rng=rng)
     sigma = np.sqrt((np.pi/4)*(1-np.pi/4))
     rescaled = (frequency-np.pi/4)/sigma
     fig = figure(figsize=(12,12))
 
     ax1 = fig.add_subplot(2,2,1)
-    ax1.plot(P[-1,:],label=f'{imax/len(P[-1,:])}')
+    ax1.plot(P,label=f'{imax/len(P)}')
     ax1.set_title('Binomial coefficients')
     ax1.legend()
 
@@ -111,7 +111,7 @@ if __name__=='__main__':
     ax2.legend()
 
     ax3 = fig.add_subplot(2,2,3)
-    ax3.plot(P[-1,:]/args.N)
+    ax3.plot(P/args.N,label=f'{imax/len(P)}')
     ax3.set_title('Scaled Binomial coefficients')
     ax3.legend()
 
