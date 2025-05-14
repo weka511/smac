@@ -32,8 +32,10 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('--theta',type=float,default = np.pi/4)
-    parser.add_argument('--N',type=int,default = 1000)
-    parser.add_argument('--M',type=int,default = 100000)
+    parser.add_argument('--N',type=int,default = 1000, help = 'Number of iterations of binomial convolution')
+    parser.add_argument('--M',type=int,default = 10000, help = 'Number of samples in one run of direct-pi')
+    parser.add_argument('--m',type=int,default = 1000, help = 'Number of runs of direct-pi')
+    parser.add_argument('--bins',type=int,default = 100, help = 'Number of bins for histogram')
     return parser.parse_args()
 
 def get_file_name(name,default_ext='png',seq=None):
@@ -69,28 +71,50 @@ def binomial_convolution(theta = np.pi/4,N=9):
 
     return P
 
-def direct_pi(M):
+def direct_pi(m,rng = np.random.default_rng()):
     n_hits = 0
-    for i in range(args.M):
+    for i in range(m):
         x,y = rng.uniform(-1,1,2)
         if x**2 + y**2 < 1:
             n_hits += 1
-    return n_hits
+    return n_hits/m
+
+def run(M,m,rng = np.random.default_rng()):
+    frequency = np.zeros((M))
+    for i in range(M):
+        frequency[i] = direct_pi(m,rng=rng)
+    return frequency
 
 if __name__=='__main__':
-
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    fig = figure(figsize=(12,12))
-    ax = fig.add_subplot(1,1,1)
 
-
-    direct_pi(args.M)
     P = binomial_convolution(theta = args.theta,N=args.N)
-    ax.plot(P[-1,:])
+    frequency = run(args.M,args.m,rng=rng)
+    sigma = np.sqrt((np.pi/4)*(1-np.pi/4))
+    fig = figure(figsize=(12,12))
+
+    ax1 = fig.add_subplot(2,2,1)
+    ax1.plot(P[-1,:])
+
+    ax2 = fig.add_subplot(2,2,2)
+    ax2.hist(frequency,bins=args.bins)
+
+    ax3 = fig.add_subplot(2,2,3)
+    ax3.plot(P[-1,:]/args.N)
+
+    ax4 = fig.add_subplot(2,2,4)
+    ax4.hist((frequency-np.pi/4)/sigma,bins=args.bins)
 
     fig.savefig(get_file_name(args.out))
-    show()
+
+    elapsed = time() - start
+    minutes = int(elapsed/60)
+    seconds = elapsed - 60*minutes
+    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
+
+    if args.show:
+        show()
