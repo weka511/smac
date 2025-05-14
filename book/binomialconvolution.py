@@ -23,6 +23,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
+from scipy.stats import mode
 
 def parse_arguments():
     '''Parse command line arguments'''
@@ -93,21 +94,31 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
 
     P = binomial_convolution(theta = args.theta,N=args.N)
+    imax = P[-1,:].argmax()
     frequency = run(args.M,args.m,rng=rng)
     sigma = np.sqrt((np.pi/4)*(1-np.pi/4))
+    rescaled = (frequency-np.pi/4)/sigma
     fig = figure(figsize=(12,12))
 
     ax1 = fig.add_subplot(2,2,1)
-    ax1.plot(P[-1,:])
+    ax1.plot(P[-1,:],label=f'{imax/len(P[-1,:])}')
+    ax1.set_title('Binomial coefficients')
+    ax1.legend()
 
     ax2 = fig.add_subplot(2,2,2)
-    ax2.hist(frequency,bins=args.bins)
+    ax2.hist(frequency,bins=args.bins,label=f'{mode(frequency).mode}')
+    ax2.set_title('Direct pi')
+    ax2.legend()
 
     ax3 = fig.add_subplot(2,2,3)
     ax3.plot(P[-1,:]/args.N)
+    ax3.set_title('Scaled Binomial coefficients')
+    ax3.legend()
 
     ax4 = fig.add_subplot(2,2,4)
-    ax4.hist((frequency-np.pi/4)/sigma,bins=args.bins)
+    ax4.hist(rescaled,bins=args.bins,label=f'{mode(rescaled).mode}')
+    ax4.legend()
+    ax4.set_title('Rescaled direct pi')
 
     fig.savefig(get_file_name(args.out))
 
