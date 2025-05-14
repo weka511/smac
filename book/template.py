@@ -26,6 +26,7 @@ from matplotlib.pyplot import figure, show
 
 
 def parse_arguments():
+    '''Parse command line arguments'''
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
