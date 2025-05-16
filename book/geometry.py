@@ -17,34 +17,62 @@
 
 '''Support use of periodic and unbounded boundary conditions '''
 
-import numpy as np
+from abc import ABC, abstractmethod
 from unittest import TestCase, main
+import numpy as np
 
-class Geometry:
-    '''This class represents the space in which the action occurs'''
+class Geometry(ABC):
+    '''
+    This class represents the space in which the action occurs
+
+    Attributes:
+        L      A vector representing the length of one side of the space
+        sigma  Radius of a sphere
+        d      Dimension of space
+    '''
     def __init__(self, L  = np.array([1,1]), sigma = 0.25,  d = 2):
         self.L = L
         self.sigma = sigma
         self.d = d
 
     def get_density(self, N = 4):
-        '''Calculate fraction of total volums that will be occupied'''
+        '''
+        Calculate fraction of total volums that will be occupied by spheres
+
+        Parameters:
+            N      Number of spheres
+        '''
         return N * np.pi * self.sigma**2/np.prod(self.L)
 
     def set_sigma(self, eta = 1.0, N   = 4):
+        '''
+        Calculate the radius of spheres needed to give a specified density
+
+        Parameters:
+            eta    The density that we want
+            N      Number of spheres
+        '''
         self.sigma = np.sqrt(np.prod(self.L)*eta/(N*np.pi))
 
     def create_configuration(self,N=4):
-        '''Create an initial configuration, spread uniformly through space'''
+        '''
+        Create an initial configuration, spread uniformly through space
+
+        Parameters:
+            N      Number of spheres
+        '''
         if self.d == 2:
             return self.pack_disks(N)
         else:
-            raise Exception(f'Not implemented for d={d}')
+            raise ValueError(f'Not implemented for d={d}')
 
     def pack_disks(self, N=4):
         '''
             Create an initial configuration of disks, spread uniformly through a rectangle,
             using Lagrange's formula https://en.wikipedia.org/wiki/Circle_packing#Densest_packing
+
+        Parameters:
+            N      Number of disks
         '''
         def alloc(i,j):
             '''Determine position of one disk'''
@@ -72,7 +100,7 @@ class Geometry:
 
         eta = self.get_density(N=N)
         if eta > np.pi*np.sqrt(3)/6:
-            raise Exception(f'Density of {eta} exceeds {np.pi*np.sqrt(3)/6}')
+            raise ValueError(f'Density of {eta} exceeds {np.pi*np.sqrt(3)/6}')
 
         m,n = get_side_dimensions(N)
 
@@ -85,16 +113,48 @@ class Geometry:
         self.HistogramBins = np.zeros((n,self.d), dtype=np.int64) if HistogramBins.size==0 else HistogramBins
         return [Histogram(n, h = self.HistogramBins[:,j]) for j in range(self.d)]
 
+    @abstractmethod
+    def get_description(self):
+        '''Used in titles of plots'''
+
+    @abstractmethod
+    def get_distance(self, X0,X1):
+        '''Calculate distance between two points using periodic boundary conditions'''
+
+    @abstractmethod
+    def move_to(self,X):
+        '''
+        This function is used to propose a move
+        '''
+
 class BoundedGeometry(Geometry):
     '''
     This class represents Boxes, Tori, etc. Any space that is bounded in at least one dimension
+
+    Attributes:
+         LowerBound
+         UpperBound
     '''
     def __init__(self, L  = np.array([1,1]), sigma = 0.25,  d = 2, LowerBound=-np.inf,UpperBound=np.inf):
+        '''
+        Parameters:
+            L           A vector representing the length of one side of the space
+            sigma       Radius of a sphere
+            d           Dimension of space
+            LowerBound
+            UpperBound
+        '''
         super().__init__(L, sigma, d)
         self.LowerBound = LowerBound
         self.UpperBound = UpperBound
 
     def is_within_bounds(self,X_proposed):
+        '''
+        Establish whether a proposed move is between lower and upper bounds
+
+        Parameters:
+            X_proposed        Proposed new position
+        '''
         if any(X_proposed < self.LowerBound): return False
         if any(self.UpperBound < X_proposed): return False
         return True
@@ -102,6 +162,12 @@ class BoundedGeometry(Geometry):
 class Box(BoundedGeometry):
     '''This class represents a simple box geometry without periodic boundary conditions'''
     def __init__(self, L = np.array([1,1]), sigma = 0.125, d = 2):
+        '''
+        Parameters:
+            L      A vector representing the length of one side of the space
+            sigma  Radius of a sphere
+            d      Dimension of space
+        '''
         super().__init__(L = L, sigma = sigma, d = d,LowerBound = sigma*np.ones(d),UpperBound =  L - sigma*np.ones(d))
 
 
@@ -110,9 +176,13 @@ class Box(BoundedGeometry):
         return np.linalg.norm(X0-X1)
 
     def move_to(self,X):
+        '''
+        This function is used to propose a move.
+        '''
         return X
 
     def get_description(self):
+        '''Used in titles of plots'''
         return 'without periodic boundary conditions'
 
 
@@ -120,6 +190,12 @@ class Box(BoundedGeometry):
 class Torus(BoundedGeometry):
     '''This class represents a  box geometry with periodic boundary conditions, i.e. a torus.'''
     def __init__(self, L = np.array([1,1]), sigma = 0.125, d = 2):
+        '''
+        Parameters:
+            L      A vector representing the length of one side of the space
+            sigma  Radius of a sphere
+            d      Dimension of space
+        '''
         super().__init__(L = L, sigma = sigma, d = d, LowerBound = np.zeros(d),UpperBound = L)
 
 
@@ -128,14 +204,30 @@ class Torus(BoundedGeometry):
         return np.linalg.norm(self.diff_vec(X0,X1))
 
     def move_to(self,X):
+        '''
+        This function is used to propose a move
+        '''
         return self.box_it(X)
 
     def box_it(self,X):
-        '''Algorithm 2.5'''
+        '''
+        Algorithm 2.5   Reduce a vector into a periodic box of size L
+
+        Parameters:
+            X       The vector that is to be reduced
+        '''
         return X % self.L
 
     def diff_vec(self,X0,X1):
-        '''Algorithm 2.6'''
+        '''
+        Algorithm 2.6  Determine the distance between two vectors in a box
+        with periodic boundary conditions
+
+        Parameters:
+            X0      One vector
+            X1      The other vector
+
+        '''
         Delta  = self.box_it(X0 - X1)
         return np.minimum(Delta, Delta - self.L/2)
 
@@ -147,17 +239,28 @@ def GeometryFactory(periodic = False,
                     L = np.array([1,1]),
                     sigma = 0.125,
                     d = 2):
-    '''Create a periodic or aperiodic Geometry'''
-    if periodic:
-        return Torus(L = L, sigma = sigma, d = d)
-    else:
-        return Box(L = L, sigma = sigma, d = d)
+    '''
+    Create a periodic or aperiodic Geometry
+
+    Parameters:
+        periodic Indicates whether geometry is to have periodic boundary conditions
+        L        A vector representing the length of one side of the space
+        sigma    Radius of a sphere
+        d        Dimension of space
+    '''
+    return Torus(L = L, sigma = sigma, d = d) if periodic else Box(L = L, sigma = sigma, d = d)
 
 class Histogram:
     '''
-       This class represents a Histogram, to which we can add points dynamically.
-       This allows memeory to be saved, as we don;t have to maintain individual
+       This class represents a Histogram, to which we can add samples dynamically.
+       This allows memory to be saved, as we don't have to maintain individual
        samples in memory.
+
+    Arrributes:
+        n        Number of bins
+        h        The collection of counts for all bins
+        x0       Lowest sample value expected
+        xn       Highest sample value expected
     '''
     def __init__(self,
                  n  = 10,
@@ -170,22 +273,38 @@ class Histogram:
         self.xn = xn
 
     def __len__(self):
+        '''
+        Find number of bins
+        '''
         return self.n
 
     def __getitem__(self, i):
+        '''
+        Find count of specified bin
+        '''
         return self.h[i]
 
     def add(self,x):
-        '''Add one value to histogram. This increases the count of the relevant bin by 1'''
+        '''
+        Add one value to histogram. This increases the count of the relevant bin by 1
+
+        Parameters:
+             x     The value to be added
+        '''
         self.h[min(int(self.n * (x-self.x0)/(self.xn-self.x0)),len(self)-1)]+=1
 
     def get_hist(self):
-        '''Retrieve counts and bin boundaries'''
+        '''
+        Retrieve counts and bin boundaries
+        '''
         Z = sum(self.h)
         bins = [self.x0 + i*(self.xn-self.x0)/self.n for i in range(self.n)]
-        return self.h/Z,bins+[self.xn]
+        return self.h/Z,bins + [self.xn]
 
     def bins(self):
+        '''
+        A generator use to iterate through the counts of all bins
+        '''
         for i in range(self.n):
             yield(self.h[i])
 
