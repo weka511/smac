@@ -24,7 +24,7 @@
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
-from sys import maxsize
+from sys import maxsize, exit
 from time import time
 import numpy as np
 from matplotlib import rc
@@ -36,12 +36,12 @@ def direct_disks(sigma = 0.25, N = 4, NTrials = maxsize, d = 2, geometry = None,
     Prepare one admissable configuration of disks
 
     Parameters:
-        sigma
-        N
-        NTrials
-        d
-        geometry
-        rng
+        sigma     Radius of a disk
+        N         Number of attempts
+        NTrials   Maximum number of attempts to create configuration (tabula rasa)
+        d         Dimension of space
+        geometry  The space in which the action occurs--bounded or unbounded
+        rng       Random number generator
 
     Returns:
         X, an array containing the coordinates of N points such that we can position N
@@ -49,17 +49,17 @@ def direct_disks(sigma = 0.25, N = 4, NTrials = maxsize, d = 2, geometry = None,
         of X.
     '''
 
-    def is_overlapped(X):
-        '''Determine whether spheres overlap'''
+    def admissable(proposed):
+        '''Determine whether proposed configuration is admissable, i.e. no two spheres overlap'''
         for i in range(N):
             for j in range(i+1,N):
-                if geometry.get_distance(X[i,:],X[j,:]) < 2*sigma:
-                    return True
-        return False
+                if geometry.get_distance(proposed[i,:],proposed[j,:]) < 2*sigma:
+                    return False
+        return True
 
     for k in range(NTrials):
-        X = geometry.LowerBound + geometry.UpperBound * rng.random(size=(N,d))
-        if not is_overlapped(X): return X
+        proposed = geometry.LowerBound + geometry.UpperBound * rng.random(size=(N,d))
+        if admissable(proposed): return proposed
 
     raise RuntimeError(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
 
@@ -84,6 +84,7 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 def parse_arguments():
+    '''Parse command line arguments'''
     parser = ArgumentParser(description = __doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
@@ -114,19 +115,25 @@ if __name__=='__main__':
             geometry = GeometryFactory(periodic = args.periodic, L = sides, sigma = sigma, d = args.d)
             eta = geometry.get_density(N = args.Disks)
             print (f'sigma = {sigma}, eta = {eta}')
-            configurations = [direct_disks(sigma=sigma,N=args.Disks,d=args.d,geometry=geometry,NTrials=args.NTrials)[:,0]
-                              for _ in range(args.N)]
-            positions = np.reshape(configurations, args.N*args.Disks)
-            hist,bin_edges = np.histogram(positions, bins = args.bins, density = True)
-            xs = [0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)]
-            ax1.plot(xs, hist,label = fr'$\sigma=${sigma}, $\eta=$ {eta:.3}')
+            x_coordinates = np.empty((args.N,args.Disks))
+            for i in range(args.N):
+                configuration = direct_disks(sigma=sigma,N=args.Disks,d=args.d,geometry=geometry,NTrials=args.NTrials)
+                x_coordinates[i,:] = configuration[:,0]
+            hist,bin_edges = np.histogram( np.reshape(x_coordinates, args.N*args.Disks), bins = args.bins, density = True)
+            actual_bins = [0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)]
+            ax1.plot(actual_bins, hist,label = fr'$\sigma=${sigma}, $\eta=${eta:.3}')
             upper_limit = max(max(hist),upper_limit)
         except RuntimeError as e:
             print (e)
 
-    ax1.set_title(fr'{args.N:,} Trials, {args.Disks} Disks {geometry.get_description()}')
-    ax1.legend()
-    ax1.set_ylim([0,upper_limit])
+    ax1.set_title(fr'x coordinates for {args.N:,} Trials, {args.Disks} Disks, {geometry.get_description()}')
+    ax1.legend(title='Disks')
+    try:
+        ax1.set_ylim([0,upper_limit])
+    except ValueError as e:
+        print (e)
+        exit(1)
+
     ax1.set_xlabel('Position')
     ax1.set_ylabel('Frequency')
 
