@@ -23,6 +23,7 @@
 -|exercise_1_14.py|Exercise 1.14. Sample random vectors on the surface of a sphere using Algorithm 1.22 and plot x[0]**2 + y[0]**2
 -|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algoritms 1.13 and 1.14
 1.3|binomialconvolution.py|Exercise 1.18 and Algorithm 1.25 from Krauth
+-|data-bunch.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch)
 1.4.2|direct-gamma.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
 -|direct-gamma-zeta.py|Implement Algorithm 1.30
 -|exercise_1_21.py|Exercise 1.21 Determine the mean value of x**(gamma-zeta) in a simple implementation of Algorithm 1.31 (markov-zeta)
