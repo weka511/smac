@@ -167,6 +167,17 @@ class BoundedGeometry(Geometry):
         if any(self.UpperBound < X_proposed): return False
         return True
 
+    def propose(self,N,rng = np.random.default_rng()):
+        '''
+        Used to propose a configuration of centroids of spheres,
+        which is not guaranteed to be admissable.
+
+        Parameters:
+            N     Number of spheres
+            rng   Random number generator
+        '''
+        return self.LowerBound + (self.UpperBound-self.LowerBound) * rng.random(size=(N,self.d))
+
 class Box(BoundedGeometry):
     '''This class represents a simple box geometry without periodic boundary conditions'''
     def __init__(self, L = np.array([1,1]), sigma = 0.125, d = 2):

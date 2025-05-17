@@ -48,7 +48,7 @@ def direct_disks(N = 4, NTrials = maxsize,  geometry = None, rng = np.random.def
     '''
 
     for k in range(NTrials):
-        proposed = geometry.LowerBound + geometry.UpperBound * rng.random(size=(N,geometry.d))
+        proposed = geometry.propose(N,rng =rng)
         if geometry.admissable(proposed): return proposed
 
     raise RuntimeError(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
