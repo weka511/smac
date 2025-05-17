@@ -31,15 +31,13 @@ from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from geometry import GeometryFactory
 
-def direct_disks(sigma = 0.25, N = 4, NTrials = maxsize, d = 2, geometry = None, rng = np.random.default_rng()):
+def direct_disks(N = 4, NTrials = maxsize,  geometry = None, rng = np.random.default_rng()):
     '''
     Prepare one admissable configuration of disks
 
     Parameters:
-        sigma     Radius of a disk
         N         Number of attempts
         NTrials   Maximum number of attempts to create configuration (tabula rasa)
-        d         Dimension of space
         geometry  The space in which the action occurs--bounded or unbounded
         rng       Random number generator
 
@@ -49,17 +47,9 @@ def direct_disks(sigma = 0.25, N = 4, NTrials = maxsize, d = 2, geometry = None,
         of X.
     '''
 
-    def admissable(proposed):
-        '''Determine whether proposed configuration is admissable, i.e. no two spheres overlap'''
-        for i in range(N):
-            for j in range(i+1,N):
-                if geometry.get_distance(proposed[i,:],proposed[j,:]) < 2*sigma:
-                    return False
-        return True
-
     for k in range(NTrials):
-        proposed = geometry.LowerBound + geometry.UpperBound * rng.random(size=(N,d))
-        if admissable(proposed): return proposed
+        proposed = geometry.LowerBound + geometry.UpperBound * rng.random(size=(N,geometry.d))
+        if geometry.admissable(proposed): return proposed
 
     raise RuntimeError(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
 
@@ -114,10 +104,10 @@ if __name__=='__main__':
         try:
             geometry = GeometryFactory(periodic = args.periodic, L = sides, sigma = sigma, d = args.d)
             eta = geometry.get_density(N = args.Disks)
-            print (f'sigma = {sigma}, eta = {eta}')
+            print (f'sigma = {sigma}, eta = {eta:.3}')
             x_coordinates = np.empty((args.N,args.Disks))
             for i in range(args.N):
-                configuration = direct_disks(sigma=sigma,N=args.Disks,d=args.d,geometry=geometry,NTrials=args.NTrials)
+                configuration = direct_disks(N=args.Disks,geometry=geometry,NTrials=args.NTrials)
                 x_coordinates[i,:] = configuration[:,0]
             hist,bin_edges = np.histogram( np.reshape(x_coordinates, args.N*args.Disks), bins = args.bins, density = True)
             actual_bins = [0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)]

@@ -79,23 +79,22 @@ class Geometry(ABC):
             offset = 0 if i%2==0 else 0.5*Delta[1]
             x0 = self.LowerBound[0] +  i * Delta[0]
             y0 = self.LowerBound[1] + offset + j * Delta[1]
-            x1,y1 = self.move_to((x0,y0))
-            return (x1,y1)
+            return self.move_to((x0,y0))
 
         def get_side_dimensions(N):
             '''
             Determine the sides of a rectangle
 
             Parameters:
-                N
+                N     The area of a rectangle
             Returns:
-                m, n such that m*n >= M and m<=N
+                m, n such that m*n >= N and m <= n
             '''
             m = int(np.sqrt(N))
             n = N // m
             if  m*n < N:
                 n += 1
-            assert(m<=n)
+            assert m <= n
             return m,n
 
         eta = self.get_density(N=N)
@@ -126,6 +125,15 @@ class Geometry(ABC):
         '''
         This function is used to propose a move
         '''
+
+    def admissable(self,proposed):
+        '''Determine whether proposed configuration is admissable, i.e. no two spheres overlap'''
+        m,_ = proposed.shape
+        for i in range(m):
+            for j in range(i+1,m):
+                if self.get_distance(proposed[i,:],proposed[j,:]) < 2*self.sigma:
+                    return False
+        return True
 
 class BoundedGeometry(Geometry):
     '''
