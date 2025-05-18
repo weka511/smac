@@ -19,6 +19,7 @@
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
+from sys import maxsize
 from time import time
 import numpy as np
 from matplotlib import rc
@@ -32,34 +33,34 @@ def data_bunch(x):
     N = len(x)
     assert N%2 == 0
     x1 = np.empty((N//2))
-    # Sigma = 0
-    # Sigma2 = 0
+
     for i in range(len(x1)):
-        # Sigma += (x[2*i] + x[2*i+1])
-        # Sigma2 += (x[2*i]**2 + x[2*i+1]**2)
         x1[i] = 0.5*(x[2*i] + x[2*i+1])
-    # Error = np.sqrt(Sigma2/N - (Sigma/N)**2) / np.sqrt(N)
+
     return x1.mean(), x1.std(), x1
 
-def perform_markov(n_trials,delta=1,start=(1.0,1.0), rng = np.random.default_rng()):
+def perform_markov(n_trials=maxsize,delta=1,start=np.array([1.0,0.0]), rng = np.random.default_rng()):
     '''
     Algorithm 1.2 Markov chain Monte Carlo, modified to return result of each trial
     so it can be used with data_bunch.
     '''
-    x, y = start
-    n_hits = np.zeros((n_trials))
+    pos = start
+
+    n_hits = 0
     n_reject = 0
 
-    for i in range(n_trials):
-        del_x, del_y = rng.uniform(-delta, delta,2)
-        if abs(x + del_x) < 1.0 and abs(y + del_y) < 1.0:
-            x, y = x + del_x, y + del_y
+    for i in range(1,n_trials+1):
+        proposed = pos + rng.uniform(-delta, delta,2)
+        if np.all(np.abs(proposed) < 1):
+            pos = proposed
         else:
             n_reject += 1
-        if x*x + y*y < 1.0:
-            n_hits[i] += 1
 
-    return (4.0 * np.cumsum(n_hits) / n_trials, n_reject/ n_trials)
+        if pos.dot(pos) < 1:
+            n_hits += 1
+
+        yield 4.0*n_hits/i,n_reject/i
+
 
 def parse_arguments():
     '''Parse command line arguments'''
@@ -69,7 +70,7 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-n', '--n', type=int, default = 16)
-    parser.add_argument('--delta', type=float, default = [0.03,0.1,0.3], nargs='+')
+    parser.add_argument('--delta', type=float, default = [0.03,0.1,0.3,0.4,0.5,1.0], nargs='+')
     return parser.parse_args()
 
 
@@ -103,17 +104,21 @@ if __name__=='__main__':
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
     for delta in args.delta:
-        x,reject = perform_markov(2**args.n,delta=delta, rng = rng)
-        print (delta,reject)
+        N = 2**args.n
+        X = np.empty((N))
+        Rejection = np.empty((N))
+        for i,(X[i],Rejection[i]) in enumerate(perform_markov(n_trials=N,delta=delta, rng = rng)):
+            pass
+
         errors = np.empty((args.n-1))
         for i in range(args.n-1):
-            mean,errors[i],x = data_bunch(x)
-        ax1.plot(errors,label=fr'$\delta=${delta}')
+            mean,errors[i],X = data_bunch(X)
+        ax1.plot(errors,label=fr'$\delta=${delta},rejection={Rejection.mean():.3},error={abs(mean-np.pi):.6}')
 
     ax1.legend()
     _,ymax = ax1.get_ylim()
     ax1.set_ylim(0,ymax)
-    ax1.set_ylabel('Error')
+    ax1.set_ylabel('Estimated Error')
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
