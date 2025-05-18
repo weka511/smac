@@ -25,27 +25,30 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 
-def data_bunch(x):
+def data_bunch(X):
     '''
     Algorithm 1.23 Computing the apparent error for an even number of data points,
-    and bunching them into pairs.
+    by bunching them into pairs.
     '''
-    N = len(x)
-    assert N%2 == 0
-    x1 = np.empty((N//2))
+    assert len(X) % 2 == 0
+    X_bunched = X.reshape(-1,2).mean(axis=1)
+    return X_bunched.mean(), X_bunched.std(), X_bunched
 
-    for i in range(len(x1)):
-        x1[i] = 0.5*(x[2*i] + x[2*i+1])
-
-    return x1.mean(), x1.std(), x1
-
-def perform_markov(n_trials=maxsize,delta=1,start=np.array([1.0,0.0]), rng = np.random.default_rng()):
+def perform_markov(n_trials=maxsize,delta=1,start=np.array([1.0,0.0]),rng=np.random.default_rng()):
     '''
-    Algorithm 1.2 Markov chain Monte Carlo, modified to return result of each trial
-    so it can be used with data_bunch.
+    Algorithm 1.2 Markov chain Monte Carlo, as a generator
+
+    Parameters:
+        n_trials     Number of trials
+        delta        Maximum step size
+        start        Starting position
+        rng          Random number generator
+
+    Yields:
+        Estimate value for pi
+        Rejextion rate
     '''
     pos = start
-
     n_hits = 0
     n_reject = 0
 
@@ -70,7 +73,7 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-n', '--n', type=int, default = 16)
-    parser.add_argument('--delta', type=float, default = [0.03,0.1,0.3,0.4,0.5,1.0], nargs='+')
+    parser.add_argument('--delta', type=float, default = [0.03,0.1,0.3,0.4,0.5,0.75,1.0,1.25], nargs='+')
     return parser.parse_args()
 
 
@@ -102,23 +105,39 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
 
     fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(1,1,1)
-    for delta in args.delta:
+    ax1 = fig.add_subplot(2,1,1)
+
+    Rejection = np.empty((len(args.delta)))
+    Errors1 = np.empty((len(args.delta)))
+    Errors2 = np.empty((len(args.delta)))
+    for j,delta in enumerate(args.delta):
         N = 2**args.n
         X = np.empty((N))
-        Rejection = np.empty((N))
-        for i,(X[i],Rejection[i]) in enumerate(perform_markov(n_trials=N,delta=delta, rng = rng)):
+        for i,(X[i],Rejection[j]) in enumerate(perform_markov(n_trials=N,delta=delta, rng = rng)):
             pass
 
-        errors = np.empty((args.n-1))
+        Estimated_Errors = np.empty((args.n-1))
         for i in range(args.n-1):
-            mean,errors[i],X = data_bunch(X)
-        ax1.plot(errors,label=fr'$\delta=${delta},rejection={Rejection.mean():.3},error={abs(mean-np.pi):.6}')
+            mean,Estimated_Errors[i],X = data_bunch(X)
+            Errors1[j] = abs(mean-np.pi)
+            Errors2[j] = Estimated_Errors[-1]
+        ax1.plot(list(range(1,args.n)),Estimated_Errors,label=fr'$\delta=${delta}, rejection={Rejection[j]:.3}, error={Errors1[j]:.6}')
 
     ax1.legend()
     _,ymax = ax1.get_ylim()
     ax1.set_ylim(0,ymax)
+    ax1.set_xlabel('Bunch number')
     ax1.set_ylabel('Estimated Error')
+    ax1.set_title(r'Bunch data from MCMC estimate for $\pi$')
+
+    ax2 = fig.add_subplot(2,1,2)
+    ax2.plot(Rejection,Errors1,label='True Error')
+    ax2.plot(Rejection,Errors2,label='Estimated Error')
+    ax2.legend()
+    ax2.set_xlabel('Rejection')
+    ax2.set_ylabel('Error')
+
+    fig.tight_layout(pad=3)
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
