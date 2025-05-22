@@ -10,7 +10,6 @@
 -|smacfiletoken.py|
 -|markov-discrete-pebble.py| 1.4 Use table
 -|large-markov.py|
--|transfer.m|1.8 Eigenvalues of transfer matrix
 -|direct-needle.py|Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch)
 1.2|permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often
 -|permutation-histogram.py
