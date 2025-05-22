@@ -15,7 +15,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 1.20. Implemement algorithm 1.28 (data-bunch).'''
+'''
+    Exercise 1.20. Implemement algorithm 1.28 (data-bunch).
+    Second part: test it also with the output of Alg 1.6,
+    markov-discrete-pebble.py.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -75,8 +79,7 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-    parser.add_argument('--N',type=int,default=10)
-    parser.add_argument('--lower',type=int,default=10)
+    parser.add_argument('--N',type=int,default=6)
     return parser.parse_args()
 
 
@@ -100,6 +103,20 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
+def get_correlation_times(CorrelationTime):
+    correlation_times = [0]
+    while correlation_times[-1] < 2**args.N-1:
+        correlation_times.append( correlation_times[-1] + CorrelationTime)
+    return correlation_times
+
+def get_ev2(T,n):
+    eigenvalues,_ = np.linalg.eig(T)
+    ev_2 = np.sort(eigenvalues)[-2]
+    Ev2_n = np.ones((n))
+    for i in range(1,n):
+        Ev2_n[i] = ev_2 * Ev2_n[i-1]
+    return ev_2,Ev2_n
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -107,8 +124,6 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
 
-    eigenvalues,_ = np.linalg.eig(T)
-    ev_2 = np.sort(eigenvalues)[-2]
     Counts = np.zeros((9,2**args.N))
 
     for i,k in markov_discrete_pebble(N=2**args.N,rng=rng):
@@ -116,27 +131,39 @@ if __name__=='__main__':
 
     Frequency = np.divide(np.cumsum(Counts,axis=1),list(range(1,2**args.N+1)))
 
-    Ev2_n = np.ones((2**args.N))
-    for i in range(1,2**args.N):
-        Ev2_n[i] = ev_2 * Ev2_n[i-1]
-
     Bunched = Counts[0,:]
     error = np.zeros((args.N))
     for i in range(args.N):
         _,error[i],Bunched = data_bunch(Bunched)
 
+    ev_2,Ev2_n = get_ev2(T,2**args.N)
+
+    correlation_times = get_correlation_times(CorrelationTime = -1/np.log(ev_2))
+
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(2,1,1)
     ax2 = fig.add_subplot(2,1,2)
-    steps = np.array(range(args.lower,2**args.N))
-    ax1.plot(steps,np.abs(Frequency[0,args.lower:] - 1/9),label='Deviation from expected frequency')
-    ax1.plot(steps,Ev2_n[args.lower:],label='Powers of second eigenvalue')
+
+    steps = np.array(range(2**args.N))
+
+    ax1.scatter(steps,np.abs(Frequency[0,:] - 1/9),label='Deviation from expected frequency',s=5,c='r')
+    ax1.scatter(steps,Ev2_n,label='Powers of second eigenvalue',s=5,c='b')
+    for i in range(0,len(correlation_times)-1):
+        ax1.axvspan(correlation_times[i],correlation_times[i+1],
+                    color='limegreen' if i%2==0 else 'green',
+                    hatch='/' if i%2==0 else '-',
+                    zorder=-1,
+                    label='Correlation Times' if i==0 else None)
     ax1.set_xlabel('Step')
+    _,x1 = ax1.get_xlim()
+    ax1.set_xlim(0,x1)
     ax1.legend()
+
     ax2.plot(error,label=f'Standard deviation after bunching {error[-2]:.6}')
     ax2.set_xlabel('Fold')
     ax2.set_ylabel('Error')
     ax2.legend()
+
     fig.tight_layout(h_pad=3)
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start

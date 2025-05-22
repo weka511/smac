@@ -15,7 +15,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 1.20. Implemement algorithm 1.28 (data-bunch).'''
+'''
+    Exercise 1.20. Implemement algorithm 1.28 (data-bunch).
+    First part: test with a single, very long, simulation of
+    Alg 1.2, markov-pi, with throwing ranges of 0.03, 0.1, 0.3.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
