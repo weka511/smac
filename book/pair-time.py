@@ -15,96 +15,116 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Exercise 2.1/algorithm 2.2 Pair Time. Pair collision time for two particles.'''
+'''
+    Exercise 2.1: Implement algorithm 2.2 (pair-time) and incorporate it into a test program
+    generating 2 random positions with ans(delta_x) > 2 sigma. Propagate both disks up to t_pair
+    if finite and verify that they touch, otherwise verify that datla_x.delta_y < 0.
+'''
 
 from argparse import ArgumentParser
-from os.path import basename, splitext
+from os.path import basename, join, splitext
+from time import time
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 import numpy as np
 from md import get_pair_time, sample
 
 def get_time_of_closest_approach(x1, x2, v1, v2):
+    '''
+    Calculate the time of closest approach for the centres of two spheres
+
+    Parameters:
+        x1         Centre of one sphere
+        x2         Centre of the other sphere
+        v1         Velocity of one sphere
+        v2         Velocity of the other sphere
+
+    Returns:
+        The time at which the relative velocity is minimized
+    '''
     Delta_x = x1 - x2
     Delta_v = v1 - v2
     return -np.dot(Delta_v,Delta_x)/np.dot(Delta_v,Delta_v)
 
 
 
-def get_plot_file_name(plot=None):
-    '''Determine plot file name from source file name or command line arguments'''
-    if plot==None:
-        return f'{splitext(basename(__file__))[0]}.png'
-    base,ext = splitext(plot)
-    return f'{plot}.png' if len(ext)==0 else plot
+def get_file_name(name,default_ext='png',seq=None):
+    '''
+    Used to create file names
 
+    Parameters:
+        name          Basis for file name
+        default_ext   Extension if non specified
+        seq           Used if there are multiple files
+    '''
+    base,ext = splitext(name)
+    if len(ext) == 0:
+        ext = default_ext
+    if seq != None:
+        base = f'{base}{seq}'
+    qualified_name = f'{base}.{ext}'
+    if ext == 'png':
+        return join(args.figs,qualified_name)
+    else:
+        return qualified_name
 
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
     parser.add_argument('--action', default = 'run', choices = ['test', 'run'])
-    parser.add_argument('--d',
-                        type    = int,
-                        default = 2,
-                        choices = [2,3],
-                        help    = 'Dimension of space')
-    parser.add_argument('--show',
-                        action = 'store_true',
-                        help   = 'Show plot')
-    parser.add_argument('--plot',
-                        default = None,
-                        help    = 'Name of plot file')
-    parser.add_argument('--seed',
-                        type    = int,
-                        default = None,
-                        help    = 'Seed for random number generator')
-    parser.add_argument('--sigma',
-                        type    = float,
-                        default = 0.1,
-                        help    = 'Radius of spheres')
-    parser.add_argument('--N',
-                        type = int,
-                        default = 10000000,
-                        help = 'Number of iterations')
+    parser.add_argument('--d', type = int, default = 2, choices = [2,3], help    = 'Dimension of space')
+    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
+    parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
+    parser.add_argument('--seed', type = int,  default = None, help = 'Seed for random number generator')
+    parser.add_argument('--sigma', type    = float, default = 0.1, help = 'Radius of spheres')
+    parser.add_argument('--N', type = int, default = 10000000,  help = 'Number of iterations')
 
     return parser.parse_args()
 
 if __name__=='__main__':
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
+    start  = time()
     args = parse_arguments()
     L = [1] * args.d
     rng = np.random.default_rng(args.seed)
 
     if args.action == 'run':
-        Distances = []
-        Dots = []
+        Distances = np.empty((args.N))
+        N_Distances = 0
+        Dots  = np.empty((args.N))
+        N_Dots = 0
         for _ in range(args.N):
-            x1, x2, v1, v2 = sample(rng, sigma = args.sigma, L = L)
+            x1, x2, v1, v2 = sample(sigma = args.sigma, L = L,rng=rng)
             DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
             if DeltaT<float('inf'):
                 x1_prime = x1 + DeltaT *v1
                 x2_prime = x2 + DeltaT *v2
-                Distances.append((np.linalg.norm(x1_prime-x2_prime)-2*args.sigma)/2*args.sigma)
+                Distances[N_Distances] = (np.linalg.norm(x1_prime-x2_prime)-2*args.sigma)/2*args.sigma
+                N_Distances += 1
             else:
                 t0 = min(get_time_of_closest_approach(x1,x2,v1,v2),0)
                 Delta_x = x1 - x2
                 Delta_v = v1 - v2
                 Delta_x_prime = Delta_x + t0*Delta_v
-                Dots.append(np.dot(Delta_x_prime, Delta_v))
+                Dots[N_Dots] = np.dot(Delta_x_prime, Delta_v)
+                N_Dots += 1
 
-        s  = np.std(Distances)
+        s  = np.std(Distances[0:N_Distances])
+
         fig = figure(figsize=(12,6))
         fig.suptitle(f'Number of samples: {args.N:,}')
-        axs = fig.subplots(1,2)
-        axs[0].hist(Distances,
-                    bins=250 if args.N>9999 else 25)
-        axs[0].set_xlim(-10*s, 10*s)
-        axs[0].set_title(f'Deviations of centres. Standard deviation = {s:.2g}')
-        axs[1].hist(Dots,
-                    bins = 250 if args.N > 9999 else 25)
-        axs[1].set_title(r'$\Delta_x\cdot\Delta_v$ for $t_{pair}=\infty$')
+        ax1 = fig.add_subplot(1,2,1)
+        ax2 = fig.add_subplot(1,2,2)
+        ax1.hist(Distances[0:N_Distances], bins=250 if args.N>9999 else 25, color='b')
+        ax1.set_xlim(-10*s, 10*s)
+        ax1.set_title('Deviations of centres at $t=t_{pair}$.'f'\nStandard deviation = {s:.2g}')
+        ax2.hist(Dots[0:N_Dots], bins = 250 if args.N > 9999 else 25, color='b')
+        ax2.set_title(r'$\Delta_x\cdot\Delta_v$ for $t_{pair}=\infty$'f'\nStandard deviation = {np.std(Dots[0:N_Dots]):.2g}')
     if args.action=='test':
         for _ in range(1000):
-            x1, x2, v1, v2 = sample(rng, sigma = args.sigma, L = L)
+            x1, x2, v1, v2 = sample(rng, sigma = args.sigma, L = L,rng=rng)
             DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
             print (DeltaT)
             if DeltaT<float('inf'): break
@@ -113,8 +133,7 @@ if __name__=='__main__':
         x2_prime = x2 + DeltaT *v2
         distance = np.linalg.norm(x1_prime-x2_prime)
         print (2*args.sigma, distance, abs(2*args.sigma-distance)/2*args.sigma)
-        rc('font',**{'family':'serif','serif':['Palatino']})
-        rc('text', usetex=True)
+
         fig = figure(figsize=(10,10))
         ax = fig.add_subplot(111)
         ax.axis([-L,  L, -L, L])
@@ -129,6 +148,11 @@ if __name__=='__main__':
         ax.scatter(x2_prime[0],x2_prime[1],label='x2"',s=marker_size)
         ax.grid()
 
-    fig.savefig(get_plot_file_name(args.plot))
+    fig.savefig(get_file_name(args.out))
+    elapsed = time() - start
+    minutes = int(elapsed/60)
+    seconds = elapsed - 60*minutes
+    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
+
     if args.show:
         show()
