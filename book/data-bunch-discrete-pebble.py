@@ -150,7 +150,7 @@ if __name__=='__main__':
     ax1.scatter(steps,Ev2_n,label='Powers of second eigenvalue',s=5,c='b')
     for i in range(0,len(correlation_times)-1):
         ax1.axvspan(correlation_times[i],correlation_times[i+1],
-                    color='limegreen' if i%2==0 else 'green',
+                    color='lightgrey' if i%2==0 else 'white',
                     hatch='/' if i%2==0 else '-',
                     zorder=-1,
                     label='Correlation Times' if i==0 else None)
