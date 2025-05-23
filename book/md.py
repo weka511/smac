@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2022 Simon Crase
+# Copyright (C) 2022-2025 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 from argparse          import ArgumentParser
 from glob              import glob
 from matplotlib.pyplot import figure, hist, plot, savefig, show, title
+import numpy as np
 from numpy             import argmin, dot, multiply, pi, savez, sign, sqrt
 from numpy.linalg      import norm
 from numpy.random      import default_rng
@@ -136,12 +137,21 @@ def create_rng(seed0):
     else:
         return rng,seed0
 
-def sample(rng,
-           L      = 1,
-           V      = 1,
-           sigma  = 0.1,
-           d      = 2):
-    '''Find one sample where points admissable'''
+def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
+    '''
+    Find one sample where points admissable
+
+    Parameters:
+        L
+        V
+        sigma
+        d
+        rng
+
+    Returns: x1, x2, v1, v2, where
+
+
+    '''
     while True:
         x1 =  2 * multiply(L, rng.random((d,))) - L
         x2 =  2 * multiply(L, rng.random((d,))) - L
