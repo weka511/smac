@@ -17,19 +17,17 @@
 
 '''Algorithm 2.3 Pair collision'''
 
-from argparse          import ArgumentParser
-from glob              import glob
+from argparse import ArgumentParser
+from glob import glob
+from re import search
+from os import remove
+from os.path import basename, splitext
+from sys import maxsize
+from matplotlib import rc
 from matplotlib.pyplot import figure, hist, plot, savefig, show, title
 import numpy as np
-from numpy             import argmin, dot, multiply, pi, savez, sign, sqrt
-from numpy.linalg      import norm
-from numpy.random      import default_rng
-from os                import remove
-from os.path           import basename, splitext
-from matplotlib        import rc
-from re                import search
 from smacfiletoken     import Registry
-from sys               import maxsize
+
 
 WALL_COLLISION = 0
 PAIR_COLLISION = 1
@@ -49,9 +47,9 @@ def get_pair_time(x1, x2, v1, v2,
     '''
     Delta_x = x1 - x2
     Delta_v = v1 - v2
-    Upsilon = dot(Delta_x,Delta_v)**2 - dot(Delta_v,Delta_v) * (dot(Delta_x,Delta_x) - 4*sigma**2)
-    if Upsilon > 0 and dot(Delta_x,Delta_v)  < 0 :
-        return - (dot(Delta_x,Delta_v)+sqrt(Upsilon))/dot(Delta_v,Delta_v)
+    Upsilon = np.dot(Delta_x,Delta_v)**2 - np.dot(Delta_v,Delta_v) * (np.dot(Delta_x,Delta_x) - 4*sigma**2)
+    if Upsilon > 0 and np.dot(Delta_x,Delta_v)  < 0 :
+        return - (np.dot(Delta_x,Delta_v)+np.sqrt(Upsilon))/np.dot(Delta_v,Delta_v)
     else:
         return float('inf')
 
@@ -60,17 +58,17 @@ def get_wall_time(x, v,
                   d     = 2,
                   L     = [1,1]):
     '''Fig 2.3 Calculate the time for the first collision with a wall'''
-    time_to_collide_with_each_wall = [(sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
+    time_to_collide_with_each_wall = [(np.sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
     assert ([abs(abs(x[i]+time_to_collide_with_each_wall[i] * v[i])-sigma)==0 for i in range(d)])
-    wall  = argmin(time_to_collide_with_each_wall)
+    wall  = np.argmin(time_to_collide_with_each_wall)
     return wall, time_to_collide_with_each_wall[wall]
 
 def collide_pair(x1, x2, v1, v2):
     '''Algorithm 2.3 Pair collision'''
     Delta_x      = x1 - x2
-    e_hat_perp   = Delta_x/norm(Delta_x)
+    e_hat_perp   = Delta_x/np.linalg.norm(Delta_x)
     Delta_v      = v1 - v2
-    Delta_v_perp = dot(Delta_v,e_hat_perp)
+    Delta_v_perp = np.dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
 
 def event_disks(Xs, Vs,
@@ -114,9 +112,9 @@ def event_disks(Xs, Vs,
         return WALL_COLLISION, j, wall
     else:
         Xs += t_pair * Vs
-        E_before = dot(Vs[k],Vs[k]) + dot(Vs[l],Vs[l])
+        E_before = np.dot(Vs[k],Vs[k]) + np.dot(Vs[l],Vs[l])
         collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
-        E_after = dot(Vs[k],Vs[k]) + dot(Vs[l],Vs[l])
+        E_after = np.dot(Vs[k],Vs[k]) + np.dot(Vs[l],Vs[l])
         assert (E_before==E_after)
         return PAIR_COLLISION, k, l
 
@@ -141,11 +139,11 @@ def create_rng(seed0):
     generate a new seed using random number generator and print it so user can reuse.
 
     '''
-    rng    = default_rng(seed = seed0)
+    rng    = np.random.default_rng(seed = seed0)
     if seed0==None:
         seed = rng.integers(0,maxsize)
         print (f'Setting seed to {seed}')
-        return default_rng(seed = seed),seed
+        return np.random.default_rng(seed = seed),seed
     else:
         return rng,seed0
 
@@ -165,11 +163,11 @@ def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
 
     '''
     while True:
-        x1 =  2 * multiply(L, rng.random((d,))) - L
-        x2 =  2 * multiply(L, rng.random((d,))) - L
+        x1 =  2 * np.multiply(L, rng.random((d,))) - L
+        x2 =  2 * np.multiply(L, rng.random((d,))) - L
         v1 = -V + 2 * V * rng.random((d,))
         v2 = -V + 2 * V * rng.random((d,))
-        if dot(x1-x2,x1-x2) > 4 * sigma**2 and dot(x1 - x2,v1 - v2)<0:
+        if np.dot(x1-x2,x1-x2) > 4 * sigma**2 and np.dot(x1 - x2,v1 - v2)<0:
             return x1,x2, v1, v2
 
 def parse_arguments():
@@ -244,7 +242,7 @@ def create_config(n     = 5,
                   rng   = None,
                   M     = 25):
     Volume = 1
-    VolumeDisk = pi if d==2 else 4*pi/3
+    VolumeDisk = np.pi if d==2 else 4*np.pi/3
     for l in L:
         Volume     *= 2*l*Volume
         VolumeDisk *= sigma
@@ -252,11 +250,11 @@ def create_config(n     = 5,
 
     print (f'Trying to create configuration: n={n}, d={d}, l={L}, sigma={sigma}, density ={density:2g}')
     for _ in range(M):
-        Xs     =  2 * multiply(L, rng.random((n,d))) - L
+        Xs     =  2 * np.multiply(L, rng.random((n,d))) - L
         reject = False
         for i in range(args.n):
             for j in range(i):
-                reject = dot(Xs[i] - Xs[j],Xs[i] - Xs[j])< 4 * sigma**2
+                reject = np.dot(Xs[i] - Xs[j],Xs[i] - Xs[j])< 4 * sigma**2
                 if reject: break
         if not reject:
             Vs = -V + 2 * V * rng.random((n,d))
@@ -283,7 +281,7 @@ def save_configuration(file_patterns = 'md.npz',
     pattern      = splitext(file_patterns)
     saved_files  = glob(f'./{pattern[0]}[0-9]*{pattern[1]}')
 
-    savez(f'./{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
+    np.savez(f'./{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
           args = args,
           seed           = seed,
           epoch          = epoch,
@@ -304,18 +302,15 @@ if __name__=='__main__':
         n      = 0
         Diffs  = []
         while True:
-            x1, x2, v1, v2 = sample(rng,
-                                    sigma = args.sigma,
-                                    L     = L,
-                                    d     = args.d)
-            DeltaT         = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
-            if DeltaT<float('inf'):
+            x1, x2, v1, v2 = sample(sigma = args.sigma, L = L, d = args.d)
+            DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
+            if DeltaT < float('inf'):
                 n += 1
-                x1_prime           = x1 + DeltaT *v1
-                x2_prime           = x2 + DeltaT *v2
+                x1_prime = x1 + DeltaT*v1
+                x2_prime = x2 + DeltaT*v2
                 v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
-                E                  = dot(v1,v1) + dot(v2,v2)
-                E_prime            = dot(v1_prime,v1_prime) + dot(v2_prime,v2_prime)
+                E = np.dot(v1,v1) + np.dot(v2,v2)
+                E_prime = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
                 Diffs.append((E-E_prime)/(E+E_prime))
             if n>args.N: break
 
