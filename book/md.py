@@ -29,9 +29,10 @@ from matplotlib.pyplot import figure, show
 import numpy as np
 from smacfiletoken import Registry
 
+# Constants used to distinguish the two types of collisions
+
 WALL_COLLISION = 0
 PAIR_COLLISION = 1
-TOLERANCE      = 1e-12
 
 def get_pair_time(x1, x2, v1, v2, sigma = 0.01):
     '''
@@ -87,7 +88,7 @@ def collide_pair(x1, x2, v1, v2):
     Delta_v_perp = np.dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
 
-def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1]):
+def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1], tolerance=1e-15):
     '''
     Algorithm 2.1: event driven molecular dynamics for particles in a box.
     Calculate time to next collision of a sphere with another sphere or
@@ -95,15 +96,23 @@ def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1]):
     to immediately after.
 
     Parameters:
-        Xs      Centres of all spheres
-        Vs      Velocities of all spheres
-        sigma   Radius of sphere spheres
-        d       Dimension of space
-        L       Lengths of sides
+        Xs        Centres of all spheres
+        Vs        Velocities of all spheres
+        sigma     Radius of sphere spheres
+        d         Dimension of space
+        L         Lengths of sides
+        tolerance Used in a wall collision to verify updated position is close to wall
     '''
 
     def get_next_pair():
-        '''Calculate time to next pair collision'''
+        '''
+        Calculate time to next pair collision
+
+        Returns:
+           t_pair   Time to next pair collision
+           k        Index of one sphere
+           l        Index of the other sphere: k < l
+        '''
         next_pair = (float('inf'), None, None)
         for k in range(len(Xs)):
             for l in range(k+1,len(Xs)):
@@ -113,7 +122,14 @@ def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1]):
         return next_pair
 
     def get_next_wall():
-        '''Calculate time to next wall collision'''
+        '''
+        Calculate time to next wall collision
+
+        Returns:
+            t_wall   Time to next wall collision
+            wall     Index of wall
+            j        Index of sphere
+        '''
         next_wall = (float('inf'), None, None)
         for j in range(len(Xs)):
             wall,t = get_wall_time(Xs[j], Vs[j], sigma = sigma, d = d, L = L)
@@ -127,7 +143,7 @@ def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1]):
 
     if t_wall < t_pair:
         Xs += t_wall * Vs     # Update to new position
-        assert abs(abs(Xs[j,wall])-(L[wall]-sigma))<TOLERANCE
+        assert abs(abs(Xs[j,wall])-(L[wall]-sigma)) < tolerance
         Vs[j][wall] = - Vs[j][wall]
         return WALL_COLLISION, j, wall
     else:
@@ -185,8 +201,8 @@ def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
     Find one sample where points admissable
 
     Parameters:
-        L       Lenghts of all sides
-        V
+        L       Lengths of all sides
+        V       Limiting velocity: we aim for velocities to be in range (-V,V)
         sigma   Radius of sphere
         d       Dimension of space
         L       Lengths of sides
@@ -228,11 +244,20 @@ def parse_arguments():
     return parser.parse_args()
 
 def get_L(L,d):
-    '''Verify that specified vector of lengths matches dimension of space. If only one value specified, replicate as needed.'''
-    if len(L)==1:
-        return L * d
-    if len(L)==d:
-        return L
+    '''
+    Verify that specified vector of lengths matches dimension of space.
+    If only one value specified, replicate as needed.
+
+    Parameters:
+        L       Vector representing walls of a box
+        d       Dimension of space
+    '''
+    match len(L):
+        case 1:
+            return L * d
+        case d:
+            return L
+
     raise Exception(f'Length of L is {len(L)}: should be 1 or {d}')
 
 def create_config(n     = 5,
@@ -263,13 +288,13 @@ def create_config(n     = 5,
     raise Exception(f'Failed to create configuration in {M} attempts: n={n}, d={d}, l={L}, sigma={sigma}')
 
 def save_configuration(file_patterns = 'md.npz',
-                       epoch          = 0,
-                       retention      = 3,
-                       seed           = None,
-                       args           = None,
+                       epoch = 0,
+                       retention = 3,
+                       seed = None,
+                       args = None,
                        collision_type = None,
-                       k              = None,
-                       l              = None):
+                       k = None,
+                       l = None):
     def get_sequence(saved_files):
         if len(saved_files)==0: return 1
 
@@ -278,18 +303,19 @@ def save_configuration(file_patterns = 'md.npz',
         digits = search(r'\d+',last_file[0]).group(0)
         return int(digits)+1
 
-    pattern      = splitext(file_patterns)
-    saved_files  = glob(f'./{pattern[0]}[0-9]*{pattern[1]}')
+    pattern = splitext(file_patterns)
+    saved_files = glob(f'./{pattern[0]}[0-9]*{pattern[1]}')
 
     np.savez(f'./{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
           args = args,
-          seed           = seed,
-          epoch          = epoch,
-          Xs             = Xs,
-          Vs             = Vs,
+          seed = seed,
+          epoch = epoch,
+          Xs = Xs,
+          Vs = Vs,
           collision_type = collision_type,
-          k              = k,
-          l              = l)
+          k = k,
+          l = l)
+
     while len(saved_files) >= retention:
         remove(saved_files.pop())
 
@@ -326,35 +352,26 @@ if __name__=='__main__':
         case '2.3':
             registry = Registry()
             registry.register_all("md%d.txt")
-            Xs,Vs = create_config(n     = args.n,
-                                  d     = args.d,
-                                  L     = L,
-                                  sigma = args.sigma,
-                                  rng   = rng,
-                                  M     = args.M)
+            Xs,Vs = create_config(n = args.n, d = args.d, L = L, sigma = args.sigma, rng = rng, M = args.M)
             print ('Created configuration')
-            n_wall_collisions = 0
-            n_pair_collisions = 0
+            n_collisions = np.zeros((2),dtype=int)
             for epoch in range(args.N):
                 if registry.is_kill_token_present(): break
-                collision_type, k, l = event_disks(Xs,Vs,
-                                                   sigma = args.sigma,
-                                                   d     = args.d,
-                                                   L     = L)
-                if collision_type==WALL_COLLISION:
-                    n_wall_collisions += 1
-                else:
-                    n_pair_collisions += 1
+                collision_type, k, l = event_disks(Xs,Vs, sigma = args.sigma, d = args.d, L = L)
+                n_collisions[collision_type] += 1
+
                 if epoch%args.freq==0:
-                    print (f'Epoch = {epoch}, Wall collisions={n_wall_collisions}, Pair collisions={n_pair_collisions} {100*n_pair_collisions/(n_pair_collisions+n_wall_collisions):.2f}%')
+                    print (f'Epoch = {epoch}, Wall collisions={n_collisions[WALL_COLLISION]},'
+                           f'Pair collisions={n_collisions[PAIR_COLLISION]}'
+                           f' {100*n_collisions[PAIR_COLLISION]/(n_collisions.sum()):.2f}%')
                     save_configuration(file_patterns = args.save,
-                                       epoch          = epoch,
-                                       retention      = args.retention,
-                                       seed           = seed,
-                                       args           = args,
+                                       epoch = epoch,
+                                       retention = args.retention,
+                                       seed = seed,
+                                       args = args,
                                        collision_type = collision_type,
-                                       k              = k,
-                                       l              = l)
+                                       k = k,
+                                       l = l)
 
     elapsed = time() - start
     minutes = int(elapsed/60)
