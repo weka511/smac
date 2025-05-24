@@ -21,20 +21,19 @@ from argparse import ArgumentParser
 from glob import glob
 from re import search
 from os import remove
-from os.path import basename, splitext
+from os.path import basename, join, splitext
 from sys import maxsize
+from time import time
 from matplotlib import rc
-from matplotlib.pyplot import figure, hist, plot, savefig, show, title
+from matplotlib.pyplot import figure, show
 import numpy as np
-from smacfiletoken     import Registry
-
+from smacfiletoken import Registry
 
 WALL_COLLISION = 0
 PAIR_COLLISION = 1
 TOLERANCE      = 1e-12
 
-def get_pair_time(x1, x2, v1, v2,
-                  sigma = 0.01):
+def get_pair_time(x1, x2, v1, v2, sigma = 0.01):
     '''
     Algorithm 2.2 Pair Time. Pair collision time for two spheres
 
@@ -57,17 +56,33 @@ def get_wall_time(x, v,
                   sigma = 0.01,
                   d     = 2,
                   L     = [1,1]):
-    '''Fig 2.3 Calculate the time for the first collision with a wall'''
+    '''
+        Fig 2.3 Calculate the time for the first collision with a wall
+        Parameters:
+            x
+            v
+            sigma
+            d
+            L
+        '''
     time_to_collide_with_each_wall = [(np.sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
     assert ([abs(abs(x[i]+time_to_collide_with_each_wall[i] * v[i])-sigma)==0 for i in range(d)])
     wall  = np.argmin(time_to_collide_with_each_wall)
     return wall, time_to_collide_with_each_wall[wall]
 
 def collide_pair(x1, x2, v1, v2):
-    '''Algorithm 2.3 Pair collision'''
-    Delta_x      = x1 - x2
-    e_hat_perp   = Delta_x/np.linalg.norm(Delta_x)
-    Delta_v      = v1 - v2
+    '''
+        Algorithm 2.3 Pair collision
+
+        Parameters:
+        x1         Centre of one sphere
+        x2         Centre of the other sphere
+        v1         Velocity of one sphere
+        v2         Velocity of the other sphere
+        '''
+    Delta_x = x1 - x2
+    e_hat_perp = Delta_x/np.linalg.norm(Delta_x)
+    Delta_v = v1 - v2
     Delta_v_perp = np.dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
 
@@ -105,8 +120,8 @@ def event_disks(Xs, Vs,
     t_wall,wall,j = next_wall
     t_pair, k, l  = next_pair
 
-    if t_wall<t_pair:
-        Xs         += t_wall * Vs     # Update to new position
+    if t_wall < t_pair:
+        Xs += t_wall * Vs     # Update to new position
         assert(abs(abs(Xs[j,wall])-(L[wall]-sigma))<TOLERANCE)
         Vs[j][wall] = - Vs[j][wall]
         return WALL_COLLISION, j, wall
@@ -118,12 +133,25 @@ def event_disks(Xs, Vs,
         assert (E_before==E_after)
         return PAIR_COLLISION, k, l
 
-def get_plot_file_name(plot=None):
-    '''Determine plot file name from source file name or command line arguments'''
-    if plot==None:
-        return f'{splitext(basename(__file__))[0]}.png'
-    base,ext = splitext(plot)
-    return f'{plot}.png' if len(ext)==0 else plot
+def get_file_name(name,default_ext='png',seq=None):
+    '''
+    Used to create file names
+
+    Parameters:
+        name          Basis for file name
+        default_ext   Extension if non specified
+        seq           Used if there are multiple files
+    '''
+    base,ext = splitext(name)
+    if len(ext) == 0:
+        ext = default_ext
+    if seq != None:
+        base = f'{base}{seq}'
+    qualified_name = f'{base}.{ext}'
+    if ext == 'png':
+        return join(args.figs,qualified_name)
+    else:
+        return qualified_name
 
 def create_rng(seed0):
     '''
@@ -133,14 +161,14 @@ def create_rng(seed0):
          seed0 is seed supplied by user
 
     Returns: Default random number generator, seedes with seed0 or newly generated seed
-    If seed0 is not Mone, use it
+    If seed0 is not None, use it
 
     If seed0 is None (no seed supplied),
     generate a new seed using random number generator and print it so user can reuse.
 
     '''
-    rng    = np.random.default_rng(seed = seed0)
-    if seed0==None:
+    rng = np.random.default_rng(seed=seed0)
+    if seed0 == None:
         seed = rng.integers(0,maxsize)
         print (f'Setting seed to {seed}')
         return np.random.default_rng(seed = seed),seed
@@ -172,57 +200,20 @@ def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
-    parser.add_argument('--action',
-                        default = '2.3',
-                        choices = ['2.2',
-                                   '2.3'])
-    parser.add_argument('--show',
-                        action = 'store_true',
-                        help   = 'Show plot')
-    parser.add_argument('--plot',
-                        default = None,
-                        help    = 'Name of plot file')
-    parser.add_argument('--seed',
-                        type    = int,
-                        default = None,
-                        help    = 'Seed for random number generator')
-    parser.add_argument('--sigma',
-                        type    = float,
-                        default = 0.01,
-                        help    = 'Radius of spheres')
-    parser.add_argument('--N',
-                        type    = int,
-                        default = 10000000,
-                        help    = 'Number of iterations')
-    parser.add_argument('--n',
-                        type    = int,
-                        default = 5,
-                        help    = 'Number of hard disks')
-    parser.add_argument('--M',
-                        type    = int,
-                        default = 1000,
-                        help    = 'Number of attempts to create configuration')
-    parser.add_argument('--L',
-                        type    = float,
-                        nargs   = '+',
-                        default = [1],
-                        help    = 'Lengths of box walls')
-    parser.add_argument('--d',
-                        type    = int,
-                        default = 2,
-                        choices = [2,3],
-                        help    = 'Dimension of space')
-    parser.add_argument('--freq',
-                        type    = int,
-                        default = 25,
-                        help    = 'For saving configuration')
-    parser.add_argument('--retention',
-                        type    = int,
-                        default = 3,
-                        help    = 'For saving configuration')
-    parser.add_argument('--save',
-                        default = f'{splitext(basename(__file__))[0]}.npz',
-                        help    = 'For saving configuration')
+    parser.add_argument('--action', default = '2.3', choices = ['2.2','2.3'])
+    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
+    parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
+    parser.add_argument('--seed', type = int, default = None, help = 'Seed for random number generator')
+    parser.add_argument('--sigma', type    = float, default = 0.01, help    = 'Radius of spheres')
+    parser.add_argument('--N', type = int, default = 10000000, help = 'Number of iterations')
+    parser.add_argument('--n', type = int, default = 5, help = 'Number of hard disks')
+    parser.add_argument('--M', type = int, default = 1000, help = 'Number of attempts to create configuration')
+    parser.add_argument('--L', type = float, nargs = '+', default = [1], help = 'Lengths of box walls')
+    parser.add_argument('--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
+    parser.add_argument('--freq', type = int, default = 25, help = 'For saving configuration')
+    parser.add_argument('--retention', type = int, default = 3, help = 'For saving configuration')
+    parser.add_argument('--save',  default = f'{splitext(basename(__file__))[0]}.npz', help = 'For saving configuration')
 
     return parser.parse_args()
 
@@ -294,68 +285,73 @@ def save_configuration(file_patterns = 'md.npz',
         remove(saved_files.pop())
 
 if __name__=='__main__':
-    args     = parse_arguments()
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
+    start = time()
+    args = parse_arguments()
     rng,seed = create_rng(args.seed)
-    L        = get_L(args.L, args.d)
+    L  = get_L(args.L, args.d)
 
-    if args.action=='2.2':
-        n      = 0
-        Diffs  = []
-        while True:
-            x1, x2, v1, v2 = sample(sigma = args.sigma, L = L, d = args.d)
-            DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
-            if DeltaT < float('inf'):
-                n += 1
-                x1_prime = x1 + DeltaT*v1
-                x2_prime = x2 + DeltaT*v2
-                v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
-                E = np.dot(v1,v1) + np.dot(v2,v2)
-                E_prime = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
-                Diffs.append((E-E_prime)/(E+E_prime))
-            if n>args.N: break
+    match args.action:
+        case '2.2':
+            n = 0
+            Diffs  = []
+            while True:
+                x1, x2, v1, v2 = sample(sigma = args.sigma, L = L, d = args.d)
+                DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
+                if DeltaT < float('inf'):
+                    n += 1
+                    x1_prime = x1 + DeltaT*v1
+                    x2_prime = x2 + DeltaT*v2
+                    v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
+                    E = np.dot(v1,v1) + np.dot(v2,v2)
+                    E_prime = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
+                    Diffs.append((E-E_prime)/(E+E_prime))
+                if n>args.N: break
 
-        rc('font',**{'family':'serif','serif':['Palatino']})
-        rc('text', usetex=True)
-        figure(figsize=(12,12))
-        hist(Diffs,
-             bins=250 if args.N>9999 else 25)
-        title (f'Discrepancy in energies for {args.N:,} trials')
+            fig = figure(figsize=(12,12))
+            ax = fig.add_subplot(1,1,1)
+            ax.hist(Diffs, bins=250 if args.N>9999 else 25, color='blue')
+            ax.set_title (f'Discrepancy in energies for {args.N:,} trials')
+            fig.savefig(get_file_name(args.out))
 
-    if args.action=='2.3':
-        registry = Registry()
-        registry.register_all("md%d.txt")
-        Xs,Vs = create_config(n     = args.n,
-                              d     = args.d,
-                              L     = L,
-                              sigma = args.sigma,
-                              rng   = rng,
-                              M     = args.M)
-        print ('Created configuration')
-        n_wall_collisions = 0
-        n_pair_collisions = 0
-        for epoch in range(args.N):
-            if registry.is_kill_token_present(): break
-            collision_type, k, l = event_disks(Xs,Vs,
-                                               sigma = args.sigma,
-                                               d     = args.d,
-                                               L     = L)
-            if collision_type==WALL_COLLISION:
-                n_wall_collisions += 1
-            else:
-                n_pair_collisions += 1
-            if epoch%args.freq==0:
-                print (f'Epoch = {epoch}, Wall collisions={n_wall_collisions}, Pair collisions={n_pair_collisions} {100*n_pair_collisions/(n_pair_collisions+n_wall_collisions):.2f}%')
-                save_configuration(file_patterns = args.save,
-                                   epoch          = epoch,
-                                   retention      = args.retention,
-                                   seed           = seed,
-                                   args           = args,
-                                   collision_type = collision_type,
-                                   k              = k,
-                                   l              = l)
+        case '2.3':
+            registry = Registry()
+            registry.register_all("md%d.txt")
+            Xs,Vs = create_config(n     = args.n,
+                                  d     = args.d,
+                                  L     = L,
+                                  sigma = args.sigma,
+                                  rng   = rng,
+                                  M     = args.M)
+            print ('Created configuration')
+            n_wall_collisions = 0
+            n_pair_collisions = 0
+            for epoch in range(args.N):
+                if registry.is_kill_token_present(): break
+                collision_type, k, l = event_disks(Xs,Vs,
+                                                   sigma = args.sigma,
+                                                   d     = args.d,
+                                                   L     = L)
+                if collision_type==WALL_COLLISION:
+                    n_wall_collisions += 1
+                else:
+                    n_pair_collisions += 1
+                if epoch%args.freq==0:
+                    print (f'Epoch = {epoch}, Wall collisions={n_wall_collisions}, Pair collisions={n_pair_collisions} {100*n_pair_collisions/(n_pair_collisions+n_wall_collisions):.2f}%')
+                    save_configuration(file_patterns = args.save,
+                                       epoch          = epoch,
+                                       retention      = args.retention,
+                                       seed           = seed,
+                                       args           = args,
+                                       collision_type = collision_type,
+                                       k              = k,
+                                       l              = l)
 
+    elapsed = time() - start
+    minutes = int(elapsed/60)
+    seconds = elapsed - 60*minutes
+    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
 
-
-    # savefig(get_plot_file_name(args.plot))
     if args.show:
         show()
