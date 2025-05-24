@@ -37,11 +37,23 @@ TOLERANCE      = 1e-12
 
 def get_pair_time(x1, x2, v1, v2,
                   sigma = 0.01):
-    '''Algorithm 2.2 Pair Time. Pair collision time for two particles'''
+    '''
+    Algorithm 2.2 Pair Time. Pair collision time for two spheres
+
+    Parameters:
+        x1         Centre of one sphere
+        x2         Centre of the other sphere
+        v1         Velocity of one sphere
+        v2         Velocity of the other sphere
+        sigma      Radius of sphere
+    '''
     Delta_x = x1 - x2
     Delta_v = v1 - v2
-    Upsilon = dot(Delta_x,Delta_v)**2 - dot(Delta_v,Delta_v)*(dot(Delta_x,Delta_x)-4*sigma**2)
-    return - (dot(Delta_x,Delta_v)+sqrt(Upsilon))/dot(Delta_v,Delta_v) if Upsilon>0 and dot(Delta_x,Delta_v) <0 else float('inf')
+    Upsilon = dot(Delta_x,Delta_v)**2 - dot(Delta_v,Delta_v) * (dot(Delta_x,Delta_x) - 4*sigma**2)
+    if Upsilon > 0 and dot(Delta_x,Delta_v)  < 0 :
+        return - (dot(Delta_x,Delta_v)+sqrt(Upsilon))/dot(Delta_v,Delta_v)
+    else:
+        return float('inf')
 
 def get_wall_time(x, v,
                   sigma = 0.01,

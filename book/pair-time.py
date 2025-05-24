@@ -71,7 +71,11 @@ def get_file_name(name,default_ext='png',seq=None):
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
-    parser.add_argument('--action', default = 'run', choices = ['test', 'run'])
+    parser.add_argument('--action', default = 'run', choices = ['test', 'run'],
+                        help='''
+                                Default value (run) performs as described above. Set to "test" instead
+                                to propagte one pair of disks and show starting and final configurations.
+                            ''')
     parser.add_argument('--d', type = int, default = 2, choices = [2,3], help    = 'Dimension of space')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
@@ -85,68 +89,70 @@ def parse_arguments():
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    start  = time()
+    start = time()
     args = parse_arguments()
     L = [1] * args.d
     rng = np.random.default_rng(args.seed)
 
-    if args.action == 'run':
-        Distances = np.empty((args.N))
-        N_Distances = 0
-        Dots  = np.empty((args.N))
-        N_Dots = 0
-        for _ in range(args.N):
-            x1, x2, v1, v2 = sample(sigma = args.sigma, L = L,rng=rng)
-            DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
-            if DeltaT<float('inf'):
-                x1_prime = x1 + DeltaT *v1
-                x2_prime = x2 + DeltaT *v2
-                Distances[N_Distances] = (np.linalg.norm(x1_prime-x2_prime)-2*args.sigma)/2*args.sigma
-                N_Distances += 1
-            else:
-                t0 = min(get_time_of_closest_approach(x1,x2,v1,v2),0)
-                Delta_x = x1 - x2
-                Delta_v = v1 - v2
-                Delta_x_prime = Delta_x + t0*Delta_v
-                Dots[N_Dots] = np.dot(Delta_x_prime, Delta_v)
-                N_Dots += 1
+    match args.action:
+        case 'run':
+            Distances = np.empty((args.N))
+            N_Distances = 0
+            Dots = np.empty((args.N))
+            N_Dots = 0
+            for _ in range(args.N):
+                x1, x2, v1, v2 = sample(sigma = args.sigma, L = L,rng=rng)
+                DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
+                if DeltaT < float('inf'):
+                    x1_prime = x1 + DeltaT *v1
+                    x2_prime = x2 + DeltaT *v2
+                    Distances[N_Distances] = (np.linalg.norm(x1_prime-x2_prime)-2*args.sigma)/2*args.sigma
+                    N_Distances += 1
+                else:
+                    t0 = min(get_time_of_closest_approach(x1,x2,v1,v2),0)
+                    Delta_x = x1 - x2
+                    Delta_v = v1 - v2
+                    Delta_x_prime = Delta_x + t0*Delta_v
+                    Dots[N_Dots] = np.dot(Delta_x_prime, Delta_v)
+                    N_Dots += 1
 
-        s  = np.std(Distances[0:N_Distances])
+            s  = np.std(Distances[0:N_Distances])
 
-        fig = figure(figsize=(12,6))
-        fig.suptitle(f'Number of samples: {args.N:,}')
-        ax1 = fig.add_subplot(1,2,1)
-        ax2 = fig.add_subplot(1,2,2)
-        ax1.hist(Distances[0:N_Distances], bins=250 if args.N>9999 else 25, color='b')
-        ax1.set_xlim(-10*s, 10*s)
-        ax1.set_title('Deviations of centres at $t=t_{pair}$.'f'\nStandard deviation = {s:.2g}')
-        ax2.hist(Dots[0:N_Dots], bins = 250 if args.N > 9999 else 25, color='b')
-        ax2.set_title(r'$\Delta_x\cdot\Delta_v$ for $t_{pair}=\infty$'f'\nStandard deviation = {np.std(Dots[0:N_Dots]):.2g}')
-    if args.action=='test':
-        for _ in range(1000):
-            x1, x2, v1, v2 = sample(rng, sigma = args.sigma, L = L,rng=rng)
-            DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
-            print (DeltaT)
-            if DeltaT<float('inf'): break
+            fig = figure(figsize=(12,6))
+            fig.suptitle(f'Number of samples: {args.N:,}')
+            ax1 = fig.add_subplot(1,2,1)
+            ax2 = fig.add_subplot(1,2,2)
+            ax1.hist(Distances[0:N_Distances], bins=250 if args.N>9999 else 25, color='b')
+            ax1.set_xlim(-10*s, 10*s)
+            ax1.set_title('Deviations of centres at $t=t_{pair}$.'f'\nStandard deviation = {s:.2g}')
+            ax2.hist(Dots[0:N_Dots], bins = 250 if args.N > 9999 else 25, color='b')
+            ax2.set_title(r'$\Delta_x\cdot\Delta_v$ for $t_{pair}=\infty$'f'\nStandard deviation = {np.std(Dots[0:N_Dots]):.2g}')
 
-        x1_prime = x1 + DeltaT *v1
-        x2_prime = x2 + DeltaT *v2
-        distance = np.linalg.norm(x1_prime-x2_prime)
-        print (2*args.sigma, distance, abs(2*args.sigma-distance)/2*args.sigma)
+        case 'test':
+            for _ in range(1000):
+                x1, x2, v1, v2 = sample(sigma = args.sigma, L = L,rng=rng)
+                DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
+                print (DeltaT)
+                if DeltaT<float('inf'): break
 
-        fig = figure(figsize=(10,10))
-        ax = fig.add_subplot(111)
-        ax.axis([-L,  L, -L, L])
-        r_display_coordinates = ax.transData.transform([args.sigma,0])[0] - ax.transData.transform([0,0])[0] # https://stackoverflow.com/questions/65174418/how-to-adjust-the-marker-size-of-a-scatter-plot-so-that-it-matches-a-given-radi
-        marker_size  = 0.5*(2*r_display_coordinates)**2 # fudge factor
-        ax.scatter(x1[0],x1[1],label='x1',s=marker_size)
-        ax.scatter(x2[0],x2[1],label='x2',s=marker_size)
-        ax.arrow(x1[0],x1[1],0.25*DeltaT*v1[0],0.25*DeltaT*v1[1],head_width=0.0125)
-        ax.arrow(x2[0],x2[1],0.25*DeltaT*v2[0],0.25*DeltaT*v2[1],head_width=0.0125)
+            x1_prime = x1 + DeltaT *v1
+            x2_prime = x2 + DeltaT *v2
+            distance = np.linalg.norm(x1_prime-x2_prime)
+            print (2*args.sigma, distance, abs(2*args.sigma-distance)/2*args.sigma)
 
-        ax.scatter(x1_prime[0],x1_prime[1],label='x1"',s=marker_size)
-        ax.scatter(x2_prime[0],x2_prime[1],label='x2"',s=marker_size)
-        ax.grid()
+            fig = figure(figsize=(10,10))
+            ax = fig.add_subplot(111)
+            ax.axis([-L[0],  L[0], -L[1], L[1]])
+            r_display_coordinates = ax.transData.transform([args.sigma,0])[0] - ax.transData.transform([0,0])[0] # https://stackoverflow.com/questions/65174418/how-to-adjust-the-marker-size-of-a-scatter-plot-so-that-it-matches-a-given-radi
+            marker_size  = 0.5*(2*r_display_coordinates)**2 # fudge factor
+            ax.scatter(x1[0],x1[1],label='x1',s=marker_size)
+            ax.scatter(x2[0],x2[1],label='x2',s=marker_size)
+            ax.arrow(x1[0],x1[1],0.25*DeltaT*v1[0],0.25*DeltaT*v1[1],head_width=0.0125)
+            ax.arrow(x2[0],x2[1],0.25*DeltaT*v2[0],0.25*DeltaT*v2[1],head_width=0.0125)
+
+            ax.scatter(x1_prime[0],x1_prime[1],label='x1"',s=marker_size)
+            ax.scatter(x2_prime[0],x2_prime[1],label='x2"',s=marker_size)
+            ax.grid()
 
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
