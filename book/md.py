@@ -43,6 +43,9 @@ def get_pair_time(x1, x2, v1, v2, sigma = 0.01):
         v1         Velocity of one sphere
         v2         Velocity of the other sphere
         sigma      Radius of sphere
+
+    Returns:
+        The time at which two spheres will collide: may be np.inf
     '''
     Delta_x = x1 - x2
     Delta_v = v1 - v2
@@ -52,23 +55,21 @@ def get_pair_time(x1, x2, v1, v2, sigma = 0.01):
     else:
         return float('inf')
 
-def get_wall_time(x, v,
-                  sigma = 0.01,
-                  d     = 2,
-                  L     = [1,1]):
+def get_wall_time(x, v, sigma = 0.01, d = 2, L = [1,1]):
     '''
-        Fig 2.3 Calculate the time for the first collision with a wall
+        Fig 2.3 Calculate the time for the first collision of a sphere with a wall
+
         Parameters:
-            x
-            v
-            sigma
-            d
-            L
+            x       Position of sphere
+            v       Velocity of sphere
+            sigma   Radius of sphere
+            d       Dimension of space
+            L       Lengths of sides
         '''
-    time_to_collide_with_each_wall = [(np.sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
-    assert ([abs(abs(x[i]+time_to_collide_with_each_wall[i] * v[i])-sigma)==0 for i in range(d)])
-    wall  = np.argmin(time_to_collide_with_each_wall)
-    return wall, time_to_collide_with_each_wall[wall]
+    collision_times = [(np.sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
+    assert ([abs(abs(x[i]+collision_times[i] * v[i])-sigma)==0 for i in range(d)])
+    wall  = np.argmin(collision_times)
+    return wall, collision_times[wall]
 
 def collide_pair(x1, x2, v1, v2):
     '''
@@ -86,43 +87,47 @@ def collide_pair(x1, x2, v1, v2):
     Delta_v_perp = np.dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
 
-def event_disks(Xs, Vs,
-                sigma = 0.01,
-                d     = 2,
-                L     = [1,1,1]):
+def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1]):
     '''
     Algorithm 2.1: event driven molecular dynamics for particles in a box.
     Calculate time to next collision of a sphere with another sphere or
-    with a wall, run time fprward until collision, then adjust velocities
+    with a wall, run time forward until collision, then adjust velocities
     to immediately after.
+
+    Parameters:
+        Xs      Centres of all spheres
+        Vs      Velocities of all spheres
+        sigma   Radius of sphere spheres
+        d       Dimension of space
+        L       Lengths of sides
     '''
 
-    # Calculate time to next pair collision
-    next_pair = (float('inf'), None, None)
-    for k in range(len(Xs)):
-        for l in range(k+1,len(Xs)):
-            t = get_pair_time(Xs[k], Xs[l], Vs[k], Vs[l],
-                              sigma = sigma)
-            if t<next_pair[0]:
-                next_pair=(t,k,l)
+    def get_next_pair():
+        '''Calculate time to next pair collision'''
+        next_pair = (float('inf'), None, None)
+        for k in range(len(Xs)):
+            for l in range(k+1,len(Xs)):
+                t = get_pair_time(Xs[k], Xs[l], Vs[k], Vs[l],sigma = sigma)
+                if t < next_pair[0]:
+                    next_pair = (t,k,l)
+        return next_pair
 
-    # Calculate time to next wall collision
-    next_wall = (float('inf'), None, None)
-    for j in range(len(Xs)):
-        wall,t = get_wall_time(Xs[j], Vs[j],
-                               sigma = sigma,
-                               d     = d,
-                               L     = L)
-        if t<next_wall[0]:
-            next_wall = (t,wall,j)
+    def get_next_wall():
+        '''Calculate time to next wall collision'''
+        next_wall = (float('inf'), None, None)
+        for j in range(len(Xs)):
+            wall,t = get_wall_time(Xs[j], Vs[j], sigma = sigma, d = d, L = L)
+            if t < next_wall[0]:
+                next_wall = (t,wall,j)
+        return next_wall
 
     # Work out which collision is next, wall or pair
-    t_wall,wall,j = next_wall
-    t_pair, k, l  = next_pair
+    t_wall,wall,j = get_next_wall()
+    t_pair, k, l  = get_next_pair()
 
     if t_wall < t_pair:
         Xs += t_wall * Vs     # Update to new position
-        assert(abs(abs(Xs[j,wall])-(L[wall]-sigma))<TOLERANCE)
+        assert abs(abs(Xs[j,wall])-(L[wall]-sigma))<TOLERANCE
         Vs[j][wall] = - Vs[j][wall]
         return WALL_COLLISION, j, wall
     else:
@@ -130,7 +135,7 @@ def event_disks(Xs, Vs,
         E_before = np.dot(Vs[k],Vs[k]) + np.dot(Vs[l],Vs[l])
         collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
         E_after = np.dot(Vs[k],Vs[k]) + np.dot(Vs[l],Vs[l])
-        assert (E_before==E_after)
+        assert E_before==E_after
         return PAIR_COLLISION, k, l
 
 def get_file_name(name,default_ext='png',seq=None):
@@ -180,14 +185,19 @@ def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
     Find one sample where points admissable
 
     Parameters:
-        L
+        L       Lenghts of all sides
         V
-        sigma
-        d
-        rng
+        sigma   Radius of sphere
+        d       Dimension of space
+        L       Lengths of sides
 
     Returns: x1, x2, v1, v2, where
-
+        x1      Centre of one sphere
+        x2      Centre of the other sphere
+        v1      Velocity of one sphere
+        v2      Velocity of the other sphere, and
+                the spheres are moving so that they will collide in a positive
+                time, which may be np.inf
 
     '''
     while True:
@@ -195,8 +205,8 @@ def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
         x2 =  2 * np.multiply(L, rng.random((d,))) - L
         v1 = -V + 2 * V * rng.random((d,))
         v2 = -V + 2 * V * rng.random((d,))
-        if np.dot(x1-x2,x1-x2) > 4 * sigma**2 and np.dot(x1 - x2,v1 - v2)<0:
-            return x1,x2, v1, v2
+        if np.dot(x1-x2,x1-x2) > 4 * sigma**2 and np.dot(x1 - x2,v1 - v2) < 0:
+            return x1,x2,v1,v2
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
@@ -261,13 +271,12 @@ def save_configuration(file_patterns = 'md.npz',
                        k              = None,
                        l              = None):
     def get_sequence(saved_files):
-        if len(saved_files)==0:
-            return 1
-        else:
-            saved_files.sort(reverse=True)
-            last_file = splitext(saved_files[0])
-            digits    = search(r'\d+',last_file[0]).group(0)
-            return int(digits)+1
+        if len(saved_files)==0: return 1
+
+        saved_files.sort(reverse=True)
+        last_file = splitext(saved_files[0])
+        digits = search(r'\d+',last_file[0]).group(0)
+        return int(digits)+1
 
     pattern      = splitext(file_patterns)
     saved_files  = glob(f'./{pattern[0]}[0-9]*{pattern[1]}')
@@ -295,19 +304,18 @@ if __name__=='__main__':
     match args.action:
         case '2.2':
             n = 0
-            Diffs  = []
-            while True:
+            Diffs = np.empty((args.N))
+            while True and n < args.N:
                 x1, x2, v1, v2 = sample(sigma = args.sigma, L = L, d = args.d)
                 DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
                 if DeltaT < float('inf'):
-                    n += 1
                     x1_prime = x1 + DeltaT*v1
                     x2_prime = x2 + DeltaT*v2
                     v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
                     E = np.dot(v1,v1) + np.dot(v2,v2)
                     E_prime = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
-                    Diffs.append((E-E_prime)/(E+E_prime))
-                if n>args.N: break
+                    Diffs[n] = (E-E_prime)/(E+E_prime)
+                    n += 1
 
             fig = figure(figsize=(12,12))
             ax = fig.add_subplot(1,1,1)
