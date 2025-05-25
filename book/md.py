@@ -205,7 +205,6 @@ def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
         V       Limiting velocity: we aim for velocities to be in range (-V,V)
         sigma   Radius of sphere
         d       Dimension of space
-        L       Lengths of sides
 
     Returns: x1, x2, v1, v2, where
         x1      Centre of one sphere
@@ -260,23 +259,29 @@ def get_L(L,d):
 
     raise Exception(f'Length of L is {len(L)}: should be 1 or {d}')
 
-def create_config(n     = 5,
-                  d     = 2,
-                  L     = [1,1],
-                  sigma = 0.1,
-                  V     = 1,
-                  rng   = None,
-                  M     = 25):
+def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = None, M = 25):
+    '''
+    Create a configuration of disks or spheres, no two of which overlap
+
+    Parameters:
+        n       Number of spheres
+        L       Lengths of all sides
+        V       Limiting velocity: we aim for velocities to be in range (-V,V)
+        sigma   Radius of sphere
+        d       Dimension of space
+        rng     Random number generator
+        M       Number of attempt allowed to create configuration
+    '''
     Volume = 1
     VolumeDisk = np.pi if d==2 else 4*np.pi/3
     for l in L:
-        Volume     *= 2*l*Volume
+        Volume *= (2*l*Volume)
         VolumeDisk *= sigma
     density = n * VolumeDisk/Volume
 
     print (f'Trying to create configuration: n={n}, d={d}, l={L}, sigma={sigma}, density ={density:2g}')
     for _ in range(M):
-        Xs     =  2 * np.multiply(L, rng.random((n,d))) - L
+        Xs =  2 * np.multiply(L, rng.random((n,d))) - L
         reject = False
         for i in range(args.n):
             for j in range(i):
@@ -285,7 +290,8 @@ def create_config(n     = 5,
         if not reject:
             Vs = -V + 2 * V * rng.random((n,d))
             return Xs, Vs
-    raise Exception(f'Failed to create configuration in {M} attempts: n={n}, d={d}, l={L}, sigma={sigma}')
+
+    raise RuntimeError(f'Failed to create configuration in {M} attempts: n={n}, d={d}, l={L}, sigma={sigma}')
 
 def save_configuration(file_patterns = 'md.npz',
                        epoch = 0,
@@ -295,13 +301,28 @@ def save_configuration(file_patterns = 'md.npz',
                        collision_type = None,
                        k = None,
                        l = None):
-    def get_sequence(saved_files):
-        if len(saved_files)==0: return 1
+    '''
+    Save configuration of disks
 
+    Parameters:
+        file_patterns
+        epoch
+        retention
+        seed
+        args
+        collision_type
+        k
+        l
+    '''
+    def get_sequence(saved_files):
+        '''
+        Used to make file name unique
+        '''
+        if len(saved_files)==0: return 1
         saved_files.sort(reverse=True)
         last_file = splitext(saved_files[0])
         digits = search(r'\d+',last_file[0]).group(0)
-        return int(digits)+1
+        return int(digits) + 1
 
     pattern = splitext(file_patterns)
     saved_files = glob(f'./{pattern[0]}[0-9]*{pattern[1]}')
