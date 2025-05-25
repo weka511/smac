@@ -91,6 +91,8 @@ if __name__=='__main__':
                                seed = seed,
                                args = args,
                                collision_type = collision_type,
+                               Xs = Xs,
+                               Vs = Vs,
                                k = k,
                                l = l)
 
