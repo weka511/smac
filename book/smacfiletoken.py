@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2015-2022 Greenweaves Software Limited
+# Copyright (C) 2015-2025 Greenweaves Software Limited
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,12 +20,15 @@
     Allow program to be stopped by creating kill token. Tested using direct.py (Problem 1.1)
 '''
 
-from os       import remove
-from os.path  import join, isfile
-from time     import strptime, strftime
+from os import remove
+from os.path import join, isfile
+from time import strptime, strftime
 from tempfile import gettempdir
 
 def make_temp_file(name):
+    '''
+    Create a path to a named temporary file
+    '''
     return join(gettempdir(),name)
 
 class Token:
@@ -67,11 +70,12 @@ class Token:
         return self.time<other.time
 
 class Registry:
-    '''This class allows Tokens to be stored in a Registry file
-        Or retrieved, and it also manages kill Tokens
     '''
-    def __init__(self,kill_token="kill.txt"):
-        self.tokens     = []
+        This class allows Tokens to be stored in a Registry file
+        or retrieved, and it also manages kill Tokens
+    '''
+    def __init__(self,kill_token="stop"):
+        self.tokens = []
         self.kill_token = kill_token
 
     def register(self,token):
