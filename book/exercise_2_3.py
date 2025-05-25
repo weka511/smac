@@ -15,7 +15,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 2.3'''
+'''
+    Exercise 2.3. Implement algorithm 2.1 (event disks) for disks in a square
+    box without periodic boundary conditions. Starte from a legal configuration,
+    allowing restart as discussed in exercise 1.3. Generate histograms of position
+    and velocity.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -74,7 +79,7 @@ if __name__=='__main__':
     registry = Registry()
     registry.register_all("md%d.txt")
     Xs,Vs = create_config(n = args.n, d = args.d, L = L, sigma = args.sigma, rng = rng, M = args.M)
-    print ('Created configuration')
+    print (f'Created configuration for {args.n} {args.d} dimensional spheres')
     n_collisions = np.zeros((2),dtype=int)
     for epoch in range(args.N):
         if registry.is_kill_token_present(): break
