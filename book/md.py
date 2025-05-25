@@ -255,6 +255,24 @@ def get_L(L,d):
 
     raise Exception(f'Length of L is {len(L)}: should be 1 or {d}')
 
+def get_density(n=5,d=2,sigma = 0.1, L = [1,1]):
+    '''
+    Determine the density of spheres in box
+
+       Parameters:
+        n       Number of spheres
+        L       Lengths of all sides
+        sigma   Radius of sphere
+        d       Dimension of space
+
+    '''
+    VolumeBox = 1
+    VolumeDisk = np.pi if d==2 else 4*np.pi/3
+    for l in L:
+        VolumeBox *= (2*l*VolumeBox)
+        VolumeDisk *= sigma
+    return n * VolumeDisk/VolumeBox
+
 def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = None, M = 25):
     '''
     Create a configuration of disks or spheres, no two of which overlap
@@ -266,16 +284,11 @@ def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = None, M = 2
         sigma   Radius of sphere
         d       Dimension of space
         rng     Random number generator
-        M       Number of attempt allowed to create configuration
+        M       Number of attempts allowed to create configuration
     '''
-    Volume = 1
-    VolumeDisk = np.pi if d==2 else 4*np.pi/3
-    for l in L:
-        Volume *= (2*l*Volume)
-        VolumeDisk *= sigma
-    density = n * VolumeDisk/Volume
 
-    print (f'Trying to create configuration: n={n}, d={d}, l={L}, sigma={sigma}, density ={density:2g}')
+    print (f'Trying to create configuration: n={n}, d={d}, L={L}, sigma={sigma},'
+           f' density ={get_density(n=5,d=d,sigma=sigma,L=L):2g}')
     for _ in range(M):
         Xs =  2 * np.multiply(L, rng.random((n,d))) - L
         reject = False
