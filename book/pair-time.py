@@ -44,9 +44,7 @@ def get_time_of_closest_approach(x1, x2, v1, v2):
     '''
     Delta_x = x1 - x2
     Delta_v = v1 - v2
-    return -np.dot(Delta_v,Delta_x)/np.dot(Delta_v,Delta_v)
-
-
+    return - np.dot(Delta_v,Delta_x)/np.dot(Delta_v,Delta_v)
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -101,32 +99,33 @@ if __name__=='__main__':
             Dots = np.empty((args.N))
             N_Dots = 0
             for _ in range(args.N):
-                x1, x2, v1, v2 = sample(sigma = args.sigma, L = L,rng=rng)
-                DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
+                x1, x2, v1, v2 = sample(sigma=args.sigma, L=L, rng=rng)
+                DeltaT = get_pair_time(x1,x2,v1,v2,sigma=args.sigma)
                 if DeltaT < float('inf'):
                     x1_prime = x1 + DeltaT *v1
                     x2_prime = x2 + DeltaT *v2
                     Distances[N_Distances] = (np.linalg.norm(x1_prime-x2_prime)-2*args.sigma)/2*args.sigma
                     N_Distances += 1
                 else:
-                    t0 = min(get_time_of_closest_approach(x1,x2,v1,v2),0)
+                    t0 = get_time_of_closest_approach(x1,x2,v1,v2)
+                    if t0 < 0: continue
                     Delta_x = x1 - x2
                     Delta_v = v1 - v2
                     Delta_x_prime = Delta_x + t0*Delta_v
                     Dots[N_Dots] = np.dot(Delta_x_prime, Delta_v)
                     N_Dots += 1
 
-            s  = np.std(Distances[0:N_Distances])
+            std  = np.std(Distances[0:N_Distances])
 
             fig = figure(figsize=(12,6))
-            fig.suptitle(f'Number of samples: {args.N:,}')
+            fig.suptitle(f'Exercose 2.1. Number of samples: {args.N:,}')
             ax1 = fig.add_subplot(1,2,1)
             ax2 = fig.add_subplot(1,2,2)
             ax1.hist(Distances[0:N_Distances], bins=250 if args.N>9999 else 25, color='b')
-            ax1.set_xlim(-10*s, 10*s)
-            ax1.set_title('Deviations of centres at $t=t_{pair}$.'f'\nStandard deviation = {s:.2g}')
+            ax1.set_xlim(-10*std, 10*std)
+            ax1.set_title('Deviations of centres at $t=t_{pair}$.'f'\nStandard deviation = {std:.2g}, from {N_Distances} collisions')
             ax2.hist(Dots[0:N_Dots], bins = 250 if args.N > 9999 else 25, color='b')
-            ax2.set_title(r'$\Delta_x\cdot\Delta_v$ for $t_{pair}=\infty$'f'\nStandard deviation = {np.std(Dots[0:N_Dots]):.2g}')
+            ax2.set_title(r'$\Delta_x\cdot\Delta_v$ for $t_{pair}=\infty$'f'\nStandard deviation = {np.std(Dots[0:N_Dots]):.2g} from {N_Dots} approaches')
 
         case 'test':
             for _ in range(1000):
