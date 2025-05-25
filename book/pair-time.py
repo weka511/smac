@@ -17,8 +17,8 @@
 
 '''
     Exercise 2.1: Implement algorithm 2.2 (pair-time) and incorporate it into a test program
-    generating 2 random positions with ans(delta_x) > 2 sigma. Propagate both disks up to t_pair
-    if finite and verify that they touch, otherwise verify that datla_x.delta_y < 0.
+    generating 2 random positions with abs(delta_x) > 2 sigma. Propagate both disks up to t_pair
+    if finite and verify that they touch, otherwise verify that delta_x.delta_v = 0.
 '''
 
 from argparse import ArgumentParser
@@ -68,6 +68,9 @@ def get_file_name(name,default_ext='png',seq=None):
 
 
 def parse_arguments():
+    '''
+    Parse command line arguments
+    '''
     parser = ArgumentParser(description = __doc__)
     parser.add_argument('--action', default = 'run', choices = ['test', 'run'],
                         help='''
@@ -101,31 +104,31 @@ if __name__=='__main__':
             for _ in range(args.N):
                 x1, x2, v1, v2 = sample(sigma=args.sigma, L=L, rng=rng)
                 DeltaT = get_pair_time(x1,x2,v1,v2,sigma=args.sigma)
-                if DeltaT < float('inf'):
+                if DeltaT < float('inf'): # Find distance between spheres when they touch (expert zero)
                     x1_prime = x1 + DeltaT *v1
                     x2_prime = x2 + DeltaT *v2
                     Distances[N_Distances] = (np.linalg.norm(x1_prime-x2_prime)-2*args.sigma)/2*args.sigma
                     N_Distances += 1
-                else:
+                else: # calculate delta_x.delta_v at closest approach
                     t0 = get_time_of_closest_approach(x1,x2,v1,v2)
-                    if t0 < 0: continue
-                    Delta_x = x1 - x2
-                    Delta_v = v1 - v2
-                    Delta_x_prime = Delta_x + t0*Delta_v
-                    Dots[N_Dots] = np.dot(Delta_x_prime, Delta_v)
-                    N_Dots += 1
+                    if t0 > 0:
+                        Delta_x = x1 - x2
+                        Delta_v = v1 - v2
+                        Delta_x_prime = Delta_x + t0*Delta_v
+                        Dots[N_Dots] = np.dot(Delta_x_prime, Delta_v)
+                        N_Dots += 1
 
             std  = np.std(Distances[0:N_Distances])
 
             fig = figure(figsize=(12,6))
-            fig.suptitle(f'Exercose 2.1. Number of samples: {args.N:,}')
+            fig.suptitle(f'Exercise 2.1. Number of samples: {args.N:,}')
             ax1 = fig.add_subplot(1,2,1)
             ax2 = fig.add_subplot(1,2,2)
             ax1.hist(Distances[0:N_Distances], bins=250 if args.N>9999 else 25, color='b')
             ax1.set_xlim(-10*std, 10*std)
-            ax1.set_title('Deviations of centres at $t=t_{pair}$.'f'\nStandard deviation = {std:.2g}, from {N_Distances} collisions')
+            ax1.set_title('Deviations of centres at $t=t_{pair}$.'f'\nStandard deviation = {std:.2g}, from {N_Distances:,} collisions')
             ax2.hist(Dots[0:N_Dots], bins = 250 if args.N > 9999 else 25, color='b')
-            ax2.set_title(r'$\Delta_x\cdot\Delta_v$ for $t_{pair}=\infty$'f'\nStandard deviation = {np.std(Dots[0:N_Dots]):.2g} from {N_Dots} approaches')
+            ax2.set_title(r'$\Delta_x\cdot\Delta_v$ for $t_{pair}=\infty$'f'\nStandard deviation = {np.std(Dots[0:N_Dots]):.2g} from {N_Dots:,} approaches')
 
         case 'test':
             for _ in range(1000):
