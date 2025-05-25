@@ -283,7 +283,7 @@ def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = None, M = 2
     for _ in range(M):
         Xs =  2 * np.multiply(L, rng.random((n,d))) - L
         reject = False
-        for i in range(args.n):
+        for i in range(n):
             for j in range(i):
                 reject = np.dot(Xs[i] - Xs[j],Xs[i] - Xs[j])< 4 * sigma**2
                 if reject: break
@@ -298,6 +298,8 @@ def save_configuration(file_patterns = 'md.npz',
                        retention = 3,
                        seed = None,
                        args = None,
+                       Xs = None,
+                       Vs = None,
                        collision_type = None,
                        k = None,
                        l = None):
@@ -390,6 +392,8 @@ if __name__=='__main__':
                                        retention = args.retention,
                                        seed = seed,
                                        args = args,
+                                       Xs = Xs,
+                                       Vs = Vs,
                                        collision_type = collision_type,
                                        k = k,
                                        l = l)
