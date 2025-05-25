@@ -225,7 +225,6 @@ def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
-    parser.add_argument('--action', default = '2.3', choices = ['2.2','2.3'])
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
@@ -236,9 +235,6 @@ def parse_arguments():
     parser.add_argument('--M', type = int, default = 1000, help = 'Number of attempts to create configuration')
     parser.add_argument('--L', type = float, nargs = '+', default = [1], help = 'Lengths of box walls')
     parser.add_argument('--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
-    parser.add_argument('--freq', type = int, default = 25, help = 'For saving configuration')
-    parser.add_argument('--retention', type = int, default = 3, help = 'For saving configuration')
-    parser.add_argument('--save',  default = f'{splitext(basename(__file__))[0]}.npz', help = 'For saving configuration')
 
     return parser.parse_args()
 
@@ -349,54 +345,25 @@ if __name__=='__main__':
     args = parse_arguments()
     rng,seed = create_rng(args.seed)
     L  = get_L(args.L, args.d)
+    n = 0
+    Diffs = np.empty((args.N))
+    while True and n < args.N:
+        x1, x2, v1, v2 = sample(sigma = args.sigma, L = L, d = args.d)
+        DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
+        if DeltaT < float('inf'):
+            x1_prime = x1 + DeltaT*v1
+            x2_prime = x2 + DeltaT*v2
+            v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
+            E = np.dot(v1,v1) + np.dot(v2,v2)
+            E_prime = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
+            Diffs[n] = (E-E_prime)/(E+E_prime)
+            n += 1
 
-    match args.action:
-        case '2.2':
-            n = 0
-            Diffs = np.empty((args.N))
-            while True and n < args.N:
-                x1, x2, v1, v2 = sample(sigma = args.sigma, L = L, d = args.d)
-                DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
-                if DeltaT < float('inf'):
-                    x1_prime = x1 + DeltaT*v1
-                    x2_prime = x2 + DeltaT*v2
-                    v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
-                    E = np.dot(v1,v1) + np.dot(v2,v2)
-                    E_prime = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
-                    Diffs[n] = (E-E_prime)/(E+E_prime)
-                    n += 1
-
-            fig = figure(figsize=(12,12))
-            ax = fig.add_subplot(1,1,1)
-            ax.hist(Diffs, bins=250 if args.N>9999 else 25, color='blue')
-            ax.set_title (f'Discrepancy in energies for {args.N:,} trials')
-            fig.savefig(get_file_name(args.out))
-
-        case '2.3':
-            registry = Registry()
-            registry.register_all("md%d.txt")
-            Xs,Vs = create_config(n = args.n, d = args.d, L = L, sigma = args.sigma, rng = rng, M = args.M)
-            print ('Created configuration')
-            n_collisions = np.zeros((2),dtype=int)
-            for epoch in range(args.N):
-                if registry.is_kill_token_present(): break
-                collision_type, k, l = event_disks(Xs,Vs, sigma = args.sigma, d = args.d, L = L)
-                n_collisions[collision_type] += 1
-
-                if epoch%args.freq==0:
-                    print (f'Epoch = {epoch}, Wall collisions={n_collisions[WALL_COLLISION]},'
-                           f'Pair collisions={n_collisions[PAIR_COLLISION]}'
-                           f' {100*n_collisions[PAIR_COLLISION]/(n_collisions.sum()):.2f}%')
-                    save_configuration(file_patterns = args.save,
-                                       epoch = epoch,
-                                       retention = args.retention,
-                                       seed = seed,
-                                       args = args,
-                                       Xs = Xs,
-                                       Vs = Vs,
-                                       collision_type = collision_type,
-                                       k = k,
-                                       l = l)
+    fig = figure(figsize=(12,12))
+    ax = fig.add_subplot(1,1,1)
+    ax.hist(Diffs, bins=250 if args.N>9999 else 25, color='blue')
+    ax.set_title (f'Discrepancy in energies for {args.N:,} trials')
+    fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
     minutes = int(elapsed/60)
