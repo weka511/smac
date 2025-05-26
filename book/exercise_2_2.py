@@ -76,7 +76,8 @@ def create_diffs(N,sigma=0.1,L=[1,1],d=2):
     An array of relative differences between energies.
     '''
     n = 0
-    Product = np.empty((args.N))
+    Energies = np.empty((args.N))
+    Momenta = np.zeros((2,args.N))
     while n < args.N:
         x1, x2, v1, v2 = sample(sigma =sigma, L = L, d = d)
         DeltaT = get_pair_time(x1,x2,v1,v2,sigma = sigma)
@@ -86,10 +87,13 @@ def create_diffs(N,sigma=0.1,L=[1,1],d=2):
             v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
             E_before = np.dot(v1,v1) + np.dot(v2,v2)
             E_after = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
-            Product[n] = (E_before-E_after)/(E_before+E_after)
+            P_before = v1 + v2
+            P_after = v1_prime + v2_prime
+            Momenta[:,n] = P_before - P_after
+            Energies[n] = (E_before-E_after)/(E_before+E_after)
             n += 1
 
-    return Product
+    return Energies,Momenta.reshape(-1)
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -97,13 +101,18 @@ if __name__=='__main__':
     start = time()
     args = parse_arguments()
     rng,seed = create_rng(args.seed)
-
+    L  = get_L(args.L, args.d)
+    Energies,Momenta = create_diffs(args.N,sigma = args.sigma, L  = L, d = args.d)
     fig = figure(figsize=(12,12))
-    fig.suptitle('Exercise 2.2')
-    ax = fig.add_subplot(1,1,1)
-    ax.hist(create_diffs(args.N,sigma = args.sigma, L  = get_L(args.L, args.d), d = args.d),
-            bins=250 if args.N>9999 else 25, color='blue')
-    ax.set_title (f'Discrepancy in energies for {args.N:,} trials')
+    fig.suptitle(fr'Exercise 2.2:  {args.N:,} trials, $\sigma=$ {args.sigma}, L={L}, d={args.d}')
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.hist(Energies,bins='doane', color='blue',density=True)
+    ax1.set_title (fr'Discrepancy in energies')
+
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.hist(Momenta,bins='doane', color='blue',density=True)
+    ax2.set_title (f'Discrepancy in momenta')
+
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
