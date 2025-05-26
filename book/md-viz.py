@@ -56,26 +56,36 @@ def parse_arguments():
 
 
 
-def create_energies(file):
-    _, Vs, _, _, epoch = reload(file)
+def create_energies(Vs):
     m,_ = Vs.shape
     Es = np.empty((m))
     for i in range(m):
         Es[i] = 0.5 * np.sum(Vs[i,:]**2)
-    return Es, epoch
+    return Es
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-
-    Es, epoch = create_energies(args.file)
+    Xs, Vs, epoch,n_collisions,d,L,sigma = reload(args.file)
+    Es = create_energies(Vs)
 
     fig = figure(figsize = (12,12))
-    ax = fig.add_subplot(1,1,1)
-    ax.hist(Es,bins=100)
-    ax.set_title(f'Epoch={epoch}')
+    ax1 = fig.add_subplot(2,2,1)
+    ax1.hist(Xs[:,0],bins=100,color='blue',density=True)
+    ax1.set_xlabel('$x$')
+
+    ax2 = fig.add_subplot(2,2,2)
+    ax2.hist(Vs[:,0],bins=100,color='blue',density=True)
+    ax2.set_xlabel('$V_x$')
+
+    ax3 = fig.add_subplot(2,2,3)
+    ax3.hist(Es,bins=100,color='blue',density=True)
+    ax3.set_xlabel('$E$')
+
+    fig.suptitle(fr'{args.file}: Epoch={epoch}, L={L}, $\sigma=${sigma}, n={len(Es)}')
+
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
