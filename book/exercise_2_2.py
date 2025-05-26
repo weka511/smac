@@ -33,8 +33,6 @@ def parse_arguments():
     parser.add_argument('--seed', type = int, default = None, help = 'Seed for random number generator')
     parser.add_argument('--sigma', type    = float, default = 0.01, help    = 'Radius of spheres')
     parser.add_argument('--N', type = int, default = 10000000, help = 'Number of iterations')
-    parser.add_argument('--n', type = int, default = 5, help = 'Number of hard disks')
-    parser.add_argument('--M', type = int, default = 1000, help = 'Number of attempts to create configuration')
     parser.add_argument('--L', type = float, nargs = '+', default = [1], help = 'Lengths of box walls')
     parser.add_argument('--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
 
@@ -62,6 +60,36 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 
+def create_diffs(N,sigma=0.1,L=[1,1],d=2):
+    '''
+    Sample a number of collisions and compare the energies before
+    and after each collision.
+
+    Parameters:
+        N       Number of collisions
+        sigma   Radius of each sphere
+        d       Dimension of space
+        L       Lengths of sides
+
+    Returns:
+
+    An array of relative differences between energies.
+    '''
+    n = 0
+    Product = np.empty((args.N))
+    while n < args.N:
+        x1, x2, v1, v2 = sample(sigma =sigma, L = L, d = d)
+        DeltaT = get_pair_time(x1,x2,v1,v2,sigma = sigma)
+        if DeltaT < float('inf'): # I.e. if the spheres will ever collide
+            x1_prime = x1 + DeltaT*v1
+            x2_prime = x2 + DeltaT*v2
+            v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
+            E_before = np.dot(v1,v1) + np.dot(v2,v2)
+            E_after = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
+            Product[n] = (E_before-E_after)/(E_before+E_after)
+            n += 1
+
+    return Product
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -69,24 +97,12 @@ if __name__=='__main__':
     start = time()
     args = parse_arguments()
     rng,seed = create_rng(args.seed)
-    L  = get_L(args.L, args.d)
-    n = 0
-    Diffs = np.empty((args.N))
-    while True and n < args.N:
-        x1, x2, v1, v2 = sample(sigma = args.sigma, L = L, d = args.d)
-        DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
-        if DeltaT < float('inf'):
-            x1_prime = x1 + DeltaT*v1
-            x2_prime = x2 + DeltaT*v2
-            v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
-            E = np.dot(v1,v1) + np.dot(v2,v2)
-            E_prime = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
-            Diffs[n] = (E-E_prime)/(E+E_prime)
-            n += 1
 
     fig = figure(figsize=(12,12))
+    fig.suptitle('Exercise 2.2')
     ax = fig.add_subplot(1,1,1)
-    ax.hist(Diffs, bins=250 if args.N>9999 else 25, color='blue')
+    ax.hist(create_diffs(args.N,sigma = args.sigma, L  = get_L(args.L, args.d), d = args.d),
+            bins=250 if args.N>9999 else 25, color='blue')
     ax.set_title (f'Discrepancy in energies for {args.N:,} trials')
     fig.savefig(get_file_name(args.out))
 
