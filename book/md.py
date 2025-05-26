@@ -23,9 +23,7 @@ from re import search
 from os import remove
 from os.path import basename, join, splitext
 from sys import maxsize
-from time import time
-from matplotlib import rc
-from matplotlib.pyplot import figure, show
+from unittest import TestCase, main
 import numpy as np
 from smacfiletoken import Registry
 
@@ -359,36 +357,4 @@ def reload(file):
             restored['n_collisions'],restored['d'].astype(int),restored['L'],restored['sigma'].astype(float))
 
 if __name__=='__main__':
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
-    start = time()
-    args = parse_arguments()
-    rng,seed = create_rng(args.seed)
-    L  = get_L(args.L, args.d)
-    n = 0
-    Diffs = np.empty((args.N))
-    while True and n < args.N:
-        x1, x2, v1, v2 = sample(sigma = args.sigma, L = L, d = args.d)
-        DeltaT = get_pair_time(x1,x2,v1,v2,sigma = args.sigma)
-        if DeltaT < float('inf'):
-            x1_prime = x1 + DeltaT*v1
-            x2_prime = x2 + DeltaT*v2
-            v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
-            E = np.dot(v1,v1) + np.dot(v2,v2)
-            E_prime = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
-            Diffs[n] = (E-E_prime)/(E+E_prime)
-            n += 1
-
-    fig = figure(figsize=(12,12))
-    ax = fig.add_subplot(1,1,1)
-    ax.hist(Diffs, bins=250 if args.N>9999 else 25, color='blue')
-    ax.set_title (f'Discrepancy in energies for {args.N:,} trials')
-    fig.savefig(get_file_name(args.out))
-
-    elapsed = time() - start
-    minutes = int(elapsed/60)
-    seconds = elapsed - 60*minutes
-    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
-
-    if args.show:
-        show()
+    main()
