@@ -17,7 +17,7 @@
 
 '''Algorithm 2.3 Pair collision'''
 
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 from glob import glob
 from re import search
 from os import remove
@@ -303,13 +303,14 @@ def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = None, M = 2
     raise RuntimeError(f'Failed to create configuration in {M} attempts: n={n}, d={d}, l={L}, sigma={sigma}')
 
 def save_configuration(file_patterns = 'md.npz',
-                       epoch = 0,
                        retention = 3,
-                       seed = None,
-                       args = None,
+                       epoch = 0,
                        Xs = None,
                        Vs = None,
-                       n_collisions = None):
+                       n_collisions = None,
+                       d = 2,
+                       L =  [1,1],
+                       sigma = 0.05):
     '''
     Save configuration of disks
 
@@ -335,20 +336,27 @@ def save_configuration(file_patterns = 'md.npz',
     saved_files = glob(f'./{pattern[0]}[0-9]*{pattern[1]}')
 
     np.savez(f'./{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
-          args = args,
-          seed = seed,
           epoch = epoch,
           Xs = Xs,
           Vs = Vs,
-          n_collisions = n_collisions)
+          n_collisions = n_collisions,
+          d = d,
+          L =  L,
+          sigma = sigma)
 
     while len(saved_files) >= retention:
         remove(saved_files.pop())
 
 def reload(file):
+    '''
+    Reload configuration stored by save_configuration
+
+    Parameters:
+        file
+    '''
     restored = np.load(file, allow_pickle=True)
-    return (restored['Xs'], restored['Vs'], restored['args'].astype(Namespace),
-            restored['seed'], restored['epoch'].astype(int),restored['n_collisions'])
+    return (restored['Xs'], restored['Vs'], restored['epoch'].astype(int),
+            restored['n_collisions'],restored['d'].astype(int),restored['L'],restored['sigma'].astype(float))
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
