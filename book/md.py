@@ -17,7 +17,7 @@
 
 '''Algorithm 2.3 Pair collision'''
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from glob import glob
 from re import search
 from os import remove
@@ -181,7 +181,7 @@ def create_rng(seed0):
     Parameters:
          seed0 is seed supplied by user
 
-    Returns: Default random number generator, seedes with seed0 or newly generated seed
+    Returns: Default random number generator, seeded with seed0 or newly generated seed
     If seed0 is not None, use it
 
     If seed0 is None (no seed supplied),
@@ -309,9 +309,7 @@ def save_configuration(file_patterns = 'md.npz',
                        args = None,
                        Xs = None,
                        Vs = None,
-                       collision_type = None,
-                       k = None,
-                       l = None):
+                       n_collisions = None):
     '''
     Save configuration of disks
 
@@ -321,9 +319,7 @@ def save_configuration(file_patterns = 'md.npz',
         retention
         seed
         args
-        collision_type
-        k
-        l
+        n_collisions
     '''
     def get_sequence(saved_files):
         '''
@@ -344,12 +340,15 @@ def save_configuration(file_patterns = 'md.npz',
           epoch = epoch,
           Xs = Xs,
           Vs = Vs,
-          collision_type = collision_type,
-          k = k,
-          l = l)
+          n_collisions = n_collisions)
 
     while len(saved_files) >= retention:
         remove(saved_files.pop())
+
+def reload(file):
+    restored = np.load(file, allow_pickle=True)
+    return (restored['Xs'], restored['Vs'], restored['args'].astype(Namespace),
+            restored['seed'], restored['epoch'].astype(int),restored['n_collisions'])
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})

@@ -23,6 +23,7 @@ from time import time
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 import numpy as np
+from md import reload
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -53,9 +54,7 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     return parser.parse_args()
 
-def reload(file):
-    restored = np.load(file, allow_pickle=True)
-    return restored['Xs'], restored['Vs'], restored['args'], restored['seed'], restored['epoch']
+
 
 def create_energies(file):
     _, Vs, _, _, epoch = reload(file)

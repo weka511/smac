@@ -28,7 +28,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from md import create_config, event_disks, save_configuration, create_rng, get_L, WALL_COLLISION, PAIR_COLLISION
+from md import create_config, event_disks, save_configuration, create_rng, get_L, WALL_COLLISION, PAIR_COLLISION, reload
 from smacfiletoken import Registry
 
 def parse_arguments():
@@ -44,7 +44,7 @@ def parse_arguments():
     parser.add_argument('--freq', type = int, default = 250, help = 'For saving configuration')
     parser.add_argument('--retention', type = int, default = 3, help = 'For saving configuration')
     parser.add_argument('--save',  default = f'{splitext(basename(__file__))[0]}_.npz', help = 'For saving configuration')
-
+    parser.add_argument('--restart', default = None, help = 'Restart from saved configuration')
     return parser.parse_args()
 
 
@@ -68,38 +68,49 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
-if __name__=='__main__':
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
-    start  = time()
-    args = parse_arguments()
-    rng,seed = create_rng(args.seed)
-    L  = get_L(args.L, args.d)
+def evolve(Xs,Vs,n_collisions = np.zeros((2),dtype=int),
+           N=0,d = 2, L = [1,1], sigma = 0.1,
+           freq=5,seed=None,args=None,retention=0,initial_epoch=0):
 
-    registry = Registry()
-    registry.register_all("md%d.txt")
-    Xs,Vs = create_config(n = args.n, d = args.d, L = L, sigma = args.sigma, rng = rng, M = args.M)
-    print (f'Created configuration for {args.n} {args.d} dimensional spheres')
-    n_collisions = np.zeros((2),dtype=int)
-    for epoch in range(args.N):
+    for epoch in range(initial_epoch,N):
         if registry.is_kill_token_present(): break
-        collision_type, k, l = event_disks(Xs,Vs, sigma = args.sigma, d = args.d, L = L)
+        collision_type, k, l = event_disks(Xs,Vs, sigma =sigma, d = d, L = L)
         n_collisions[collision_type] += 1
 
-        if epoch%args.freq==0:
+        if epoch%freq==0:
             print (f'Epoch = {epoch}, Wall collisions={n_collisions[WALL_COLLISION]},'
                    f'Pair collisions={n_collisions[PAIR_COLLISION]}'
                    f' {100*n_collisions[PAIR_COLLISION]/(n_collisions.sum()):.2f}%')
             save_configuration(file_patterns = args.save,
                                epoch = epoch,
-                               retention = args.retention,
+                               retention = retention,
                                seed = seed,
                                args = args,
-                               collision_type = collision_type,
+                               n_collisions = n_collisions,
                                Xs = Xs,
-                               Vs = Vs,
-                               k = k,
-                               l = l)
+                               Vs = Vs)
+
+if __name__=='__main__':
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
+    start  = time()
+    args = parse_arguments()
+    registry = Registry()
+    registry.register_all("md%d.txt")
+
+    if args.restart == None:
+        rng,seed = create_rng(args.seed)
+        L  = get_L(args.L, args.d)
+        Xs,Vs = create_config(n = args.n, d = args.d, L = L, sigma = args.sigma, rng = rng, M = args.M)
+        print (f'Created configuration for {args.n} {args.d} dimensional spheres')
+        evolve(Xs,Vs,N=args.N,d = args.d, L = L, args=args,sigma = args.sigma, freq=args.freq,seed=args.seed,retention=args.retention)
+    else:
+        Xs, Vs, args_old, seed, epoch,n_collisions = reload(args.restart)
+        seed = None
+        rng,seed = create_rng(seed)
+        L  = get_L(args.L, args.d)
+        evolve(Xs,Vs,N=args.N,d = args.d, L = L, args=args,sigma = args.sigma,
+               freq=args.freq,seed=args.seed,retention=args.retention,initial_epoch=epoch)
 
     elapsed = time() - start
     minutes = int(elapsed/60)
