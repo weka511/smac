@@ -3,7 +3,7 @@
 # Copyright (C) 2022-2025 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# it under the terms of the GNU General Public License a s published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 
@@ -15,22 +15,24 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Algorithm 2.3 Pair collision'''
+'''
+    This module comprises functions for creating configurations,
+    allowing spheres to collide, and save and restore configurations.
+'''
 
-from argparse import ArgumentParser
+
 from glob import glob
 from re import search
 from os import remove
-from os.path import basename, join, splitext
+from os.path import  splitext
 from sys import maxsize
 from unittest import TestCase, main
 import numpy as np
-from smacfiletoken import Registry
 
-# Constants used to distinguish the two types of collisions
-
-WALL_COLLISION = 0
-PAIR_COLLISION = 1
+class Collision:
+    '''A class for keeping track of the mechanism for a collision'''
+    WALL = 0
+    PAIR = 1
 
 def get_pair_time(x1, x2, v1, v2, sigma = 0.01):
     '''
@@ -143,34 +145,16 @@ def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1], tolerance=1e-15):
         Xs += t_wall * Vs     # Update to new position
         assert abs(abs(Xs[j,wall])-(L[wall]-sigma)) < tolerance
         Vs[j][wall] = - Vs[j][wall]
-        return WALL_COLLISION, j, wall
+        return Collision.WALL, j, wall
     else:
         Xs += t_pair * Vs
         E_before = np.dot(Vs[k],Vs[k]) + np.dot(Vs[l],Vs[l])
         collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
         E_after = np.dot(Vs[k],Vs[k]) + np.dot(Vs[l],Vs[l])
         assert E_before==E_after
-        return PAIR_COLLISION, k, l
+        return Collision.PAIR, k, l
 
-def get_file_name(name,default_ext='png',seq=None):
-    '''
-    Used to create file names
 
-    Parameters:
-        name          Basis for file name
-        default_ext   Extension if non specified
-        seq           Used if there are multiple files
-    '''
-    base,ext = splitext(name)
-    if len(ext) == 0:
-        ext = default_ext
-    if seq != None:
-        base = f'{base}{seq}'
-    qualified_name = f'{base}.{ext}'
-    if ext == 'png':
-        return join(args.figs,qualified_name)
-    else:
-        return qualified_name
 
 def create_rng(seed0):
     '''
@@ -220,20 +204,6 @@ def find_admissable_pair(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default
         if np.dot(x1-x2,x1-x2) > 4 * sigma**2 and np.dot(x1 - x2,v1 - v2) < 0:
             return x1,x2,v1,v2
 
-def parse_arguments():
-    parser = ArgumentParser(description = __doc__)
-    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
-    parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
-    parser.add_argument('--seed', type = int, default = None, help = 'Seed for random number generator')
-    parser.add_argument('--sigma', type    = float, default = 0.01, help    = 'Radius of spheres')
-    parser.add_argument('--N', type = int, default = 10000000, help = 'Number of iterations')
-    parser.add_argument('--n', type = int, default = 5, help = 'Number of hard disks')
-    parser.add_argument('--M', type = int, default = 1000, help = 'Number of attempts to create configuration')
-    parser.add_argument('--L', type = float, nargs = '+', default = [1], help = 'Lengths of box walls')
-    parser.add_argument('--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
-
-    return parser.parse_args()
 
 def get_L(L,d):
     '''
@@ -307,17 +277,23 @@ def save_configuration(file_patterns = 'md.npz',
                        n_collisions = None,
                        d = 2,
                        L =  [1,1],
-                       sigma = 0.05):
+                       sigma = 0.05,
+                       folder = 'configs'):
     '''
     Save configuration of disks
 
     Parameters:
-        file_patterns
-        epoch
-        retention
-        seed
-        args
-        n_collisions
+        file_patterns   Underlying pattern for file names (extended with generation number)
+        epoch           Current epoch (total number of all collisions)
+        retention       Number of vesions of file that should be retained
+        Xs              Positions of all particlesenerator
+        Vs              Velocities of all particles
+        seed            Seed used when random number generator was created
+        n_collisions    Vector containing number of wall collisions and pair collisions
+        L               Lengths of all sides
+        sigma           Radius of sphere
+        d               Dimension of space
+        folder          Folder to store files
     '''
     def get_sequence(saved_files):
         '''
@@ -330,9 +306,9 @@ def save_configuration(file_patterns = 'md.npz',
         return int(digits) + 1
 
     pattern = splitext(file_patterns)
-    saved_files = glob(f'./{pattern[0]}[0-9]*{pattern[1]}')
+    saved_files = glob(f'./{pattern[0]}[0-9]*{pattern[1]}',root_dir=folder)
 
-    np.savez(f'./{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
+    np.savez(f'{folder}/{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
           epoch = epoch,
           Xs = Xs,
           Vs = Vs,
@@ -342,16 +318,17 @@ def save_configuration(file_patterns = 'md.npz',
           sigma = sigma)
 
     while len(saved_files) >= retention:
-        remove(saved_files.pop())
+        remove(f'{folder}{saved_files.pop()}')
 
-def reload(file):
+def reload(file, folder = 'configs'):
     '''
     Reload configuration stored by save_configuration
 
     Parameters:
-        file
+        file       Name of file to load
+        folder     Folder where files are stored
     '''
-    restored = np.load(file, allow_pickle=True)
+    restored = np.load(f'{folder}/{file}', allow_pickle=True)
     return (restored['Xs'], restored['Vs'], restored['epoch'].astype(int),
             restored['n_collisions'],restored['d'].astype(int),restored['L'],restored['sigma'].astype(float))
 

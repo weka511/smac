@@ -28,7 +28,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from md import create_config, event_disks, save_configuration, create_rng, get_L, WALL_COLLISION, PAIR_COLLISION, reload
+from md import create_config, event_disks, save_configuration, create_rng, get_L, Collision, reload
 from smacfiletoken import Registry
 
 def parse_arguments():
@@ -45,6 +45,7 @@ def parse_arguments():
     parser.add_argument('--retention', type = int, default = 3, help = 'For saving configuration')
     parser.add_argument('--save',  default = f'{splitext(basename(__file__))[0]}_.npz', help = 'For saving configuration')
     parser.add_argument('--restart', default = None, help = 'Restart from saved configuration')
+    parser.add_argument('--folder',default = 'configs', help= 'Folder to store config files')
     return parser.parse_args()
 
 
@@ -71,16 +72,33 @@ def get_file_name(name,default_ext='png',seq=None):
 def evolve(Xs,Vs,n_collisions = np.zeros((2),dtype=int),
            N=0,d = 2, L = [1,1], sigma = 0.1,
            freq=5,seed=None,save='TBP',retention=0,initial_epoch=0):
+    '''
+    Allow configuration to evolve by performing a specified number of collisions,
 
+    Parameters:
+        Xs              Positions of all particles
+        Vs              Velocities of all particles
+        n_collisions    Vector containing number of wall collisions and pair collisions
+        N               Target number of collisions
+        L               Lengths of all sides
+        sigma           Radius of sphere
+        d               Dimension of space
+        freq            Frequency for reporting and saveing configurations
+        seed            Seed used when random number generator was created
+        save            File name for saving configurations
+        retention       Number of vesions of file that should be retained
+        initial_epoch   Used when we restart to ensure epoch number is correct
+        folder          Folder to store configuration files
+    '''
     for epoch in range(initial_epoch,N):
         if registry.is_kill_token_present(): break
         collision_type, k, l = event_disks(Xs,Vs, sigma =sigma, d = d, L = L)
         n_collisions[collision_type] += 1
 
         if epoch%freq==0:
-            print (f'Epoch = {epoch}, Wall collisions={n_collisions[WALL_COLLISION]},'
-                   f'Pair collisions={n_collisions[PAIR_COLLISION]}'
-                   f' {100*n_collisions[PAIR_COLLISION]/(n_collisions.sum()):.2f}%')
+            print (f'Epoch = {epoch}, Wall collisions={n_collisions[Collision.WALL]},'
+                   f'Pair collisions={n_collisions[Collision.PAIR]}'
+                   f' {100*n_collisions[Collision.PAIR]/(n_collisions.sum()):.2f}%')
             save_configuration(file_patterns = save,
                                epoch = epoch,
                                retention = retention,
@@ -89,7 +107,8 @@ def evolve(Xs,Vs,n_collisions = np.zeros((2),dtype=int),
                                Vs = Vs,
                                d = d,
                                L =  L,
-                               sigma = sigma)
+                               sigma = sigma,
+                               folder = args.folder)
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -114,5 +133,3 @@ if __name__=='__main__':
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
     print (f'Elapsed Time {minutes} m {seconds:.2f} s')
-
-
