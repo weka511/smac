@@ -72,20 +72,30 @@ if __name__=='__main__':
     Es = create_energies(Vs)
 
     fig = figure(figsize = (12,12))
+
     ax1 = fig.add_subplot(2,2,1)
-    ax1.hist(Xs[:,0],bins=100,color='blue',density=True)
-    ax1.set_xlabel('$x$')
+    ax1.hist(Es,bins=100,color='blue',density=True)
+    ax1.set_xlabel('$E$')
+    ax1.set_title('Energies')
 
     ax2 = fig.add_subplot(2,2,2)
-    ax2.hist(Vs[:,0],bins=100,color='blue',density=True)
-    ax2.set_xlabel('$V_x$')
+    ax2.hist(Xs[:,0],bins=100,color='blue',density=True)
+    ax2.set_xlabel('$x$')
+    ax2.set_title('Positions')
 
     ax3 = fig.add_subplot(2,2,3)
-    ax3.hist(Es,bins=100,color='blue',density=True)
-    ax3.set_xlabel('$E$')
+    ax3.hist(Xs[:,1],bins=100,color='blue',density=True)
+    ax3.set_xlabel('$y$')
+    ax3.set_title('Positions')
+
+    if d == 3:
+        ax4 = fig.add_subplot(2,2,4)
+        ax4.hist(Xs[:,2],bins=100,color='blue',density=True)
+        ax4.set_xlabel('$z$')
+        ax4.set_title('Positions')
 
     fig.suptitle(fr'{args.file}: Epoch={epoch}, L={L}, $\sigma=${sigma}, n={len(Es)}')
-
+    fig.tight_layout(h_pad=3)
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start

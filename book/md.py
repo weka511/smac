@@ -24,7 +24,7 @@
 from glob import glob
 from re import search
 from os import remove
-from os.path import  splitext
+from os.path import splitext
 from sys import maxsize
 from unittest import TestCase, main
 import numpy as np
@@ -328,6 +328,8 @@ def reload(file, folder = 'configs'):
         file       Name of file to load
         folder     Folder where files are stored
     '''
+    if len(splitext(file)[1]) ==0:
+        file = f'{file}.npz'
     restored = np.load(f'{folder}/{file}', allow_pickle=True)
     return (restored['Xs'], restored['Vs'], restored['epoch'].astype(int),
             restored['n_collisions'],restored['d'].astype(int),restored['L'],restored['sigma'].astype(float))
