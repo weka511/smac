@@ -277,7 +277,7 @@ def get_sequence(saved_files):
         saved_files   A list of file names for saved configurations
 
     Returns:
-        The sequence number for the last file, incrmented by 1. If there
+        The sequence number for the last file, incremented by 1. If there
         are no saved files, returns 1.
     '''
     if len(saved_files)==0: return 1
@@ -342,7 +342,9 @@ def reload(file, folder = 'configs'):
             restored['n_collisions'],restored['d'].astype(int),restored['L'],restored['sigma'].astype(float))
 
 class TestsForFiles(TestCase):
-
+    '''
+    Tests for saving and reloading configurations.
+    '''
     def test_get_sequence(self):
         '''
         Test for Issue #79: md.save_configuration does not handle
