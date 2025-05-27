@@ -15,7 +15,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 2.2/Algorithm 2.3 (pair collision)'''
+'''
+    Exercise 2.2/Algorithm 2.3 (pair collision). Verify that energy
+    and momentum are both conserved in a collision.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -23,7 +26,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from md import sample, get_pair_time, collide_pair, create_rng, get_L
+from md import find_admissable_pair, get_pair_time, collide_pair, create_rng, get_L
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
@@ -35,6 +38,7 @@ def parse_arguments():
     parser.add_argument('--N', type = int, default = 10000000, help = 'Number of iterations')
     parser.add_argument('--L', type = float, nargs = '+', default = [1], help = 'Lengths of box walls')
     parser.add_argument('--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
+    parser.add_argument('--freq', type = int, default = 1000, help = 'Used to report progress')
 
     return parser.parse_args()
 
@@ -72,16 +76,18 @@ def create_diffs(N,sigma=0.1,L=[1,1],d=2):
         L       Lengths of sides
 
     Returns:
+        A tuple of two arrays
+            Energies  The difference in energy before and after a collision, divided by energy before
+            Momenta   The difference in momentum before and after a collision, divided by norm of momentum before
 
-    An array of relative differences between energies.
     '''
     n = 0
     Energies = np.empty((args.N))
     Momenta = np.zeros((2,args.N))
     while n < args.N:
-        x1, x2, v1, v2 = sample(sigma =sigma, L = L, d = d)
+        x1, x2, v1, v2 = find_admissable_pair(sigma =sigma, L = L, d = d)
         DeltaT = get_pair_time(x1,x2,v1,v2,sigma = sigma)
-        if DeltaT < float('inf'): # I.e. if the spheres will ever collide
+        if DeltaT < float('inf'): # i.e. if the spheres will ever collide
             x1_prime = x1 + DeltaT*v1
             x2_prime = x2 + DeltaT*v2
             v1_prime, v2_prime = collide_pair(x1_prime, x2_prime, v1, v2)
@@ -89,9 +95,11 @@ def create_diffs(N,sigma=0.1,L=[1,1],d=2):
             E_after = np.dot(v1_prime,v1_prime) + np.dot(v2_prime,v2_prime)
             P_before = v1 + v2
             P_after = v1_prime + v2_prime
-            Momenta[:,n] = P_before - P_after
-            Energies[n] = (E_before-E_after)/(E_before+E_after)
+            Momenta[:,n] = (P_before - P_after)/np.linalg.norm(P_before)
+            Energies[n] = (E_before-E_after)/E_before
             n += 1
+            if n%args.freq ==0:
+                print (f'Collided {n} times out of {args.N}')
 
     return Energies,Momenta.reshape(-1)
 

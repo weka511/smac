@@ -194,9 +194,10 @@ def create_rng(seed0):
     else:
         return rng,seed0
 
-def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
+def find_admissable_pair(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
     '''
-    Find one sample where points admissable
+    Find a pair of spheres which don't overlap, and are moving so that they
+    will collide in a positive time, which may beinfinite
 
     Parameters:
         L       Lengths of all sides
@@ -208,9 +209,7 @@ def sample(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
         x1      Centre of one sphere
         x2      Centre of the other sphere
         v1      Velocity of one sphere
-        v2      Velocity of the other sphere, and
-                the spheres are moving so that they will collide in a positive
-                time, which may be np.inf
+        v2      Velocity of the other sphere,
 
     '''
     while True:
