@@ -269,6 +269,23 @@ def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = None, M = 2
 
     raise RuntimeError(f'Failed to create configuration in {M} attempts: n={n}, d={d}, l={L}, sigma={sigma}')
 
+def get_sequence(saved_files):
+    '''
+    Used to make file name unique
+
+    Parameters:
+        saved_files   A list of file names for saved configurations
+
+    Returns:
+        The sequence number for the last file, incrmented by 1. If there
+        are no saved files, returns 1.
+    '''
+    if len(saved_files)==0: return 1
+    saved_files.sort(reverse=True)
+    last_file = splitext(saved_files[0])
+    digits = search(r'(\d+)$',last_file[0]).group(1)
+    return int(digits) + 1
+
 def save_configuration(file_patterns = 'md.npz',
                        retention = 3,
                        epoch = 0,
@@ -295,16 +312,6 @@ def save_configuration(file_patterns = 'md.npz',
         d               Dimension of space
         folder          Folder to store files
     '''
-    def get_sequence(saved_files):
-        '''
-        Used to make file name unique
-        '''
-        if len(saved_files)==0: return 1
-        saved_files.sort(reverse=True)
-        last_file = splitext(saved_files[0])
-        digits = search(r'\d+',last_file[0]).group(0)
-        return int(digits) + 1
-
     pattern = splitext(file_patterns)
     saved_files = glob(f'./{pattern[0]}[0-9]*{pattern[1]}',root_dir=folder)
 
@@ -324,7 +331,7 @@ def reload(file, folder = 'configs'):
     '''
     Reload configuration stored by save_configuration
 
-    Parameters:
+    Parameter
         file       Name of file to load
         folder     Folder where files are stored
     '''
@@ -333,6 +340,15 @@ def reload(file, folder = 'configs'):
     restored = np.load(f'{folder}/{file}', allow_pickle=True)
     return (restored['Xs'], restored['Vs'], restored['epoch'].astype(int),
             restored['n_collisions'],restored['d'].astype(int),restored['L'],restored['sigma'].astype(float))
+
+class TestsForFiles(TestCase):
+
+    def test_get_sequence(self):
+        '''
+        Test for Issue #79: md.save_configuration does not handle
+        filename correctly if base contains digits
+        '''
+        self.assertEqual(4,get_sequence(['.\\exercise_2_3_000001.npz', '.\\exercise_2_3_000003.npz']))
 
 if __name__=='__main__':
     main()
