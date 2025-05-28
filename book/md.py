@@ -77,10 +77,13 @@ def collide_pair(x1, x2, v1, v2):
         Algorithm 2.3 Pair collision
 
         Parameters:
-        x1         Centre of one sphere
-        x2         Centre of the other sphere
-        v1         Velocity of one sphere
-        v2         Velocity of the other sphere
+            x1         Centre of one sphere
+            x2         Centre of the other sphere
+            v1         Velocity of one sphere
+            v2         Velocity of the other sphere
+
+        Returns:
+           Velocities after collision
         '''
     Delta_x = x1 - x2
     e_hat_perp = Delta_x/np.linalg.norm(Delta_x)
@@ -88,7 +91,7 @@ def collide_pair(x1, x2, v1, v2):
     Delta_v_perp = np.dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
 
-def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1], tolerance=1e-15):
+def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1], tolerance=1e-12):
     '''
     Algorithm 2.1: event driven molecular dynamics for particles in a box.
     Calculate time to next collision of a sphere with another sphere or
@@ -145,14 +148,14 @@ def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1], tolerance=1e-15):
         Xs += t_wall * Vs     # Update to new position
         assert abs(abs(Xs[j,wall])-(L[wall]-sigma)) < tolerance
         Vs[j][wall] = - Vs[j][wall]
-        return Collision.WALL, j, wall
+        return Collision.WALL, j, wall, t_wall
     else:
         Xs += t_pair * Vs
         E_before = np.dot(Vs[k],Vs[k]) + np.dot(Vs[l],Vs[l])
-        collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
+        Vs[k], Vs[l] = collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
         E_after = np.dot(Vs[k],Vs[k]) + np.dot(Vs[l],Vs[l])
-        assert E_before==E_after
-        return Collision.PAIR, k, l
+        assert abs(E_before-E_after) < tolerance
+        return Collision.PAIR, k, l, t_pair
 
 
 
