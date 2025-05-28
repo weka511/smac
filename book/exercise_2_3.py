@@ -36,11 +36,11 @@ def parse_arguments():
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('--sigma', type    = float, default = 0.01, help    = 'Radius of spheres')
-    parser.add_argument('--N', type = int, default = 10000000, help = 'Number of iterations')
-    parser.add_argument('--n', type = int, default = 5, help = 'Number of hard disks')
-    parser.add_argument('--M', type = int, default = 1000, help = 'Number of attempts to create configuration')
-    parser.add_argument('--L', type = float, nargs = '+', default = [1], help = 'Lengths of box walls')
-    parser.add_argument('--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
+    parser.add_argument('-N','--N', type = int, default = 10000000, help = 'Number of iterations')
+    parser.add_argument('-n','--n', type = int, default = 5, help = 'Number of hard disks')
+    parser.add_argument('-M','--M', type = int, default = 1000, help = 'Number of attempts to create configuration')
+    parser.add_argument('-L','--L', type = float, nargs = '+', default = [1], help = 'Lengths of box walls')
+    parser.add_argument('-d','--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
     parser.add_argument('--freq', type = int, default = 250, help = 'For saving configuration')
     parser.add_argument('--retention', type = int, default = 3, help = 'For saving configuration')
     parser.add_argument('--save',  default = f'{splitext(basename(__file__))[0]}_.npz', help = 'For saving configuration')
@@ -72,6 +72,7 @@ def get_file_name(name,default_ext='png',seq=None):
 def evolve(Xs,Vs,n_collisions = np.zeros((2),dtype=int),
            N=0,d = 2, L = [1,1], sigma = 0.1,
            freq=5,seed=None,save='TBP',retention=0,initial_epoch=0):
+    t = 0
     '''
     Allow configuration to evolve by performing a specified number of collisions,
 
@@ -92,11 +93,12 @@ def evolve(Xs,Vs,n_collisions = np.zeros((2),dtype=int),
     '''
     for epoch in range(initial_epoch,N):
         if registry.is_kill_token_present(): break
-        collision_type, k, l = event_disks(Xs,Vs, sigma =sigma, d = d, L = L)
+        collision_type, k, l,dt = event_disks(Xs,Vs, sigma =sigma, d = d, L = L)
+        t += dt
         n_collisions[collision_type] += 1
 
         if epoch%freq==0:
-            print (f'Epoch = {epoch}, Wall collisions={n_collisions[Collision.WALL]},'
+            print (f'Epoch = {epoch}, t={t}, Wall collisions={n_collisions[Collision.WALL]},'
                    f'Pair collisions={n_collisions[Collision.PAIR]}'
                    f' {100*n_collisions[Collision.PAIR]/(n_collisions.sum()):.2f}%')
             save_configuration(file_patterns = save,
