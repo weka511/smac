@@ -126,8 +126,10 @@ if __name__=='__main__':
         evolve(Xs,Vs,N=args.N,d = args.d, L = L, save=args.save,sigma = args.sigma, freq=args.freq,seed=args.seed,retention=args.retention)
     else:
         Xs, Vs, epoch,n_collisions,d,L,sigma = reload(args.restart)
+        n,d = Xs.shape
+        print (f'Restart with configuration read from {args.restart}. There are {n}x{d} dimensional spheres')
         evolve(Xs,Vs,N=args.N,d = d, L = L, sigma = sigma, n_collisions=n_collisions,
-               freq=args.freq,seed=args.seed,retention=args.retention,initial_epoch=epoch,save=args.save)
+               freq=args.freq,seed=args.seed,retention=args.retention,initial_epoch=epoch+1,save=args.save)
 
     elapsed = time() - start
     minutes = int(elapsed/60)
