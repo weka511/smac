@@ -35,7 +35,7 @@ def parse_arguments():
     '''Parse command line arguments'''
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
-    parser.add_argument('--sigma', type    = float, default = 0.01, help    = 'Radius of spheres')
+    parser.add_argument('--sigma', type    = float, default = 0.01, help = 'Radius of spheres')
     parser.add_argument('-N','--N', type = int, default = 10000000, help = 'Number of iterations')
     parser.add_argument('-n','--n', type = int, default = 5, help = 'Number of hard disks')
     parser.add_argument('-M','--M', type = int, default = 1000, help = 'Number of attempts to create configuration')
@@ -72,7 +72,6 @@ def get_file_name(name,default_ext='png',seq=None):
 def evolve(Xs,Vs,n_collisions = np.zeros((2),dtype=int),
            N=0,d = 2, L = [1,1], sigma = 0.1,
            freq=5,seed=None,save='TBP',retention=0,initial_epoch=0):
-    t = 0
     '''
     Allow configuration to evolve by performing a specified number of collisions,
 
@@ -91,6 +90,7 @@ def evolve(Xs,Vs,n_collisions = np.zeros((2),dtype=int),
         initial_epoch   Used when we restart to ensure epoch number is correct
         folder          Folder to store configuration files
     '''
+    t = 0  # Simulated time
     for epoch in range(initial_epoch,N):
         if registry.is_kill_token_present(): break
         collision_type, k, l,dt = event_disks(Xs,Vs, sigma =sigma, d = d, L = L)

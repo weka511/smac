@@ -105,6 +105,12 @@ def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1], tolerance=1e-12):
         d         Dimension of space
         L         Lengths of sides
         tolerance Used in a wall collision to verify updated position is close to wall
+
+    Returns:
+        Collision.WALL or Collision.PAIR
+        Index of a sphere involved in collision
+        Index of a other sphere or of wall, as appropriate
+        Time to collision
     '''
 
     def get_next_pair():
