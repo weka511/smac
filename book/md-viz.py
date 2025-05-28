@@ -88,14 +88,20 @@ if __name__=='__main__':
     ax3.set_xlabel('$y$')
     ax3.set_title('Positions')
 
+    ax4 = fig.add_subplot(2,2,4)
     if d == 3:
-        ax4 = fig.add_subplot(2,2,4)
         ax4.hist(Xs[:,2],bins=100,color='blue',density=True)
         ax4.set_xlabel('$z$')
         ax4.set_title('Positions')
+    else:
+        ax4.scatter(Xs[:,0],Xs[:,1],color='blue',s=10)
+        ax4.quiver(Xs[:,0],Xs[:,1],Vs[:,0],Vs[:,1],color='red',width=0.005)
+        ax4.set_xlabel('$x$')
+        ax4.set_ylabel('$y$')
+        ax4.set_title('Positions and Velocities')
 
     fig.suptitle(fr'{args.file}: Epoch={epoch}, L={L}, $\sigma=${sigma}, n={len(Es)}')
-    fig.tight_layout(h_pad=3)
+    fig.tight_layout(h_pad=5,pad=2)
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
