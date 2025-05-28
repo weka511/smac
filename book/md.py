@@ -240,7 +240,7 @@ def get_density(n=5,d=2,sigma = 0.1, L = [1,1]):
         VolumeDisk *= sigma
     return n * VolumeDisk/VolumeBox
 
-def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = None, M = 25):
+def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = np.random.default_rng(), M = 25, verbose=True):
     '''
     Create a configuration of disks or spheres, no two of which overlap
 
@@ -253,17 +253,17 @@ def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = None, M = 2
         rng     Random number generator
         M       Number of attempts allowed to create configuration
     '''
-
-    print (f'Trying to create configuration: n={n}, d={d}, L={L}, sigma={sigma},'
-           f' density ={get_density(n=5,d=d,sigma=sigma,L=L):2g}')
-    for _ in range(M):
-        Xs =  2 * np.multiply(L, rng.random((n,d))) - L
-        reject = False
+    def any_spheres_too_close(X):
         for i in range(n):
             for j in range(i):
-                reject = np.dot(Xs[i] - Xs[j],Xs[i] - Xs[j])< 4 * sigma**2
-                if reject: break
-        if not reject:
+                if np.dot(Xs[i,:] - Xs[j,:],Xs[i,:] - Xs[j,:])< 4 * sigma**2: return True
+
+    if verbose:
+        print (f'Trying to create configuration: n={n}, d={d}, L={L}, sigma={sigma},'
+            f' density ={get_density(n=5,d=d,sigma=sigma,L=L):2g}')
+    for _ in range(M):
+        Xs =  2 * np.multiply(L, rng.random((n,d))) - L
+        if not any_spheres_too_close(Xs):
             Vs = -V + 2 * V * rng.random((n,d))
             return Xs, Vs
 
@@ -351,6 +351,18 @@ class TestsForFiles(TestCase):
         filename correctly if base contains digits
         '''
         self.assertEqual(4,get_sequence(['.\\exercise_2_3_000001.npz', '.\\exercise_2_3_000003.npz']))
+
+class TestsForSpheres(TestCase):
+    def test_easy_case(self):
+        Xs,Vs = create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1,  M = 25, verbose=False)
+        n,d = Xs.shape
+        self.assertEqual(5,n)
+        self.assertEqual(2,d)
+        self.assertEqual(Xs.shape,Vs.shape)
+
+    def test_too_dense(self):
+        with self.assertRaises(RuntimeError) as cm:
+            create_config(n = 100, d = 2, L = [1,1], sigma = 0.1, V = 1,  M = 25, verbose=False)
 
 if __name__=='__main__':
     main()
