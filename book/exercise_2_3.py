@@ -17,7 +17,7 @@
 
 '''
     Exercise 2.3. Implement algorithm 2.1 (event disks) for disks in a square
-    box without periodic boundary conditions. Starte from a legal configuration,
+    box without periodic boundary conditions. Start from a legal configuration,
     allowing restart as discussed in exercise 1.3. Generate histograms of position
     and velocity.
 '''
