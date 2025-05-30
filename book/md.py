@@ -52,7 +52,9 @@ def get_pair_time(x1, x2, v1, v2, sigma = 0.01):
     Delta_v = v1 - v2
     Upsilon = np.dot(Delta_x,Delta_v)**2 - np.dot(Delta_v,Delta_v) * (np.dot(Delta_x,Delta_x) - 4*sigma**2)
     if Upsilon > 0 and np.dot(Delta_x,Delta_v)  < 0 :
-        return - (np.dot(Delta_x,Delta_v)+np.sqrt(Upsilon))/np.dot(Delta_v,Delta_v)
+        dt = - (np.dot(Delta_x,Delta_v)+np.sqrt(Upsilon))/np.dot(Delta_v,Delta_v)
+        assert dt>-0
+        return dt
     else:
         return float('inf')
 
@@ -70,9 +72,10 @@ def get_wall_time(x, v, sigma = 0.01, d = 2, L = [1,1]):
     collision_times = np.full((d),float('inf'))
     for i in range(d):
         direction  = np.sign(v[i])
-        dt = (direction*(L[i]-sigma) - x[i]) / v[i]
-        if dt > 0:
-            collision_times[i] = dt
+        collision_times[i] = (direction*(L[i]-sigma) - x[i]) / v[i]
+        # if dt > 0:
+            # collision_times[i] = dt
+        assert collision_times[i] >= 0
     assert ([abs(abs(x[i] + collision_times[i] * v[i]) - sigma)==0 for i in range(d)])
     wall  = np.argmin(collision_times)
     return wall, collision_times[wall]
@@ -147,6 +150,7 @@ def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1], tolerance=1e-12):
         next_wall = (float('inf'), None, None)
         for j in range(len(Xs)):
             wall,t = get_wall_time(Xs[j], Vs[j], sigma = sigma, d = d, L = L)
+            assert t>0
             if t < next_wall[0]:
                 next_wall = (t,wall,j)
         return next_wall
@@ -287,7 +291,7 @@ def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = np.random.d
 
     raise RuntimeError(f'Failed to create configuration in {M} attempts: n={n}, d={d}, l={L}, sigma={sigma}')
 
-def get_sequence(saved_files):
+def get_sequence(saved_files,increment=1):
     '''
     Used to make file name unique
 
@@ -302,7 +306,12 @@ def get_sequence(saved_files):
     saved_files.sort(reverse=True)
     last_file = splitext(saved_files[0])
     digits = search(r'(\d+)$',last_file[0]).group(1)
-    return int(digits) + 1
+    return int(digits) + increment
+
+def get_path_to_config(file_patterns = 'md.npz',folder = 'configs',increment=1):
+    pattern = splitext(file_patterns)
+    saved_files = glob(f'./{pattern[0]}[0-9]*{pattern[1]}',root_dir=folder)
+    return f'{folder}/{pattern[0]}{get_sequence(saved_files,increment=increment):06d}{pattern[1]}',saved_files
 
 def save_configuration(file_patterns = 'md.npz',
                        retention = 3,
@@ -330,10 +339,8 @@ def save_configuration(file_patterns = 'md.npz',
         d               Dimension of space
         folder          Folder to store files
     '''
-    pattern = splitext(file_patterns)
-    saved_files = glob(f'./{pattern[0]}[0-9]*{pattern[1]}',root_dir=folder)
-
-    np.savez(f'{folder}/{pattern[0]}{get_sequence(saved_files):06d}{pattern[1]}',
+    file,saved_files = get_path_to_config(file_patterns = file_patterns,folder = folder)
+    np.savez(file,
           epoch = epoch,
           Xs = Xs,
           Vs = Vs,
@@ -355,7 +362,8 @@ def reload(file, folder = 'configs'):
     '''
     if len(splitext(file)[1]) ==0:
         file = f'{file}.npz'
-    restored = np.load(f'{folder}/{file}', allow_pickle=True)
+    full_file_name = f'{folder}/{file}' if folder != None else file
+    restored = np.load(full_file_name, allow_pickle=True)
     return (restored['Xs'], restored['Vs'], restored['epoch'].astype(int),
             restored['n_collisions'],restored['d'].astype(int),restored['L'],restored['sigma'].astype(float))
 
