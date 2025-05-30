@@ -67,8 +67,13 @@ def get_wall_time(x, v, sigma = 0.01, d = 2, L = [1,1]):
             d       Dimension of space
             L       Lengths of sides
         '''
-    collision_times = [(np.sign(v[i])*(L[i]-sigma)-x[i]) / v[i] for i in range(d)]
-    assert ([abs(abs(x[i]+collision_times[i] * v[i])-sigma)==0 for i in range(d)])
+    collision_times = np.full((d),float('inf'))
+    for i in range(d):
+        direction  = np.sign(v[i])
+        dt = (direction*(L[i]-sigma) - x[i]) / v[i]
+        if dt > 0:
+            collision_times[i] = dt
+    assert ([abs(abs(x[i] + collision_times[i] * v[i]) - sigma)==0 for i in range(d)])
     wall  = np.argmin(collision_times)
     return wall, collision_times[wall]
 
@@ -231,6 +236,13 @@ def get_L(L,d):
 
     raise Exception(f'Length of L is {len(L)}: should be 1 or {d}')
 
+
+def get_volume_sphere(d=2,sigma = 0.1):
+    return (np.pi if d==2 else 4*np.pi/3) * sigma ** d
+
+def get_volume_box(d=2,L = [1,1]):
+    return  np.prod(L) * 2**d
+
 def get_density(n=5,d=2,sigma = 0.1, L = [1,1]):
     '''
     Determine the density of spheres in box
@@ -242,12 +254,9 @@ def get_density(n=5,d=2,sigma = 0.1, L = [1,1]):
         d       Dimension of space
 
     '''
-    VolumeBox = 1
-    VolumeDisk = np.pi if d==2 else 4*np.pi/3
-    for l in L:
-        VolumeBox *= (2*l*VolumeBox)
-        VolumeDisk *= sigma
-    return n * VolumeDisk/VolumeBox
+    s=  get_volume_sphere(d=d,sigma=sigma)
+    b = get_volume_box(d=d,L=L)
+    return n * s / b
 
 def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = np.random.default_rng(), M = 25, verbose=True):
     '''
@@ -372,6 +381,27 @@ class TestsForSpheres(TestCase):
     def test_too_dense(self):
         with self.assertRaises(RuntimeError) as cm:
             create_config(n = 100, d = 2, L = [1,1], sigma = 0.1, V = 1,  M = 25, verbose=False)
+
+class TestVolume(TestCase):
+    def test_sphere2d(self):
+        self.assertEqual(np.pi,get_volume_sphere(sigma=1))
+
+        self.assertEqual(np.pi/100,get_volume_sphere(sigma=0.1))
+    def test_sphere3d(self):
+        self.assertAlmostEqual(4*np.pi/3000,get_volume_sphere(d=3,sigma=0.1))
+
+    def test_box2d(self):
+        self.assertEqual(24,get_volume_box(L=[2,3]))
+
+    def test_box3d(self):
+        self.assertEqual(240,get_volume_box(d=3,L=[2,3,5]))
+
+    def test_density(self):
+        self.assertAlmostEqual(np.pi,get_density(n=4,d=2,sigma = 1, L = [1,1]),places=12)
+        self.assertAlmostEqual(np.pi/25,get_volume_sphere(sigma=0.2),places=12)
+        self.assertAlmostEqual(0.16,get_volume_box(L=[0.2,0.2]),places=12)
+        self.assertAlmostEqual(4,get_volume_box(L=[1,1]),places=12)
+        self.assertAlmostEqual(np.pi,get_density(n=100,d=2,sigma = 0.2, L = [1,1]),places=12)
 
 if __name__=='__main__':
     main()
