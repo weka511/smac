@@ -58,7 +58,7 @@ def get_pair_time(x1, x2, v1, v2, sigma = 0.01):
     else:
         return float('inf')
 
-def get_wall_time(x, v, sigma = 0.01, d = 2, L = [1,1]):
+def get_wall_time(x, v, sigma = 0.01, d = 2, L = np.array([1,1])):
     '''
         Fig 2.3 Calculate the time for the first collision of a sphere with a wall
 
@@ -71,8 +71,11 @@ def get_wall_time(x, v, sigma = 0.01, d = 2, L = [1,1]):
         '''
     collision_times = np.full((d),float('inf'))
     for i in range(d):
-        direction  = np.sign(v[i])
-        collision_times[i] = (direction*(L[i]-sigma) - x[i]) / v[i]
+        if v[i] > 0:
+            collision_times[i] = (L[i]-sigma - x[i]) / v[i]
+        if v[i] < 0:
+            collision_times[i] = (L[i]-sigma + x[i]) / abs(v[i])
+
         # if dt > 0:
             # collision_times[i] = dt
         assert collision_times[i] >= 0
@@ -99,7 +102,7 @@ def collide_pair(x1, x2, v1, v2):
     Delta_v_perp = np.dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
 
-def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = [1,1,1], tolerance=1e-12):
+def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = np.array([1,1]), tolerance=1e-12):
     '''
     Algorithm 2.1: event driven molecular dynamics for particles in a box.
     Calculate time to next collision of a sphere with another sphere or
@@ -244,10 +247,10 @@ def get_L(L,d):
 def get_volume_sphere(d=2,sigma = 0.1):
     return (np.pi if d==2 else 4*np.pi/3) * sigma ** d
 
-def get_volume_box(d=2,L = [1,1]):
+def get_volume_box(d=2, L = np.array([1,1])):
     return  np.prod(L) * 2**d
 
-def get_density(n=5,d=2,sigma = 0.1, L = [1,1]):
+def get_density(n=5,d=2,sigma = 0.1,  L = np.array([1,1])):
     '''
     Determine the density of spheres in box
 
@@ -262,7 +265,7 @@ def get_density(n=5,d=2,sigma = 0.1, L = [1,1]):
     b = get_volume_box(d=d,L=L)
     return n * s / b
 
-def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = np.random.default_rng(), M = 25, verbose=True):
+def create_config(n = 5, d = 2,  L = np.array([1,1]), sigma = 0.1, V = 1, rng = np.random.default_rng(), M = 25, verbose=True):
     '''
     Create a configuration of disks or spheres, no two of which overlap
 
@@ -284,7 +287,7 @@ def create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1, rng = np.random.d
         print (f'Trying to create configuration: n={n}, d={d}, L={L}, sigma={sigma},'
             f' density ={get_density(n=5,d=d,sigma=sigma,L=L):2g}')
     for _ in range(M):
-        Xs =  2 * np.multiply(L, rng.random((n,d))) - L
+        Xs =  2 * np.multiply(L-sigma, rng.random((n,d))) - (L-sigma)
         if not any_spheres_too_close(Xs):
             Vs = -V + 2 * V * rng.random((n,d))
             return Xs, Vs
@@ -320,7 +323,7 @@ def save_configuration(file_patterns = 'md.npz',
                        Vs = None,
                        n_collisions = None,
                        d = 2,
-                       L =  [1,1],
+                        L = np.array([1,1]),
                        sigma = 0.05,
                        folder = 'configs'):
     '''
@@ -380,7 +383,7 @@ class TestsForFiles(TestCase):
 
 class TestsForSpheres(TestCase):
     def test_easy_case(self):
-        Xs,Vs = create_config(n = 5, d = 2, L = [1,1], sigma = 0.1, V = 1,  M = 25, verbose=False)
+        Xs,Vs = create_config(n = 5, d = 2,  L = np.array([1,1]), sigma = 0.1, V = 1,  M = 25, verbose=False)
         n,d = Xs.shape
         self.assertEqual(5,n)
         self.assertEqual(2,d)
@@ -388,7 +391,7 @@ class TestsForSpheres(TestCase):
 
     def test_too_dense(self):
         with self.assertRaises(RuntimeError) as cm:
-            create_config(n = 100, d = 2, L = [1,1], sigma = 0.1, V = 1,  M = 25, verbose=False)
+            create_config(n = 100, d = 2,  L = np.array([1,1]), sigma = 0.1, V = 1,  M = 25, verbose=False)
 
 class TestVolume(TestCase):
     def test_sphere2d(self):
@@ -399,13 +402,13 @@ class TestVolume(TestCase):
         self.assertAlmostEqual(4*np.pi/3000,get_volume_sphere(d=3,sigma=0.1))
 
     def test_box2d(self):
-        self.assertEqual(24,get_volume_box(L=[2,3]))
+        self.assertEqual(24,get_volume_box(L=np.array([2,3])))
 
     def test_box3d(self):
-        self.assertEqual(240,get_volume_box(d=3,L=[2,3,5]))
+        self.assertEqual(240,get_volume_box(d=3,L=np.array([2,3,5])))
 
     def test_density(self):
-        self.assertAlmostEqual(np.pi,get_density(n=4,d=2,sigma = 1, L = [1,1]),places=12)
+        self.assertAlmostEqual(np.pi,get_density(n=4,d=2,sigma = 1, L = np.array([1,1])),places=12)
         self.assertAlmostEqual(np.pi/25,get_volume_sphere(sigma=0.2),places=12)
         self.assertAlmostEqual(0.16,get_volume_box(L=[0.2,0.2]),places=12)
         self.assertAlmostEqual(4,get_volume_box(L=[1,1]),places=12)

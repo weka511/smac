@@ -70,7 +70,7 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 def evolve(Xs,Vs,n_collisions = np.zeros((2),dtype=int),
-           N=0,d = 2, L = [1,1], sigma = 0.1,
+           N=0,d = 2,  L = np.array([1,1]), sigma = 0.1,
            freq=5,seed=None,save='TBP',retention=0,initial_epoch=0):
     '''
     Allow configuration to evolve by performing a specified number of collisions,
@@ -123,7 +123,7 @@ if __name__=='__main__':
     if args.restart == None:
         rng,seed = create_rng(args.seed)
         L  = get_L(args.L, args.d)
-        Xs,Vs = create_config(n = args.n, d = args.d, L = L, sigma = args.sigma, rng = rng, M = args.M)
+        Xs,Vs = create_config(n = args.n, d = args.d, L = np.array(L), sigma = args.sigma, rng = rng, M = args.M)
         print (f'Created configuration for {args.n} {args.d} dimensional spheres')
         evolve(Xs,Vs,N=args.N,d = args.d, L = L, save=args.save,sigma = args.sigma, freq=args.freq,seed=args.seed,retention=args.retention)
     else:
