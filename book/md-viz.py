@@ -23,7 +23,7 @@ from time import time
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 import numpy as np
-from md import reload
+from md import reload,get_path_to_config
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -48,10 +48,11 @@ def get_file_name(name,default_ext='png',seq=None):
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
-    parser.add_argument('file', help = 'Name of saved file')
+    parser.add_argument('--file', default='exercise_2_3_.npz',help = 'Name of saved file')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
+    parser.add_argument('--folder',default = 'configs', help= 'Folder to store config files')
     return parser.parse_args()
 
 
@@ -68,7 +69,8 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    Xs, Vs, epoch,n_collisions,d,L,sigma = reload(args.file)
+    file,_ = get_path_to_config(file_patterns = args.file,folder = args.folder,increment=0)
+    Xs, Vs, epoch,n_collisions,d,L,sigma = reload(file,folder=None)
     Es = create_energies(Vs)
 
     fig = figure(figsize = (12,12))
