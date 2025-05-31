@@ -82,10 +82,8 @@ if __name__=='__main__':
         xs[i] = 0.5* (bins[i]+ bins[i+1])
 
     (popt,_) =curve_fit(pdf,xs,ys,p0=[1,1])
-    beta = popt[0]
-    Z = popt[1]
-    pdf_v = np.vectorize(lambda x:pdf(x,beta,Z))
-    yy = pdf_v(xs)
+    pdf_v = np.vectorize(lambda x:pdf(x,popt[0],popt[1]))
+
     fig = figure(figsize = (12,12))
 
     ax1 = fig.add_subplot(2,2,1)
@@ -93,9 +91,9 @@ if __name__=='__main__':
     ax1.set_xlabel('$E$')
     ax1.set_title('Energies')
     ax1a = ax1.twinx()
-    ax1a.plot(xs,yy,color='red',label=r'$\frac{e^{-\beta E}}{Z}$')
-    ax1.legend()
-    ax1a.legend()
+    ax1a.plot(xs,pdf_v(xs),color='red',label=r'$\frac{e^{-\beta E}}{Z}$')
+    ax1.legend(loc=7)
+    ax1a.legend(loc=1)
 
     ax2 = fig.add_subplot(2,2,2)
     ax2.hist(Xs[:,0],bins=100,color='blue',density=True)
