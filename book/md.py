@@ -76,8 +76,6 @@ def get_wall_time(x, v, sigma = 0.01, d = 2, L = np.array([1,1])):
         if v[i] < 0:
             collision_times[i] = (L[i]-sigma + x[i]) / abs(v[i])
 
-        # if dt > 0:
-            # collision_times[i] = dt
         assert collision_times[i] >= 0
     assert ([abs(abs(x[i] + collision_times[i] * v[i]) - sigma)==0 for i in range(d)])
     wall  = np.argmin(collision_times)
