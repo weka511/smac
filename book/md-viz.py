@@ -24,6 +24,7 @@ from matplotlib import rc
 from matplotlib.pyplot import figure, show
 import numpy as np
 from md import reload,get_path_to_config
+from scipy.optimize import curve_fit
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -64,6 +65,9 @@ def create_energies(Vs):
         Es[i] = 0.5 * np.sum(Vs[i,:]**2)
     return Es
 
+def pdf(E,beta,Z):
+    return np.exp(-beta*E)/Z
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -72,13 +76,26 @@ if __name__=='__main__':
     file,_ = get_path_to_config(file_patterns = args.file,folder = args.folder,increment=0)
     Xs, Vs, epoch,n_collisions,d,L,sigma = reload(file,folder=None)
     Es = create_energies(Vs)
+    ys,bins = np.histogram(Es,bins=100)
+    xs = np.zeros_like(ys,dtype=float)
+    for i in range(len(ys)):
+        xs[i] = 0.5* (bins[i]+ bins[i+1])
 
+    (popt,_) =curve_fit(pdf,xs,ys,p0=[1,1])
+    beta = popt[0]
+    Z = popt[1]
+    pdf_v = np.vectorize(lambda x:pdf(x,beta,Z))
+    yy = pdf_v(xs)
     fig = figure(figsize = (12,12))
 
     ax1 = fig.add_subplot(2,2,1)
-    ax1.hist(Es,bins=100,color='blue',density=True)
+    ax1.hist(Es,bins=100,color='blue',density=True,label='Empirical')
     ax1.set_xlabel('$E$')
     ax1.set_title('Energies')
+    ax1a = ax1.twinx()
+    ax1a.plot(xs,yy,color='red',label=r'$\frac{e^{-\beta E}}{Z}$')
+    ax1.legend()
+    ax1a.legend()
 
     ax2 = fig.add_subplot(2,2,2)
     ax2.hist(Xs[:,0],bins=100,color='blue',density=True)
