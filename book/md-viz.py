@@ -54,7 +54,7 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--folder',default = 'configs', help= 'Folder to store config files')
-    parser.add_argument('--bins', default='sqrt', help = 'Binning strategy or number of bins')
+    parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
     return parser.parse_args()
 
 
@@ -75,16 +75,16 @@ def pdf(E,beta,Z):
     '''
     return np.exp(-beta*E)/Z
 
-def get_bins(args):
+def get_bins(bins):
     '''
     Used to parse args.bins: either a number of bins, or the name of a binning strategy.
     '''
     try:
-        return int(args.bins)
+        return int(bins)
     except ValueError:
-        if args.bins in ['auto', 'fd', 'doane', 'scott', 'sturges', 'sqrt', 'stone', 'rice']:
-            return args.bins
-        raise ArgumentTypeError(f'Invalid binning strategy "{args.bins}"')
+        if bins in ['auto', 'fd', 'doane', 'scott', 'sturges', 'sqrt', 'stone', 'rice']:
+            return bins
+        raise ArgumentTypeError(f'Invalid binning strategy "{bins}"')
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -105,7 +105,7 @@ if __name__=='__main__':
     fig = figure(figsize = (12,12))
 
     ax1 = fig.add_subplot(2,2,1)
-    ax1.hist(Es,bins=get_bins(args),color='blue',density=True,label='Empirical')
+    ax1.hist(Es,bins=get_bins(args.bins),color='blue',density=True,label='Empirical')
     ax1.set_xlabel('$E$')
     ax1.set_title('Energies')
     ax1a = ax1.twinx()
@@ -114,12 +114,12 @@ if __name__=='__main__':
     ax1a.legend(loc=1)
 
     ax2 = fig.add_subplot(2,2,2)
-    ax2.hist(Xs[:,0],bins=get_bins(args),color='blue',density=True)
+    ax2.hist(Xs[:,0],bins=get_bins(args.bins),color='blue',density=True)
     ax2.set_xlabel('$x$')
     ax2.set_title('Positions')
 
     ax3 = fig.add_subplot(2,2,3)
-    ax3.hist(Xs[:,1],bins=get_bins(args),color='blue',density=True)
+    ax3.hist(Xs[:,1],bins=get_bins(args.bins),color='blue',density=True)
     ax3.set_xlabel('$y$')
     ax3.set_title('Positions')
 
