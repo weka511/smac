@@ -135,7 +135,7 @@ if __name__=='__main__':
         ax4.set_ylabel('$y$')
         ax4.set_title('Positions and Velocities')
 
-    fig.suptitle(fr'{args.file}: Epoch={epoch}, L={L}, $\sigma=${sigma}, n={len(Es)}')
+    fig.suptitle(fr'{args.file}: Epoch={epoch:,}, L={L}, $\sigma=${sigma}, n={len(Es)}')
     fig.tight_layout(h_pad=5,pad=2)
     fig.savefig(get_file_name(args.out))
 
