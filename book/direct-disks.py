@@ -87,7 +87,7 @@ def parse_arguments():
     parser.add_argument('--show', action = 'store_true', help = 'Show plot')
     parser.add_argument('--bins', type = int, default = 100, help = 'Number of bins for histogram')
     parser.add_argument('--periodic', action = 'store_true', default = False, help='Use periodic boundary conditions')
-    parser.add_argument('--L', type = float, nargs   = '+', default = [1], help='Lenghts of walls')
+    parser.add_argument('--L', type = float, nargs   = '+', default = [1], help='Lengths of walls')
     return parser.parse_args()
 
 if __name__=='__main__':
@@ -97,12 +97,14 @@ if __name__=='__main__':
     args = parse_arguments()
     upper_limit = -float('inf')
     rng = np.random.default_rng(args.seed)
-    sides  = np.array(args.L if len(args.L)==args.d else args.L * args.d)
     fig = figure(figsize = (12,12))
     ax1 = fig.add_subplot(1,1,1)
     for sigma in args.sigma:
         try:
-            geometry = GeometryFactory(periodic = args.periodic, L = sides, sigma = sigma, d = args.d)
+            geometry = GeometryFactory(periodic = args.periodic,
+                                       L = np.array(args.L if len(args.L)==args.d else args.L * args.d),
+                                       sigma = sigma,
+                                       d = args.d)
             eta = geometry.get_density(N = args.Disks)
             print (f'sigma = {sigma}, eta = {eta:.3}')
             x_coordinates = np.empty((args.N,args.Disks))

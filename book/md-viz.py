@@ -99,8 +99,13 @@ if __name__=='__main__':
     for i in range(len(ys)):
         xs[i] = 0.5* (bins[i]+ bins[i+1])
 
-    (popt,_) =curve_fit(pdf,xs,ys,p0=[1,1])
-    pdf_v = np.vectorize(lambda x:pdf(x,popt[0],popt[1]))
+    popt = None
+
+    try:
+        (popt,_) =curve_fit(pdf,xs,ys,p0=[1,1])
+        pdf_v = np.vectorize(lambda x:pdf(x,popt[0],popt[1]))
+    except RuntimeError:
+        pass
 
     fig = figure(figsize = (12,12))
 
@@ -108,10 +113,12 @@ if __name__=='__main__':
     ax1.hist(Es,bins=get_bins(args.bins),color='blue',density=True,label='Empirical')
     ax1.set_xlabel('$E$')
     ax1.set_title('Energies')
-    ax1a = ax1.twinx()
-    ax1a.plot(xs,pdf_v(xs),color='red',label=r'$\frac{e^{-\beta E}}{Z}$')
     ax1.legend(loc=7)
-    ax1a.legend(loc=1)
+
+    if popt != None:
+        ax1a = ax1.twinx()
+        ax1a.plot(xs,pdf_v(xs),color='red',label=r'$\frac{e^{-\beta E}}{Z}$')
+        ax1a.legend(loc=1)
 
     ax2 = fig.add_subplot(2,2,2)
     ax2.hist(Xs[:,0],bins=get_bins(args.bins),color='blue',density=True)

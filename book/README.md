@@ -38,6 +38,7 @@
 -|md-plot.py|Visualize output from md.cpp. Plot distribution of distances from wall, and compare energy histogram with Bolzmann distribution.
 -|md|Algorithm 2.3 Pair collision
 -|exercise_2_3.py|Algorithm 2.3 Pair collision
+-|md-mc-compare.py|Exercise 2.6: Compare molecular dynamics with direct disks monte carlo
 -|direct-disks.py|Exercise 2.6: directly sample the positions of 4 disks in a square box without periodic boundary conditions, for different covering densities
 -|hist-plot.py|Exercise 2.6:  ...
 -|geometry.py|Used to implement periodic and aperiodic boundary conditions in Exercises 2.6-2.8
