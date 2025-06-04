@@ -39,7 +39,8 @@ def parse_arguments():
     parser.add_argument('-N','--N', type = int, default = 1000, help = 'Number of iterations')
     parser.add_argument('-n','--n', type = int, default = 4, help = 'Number of spheres')
     parser.add_argument('-m','--m', type = int, default = 100, help = 'Number of attempts')
-    parser.add_argument('--sigma', type    = float, default = 0.1, help = 'Radius of spheres')
+    parser.add_argument('--sigma', type = float, default = [0.1], nargs='+', help = 'Radius of spheres')
+    parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
     return parser.parse_args()
 
 
@@ -63,11 +64,11 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
-def create_md(N=1000,sigma=0.1,n=4,rng = np.random.default_rng()):
+def create_md(N=1000,sigma=0.1,n=4,rng = np.random.default_rng(),M=25):
     Positions = np.empty((n,N))
-    Xs, Vs = create_config(n=n,rng=rng, sigma=sigma)
+    Xs, Vs = create_config(n=n,rng=rng, sigma=sigma,M=M,verbose=False)
     for i in range(N):
-        event_disks(Xs,Vs, sigma=args.sigma)
+        event_disks(Xs,Vs, sigma=sigma)
         Positions[:,i] = Xs[:,0]
     return Positions
 
@@ -84,25 +85,48 @@ def create_mc(N=1000,sigma=0.1,n=4,rng = np.random.default_rng(),m=100):
         Positions[:,i] = proposed[:,0]
     return Positions
 
+def get_bins(bins):
+    '''
+    Used to parse args.bins: either a number of bins, or the name of a binning strategy.
+    '''
+    try:
+        return int(bins)
+    except ValueError:
+        if bins in ['auto', 'fd', 'doane', 'scott', 'sturges', 'sqrt', 'stone', 'rice']:
+            return bins
+        raise ArgumentTypeError(f'Invalid binning strategy "{bins}"')
+
+def get_rows_cols(k):
+    r = int(np.sqrt(k))
+    c = k // r
+    while r*c < k:
+        r +=1
+        if  r*c < k:
+            c += 1
+    return r,c
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
+    r,c = get_rows_cols(len(args.sigma))
 
-    n_md,bins = np.histogram(create_md(N=args.N,sigma=args.sigma,n=args.n,rng=rng))
-    n_mc,_ = np.histogram(create_mc(N=args.N,sigma=args.sigma,n=args.n,rng=rng,m=args.m),bins=bins)
-
-    x = (bins[1:] + bins[:-1]) / 2
     fig = figure(figsize=(12,12))
-    fig.suptitle(f'A comparison of Molecular Dynamics and Monte Carlo (Acceptance/Rejection sampling')
-    ax1 = fig.add_subplot(1,1,1)
-    ax1.set_title(fr'$\sigma=${args.sigma},N={args.N},n={args.n}')
-    ax1.plot(x,n_md,label='Molecular Dynamics')
-    ax1.plot(x,n_mc,label='Monte Carlo')
-    ax1.legend()
+    fig.suptitle(f'A comparison of Molecular Dynamics and Acceptance/Rejection sampling')
 
+    for i,sigma in enumerate(args.sigma):
+        n_md,bins = np.histogram(create_md(N=args.N,sigma=sigma,n=args.n,rng=rng,M=args.m),bins=args.bins)
+        n_mc,_ = np.histogram(create_mc(N=args.N,sigma=sigma,n=args.n,rng=rng,m=args.m),bins=bins)
+        x = (bins[1:] + bins[:-1]) / 2
+        ax1 = fig.add_subplot(r,c,i+1)
+        ax1.set_title(fr'$\sigma=${sigma}, N={args.N:,}, n={args.n}')
+        ax1.plot(x,n_md,label='Molecular Dynamics')
+        ax1.plot(x,n_mc,label='Acceptance/Rejection')
+        ax1.legend()
+
+    fig.tight_layout(h_pad=3,pad=2)
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
