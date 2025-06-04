@@ -37,7 +37,8 @@ def parse_arguments():
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-N','--N', type = int, default = 1000, help = 'Number of iterations')
-    parser.add_argument('-n','--n', type = int, default = 1000, help = 'Number of intervals to compare')
+    parser.add_argument('-n','--n', type = int, default = 4, help = 'Number of spheres')
+    parser.add_argument('-m','--m', type = int, default = 100, help = 'Number of attempts')
     parser.add_argument('--sigma', type    = float, default = 0.1, help = 'Radius of spheres')
     return parser.parse_args()
 
@@ -62,6 +63,27 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
+def create_md(N=1000,sigma=0.1,n=4,rng = np.random.default_rng()):
+    Positions = np.empty((n,N))
+    Xs, Vs = create_config(n=n,rng=rng, sigma=sigma)
+    for i in range(N):
+        event_disks(Xs,Vs, sigma=args.sigma)
+        Positions[:,i] = Xs[:,0]
+    return Positions
+
+def create_mc(N=1000,sigma=0.1,n=4,rng = np.random.default_rng(),m=100):
+    def sample():
+        for _ in range(m):
+            proposed = geometry.propose(n,rng =rng)
+            if geometry.admissable(proposed): return proposed
+        raise RuntimeError(f'Failed to create admissable sample after {m} attempts')
+    Positions = np.empty((n,N))
+    geometry = Box(sigma = sigma)
+    for i in range(N):
+        proposed = sample()
+        Positions[:,i] = proposed[:,0]
+    return Positions
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -69,26 +91,17 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
 
-    Positions1 = np.empty((4,args.N))
-    Xs, Vs = create_config(n=4,rng=rng, sigma=args.sigma)
-    for i in range(args.N):
-        event_disks(Xs,Vs, sigma=args.sigma)
-        Positions1[:,i] = Xs[:,0]
+    n_md,bins = np.histogram(create_md(N=args.N,sigma=args.sigma,n=args.n,rng=rng))
+    n_mc,_ = np.histogram(create_mc(N=args.N,sigma=args.sigma,n=args.n,rng=rng,m=args.m),bins=bins)
 
-    Positions2 = np.empty((4,args.N))
-    geometry = Box(sigma = args.sigma)
-    for i in range(args.N):
-        proposed = geometry.propose(4,rng =rng)
-        if not geometry.admissable(proposed): continue
-        Positions2[:,i] = proposed[:,0]
-
+    x = (bins[1:] + bins[:-1]) / 2
     fig = figure(figsize=(12,12))
-
-    ax1 = fig.add_subplot(1,2,1)
-    ax1.hist(Positions1.reshape((-1)))
-
-    ax2 = fig.add_subplot(1,2,2)
-    ax2.hist(Positions2.reshape((-1)))
+    fig.suptitle(f'A comparison of Molecular Dynamics and Monte Carlo (Acceptance/Rejection sampling')
+    ax1 = fig.add_subplot(1,1,1)
+    ax1.set_title(fr'$\sigma=${args.sigma},N={args.N},n={args.n}')
+    ax1.plot(x,n_md,label='Molecular Dynamics')
+    ax1.plot(x,n_mc,label='Monte Carlo')
+    ax1.legend()
 
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start

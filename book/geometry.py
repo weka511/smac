@@ -187,7 +187,7 @@ class Box(BoundedGeometry):
             sigma  Radius of a sphere
             d      Dimension of space
         '''
-        super().__init__(L = L, sigma = sigma, d = d,LowerBound = sigma*np.ones(d),UpperBound =  L - sigma*np.ones(d))
+        super().__init__(L = L, sigma = sigma, d = d,LowerBound = -L + sigma*np.ones(d),UpperBound =  L - sigma*np.ones(d))  #FIXME
 
 
     def get_distance(self, X0,X1):
