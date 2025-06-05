@@ -15,10 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Exercise 2.8 and Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC'''
+'''
+    Exercise 2.8 and Algorithm 2.9. Generating a hard disk configuration
+    from an earlier valid configuration using MCMC
+'''
 
 from argparse import ArgumentParser
-from os.path import basename, exists, splitext
+from os.path import basename, exists, join, splitext
 from shutil import copyfile
 from time import time
 from matplotlib import rc
@@ -27,10 +30,7 @@ import numpy as np
 from numpy.random import default_rng
 from geometry import GeometryFactory
 
-def markov_disks(X,
-                 rng = default_rng(),
-                 delta = np.array([0.01,0.01]),
-                 geometry = GeometryFactory()):
+def markov_disks(X, rng = default_rng(), delta = np.array([0.01,0.01]), geometry = GeometryFactory()):
     '''Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC'''
 
     def can_move(k,X_proposed):
@@ -57,82 +57,74 @@ def markov_disks(X,
         return -1,X
 
 def get_coordinate_description(coordinate):
-    '''Used to display the name of a oordinate'''
-    if coordinate == 0:
-        return 'X'
-    elif coordinate == 1:
-        return 'Y'
-    else:
-        return 'Z'
+    '''
+    Used to display the name of a coordinate
+
+    Parameters:
+        coordinate    Index of coordinate
+    '''
+    match coordinate:
+        case 0:
+            return 'X'
+        case 1:
+            return 'Y'
+        case 2:
+            return 'Z'
+    raise ValueError(f'Coordinate index {coordinate} undefined')
 
 def get_coordinate_colour(coordinate):
-    'xkcd:red' if coordinate==0 else 'xkcd:blue' if coordinate==1 else 'xkcd:green'
+    '''
+    Used to select a colour for plotting data against a coordinate
 
-def get_plot_file_name(plot=None):
-    '''Determine plot file name from source file name or command line arguments'''
-    if plot == None:
-        return f'{splitext(basename(__file__))[0]}.png'
-    base,ext = splitext(plot)
-    return f'{plot}.png' if len(ext) == 0 else plot
+    Parameters:
+        coordinate    Index of coordinate
+    '''
+    match coordinate:
+        case 0:
+            return 'xkcd:red'
+        case 1:
+            return 'xkcd:blue'
+        case 2:
+            return 'xkcd:green'
+    raise ValueError(f'Coordinate index {coordinate} undefined')
+
+def get_file_name(name,default_ext='png',seq=None):
+    '''
+    Used to create file names
+
+    Parameters:
+        name          Basis for file name
+        default_ext   Extension if non specified
+        seq           Used if there are multiple files
+    '''
+    base,ext = splitext(name)
+    if len(ext) == 0:
+        ext = default_ext
+    if seq != None:
+        base = f'{base}{seq}'
+    qualified_name = f'{base}.{ext}'
+    if ext == 'png':
+        return join(args.figs,qualified_name)
+    else:
+        return qualified_name
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
-    parser.add_argument('--show',
-                        action = 'store_true',
-                        help   = 'Show plot')
-    parser.add_argument('--plot',
-                        default = None,
-                        help    = 'Name of plot file')
-    parser.add_argument('--N',
-                        type    = int,
-                        default = 10000,
-                        help    = 'Number of iterations')
-    parser.add_argument('--Disks',
-                        type    = int,
-                        default = 4,
-                        help    = 'Number of disks/spheres')
-    parser.add_argument('--sigma',
-                        type    = float,
-                        default = 0.125,
-                        help    = 'Radius of disk/sphere')
-    parser.add_argument('--d',
-                        type    = int,
-                        choices = [2,3],
-                        default = 2,
-                        help    = 'Number of dumensions for space')
-    parser.add_argument('--periodic',
-                        action = 'store_true',
-                        default = False,
-                        help    = 'Used to specifiy periodic boundary conditions')
-    parser.add_argument('--L',
-                        type    = float,
-                        nargs   = '+',
-                        default = [1],
-                        help    = 'Length of each side of box (just one value for square/cube)')
-    parser.add_argument('--delta',
-                        type    = float,
-                        nargs   = '+',
-                        default = [0.1],
-                        help    = 'Maximum distance for each step')
-    parser.add_argument('--bins',
-                        type    = int,
-                        default = 100,
-                        help    = 'Number of bins for histogram')
-    parser.add_argument('--burn',
-                        type    = int,
-                        default = 0,
-                        help    = 'Used to skip over early steps without accumulating stats')
-    parser.add_argument('--frequency',
-                        type    = int,
-                        default = 1000,
-                        help    = 'For reporting progress')
-    parser.add_argument('--restart',
-                        action = 'store_true',
-                        help   = 'Restart from checkpoint')
-    parser.add_argument('--eta',
-                        type    = float,
-                        default = None,
-                        help    = 'Used to specify density (override sigma)')
+    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
+    parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
+    parser.add_argument('--N', type = int,  default = 10000, help = 'Number of iterations')
+    parser.add_argument('--Disks', type = int, default = 4, help = 'Number of disks/spheres')
+    parser.add_argument('--sigma', type = float, default = 0.125, help = 'Radius of disk/sphere')
+    parser.add_argument('--d', type = int, choices = [2,3], default = 2, help = 'Number of dimensions for space')
+    parser.add_argument('--periodic', action = 'store_true',  default = False, help = 'Used to specifiy periodic boundary conditions')
+    parser.add_argument('--L', type = float, nargs = '+', default = [1], help = 'Length of each side of box (just one value for square/cube)')
+    parser.add_argument('--delta', type = float, nargs   = '+', default = [0.1], help    = 'Maximum distance for each step')
+    parser.add_argument('--bins', type = int, default = 100, help = 'Number of bins for histogram')
+    parser.add_argument('--burn', type = int, default = 0, help = 'Used to skip over early steps without accumulating stats')
+    parser.add_argument('--frequency', type = int, default = 1000,  help  = 'For reporting progress')
+    parser.add_argument('--restart', action = 'store_true', help  = 'Restart from checkpoint')
+    parser.add_argument('--eta', type = float, default = None, help = 'Used to specify density (override sigma)')
     return parser.parse_args()
 
 
@@ -198,9 +190,9 @@ if __name__=='__main__':
                 label = f'{get_coordinate_description(j)}',
                 alpha = 0.5,
                 color = get_coordinate_colour(j))
-    ax1.set_title(f'{args.Disks} Disks {geometry.get_description()}: sigma = {geometry.sigma:.3g}, eta = {eta:.3g}, delta = {max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
+    ax1.set_title(fr'{args.Disks} Disks {geometry.get_description()}: $\sigma=${geometry.sigma:.3g}, $\eta=${eta:.3g}, $\delta=${max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
     ax1.legend()
-    fig.savefig(get_plot_file_name(args.plot))
+    fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
     minutes = int(elapsed/60)
