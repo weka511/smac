@@ -86,7 +86,7 @@ if __name__=='__main__':
             print (f'sigma = {sigma}, eta = {eta:.3}')
             x_coordinates = np.empty((args.N,args.Disks))
             for i in range(args.N):
-                configuration = direct_disks(N=args.Disks,geometry=geometry,NTrials=args.NTrials)
+                configuration = geometry.direct_disks(N=args.Disks,NTrials=args.NTrials)
                 x_coordinates[i,:] = configuration[:,0]
             hist,bin_edges = np.histogram( np.reshape(x_coordinates, args.N*args.Disks), bins = args.bins, density = True)
             actual_bins = [0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)]

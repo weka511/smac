@@ -41,7 +41,6 @@
 -|md|Algorithm 2.3 Pair collision
 -|exercise_2_3.py|Algorithm 2.3 Pair collision
 -|md-mc-compare.py|Exercise 2.6: Compare molecular dynamics with direct disks monte carlo
--|direct-disks.py|Algoritm 2.7: direct sampling for N disks in a fixed box
 -|hist-plot.py|Exercise 2.6:  ...
 -|geometry.py|Used to implement periodic and aperiodic boundary conditions in Exercises 2.6-2.8
 2.2.2|directDisksAny.py|

@@ -18,6 +18,7 @@
 '''Support use of periodic and unbounded boundary conditions '''
 
 from abc import ABC, abstractmethod
+from sys import maxsize
 from unittest import TestCase, main
 import numpy as np
 
@@ -138,6 +139,28 @@ class Geometry(ABC):
                 if self.get_distance(proposed[i,:],proposed[j,:]) < 2*self.sigma:
                     return False
         return True
+
+    def direct_disks(self, N = 4, NTrials = maxsize,  rng = np.random.default_rng()):
+        '''
+        Prepare one admissable configuration of disks
+
+        Parameters:
+            N         Number of attempts
+            NTrials   Maximum number of attempts to create configuration (tabula rasa)
+            rng       Random number generator
+
+        Returns:
+            X, an array containing the coordinates of N points such that we can position N
+            disks of radius sigma, with the centre of each disk at the corresponding point
+            of X.
+        '''
+
+        for k in range(NTrials):
+            proposed = self.propose(N,rng =rng)
+            if self.admissable(proposed): return proposed
+
+        raise RuntimeError(f'Failed to place {N} spheres within {NTrials} attempts for sigma={sigma}')
+
 
 class BoundedGeometry(Geometry):
     '''
