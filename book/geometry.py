@@ -30,6 +30,10 @@ class Geometry(ABC):
         sigma  Radius of a sphere
         d      Dimension of space
     '''
+    @staticmethod
+    def create_L(L,d):
+        return np.array(L if len(L)==d else L * d)
+
     def __init__(self, L  = np.array([1,1]), sigma = 0.25,  d = 2):
         self.L = L
         self.sigma = sigma
@@ -187,7 +191,7 @@ class Box(BoundedGeometry):
             sigma  Radius of a sphere
             d      Dimension of space
         '''
-        super().__init__(L = L, sigma = sigma, d = d,LowerBound = -L + sigma*np.ones(d),UpperBound =  L - sigma*np.ones(d))  #FIXME
+        super().__init__(L = L, sigma = sigma, d = d,LowerBound = sigma*np.ones(d),UpperBound =  L - sigma*np.ones(d))  #FIXME
 
 
     def get_distance(self, X0,X1):
