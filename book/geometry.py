@@ -15,7 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Support use of periodic and unbounded boundary conditions '''
+'''
+    This class models the space in which sphers move. It supports the use of both periodic
+    and bounded boundary conditions.
+'''
 
 from abc import ABC, abstractmethod
 from sys import maxsize
@@ -35,6 +38,10 @@ class Geometry(ABC):
     def create_L(L,d):
         '''
         Create a vector of lengths from a command line parameter
+
+        Parameters:
+            L   Either a list of lenghts, or a single number if all lengths are identical
+            d   Dimension of space
         '''
         return np.array(L if len(L)==d else L * d)
 
@@ -106,8 +113,6 @@ class Geometry(ABC):
             y0 = self.LowerBound[1] + offset + j * Delta[1]
             return self.move_to((x0,y0))
 
-
-
         eta = self.get_density(N=N)
         if eta > np.pi*np.sqrt(3)/6:
             raise ValueError(f'Density of {eta} exceeds {np.pi*np.sqrt(3)/6}')
@@ -120,6 +125,9 @@ class Geometry(ABC):
         return np.array(coordinates[0:N])
 
     def create_Histograms(self,n=10,HistogramBins=np.zeros(0)):
+        '''
+        Used to instantiate a dynamic histogram
+        '''
         self.HistogramBins = np.zeros((n,self.d), dtype=np.int64) if HistogramBins.size==0 else HistogramBins
         return [Histogram(n, h = self.HistogramBins[:,j]) for j in range(self.d)]
 
@@ -176,28 +184,30 @@ class BoundedGeometry(Geometry):
          LowerBound
          UpperBound
     '''
-    def __init__(self, L  = np.array([1,1]), sigma = 0.25,  d = 2, LowerBound=-np.inf,UpperBound=np.inf):
+    def __init__(self, L=np.array([1,1]), sigma=0.25,  d=2, LowerBound=0,UpperBound=np.inf):
         '''
         Parameters:
             L           A vector representing the length of one side of the space
             sigma       Radius of a sphere
             d           Dimension of space
-            LowerBound
-            UpperBound
+            LowerBound  No coordinate is allowed to be less than this value
+            UpperBound  No coordinate is allowed to exceed than this value
         '''
         super().__init__(L, sigma, d)
         self.LowerBound = LowerBound
         self.UpperBound = UpperBound
 
-    def is_within_bounds(self,X_proposed):
+    def is_within_bounds(self,X):
         '''
         Establish whether a proposed move is between lower and upper bounds
 
         Parameters:
-            X_proposed        Proposed new position
+            X        Proposed new position
+
+        Returns:   True iff new position is between lower and upper bounds
         '''
-        if any(X_proposed < self.LowerBound): return False
-        if any(self.UpperBound < X_proposed): return False
+        if any(X < self.LowerBound): return False
+        if any(self.UpperBound < X): return False
         return True
 
     def propose(self,N,rng = np.random.default_rng()):
@@ -212,7 +222,9 @@ class BoundedGeometry(Geometry):
         return self.LowerBound + (self.UpperBound-self.LowerBound) * rng.random(size=(N,self.d))
 
 class Box(BoundedGeometry):
-    '''This class represents a simple box geometry without periodic boundary conditions'''
+    '''
+    This class represents a simple box geometry without periodic boundary conditions
+    '''
     def __init__(self, L = np.array([1,1]), sigma = 0.125, d = 2):
         '''
         Parameters:
