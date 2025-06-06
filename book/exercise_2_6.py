@@ -23,7 +23,7 @@
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
-from sys import maxsize, exit
+from sys import maxsize
 from time import time
 import numpy as np
 from matplotlib import rc
@@ -72,7 +72,6 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    upper_limit = -float('inf')
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize = (12,12))
     fig.suptitle(fr'x coordinates for {args.N:,} Trials, {args.Disks} Disks')
@@ -93,15 +92,8 @@ if __name__=='__main__':
             ax1 = fig.add_subplot(m,n,i+1)
             ax1.plot(actual_bins, hist,label = fr'$\sigma=${sigma}, $\eta=${eta:.3}')
             ax1.legend(title='Disks')
-            upper_limit = max(max(hist),upper_limit)
         except RuntimeError as e:
             print (e)
-
-    try:
-        ax1.set_ylim([0,upper_limit])
-    except ValueError as e:
-        print (e)
-        exit(1)
 
     ax1.set_xlabel('Position')
     ax1.set_ylabel('Frequency')
