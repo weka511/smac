@@ -22,12 +22,12 @@
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
-from sys import maxsize, exit
+from sys import maxsize
 from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from geometry import GeometryFactory
+from geometry import Geometry, GeometryFactory
 
 def parse_arguments():
     '''Parse command line arguments'''
@@ -71,11 +71,11 @@ if __name__=='__main__':
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    upper_limit = -float('inf')
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize = (12,12))
-    ax1 = fig.add_subplot(1,1,1)
-    for sigma in args.sigma:
+    fig.suptitle(fr'x coordinates for {args.N:,} Trials, {args.Disks} Disks')
+    m,n = Geometry.get_side_dimensions(len(args.sigma))
+    for i,sigma in enumerate(args.sigma):
         try:
             geometry = GeometryFactory(periodic = True,
                                        L = np.array(args.L if len(args.L)==args.d else args.L * args.d),
@@ -84,23 +84,19 @@ if __name__=='__main__':
             eta = geometry.get_density(N = args.Disks)
             print (f'sigma = {sigma}, eta = {eta:.3}')
             x_coordinates = np.empty((args.N,args.Disks))
-            for i in range(args.N):
+            for j in range(args.N):
                 configuration = geometry.direct_disks(N=args.Disks,NTrials=args.NTrials)
-                x_coordinates[i,:] = configuration[:,0]
+                x_coordinates[j,:] = configuration[:,0]
             hist,bin_edges = np.histogram( np.reshape(x_coordinates, args.N*args.Disks), bins = args.bins, density = True)
             actual_bins = [0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)]
+            ax1 = fig.add_subplot(m,n,i+1)
             ax1.plot(actual_bins, hist,label = fr'$\sigma=${sigma}, $\eta=${eta:.3}')
-            upper_limit = max(max(hist),upper_limit)
+            ax1.legend(title='Disks')
+
         except RuntimeError as e:
             print (e)
 
     ax1.set_title(fr'x coordinates for {args.N:,} Trials, {args.Disks} Disks, {geometry.get_description()}')
-    ax1.legend(title='Disks')
-    try:
-        ax1.set_ylim([0,upper_limit])
-    except ValueError as e:
-        print (e)
-        exit(1)
 
     ax1.set_xlabel('Position')
     ax1.set_ylabel('Frequency')
