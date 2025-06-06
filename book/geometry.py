@@ -33,6 +33,9 @@ class Geometry(ABC):
     '''
     @staticmethod
     def create_L(L,d):
+        '''
+        Create a vector of lengths from a command line parameter
+        '''
         return np.array(L if len(L)==d else L * d)
 
     @staticmethod
@@ -64,7 +67,7 @@ class Geometry(ABC):
         Parameters:
             N      Number of spheres
         '''
-        return N * np.pi * self.sigma**2/np.prod(self.L)
+        return N * (np.pi * self.sigma**2)/np.prod(self.L)
 
     def set_sigma(self, eta = 1.0, N   = 4):
         '''
