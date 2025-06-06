@@ -27,7 +27,6 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from direct_disks import direct_disks
 from geometry import GeometryFactory
 
 def parse_arguments():
