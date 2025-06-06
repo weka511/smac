@@ -28,7 +28,6 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from direct_disks import direct_disks
 from geometry import Geometry, GeometryFactory
 
 def parse_arguments():
@@ -40,7 +39,7 @@ def parse_arguments():
     parser.add_argument('--N', type = int, default = 10000, help='Number of configurations to be tried')
     parser.add_argument('--NTrials', type = int, default = maxsize, help='Number of attempts to create configuration')
     parser.add_argument('--Disks', type = int, default = 4, help='Number of disks in each configuration')
-    parser.add_argument('--sigma', type = float,  nargs   = '+',  default = [0.25],  help='Radius of a disk')
+    parser.add_argument('--sigma', type = float,  nargs   = '+',  default = [0.1],  help='Radius of a disk')
     parser.add_argument('--d', type = int, default =2,  help='Dimensionality of space')
     parser.add_argument('--show', action = 'store_true', help = 'Show plot')
     parser.add_argument('--bins', type = int, default = 100, help = 'Number of bins for histogram')
@@ -76,8 +75,9 @@ if __name__=='__main__':
     upper_limit = -float('inf')
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize = (12,12))
-    ax1 = fig.add_subplot(1,1,1)
-    for sigma in args.sigma:
+    fig.suptitle(fr'x coordinates for {args.N:,} Trials, {args.Disks} Disks')
+    m,n = Geometry.get_side_dimensions(len(args.sigma))
+    for i,sigma in enumerate(args.sigma):
         try:
             geometry = GeometryFactory(L = Geometry.create_L(args.L,args.d),
                                        sigma = sigma,
@@ -85,18 +85,18 @@ if __name__=='__main__':
             eta = geometry.get_density(N = args.Disks)
             print (f'sigma = {sigma}, eta = {eta:.3}')
             x_coordinates = np.empty((args.N,args.Disks))
-            for i in range(args.N):
+            for j in range(args.N):
                 configuration = geometry.direct_disks(N=args.Disks,NTrials=args.NTrials)
-                x_coordinates[i,:] = configuration[:,0]
+                x_coordinates[j,:] = configuration[:,0]
             hist,bin_edges = np.histogram( np.reshape(x_coordinates, args.N*args.Disks), bins = args.bins, density = True)
             actual_bins = [0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)]
+            ax1 = fig.add_subplot(m,n,i+1)
             ax1.plot(actual_bins, hist,label = fr'$\sigma=${sigma}, $\eta=${eta:.3}')
+            ax1.legend(title='Disks')
             upper_limit = max(max(hist),upper_limit)
         except RuntimeError as e:
             print (e)
 
-    ax1.set_title(fr'x coordinates for {args.N:,} Trials, {args.Disks} Disks, {geometry.get_description()}')
-    ax1.legend(title='Disks')
     try:
         ax1.set_ylim([0,upper_limit])
     except ValueError as e:

@@ -35,6 +35,23 @@ class Geometry(ABC):
     def create_L(L,d):
         return np.array(L if len(L)==d else L * d)
 
+    @staticmethod
+    def get_side_dimensions(N):
+        '''
+        Determine the sides of a rectangle
+
+        Parameters:
+            N     The area of a rectangle
+        Returns:
+            m, n such that m*n >= N and m <= n
+        '''
+        m = int(np.sqrt(N))
+        n = N // m
+        if  m*n < N:
+            n += 1
+        assert m <= n
+        return m,n
+
     def __init__(self, L  = np.array([1,1]), sigma = 0.25,  d = 2):
         self.L = L
         self.sigma = sigma
@@ -86,27 +103,13 @@ class Geometry(ABC):
             y0 = self.LowerBound[1] + offset + j * Delta[1]
             return self.move_to((x0,y0))
 
-        def get_side_dimensions(N):
-            '''
-            Determine the sides of a rectangle
 
-            Parameters:
-                N     The area of a rectangle
-            Returns:
-                m, n such that m*n >= N and m <= n
-            '''
-            m = int(np.sqrt(N))
-            n = N // m
-            if  m*n < N:
-                n += 1
-            assert m <= n
-            return m,n
 
         eta = self.get_density(N=N)
         if eta > np.pi*np.sqrt(3)/6:
             raise ValueError(f'Density of {eta} exceeds {np.pi*np.sqrt(3)/6}')
 
-        m,n = get_side_dimensions(N)
+        m,n = Geometry.get_side_dimensions(N)
 
         Available = self.UpperBound - self.LowerBound
         Delta = [Available[0]/m, Available[1]/n]
