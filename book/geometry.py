@@ -16,7 +16,7 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-    This class models the space in which sphers move. It supports the use of both periodic
+    This class models the space in which spheres move. It supports the use of both periodic
     and bounded boundary conditions.
 '''
 
