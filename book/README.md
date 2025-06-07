@@ -42,8 +42,8 @@
 -|exercise_2_3.py|Algorithm 2.3 Pair collision
 -|md-mc-compare.py|Exercise 2.6: Compare molecular dynamics with direct disks monte carlo
 -|hist-plot.py|Exercise 2.6:  ...
--|geometry.py|Used to implement periodic and aperiodic boundary conditions in Exercises 2.6-2.8
-2.2.2|directDisksAny.py|
+-|geometry.py|This class models the space in which spheres move. It supports the use of both periodic and bounded boundary conditions in Exercises 2.6-2.8
+2.2.2|exercise_2_9.py|Exercise 2.9: implement Algorithm 2.8, direct-disks-any, in order to determine the acceptance rate of algorithm 2.7, direct-disks.
 2.2.3|markov-disks.py|Exercise 2.8 and Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC.
 3.1|harmonic_wavefunction.py|Exercise 3.1: verify orthonormality of the solutions to Schroedinger's equation for Simple Harmonic Oscillator
 -|harmonic_density.py|Exercise 3.2: determine density matrix
