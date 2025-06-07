@@ -33,7 +33,7 @@ def parse_arguments():
    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
    parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-   parser.add_argument('-M','--M', type=int, default=1000,help='Number of iterations')
+   parser.add_argument('-M','--M', type=int, default=1000000,help='Number of iterations')
    parser.add_argument('-N','--N', type=int, default=16,help='Number of spheres')
    parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
    parser.add_argument('--L', type = float, nargs   = '+', default = [1,1], help='Lengths of walls')
@@ -62,9 +62,22 @@ def get_file_name(name,default_ext='png',seq=None):
 
 
 def direct_disks_any(N,L=np.array([1,1]), rng = np.random.default_rng()):
-   '''Algorithm 2-8'''
+   '''
+   Algorithm 2-8: compute the acceptance rate of Algorithm 2-7,
+   direct-disks, in a rectangular box.
+
+   Parameters:
+      N         Number of disks
+      L         Array of lenghts of sides for box
+      rng       Random number generator
+   '''
    def get_sigma2(pts):
-      '''Get minimum distance between points'''
+      '''
+      Get minimum distance between points
+
+      Parameters:
+          pts    The array of points
+      '''
       sigma2 = float('inf')
       for i in range(N):
          for j in range(i+1,N):
@@ -104,7 +117,7 @@ if __name__=='__main__':
    ax1.legend()
    ax1.set_xlabel(r'$\eta$')
    ax1.set_ylabel(r'$P_{accept}(\eta)$')
-   ax1.set_title(f'acceptance rate for {args.N} disks')
+   ax1.set_title(f'Acceptance rate for {args.N} disks, after {args.M} iterations')
    fig.savefig(get_file_name(args.out))
    elapsed = time() - start
    minutes = int(elapsed/60)
