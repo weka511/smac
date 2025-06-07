@@ -33,7 +33,10 @@ def parse_arguments():
    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
    parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-   parser.add_argument('-N','--N', type=int, default=1000,help='Number of iterations')
+   parser.add_argument('-M','--M', type=int, default=1000,help='Number of iterations')
+   parser.add_argument('-N','--N', type=int, default=16,help='Number of spheres')
+   parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
+   parser.add_argument('--L', type = float, nargs   = '+', default = [1,1], help='Lengths of walls')
    return parser.parse_args()
 
 
@@ -58,21 +61,29 @@ def get_file_name(name,default_ext='png',seq=None):
       return qualified_name
 
 
-
-def distance(z1,z2):
-   return (z1[0]-z2[0])*(z1[0]-z2[0])+(z1[1]-z2[1])*(z1[1]-z2[1])
-
-def direct_disks_any(n,l_x,l_y, rng = np.random.default_rng()):
-   '''Algoritm 2-8'''
-   def get_sigma2():
+def direct_disks_any(N,L=np.array([1,1]), rng = np.random.default_rng()):
+   '''Algorithm 2-8'''
+   def get_sigma2(pts):
+      '''Get minimum distance between points'''
       sigma2 = float('inf')
-      for i in range(n):
-         for j in range(i+1,n):
+      for i in range(N):
+         for j in range(i+1,N):
             sigma2 = min(sigma2,np.linalg.norm(pts[i,:]-pts[j,:]))
       return sigma2
-   pts = np.array([l_x,l_y]) * rng.random((n,2))
-   sigma = 0.5 * get_sigma2()
-   return np.pi*(sigma**2)*n/(l_x*l_y)
+
+   sigma = 0.5 * get_sigma2(L * rng.random((N,2)))
+   return np.pi * sigma**2 * N / (L[0]*L[1])
+
+def get_bins(bins):
+   '''
+   Used to parse args.bins: either a number of bins, or the name of a binning strategy.
+   '''
+   try:
+      return int(bins)
+   except ValueError:
+      if bins in ['auto', 'fd', 'doane', 'scott', 'sturges', 'sqrt', 'stone', 'rice']:
+         return bins
+      raise ArgumentTypeError(f'Invalid binning strategy "{bins}"')
 
 if __name__=='__main__':
    rc('font',**{'family':'serif','serif':['Palatino']})
@@ -81,15 +92,19 @@ if __name__=='__main__':
    args = parse_arguments()
    rng = np.random.default_rng(args.seed)
 
-   etas = np.empty((args.N))
-
-   for i in range(args.N):
-      etas[i] = direct_disks_any(16,1,1,rng=rng)
+   etas = np.fromfunction(np.vectorize(lambda x:direct_disks_any(args.N,np.array(args.L),rng=rng)),(args.M,))
+   n,bins = np.histogram(etas,bins=args.bins,density=True)
+   centres = 0.5 *(bins[1:] + bins[:-1])
 
    fig = figure(figsize=(12,12))
-   ax = fig.add_subplot(1,1,1)
-   ax.hist(etas,'sqrt')
-
+   ax1 = fig.add_subplot(1,1,1)
+   ax1.plot(centres,1-np.cumsum(n/n.sum()),label=r'$\pi(\eta_{max})$')
+   ax1.plot(centres,np.exp(-2*(args.N-1)*centres),label=r'$\exp(-2(N-1)\eta)$')
+   ax1.set_yscale('log')
+   ax1.legend()
+   ax1.set_xlabel(r'$\eta$')
+   ax1.set_ylabel(r'$P_{accept}(\eta)$')
+   ax1.set_title(f'acceptance rate for {args.N} disks')
    fig.savefig(get_file_name(args.out))
    elapsed = time() - start
    minutes = int(elapsed/60)
