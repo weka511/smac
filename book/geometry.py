@@ -62,6 +62,41 @@ class Geometry(ABC):
         assert m <= n
         return m,n
 
+    @staticmethod
+    def get_coordinate_description(coordinate):
+        '''
+        Used to display the name of a coordinate
+
+        Parameters:
+            coordinate    Index of coordinate
+        '''
+        match coordinate:
+            case 0:
+                return 'X'
+            case 1:
+                return 'Y'
+            case 2:
+                return 'Z'
+        raise ValueError(f'Coordinate index {coordinate} undefined')
+
+    @staticmethod
+    def get_coordinate_colour(coordinate):
+        '''
+        Used to select a colour for plotting data against a coordinate
+
+        Parameters:
+            coordinate    Index of coordinate
+        '''
+        match coordinate:
+            case 0:
+                return 'xkcd:red'
+            case 1:
+                return 'xkcd:blue'
+            case 2:
+                return 'xkcd:green'
+        raise ValueError(f'Coordinate index {coordinate} undefined')
+
+
     def __init__(self, L  = np.array([1,1]), sigma = 0.25,  d = 2):
         self.L = L
         self.sigma = sigma
