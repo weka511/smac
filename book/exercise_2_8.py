@@ -39,7 +39,6 @@ def parse_arguments():
     parser.add_argument('--Disks', type = int, default = 4, help = 'Number of disks/spheres')
     parser.add_argument('--sigma', type = float, default = 0.125, help = 'Radius of disk/sphere')
     parser.add_argument('--d', type = int, choices = [2,3], default = 2, help = 'Number of dimensions for space')
-    parser.add_argument('--periodic', action = 'store_true',  default = False, help = 'Used to specifiy periodic boundary conditions')
     parser.add_argument('--L', type = float, nargs = '+', default = [1], help = 'Length of each side of box (just one value for square/cube)')
     parser.add_argument('--delta', type = float, nargs   = '+', default = [0.1], help    = 'Maximum distance for each step')
     parser.add_argument('--bins', type = int, default = 100, help = 'Number of bins for histogram')
@@ -77,7 +76,7 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
     delta = np.array(args.delta if len(args.delta)==args.d else args.delta * args.d)
     L  = np.array(args.L if len(args.L)==args.d else args.L * args.d)
-    geometry = GeometryFactory(periodic = args.periodic, L = L, sigma = args.sigma, d = args.d)
+    geometry = GeometryFactory(L = L, sigma = args.sigma, d = args.d)
     if args.eta != None:
         geometry.set_sigma(eta = args.eta, N = args.Disks)
     eta = geometry.get_density(N = args.Disks)
