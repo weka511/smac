@@ -235,9 +235,9 @@ def get_L(L,d):
     '''
     match len(L):
         case 1:
-            return L * d
+            return np.array(L * d)
         case d:
-            return L
+            return np.array(L)
 
     raise Exception(f'Length of L is {len(L)}: should be 1 or {d}')
 
