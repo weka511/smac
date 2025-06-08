@@ -28,7 +28,21 @@ from numpy.random import default_rng
 from geometry import GeometryFactory
 
 def markov_disks(X, rng = default_rng(), delta = np.array([0.01,0.01]), geometry = GeometryFactory()):
-    '''Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC'''
+    '''
+    Algorithm 2.9. Generating a hard disk configuration from an earlier valid configuration using MCMC
+
+    Parameters:
+        X
+        rng
+        delta
+        geometry
+
+    Returns:
+        k,X, where
+            k = index of the disk that was moved if we obtained a valid cofiguration
+                -1 otherwise
+            X is the new configuration (old if no move)
+    '''
 
     def can_move(k,X_proposed):
         '''
