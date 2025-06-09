@@ -28,6 +28,7 @@ from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from markov_disks import markov_disks
 from geometry import Geometry, GeometryFactory
+from smacfiletoken import Registry
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
@@ -83,6 +84,8 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
+    registry = Registry()
+    registry.register_all("md%d.txt")
     if args.restart == None:
         Disks = args.Disks
         delta = np.array(args.delta if len(args.delta)==args.d else args.delta * args.d)
@@ -110,6 +113,9 @@ if __name__=='__main__':
     for _ in range(args.burn):
         _,X = markov_disks(X, rng = rng, delta = delta, geometry = geometry)
     for epoch in range(args.N):
+        if registry.is_kill_token_present():
+            X_all_disks = X_all_disks[0:epoch,:]
+            break
         k,X = markov_disks(X, rng = rng, delta = delta, geometry = geometry)
         X_all_disks[epoch,:] = X[:,0]
         if k >- 1:
