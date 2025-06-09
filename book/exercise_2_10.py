@@ -28,6 +28,7 @@ from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from markov_disks import markov_disks, Checkpointer
 from geometry import Geometry, GeometryFactory
+from md import get_L
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
@@ -75,8 +76,7 @@ if __name__=='__main__':
     check = Checkpointer()
     rng = np.random.default_rng(args.seed)
     delta = np.array(args.delta if len(args.delta)==args.d else args.delta * args.d)
-    L  = np.array(args.L if len(args.L)==args.d else args.L * args.d)
-    geometry = GeometryFactory(periodic = True, L = L, sigma = args.sigma, d = args.d)
+    geometry = GeometryFactory(periodic = True, L = get_L(args.L,args.d), sigma = args.sigma, d = args.d)
     if args.eta != None:
         geometry.set_sigma(eta = args.eta, N = args.Disks)
     eta = geometry.get_density(N = args.Disks)
@@ -104,6 +104,7 @@ if __name__=='__main__':
 
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
+
     for j in range(args.d):
         h,bins = histograms[j].get_hist()
         ax1.bar([0.5*(bins[i]+bins[i+1]) for i in range(len(h))],h,
@@ -111,6 +112,7 @@ if __name__=='__main__':
                 label = f'{Geometry.get_coordinate_description(j)}',
                 alpha = 0.5,
                 color = Geometry.get_coordinate_colour(j))
+        break
     ax1.set_title(fr'{args.Disks} Disks {geometry.get_description()}: $\sigma=${geometry.sigma:.3g}, $\eta=${eta:.3g}, $\delta=${max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
     ax1.legend()
     fig.savefig(get_file_name(args.out))
