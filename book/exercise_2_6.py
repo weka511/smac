@@ -39,7 +39,7 @@ def parse_arguments():
     parser.add_argument('--N', type = int, default = 10000, help='Number of configurations to be tried')
     parser.add_argument('--NTrials', type = int, default = maxsize, help='Number of attempts to create configuration')
     parser.add_argument('--Disks', type = int, default = 4, help='Number of disks in each configuration')
-    parser.add_argument('--sigma', type = float,  nargs   = '+',  default = [0.1],  help='Radius of a disk')
+    parser.add_argument('--sigma', type = float,  nargs   = '+',  default = [0.125],  help='Radius of a disk')
     parser.add_argument('--d', type = int, default =2,  help='Dimensionality of space')
     parser.add_argument('--show', action = 'store_true', help = 'Show plot')
     parser.add_argument('--bins', type = int, default = 100, help = 'Number of bins for histogram')
