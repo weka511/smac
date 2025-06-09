@@ -44,7 +44,7 @@ def parse_arguments():
     parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
     parser.add_argument('--burn', type = int, default = 0, help = 'Used to skip over early steps without accumulating stats')
     parser.add_argument('--frequency', type = int, default = 1000,  help  = 'For reporting progress')
-    parser.add_argument('--restart', action = 'store_true', help  = 'Restart from checkpoint')
+    parser.add_argument('--restart', default = None, help  = 'Restart from checkpoint')
     parser.add_argument('--eta', type = float, default = None, help = 'Used to specify density (override sigma)')
     return parser.parse_args()
 
@@ -83,14 +83,30 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    delta = np.array(args.delta if len(args.delta)==args.d else args.delta * args.d)
-    geometry = GeometryFactory(L = Geometry.create_L(args.L,args.d), sigma = args.sigma, d = args.d)
-    if args.eta != None:
-        geometry.set_sigma(eta = args.eta, N = args.Disks)
-    eta = geometry.get_density(N = args.Disks)
+    if args.restart == None:
+        Disks = args.Disks
+        delta = np.array(args.delta if len(args.delta)==args.d else args.delta * args.d)
+        L = Geometry.create_L(args.L,args.d)
+        geometry = GeometryFactory(L = L, sigma = args.sigma, d = args.d)
+        if args.eta != None:
+            geometry.set_sigma(eta = args.eta, N = Disks)
+        X = geometry.create_configuration(N = Disks)
+        bins = get_bins(args.bins)
+    else:
+        npzfile = np.load(args.restart)
+        X = npzfile['X']
+        counts = npzfile['counts']
+        bins =  npzfile['bins']
+        L = npzfile['L']
+        sigma = float(npzfile['sigma'])
+        delta = npzfile['delta']
+        Disks,d = X.shape
+        geometry = GeometryFactory(L = L, sigma = sigma, d = d)
+
+    eta = geometry.get_density(N = Disks)
     n_accepted = 0
-    X_all_disks = np.empty((args.N,args.Disks))
-    X = geometry.create_configuration(N = args.Disks)                 #TODO - restart
+    X_all_disks = np.empty((args.N,Disks))
+
     for _ in range(args.burn):
         _,X = markov_disks(X, rng = rng, delta = delta, geometry = geometry)
     for epoch in range(args.N):
@@ -102,11 +118,24 @@ if __name__=='__main__':
         if epoch%args.frequency ==0:
             print (f'Epoch {epoch:,} Accepted: {n_accepted:,}')
 
+    n,bins = np.histogram(X_all_disks,bins=bins)
+    if args.restart == None:
+        counts = n
+    else:
+        counts += n
+
+    np.savez(get_file_name(args.out,default_ext='npz'),
+             X=X,counts=counts,bins=bins,L=L,sigma=geometry.sigma,delta=delta)
+
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
-    n,bins = np.histogram(X_all_disks,bins=get_bins(args.bins))
-    ax1.plot(0.5*(bins[0:-1]+bins[1:]),n/n.sum())
-    ax1.set_title(fr'{args.Disks} Disks {geometry.get_description()}: $\sigma=${geometry.sigma:.3g}, $\eta=${eta:.3g}, $\delta=${max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
+    ax1.plot(0.5*(bins[0:-1]+bins[1:]),counts/counts.sum())
+    ax1.set_title(fr'{Disks} Disks {geometry.get_description()}: '
+                  fr'{counts.sum()//Disks:,} iterations, '
+                  fr'$\sigma=${geometry.sigma:.3g}, '
+                  fr'$\eta=${eta:.3g}, '
+                  fr'$\delta=${max(args.delta):.2g}, '
+                  fr'acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
