@@ -128,14 +128,20 @@ if __name__=='__main__':
              X=X,counts=counts,bins=bins,L=L,sigma=geometry.sigma,delta=delta)
 
     fig = figure(figsize=(12,12))
+
     ax1 = fig.add_subplot(1,1,1)
-    ax1.plot(0.5*(bins[0:-1]+bins[1:]),counts/counts.sum())
+    ax1.plot(0.5*(bins[0:-1]+bins[1:]),counts/counts.sum(),color='blue')
     ax1.set_title(fr'{Disks} Disks {geometry.get_description()}: '
                   fr'{counts.sum()//Disks:,} iterations, '
                   fr'$\sigma=${geometry.sigma:.3g}, '
                   fr'$\eta=${eta:.3g}, '
                   fr'$\delta=${max(args.delta):.2g}, '
-                  fr'acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
+                fr'acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
+    ax1.axvline(x=geometry.sigma,color='red',linestyle='dashed')
+    ax1.axvline(x=L[0]-geometry.sigma,color='red',linestyle='dashed')
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Frequency')
+
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
