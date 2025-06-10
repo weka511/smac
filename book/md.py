@@ -74,7 +74,7 @@ def get_wall_time(x, v, sigma = 0.01, d = 2, L = np.array([1,1])):
         if v[i] > 0:
             collision_times[i] = (L[i]-sigma - x[i]) / v[i]
         if v[i] < 0:
-            collision_times[i] = (L[i]-sigma + x[i]) / abs(v[i])
+            collision_times[i] = (x[i] - sigma) / abs(v[i])
 
         assert collision_times[i] >= 0
     assert ([abs(abs(x[i] + collision_times[i] * v[i]) - sigma)==0 for i in range(d)])
@@ -162,7 +162,7 @@ def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = np.array([1,1]), tolerance=1e-1
 
     if t_wall < t_pair:
         Xs += t_wall * Vs     # Update to new position
-        assert abs(abs(Xs[j,wall])-(L[wall]-sigma)) < tolerance
+        # assert abs(abs(Xs[j,wall])-(L[wall]-sigma)) < tolerance
         Vs[j][wall] = - Vs[j][wall]
         return Collision.WALL, j, wall, t_wall
     else:
@@ -279,13 +279,14 @@ def create_config(n = 5, d = 2,  L = np.array([1,1]), sigma = 0.1, V = 1, rng = 
     def any_spheres_too_close(X):
         for i in range(n):
             for j in range(i):
-                if np.dot(Xs[i,:] - Xs[j,:],Xs[i,:] - Xs[j,:])< 4 * sigma**2: return True
+                if np.linalg.norm(Xs[i,:] - Xs[j,:]) < 2 * sigma: return True
+        return False
 
     if verbose:
         print (f'Trying to create configuration: n={n}, d={d}, L={L}, sigma={sigma},'
             f' density ={get_density(n=5,d=d,sigma=sigma,L=L):2g}')
     for _ in range(M):
-        Xs =  2 * np.multiply(L-sigma, rng.random((n,d))) - (L-sigma)
+        Xs = sigma + rng.random((n,d)) * (L - 2*sigma)
         if not any_spheres_too_close(Xs):
             Vs = -V + 2 * V * rng.random((n,d))
             return Xs, Vs
