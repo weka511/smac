@@ -21,7 +21,8 @@
 '''
 
 from argparse import ArgumentParser
-from os.path import basename, join, splitext
+from os.path import basename, join, splitext, exists
+from os import replace
 from time import time
 import numpy as np
 from matplotlib import rc
@@ -130,7 +131,12 @@ if __name__=='__main__':
     else:
         counts += n
 
-    np.savez(get_file_name(args.out,default_ext='npz'),
+    save_file = get_file_name(args.out,default_ext='npz')
+    if exists(save_file):
+        backup_file = save_file + '~'
+        replace(save_file,backup_file)
+
+    np.savez(save_file,
              X=X,counts=counts,bins=bins,L=L,sigma=geometry.sigma,delta=delta)
 
     fig = figure(figsize=(12,12))
