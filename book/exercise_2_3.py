@@ -107,9 +107,17 @@ if __name__=='__main__':
     n,bins =np.histogram(x_coordinates)
     fig = figure(figsize=(12,12))
 
-    fig.savefig(get_file_name(args.out))
     ax1 = fig.add_subplot(1,1,1)
     ax1.plot(0.5*(bins[0:-1]+bins[1:]),n/n.sum())
+    ax1.set_title(fr'{args.n} Disks, '
+                  fr'{args.N} Epochs, '
+                  fr'$\sigma=${args.sigma:.3g}, ')
+    ax1.axvline(x=args.sigma,color='red',linestyle='dashed')
+    ax1.axvline(x=L[0]-args.sigma,color='red',linestyle='dashed')
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Frequency')
+    fig.savefig(get_file_name(args.out))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
