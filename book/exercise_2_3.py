@@ -18,8 +18,8 @@
 '''
     Exercise 2.3. Implement algorithm 2.1 (event disks) for disks in a square
     box without periodic boundary conditions. Start from a legal configuration,
-    allowing restart as discussed in exercise 1.3. Generate histograms of position
-    and velocity.
+    allowing restart as discussed in exercise 1.3. Sample at regular intervals,
+    and generate histograms of position and velocity.
 '''
 
 from argparse import ArgumentParser
@@ -110,14 +110,15 @@ if __name__=='__main__':
             sigma = float(npzfile['sigma'])
             DeltaT = float(npzfile['DeltaT'])
 
-    T = np.zeros((3))
-    X_all_disks = np.zeros((args.N,args.n))
+    T = np.zeros((3)) # times to next wall collision, next pair colliion, and next sample time
+    X_all_disks = np.zeros((args.N,args.n))   # This will hold x coordinates of all spheres
 
     for i in range(args.N):
         if registry.is_kill_token_present():
             X_all_disks = X_all_disks[0:i,:]
             break
-        t = args.DeltaT* i
+
+        t = args.DeltaT * i
         if i%args.freq == 0:
             print (f'Epoch={i:,},t={t}')
         T[Collision.SAMPLE] = args.DeltaT + t
