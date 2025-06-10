@@ -101,14 +101,14 @@ if __name__=='__main__':
         Xs,Vs = create_config(n = n, d = d, L = L, sigma = sigma, rng = rng, M = M)
         bins = get_bins(args.bins)
     else:
-        npzfile = np.load(args.restart)
-        Xs = npzfile['Xs']
-        Vs = npzfile['Vs']
-        counts = npzfile['counts']
-        bins =  npzfile['bins']
-        L = npzfile['L']
-        sigma = float(npzfile['sigma'])
-        DeltaT = float(npzfile['DeltaT'])
+        with np.load(args.restart) as  npzfile:
+            Xs = npzfile['Xs']
+            Vs = npzfile['Vs']
+            counts = npzfile['counts']
+            bins =  npzfile['bins']
+            L = npzfile['L']
+            sigma = float(npzfile['sigma'])
+            DeltaT = float(npzfile['DeltaT'])
 
     T = np.zeros((3))
     X_all_disks = np.zeros((args.N,args.n))
