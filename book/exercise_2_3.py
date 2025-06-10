@@ -28,24 +28,23 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from md import create_config, event_disks, save_configuration, create_rng, get_L, Collision, reload
-from smacfiletoken import Registry
+from md import create_config, get_next_pair, get_next_wall, collide_pair, get_L, Collision
 
 def parse_arguments():
     '''Parse command line arguments'''
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
-    parser.add_argument('--sigma', type    = float, default = 0.01, help = 'Radius of spheres')
-    parser.add_argument('-N','--N', type = int, default = 10000000, help = 'Number of iterations')
-    parser.add_argument('-n','--n', type = int, default = 5, help = 'Number of hard disks')
+    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
+    parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
+    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('--sigma', type    = float, default = 0.125, help = 'Radius of spheres')
+    parser.add_argument('-N','--N', type = int, default = 1000, help = 'Number of iterations')
+    parser.add_argument('-n','--n', type = int, default = 4, help = 'Number of spheres')
     parser.add_argument('-M','--M', type = int, default = 1000, help = 'Number of attempts to create configuration')
     parser.add_argument('-L','--L', type = float, nargs = '+', default = [1], help = 'Lengths of box walls')
     parser.add_argument('-d','--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
-    parser.add_argument('--freq', type = int, default = 250, help = 'For saving configuration')
-    parser.add_argument('--retention', type = int, default = 3, help = 'For saving configuration')
-    parser.add_argument('--save',  default = f'{splitext(basename(__file__))[0]}_.npz', help = 'For saving configuration')
-    parser.add_argument('--restart', default = None, help = 'Restart from saved configuration')
-    parser.add_argument('--folder',default = 'configs', help= 'Folder to store config files')
+    parser.add_argument('--freq', type = int, default = 250, help = 'For reporting')
+    parser.add_argument('--DeltaT', type = float, default = 1.0, help = 'For sampleing')
     return parser.parse_args()
 
 
@@ -69,71 +68,52 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
-def evolve(Xs,Vs,n_collisions = np.zeros((2),dtype=int),
-           N=0,d = 2,  L = np.array([1,1]), sigma = 0.1,
-           freq=5,seed=None,save='TBP',retention=0,initial_epoch=0):
-    '''
-    Allow configuration to evolve by performing a specified number of collisions,
-
-    Parameters:
-        Xs              Positions of all particles
-        Vs              Velocities of all particles
-        n_collisions    Vector containing number of wall collisions and pair collisions
-        N               Target number of collisions
-        L               Lengths of all sides
-        sigma           Radius of sphere
-        d               Dimension of space
-        freq            Frequency for reporting and saveing configurations
-        seed            Seed used when random number generator was created
-        save            File name for saving configurations
-        retention       Number of vesions of file that should be retained
-        initial_epoch   Used when we restart to ensure epoch number is correct
-        folder          Folder to store configuration files
-    '''
-    t = 0  # Simulated time
-    for epoch in range(initial_epoch,N):
-        if registry.is_kill_token_present(): break
-        collision_type, k, l,dt = event_disks(Xs,Vs, sigma =sigma, d = d, L = L)
-        t += dt
-        n_collisions[collision_type] += 1
-
-        if epoch%freq==0:
-            print (f'Epoch = {epoch}, t={t}, Wall collisions={n_collisions[Collision.WALL]},'
-                   f'Pair collisions={n_collisions[Collision.PAIR]}'
-                   f' {100*n_collisions[Collision.PAIR]/(n_collisions.sum()):.2f}%')
-            save_configuration(file_patterns = save,
-                               epoch = epoch,
-                               retention = retention,
-                               n_collisions = n_collisions,
-                               Xs = Xs,
-                               Vs = Vs,
-                               d = d,
-                               L =  L,
-                               sigma = sigma,
-                               folder = args.folder)
-
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    registry = Registry()
-    registry.register_all("md%d.txt")
+    rng = np.random.default_rng(args.seed)
+    T = np.zeros((3))
+    x_coordinates = np.zeros((args.N,args.n))
+    L  = get_L(args.L, args.d)
+    Xs,Vs = create_config(n = args.n, d = args.d, L = np.array(L), sigma = args.sigma, rng = rng, M = args.M)
+    for i in range(args.N):
+        t = args.DeltaT* i
+        if i%args.freq == 0:
+            print (f'Epoch={i:,},t={t}')
+        T[Collision.SAMPLE] = args.DeltaT + t
+        sampled = False
+        while not sampled:
+            dt_wall,wall,j = get_next_wall(Xs, Vs, sigma = args.sigma, d = args.d, L = L)
+            dt_pair, k, l = get_next_pair(Xs,Vs,sigma=args.sigma)
+            T[Collision.WALL] = t + dt_wall
+            T[Collision.PAIR] = t + dt_pair
+            match np.argmin(T):
+                case Collision.WALL:
+                    Xs += dt_wall * Vs
+                    Vs[j][wall] = - Vs[j][wall]
+                    t += dt_wall
+                case Collision.PAIR:
+                    Xs += dt_pair * Vs
+                    Vs[k], Vs[l] = collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
+                    t += dt_pair
+                case Collision.SAMPLE:
+                    dt = (T[2] - t)
+                    Xs += dt * Vs
+                    x_coordinates[i,:] = Xs[:,0]
+                    sampled = True
 
-    if args.restart == None:
-        rng,seed = create_rng(args.seed)
-        L  = get_L(args.L, args.d)
-        Xs,Vs = create_config(n = args.n, d = args.d, L = np.array(L), sigma = args.sigma, rng = rng, M = args.M)
-        print (f'Created configuration for {args.n} {args.d} dimensional spheres')
-        evolve(Xs,Vs,N=args.N,d = args.d, L = L, save=args.save,sigma = args.sigma, freq=args.freq,seed=args.seed,retention=args.retention)
-    else:
-        Xs, Vs, epoch,n_collisions,d,L,sigma = reload(args.restart)
-        n,d = Xs.shape
-        print (f'Restart with configuration read from {args.restart}. There are {n}x{d} dimensional spheres')
-        evolve(Xs,Vs,N=args.N,d = d, L = L, sigma = sigma, n_collisions=n_collisions,
-               freq=args.freq,seed=args.seed,retention=args.retention,initial_epoch=epoch+1,save=args.save)
+    n,bins =np.histogram(x_coordinates)
+    fig = figure(figsize=(12,12))
 
+    fig.savefig(get_file_name(args.out))
+    ax1 = fig.add_subplot(1,1,1)
+    ax1.plot(0.5*(bins[0:-1]+bins[1:]),n/n.sum())
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
     print (f'Elapsed Time {minutes} m {seconds:.2f} s')
+
+    if args.show:
+        show()
