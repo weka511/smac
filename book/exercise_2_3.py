@@ -23,12 +23,14 @@
 '''
 
 from argparse import ArgumentParser
-from os.path import basename, join, splitext
+from os.path import basename, join, splitext, exists
+from os import replace
 from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from md import create_config, get_next_pair, get_next_wall, collide_pair, get_L, Collision
+from smacfiletoken import Registry
 
 def parse_arguments():
     '''Parse command line arguments'''
@@ -41,12 +43,24 @@ def parse_arguments():
     parser.add_argument('-N','--N', type = int, default = 1000, help = 'Number of iterations')
     parser.add_argument('-n','--n', type = int, default = 4, help = 'Number of spheres')
     parser.add_argument('-M','--M', type = int, default = 1000, help = 'Number of attempts to create configuration')
-    parser.add_argument('-L','--L', type = float, nargs = '+', default = [1], help = 'Lengths of box walls')
+    parser.add_argument('-L','--L', type = float, nargs = '+', default = [1,1], help = 'Lengths of box walls')
     parser.add_argument('-d','--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
     parser.add_argument('--freq', type = int, default = 250, help = 'For reporting')
     parser.add_argument('--DeltaT', type = float, default = 1.0, help = 'For sampleing')
+    parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
+    parser.add_argument('--restart', default = None, help  = 'Restart from checkpoint')
     return parser.parse_args()
 
+def get_bins(bins):
+    '''
+    Used to parse args.bins: either a number of bins, or the name of a binning strategy.
+    '''
+    try:
+        return int(bins)
+    except ValueError:
+        if bins in ['auto', 'fd', 'doane', 'scott', 'sturges', 'sqrt', 'stone', 'rice']:
+            return bins
+        raise ArgumentTypeError(f'Invalid binning strategy "{bins}"')
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -74,11 +88,35 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
+    registry = Registry()
+    registry.register_all("md%d.txt")
+
+    if args.restart == None:
+        n = args.n
+        d = args.d
+        L = np.array(args.L)
+        sigma = args.sigma
+        M = args.M
+        DeltaT = args.DeltaT
+        Xs,Vs = create_config(n = n, d = d, L = L, sigma = sigma, rng = rng, M = M)
+        bins = get_bins(args.bins)
+    else:
+        npzfile = np.load(args.restart)
+        Xs = npzfile['Xs']
+        Vs = npzfile['Vs']
+        counts = npzfile['counts']
+        bins =  npzfile['bins']
+        L = npzfile['L']
+        sigma = float(npzfile['sigma'])
+        DeltaT = float(npzfile['DeltaT'])
+
     T = np.zeros((3))
-    x_coordinates = np.zeros((args.N,args.n))
-    L  = get_L(args.L, args.d)
-    Xs,Vs = create_config(n = args.n, d = args.d, L = np.array(L), sigma = args.sigma, rng = rng, M = args.M)
+    X_all_disks = np.zeros((args.N,args.n))
+
     for i in range(args.N):
+        if registry.is_kill_token_present():
+            X_all_disks = X_all_disks[0:i,:]
+            break
         t = args.DeltaT* i
         if i%args.freq == 0:
             print (f'Epoch={i:,},t={t}')
@@ -101,16 +139,30 @@ if __name__=='__main__':
                 case Collision.SAMPLE:
                     dt = (T[2] - t)
                     Xs += dt * Vs
-                    x_coordinates[i,:] = Xs[:,0]
+                    X_all_disks[i,:] = Xs[:,0]
                     sampled = True
 
-    n,bins =np.histogram(x_coordinates)
+    n,bins = np.histogram(X_all_disks,bins=bins)
+    if args.restart == None:
+        counts = n
+    else:
+        counts += n
+
+    save_file = get_file_name(args.out,default_ext='npz')
+    if exists(save_file):
+        backup_file = save_file + '~'
+        replace(save_file,backup_file)
+
+    np.savez(save_file,
+             Xs=Xs,Vs=Vs,counts=counts,bins=bins,L=L,sigma=sigma,DeltaT=DeltaT)
+
+    Disks,_ = Xs.shape
     fig = figure(figsize=(12,12))
 
     ax1 = fig.add_subplot(1,1,1)
     ax1.plot(0.5*(bins[0:-1]+bins[1:]),n/n.sum())
     ax1.set_title(fr'{args.n} Disks, '
-                  fr'{args.N} Epochs, '
+                  fr'{counts.sum()//Disks:,} Epochs, '
                   fr'$\sigma=${args.sigma:.3g}, ')
     ax1.axvline(x=args.sigma,color='red',linestyle='dashed')
     ax1.axvline(x=L[0]-args.sigma,color='red',linestyle='dashed')
