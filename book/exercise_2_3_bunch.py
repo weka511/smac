@@ -15,7 +15,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+'''
+    Exercise 2.3. Implement algorithm 2.1 (event disks) for disks in a square
+    box without periodic boundary conditions. Start from a legal configuration,
+    allowing restart as discussed in exercise 1.3. Generate histograms of position
+    and velocity.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -23,7 +28,7 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from md import create_config, get_next_pair, get_next_wall, collide_pair, get_L
+from md import create_config, get_next_pair, get_next_wall, collide_pair, get_L, Collision
 
 def parse_arguments():
     '''Parse command line arguments'''
@@ -70,42 +75,41 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
     T = np.zeros((3))
-    t = 0  # Simulated time
-    T[2] = args.DeltaT
     x_coordinates = np.zeros((args.N,args.n))
     L  = get_L(args.L, args.d)
     Xs,Vs = create_config(n = args.n, d = args.d, L = np.array(L), sigma = args.sigma, rng = rng, M = args.M)
+    for i in range(args.N):
+        t = args.DeltaT* i
+        if i%args.freq == 0:
+            print (f'Epoch={i:,},t={t}')
+        T[Collision.SAMPLE] = args.DeltaT + t
+        sampled = False
+        while not sampled:
+            dt_wall,wall,j = get_next_wall(Xs, Vs, sigma = args.sigma, d = args.d, L = L)
+            dt_pair, k, l = get_next_pair(Xs,Vs,sigma=args.sigma)
+            T[Collision.WALL] = t + dt_wall
+            T[Collision.PAIR] = t + dt_pair
+            match np.argmin(T):
+                case Collision.WALL:
+                    Xs += dt_wall * Vs
+                    Vs[j][wall] = - Vs[j][wall]
+                    t += dt_wall
+                case Collision.PAIR:
+                    Xs += dt_pair * Vs
+                    Vs[k], Vs[l] = collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
+                    t += dt_pair
+                case Collision.SAMPLE:
+                    dt = (T[2] - t)
+                    Xs += dt * Vs
+                    x_coordinates[i,:] = Xs[:,0]
+                    sampled = True
 
-    epoch = 0
-    for i in range(1000* args.N):
-        t_wall,wall,j = get_next_wall(Xs, Vs, sigma = args.sigma, d = args.d, L = L)
-        t_pair, k, l = get_next_pair(Xs,Vs,sigma=args.sigma)
-        T[0] = t + t_wall
-        T[1] = t + t_pair
-        match np.argmin(T):
-            case 0:
-                Xs += t_wall * Vs
-                Vs[j][wall] = - Vs[j][wall]
-                T[2] -= t_wall
-                t += t_wall
-            case 1:
-                Xs += t_pair * Vs
-                Vs[k], Vs[l] = collide_pair(Xs[k], Xs[l], Vs[k], Vs[l])
-                T[2] -= t_pair
-                t += t_pair
-            case 2:
-                Xs += T[2] * Vs
-                x_coordinates[epoch,:] = Xs[:,0]
-                epoch += 1
-                t += T[2]
-                T[2] = args.DeltaT
-                if epoch > args.N: break
-
+    n,bins =np.histogram(x_coordinates)
     fig = figure(figsize=(12,12))
 
     fig.savefig(get_file_name(args.out))
     ax1 = fig.add_subplot(1,1,1)
-    ax1.hist(x_coordinates)
+    ax1.plot(0.5*(bins[0:-1]+bins[1:]),n/n.sum())
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes

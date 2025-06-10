@@ -33,6 +33,7 @@ class Collision:
     '''A class for keeping track of the mechanism for a collision'''
     WALL = 0
     PAIR = 1
+    SAMPLE = 2
 
 def get_pair_time(x1, x2, v1, v2, sigma = 0.01):
     '''
