@@ -100,6 +100,40 @@ def collide_pair(x1, x2, v1, v2):
     Delta_v_perp = np.dot(Delta_v,e_hat_perp)
     return (v1 - Delta_v_perp*e_hat_perp, v2 + Delta_v_perp*e_hat_perp)
 
+def get_next_pair(Xs,Vs,sigma = 0.1):
+    '''
+    Calculate time to next pair collision
+
+    Returns:
+       t_pair   Time to next pair collision
+       k        Index of one sphere
+       l        Index of the other sphere: k < l
+    '''
+    next_pair = (float('inf'), None, None)
+    for k in range(len(Xs)):
+        for l in range(k+1,len(Xs)):
+            t = get_pair_time(Xs[k], Xs[l], Vs[k], Vs[l],sigma = sigma)
+            if t < next_pair[0]:
+                next_pair = (t,k,l)
+    return next_pair
+
+def get_next_wall(Xs, Vs, sigma = 0.1, d = 2, L = np.array([1,1])):
+    '''
+    Calculate time to next wall collision
+
+    Returns:
+        t_wall   Time to next wall collision
+        wall     Index of wall
+        j        Index of sphere
+    '''
+    next_wall = (float('inf'), None, None)
+    for j in range(len(Xs)):
+        wall,t = get_wall_time(Xs[j], Vs[j], sigma = sigma, d = d, L = L)
+        assert t>0
+        if t < next_wall[0]:
+            next_wall = (t,wall,j)
+    return next_wall
+
 def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = np.array([1,1]), tolerance=1e-12):
     '''
     Algorithm 2.1: event driven molecular dynamics for particles in a box.
@@ -122,43 +156,9 @@ def event_disks(Xs, Vs, sigma = 0.01, d = 2, L = np.array([1,1]), tolerance=1e-1
         Time to collision
     '''
 
-    def get_next_pair():
-        '''
-        Calculate time to next pair collision
-
-        Returns:
-           t_pair   Time to next pair collision
-           k        Index of one sphere
-           l        Index of the other sphere: k < l
-        '''
-        next_pair = (float('inf'), None, None)
-        for k in range(len(Xs)):
-            for l in range(k+1,len(Xs)):
-                t = get_pair_time(Xs[k], Xs[l], Vs[k], Vs[l],sigma = sigma)
-                if t < next_pair[0]:
-                    next_pair = (t,k,l)
-        return next_pair
-
-    def get_next_wall():
-        '''
-        Calculate time to next wall collision
-
-        Returns:
-            t_wall   Time to next wall collision
-            wall     Index of wall
-            j        Index of sphere
-        '''
-        next_wall = (float('inf'), None, None)
-        for j in range(len(Xs)):
-            wall,t = get_wall_time(Xs[j], Vs[j], sigma = sigma, d = d, L = L)
-            assert t>0
-            if t < next_wall[0]:
-                next_wall = (t,wall,j)
-        return next_wall
-
     # Work out which collision is next, wall or pair
-    t_wall,wall,j = get_next_wall()
-    t_pair, k, l  = get_next_pair()
+    t_wall,wall,j = get_next_wall(Xs, Vs, sigma = sigma, d = d, L = L)
+    t_pair, k, l  = get_next_pair(Xs,Vs,sigma=sigma)
 
     if t_wall < t_pair:
         Xs += t_wall * Vs     # Update to new position
