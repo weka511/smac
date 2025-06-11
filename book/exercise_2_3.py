@@ -106,16 +106,20 @@ if __name__=='__main__':
             Vs = npzfile['Vs']
             counts = npzfile['counts']
             bins =  npzfile['bins']
+            countsv = npzfile['countsv']
+            binsv =  npzfile['binsv']
             L = npzfile['L']
             sigma = float(npzfile['sigma'])
             DeltaT = float(npzfile['DeltaT'])
+            _,d = Xs.shape
 
     T = np.zeros((3)) # times to next wall collision, next pair colliion, and next sample time
-    X_all_disks = np.zeros((args.N,args.n))   # This will hold x coordinates of all spheres
-
+    X_all_disks = np.zeros((args.N,args.n))
+    E_all_disks = np.zeros((args.N,args.n))
     for i in range(args.N):
         if registry.is_kill_token_present():
             X_all_disks = X_all_disks[0:i,:]
+            E_all_disks = E_all_disks[0:i,:]
             break
 
         t = args.DeltaT * i
@@ -141,6 +145,10 @@ if __name__=='__main__':
                     dt = (T[2] - t)
                     Xs += dt * Vs
                     X_all_disks[i,:] = Xs[:,0]
+                    _,m_disks = E_all_disks.shape
+                    for j in range(m_disks):
+                        for k in range(d):
+                            E_all_disks[i,j] += Vs[j,k]**2
                     sampled = True
 
     n,bins = np.histogram(X_all_disks,bins=bins)
@@ -149,27 +157,48 @@ if __name__=='__main__':
     else:
         counts += n
 
+    nv,binsv = np.histogram(E_all_disks,bins=bins)
+    if args.restart == None:
+        countsv = nv
+    else:
+        countsv += nv
+
     save_file = get_file_name(args.out,default_ext='npz')
     if exists(save_file):
         backup_file = save_file + '~'
         replace(save_file,backup_file)
 
     np.savez(save_file,
-             Xs=Xs,Vs=Vs,counts=counts,bins=bins,L=L,sigma=sigma,DeltaT=DeltaT)
+             Xs=Xs,Vs=Vs,counts=counts,bins=bins,L=L,sigma=sigma,DeltaT=DeltaT,countsv=countsv,binsv=binsv)
 
     Disks,_ = Xs.shape
-    fig = figure(figsize=(12,12))
 
-    ax1 = fig.add_subplot(1,1,1)
-    ax1.plot(0.5*(bins[0:-1]+bins[1:]),n/n.sum())
-    ax1.set_title(fr'{args.n} Disks, '
+    fig1 = figure(figsize=(12,12))
+    fig1.suptitle(fr'{args.n} Disks, '
                   fr'{counts.sum()//Disks:,} Epochs, '
                   fr'$\sigma=${args.sigma:.3g}, ')
+
+    ax1 = fig1.add_subplot(1,1,1)
+    ax1.plot(0.5*(bins[0:-1]+bins[1:]),counts/counts.sum())
     ax1.axvline(x=args.sigma,color='red',linestyle='dashed')
     ax1.axvline(x=L[0]-args.sigma,color='red',linestyle='dashed')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Frequency')
-    fig.savefig(get_file_name(args.out))
+    ax1.set_title('Positions')
+
+    fig1.savefig(get_file_name(args.out,seq='X'))
+
+    fig2 = figure(figsize=(12,12))
+    fig2.suptitle(fr'{args.n} Disks, '
+                  fr'{counts.sum()//Disks:,} Epochs, '
+                  fr'$\sigma=${args.sigma:.3g}, ')
+    ax2 = fig2.add_subplot(1,1,1)
+    ax2.plot(0.5*(binsv[0:-1]+binsv[1:]),countsv/countsv.sum())
+    ax2.set_xlabel('E')
+    ax2.set_ylabel('Frequency')
+    ax2.set_title('Energies')
+
+    fig2.savefig(get_file_name(args.out,seq='E'))
 
     elapsed = time() - start
     minutes = int(elapsed/60)
