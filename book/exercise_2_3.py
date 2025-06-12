@@ -100,6 +100,8 @@ if __name__=='__main__':
         DeltaT = args.DeltaT
         Xs,Vs = create_config(n = n, d = d, L = L, sigma = sigma, rng = rng, M = M)
         bins = get_bins(args.bins)
+        binsv = get_bins(args.bins)
+        binsvx = get_bins(args.bins)
     else:
         with np.load(args.restart) as  npzfile:
             Xs = npzfile['Xs']
@@ -123,6 +125,7 @@ if __name__=='__main__':
         if registry.is_kill_token_present():
             X_all_disks = X_all_disks[0:i,:]
             V_all_disks = V_all_disks[0:i,:]
+            Vx_all_disks = Vx_all_disks[0:i,:]
             break
 
         t = args.DeltaT * i
@@ -130,6 +133,8 @@ if __name__=='__main__':
             print (f'Epoch={i:,},t={t}')
         T[Collision.SAMPLE] = args.DeltaT + t
         sampled = False
+        # Iterate through a sequence of collisions until
+        # we reach a time step so we can sample
         while not sampled:
             dt_wall,wall,j = get_next_wall(Xs, Vs, sigma = args.sigma, d = args.d, L = L)
             dt_pair, k, l = get_next_pair(Xs,Vs,sigma=args.sigma)
@@ -160,14 +165,14 @@ if __name__=='__main__':
     else:
         counts += n
 
-    nvx,binsvx = np.histogram(Vx_all_disks,bins=bins)
+    nvx,binsvx = np.histogram(Vx_all_disks,bins=binsvx)
 
     if args.restart == None:
         countsvx = nvx
     else:
         countsvx += nvx
 
-    nv,binsv = np.histogram(V_all_disks,bins=bins)
+    nv,binsv = np.histogram(V_all_disks,bins=binsv)
     if args.restart == None:
         countsv = nv
     else:
