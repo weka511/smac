@@ -108,6 +108,8 @@ if __name__=='__main__':
             bins =  npzfile['bins']
             countsv = npzfile['countsv']
             binsv =  npzfile['binsv']
+            countsvx = npzfile['countsvx']
+            binsvx =  npzfile['binsvx']
             L = npzfile['L']
             sigma = float(npzfile['sigma'])
             DeltaT = float(npzfile['DeltaT'])
@@ -115,11 +117,12 @@ if __name__=='__main__':
 
     T = np.zeros((3)) # times to next wall collision, next pair colliion, and next sample time
     X_all_disks = np.zeros((args.N,args.n))
-    E_all_disks = np.zeros((args.N,args.n))
+    Vx_all_disks = np.zeros((args.N,args.n))
+    V_all_disks = np.zeros((args.N,args.n))
     for i in range(args.N):
         if registry.is_kill_token_present():
             X_all_disks = X_all_disks[0:i,:]
-            E_all_disks = E_all_disks[0:i,:]
+            V_all_disks = V_all_disks[0:i,:]
             break
 
         t = args.DeltaT * i
@@ -145,10 +148,10 @@ if __name__=='__main__':
                     dt = (T[2] - t)
                     Xs += dt * Vs
                     X_all_disks[i,:] = Xs[:,0]
-                    _,m_disks = E_all_disks.shape
+                    _,m_disks = V_all_disks.shape
                     for j in range(m_disks):
-                        for k in range(d):
-                            E_all_disks[i,j] += Vs[j,k]**2
+                        Vx_all_disks[i,j] = Vs[j,0]
+                        V_all_disks[i,j] = np.sqrt(sum([Vs[j,k]**2 for k in range(d)]))
                     sampled = True
 
     n,bins = np.histogram(X_all_disks,bins=bins)
@@ -157,7 +160,14 @@ if __name__=='__main__':
     else:
         counts += n
 
-    nv,binsv = np.histogram(E_all_disks,bins=bins)
+    nvx,binsvx = np.histogram(Vx_all_disks,bins=bins)
+
+    if args.restart == None:
+        countsvx = nvx
+    else:
+        countsvx += nvx
+
+    nv,binsv = np.histogram(V_all_disks,bins=bins)
     if args.restart == None:
         countsv = nv
     else:
@@ -169,7 +179,7 @@ if __name__=='__main__':
         replace(save_file,backup_file)
 
     np.savez(save_file,
-             Xs=Xs,Vs=Vs,counts=counts,bins=bins,L=L,sigma=sigma,DeltaT=DeltaT,countsv=countsv,binsv=binsv)
+             Xs=Xs,Vs=Vs,counts=counts,bins=bins,countsvx=countsvx,binsvx=binsvx,countsv=countsv,binsv=binsv,L=L,sigma=sigma,DeltaT=DeltaT)
 
     Disks,_ = Xs.shape
 
@@ -193,12 +203,14 @@ if __name__=='__main__':
                   fr'{counts.sum()//Disks:,} Epochs, '
                   fr'$\sigma=${args.sigma:.3g}, ')
     ax2 = fig2.add_subplot(1,1,1)
-    ax2.plot(0.5*(binsv[0:-1]+binsv[1:]),countsv/countsv.sum())
-    ax2.set_xlabel('E')
+    ax2.plot(0.5*(binsvx[0:-1]+binsvx[1:]),countsvx/countsvx.sum(),label='$V_x$')
+    ax2.plot(0.5*(binsv[0:-1]+binsv[1:]),countsv/countsv.sum(),label='V')
+    ax2.set_xlabel('V')
     ax2.set_ylabel('Frequency')
-    ax2.set_title('Energies')
+    ax2.set_title('Velocities')
+    ax2.legend()
 
-    fig2.savefig(get_file_name(args.out,seq='E'))
+    fig2.savefig(get_file_name(args.out,seq='V'))
 
     elapsed = time() - start
     minutes = int(elapsed/60)
