@@ -49,7 +49,7 @@ class HardDisk:
         return self.x/radius, self.y/radius
 
 class Collision:
-    '''Compute time to next collision of spheres and consequnces of collision'''
+    '''Compute time to next collision of spheres and consequences of collision'''
     def __init__(self,L,sigma,V):
         self.L = L
         self.sigma = sigma
@@ -192,14 +192,14 @@ def get_file_name(name,default_ext='png',seq=None):
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
-    parser.add_argument('--L', type    = float, default = 1.0, help    = 'Half length of box')
-    parser.add_argument('--sigma', type    = float, default = 0.365, help    = 'Radius of sphere')
-    parser.add_argument('--N', type    = int, default = 1000000, help    = 'Number of steps to evolve configuration')
-    parser.add_argument('--m', type    = int, default = 100, help    = 'Number of bins for histogram')
-    parser.add_argument('--seed', type    = int, default = None, help    = 'Seed for random number generator')
-    parser.add_argument('--dt', type    = float, default = 0.1, help    = 'Time step for sampling')
-    parser.add_argument('--V', type    = float, default = 1.0,  help    = 'Magnitude of velocity')
-    parser.add_argument('--show', action = 'store_true',  help   = 'Show plot')
+    parser.add_argument('--L', type = float, default = 1.0, help = 'Half length of box')
+    parser.add_argument('--sigma', type = float, default = 0.365, help = 'Radius of sphere')
+    parser.add_argument('--N', type = int, default = 1000000, help = 'Number of steps to evolve configuration')
+    parser.add_argument('--m', type = int, default = 100, help = 'Number of bins for histogram')
+    parser.add_argument('--seed', type = int, default = None, help = 'Seed for random number generator')
+    parser.add_argument('--dt', type = float, default = 0.1, help = 'Time step for sampling')
+    parser.add_argument('--V', type = float, default = 1.0, help = 'Magnitude of velocity')
+    parser.add_argument('--show', action = 'store_true', help = 'Show plot')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     return parser.parse_args()
@@ -222,10 +222,8 @@ if __name__=='__main__':
                                    disk      = disk):
         event.exec(disk,dt,sample)
 
-    bins = np.linspace(-args.L, args.L,
-                    num = args.m)
-    rc('font',**{'family':'serif','serif':['Palatino']})
-    rc('text', usetex=True)
+    bins = np.linspace(-args.L, args.L, num = args.m)
+
     fig = figure(figsize=(12,6))
     fig.suptitle('Sinai two-disk system')
 
@@ -251,9 +249,11 @@ if __name__=='__main__':
     ax2.grid(True)
 
     fig.savefig(get_file_name(args.out))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
     print (f'Elapsed Time {minutes} m {seconds:.2f} s')
+
     if args.show:
         show()
