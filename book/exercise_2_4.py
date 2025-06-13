@@ -241,10 +241,10 @@ if __name__=='__main__':
 
     ax1 = fig.add_subplot(1,2,1)
     ax1.axis('scaled')
-    h,_,_,_ = ax1.hist2d(sample.xs, sample.ys,
+    h,_,_,m = ax1.hist2d(sample.xs, sample.ys,
                      bins    = [bins,bins],
                      density = True)
-    # ax1.colorbar()
+    fig.colorbar(m)
     ax1.set_title(fr'L={args.L}, $\sigma=${args.sigma}, N={args.N:,d}, dt={args.dt}, V={args.V}')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
@@ -258,7 +258,7 @@ if __name__=='__main__':
     ax2.set_title(fr'Projected Densities $\eta=${np.pi*args.sigma**2/(4*args.L**2):.3f}')
     ax2.set_xlabel('Density')
     ax2.set_ylabel('Frequency')
-    # ax2.grid(True)
+    ax2.grid(True)
 
     fig.savefig(get_plot_file_name(args.plot))
 
