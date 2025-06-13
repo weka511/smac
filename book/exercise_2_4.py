@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2022=2025 Simon Crase
+# Copyright (C) 2022-2025 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@
 '''
 
 from argparse import ArgumentParser
-from os.path import basename, splitext
+from os.path import basename, splitext, join
+from time import time
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 import numpy as np
@@ -28,10 +29,10 @@ import numpy as np
 class HardDisk:
     '''Keeps track of position and velocity of disk'''
     def __init__(self,x,y,u,v,sigma):
-        self.x     = x
-        self.y     = y
-        self.u     = u
-        self.v     = v
+        self.x = x
+        self.y = y
+        self.u = u
+        self.v = v
         self.sigma = sigma
 
     def move(self,dt):
@@ -50,14 +51,14 @@ class HardDisk:
 class Collision:
     '''Compute time to next collision of spheres and consequnces of collision'''
     def __init__(self,L,sigma,V):
-        self.L     = L
+        self.L = L
         self.sigma = sigma
-        self.a     = V**2
+        self.a = V**2
 
     def get_delta(self,disk):
         '''Compute time to next collision of spheres'''
-        b     = disk.x * disk.u + disk.y * disk.v
-        c     = disk.x**2 + disk.y**2 - 4*self.sigma**2
+        b = disk.x * disk.u + disk.y * disk.v
+        c = disk.x**2 + disk.y**2 - 4*self.sigma**2
         delta = b**2 - self.a *c
         if delta>0 and b<0:
             return (-b - np.sqrt(delta))/self.a
@@ -66,32 +67,31 @@ class Collision:
     '''Collide spheres. We need to reverse the radial component of velocity, while preserving theta component.'''
     def exec(self,disk,dt,sample):
         disk.move(dt)
-        x, y     = disk.get_direction_cosines()
+        x, y = disk.get_direction_cosines()
         assert np.allclose(1,x**2 + y**2,
                         rtol = 1e-5,
                         atol = 0),f'{1} not = {x**2 + y**2}'
-        v_r      =   x * disk.u + y * disk.v
+        v_r = x * disk.u + y * disk.v
         v_theta  = - y * disk.u + x * disk.v
-        v_r     *= -1
-        disk.v   = v_theta * x + v_r * y
-        disk.u   = v_r * x     - v_theta * y
+        v_r *= -1
+        disk.v = v_theta * x + v_r * y
+        disk.u = v_r * x     - v_theta * y
         assert np.allclose(self.a, disk.u**2+disk.v**2,
                         rtol = 1e-5,
                         atol = 0),f'{self.a} not = {disk.u**2+disk.v**2}'
         sample.synchronize(dt)
 
 class Wrap:
-    '''Compute time to next collision with Wall and consequnces of collision'''
+    '''Compute time to next collision with Wall and consequences of collision'''
     def __init__(self,L):
         self.L = L
 
     def get_delta(self,disk):
         '''
-           Compute time to next collision with Wall.
-           Store the number of the wall that gives next collision
+        Compute time to next collision with Wall.
+        Store the number of the wall that gives next collision
         '''
-        Deltas = [self.get_one_delta(disk.x,disk.u),
-                    self.get_one_delta(disk.y,disk.v)]
+        Deltas = [self.get_one_delta(disk.x,disk.u), self.get_one_delta(disk.y,disk.v)]
         self.axis = np.argmin(Deltas)
         return Deltas[self.axis]
 
@@ -114,12 +114,12 @@ class Wrap:
 class Sample:
     '''Keep track of Time, and sample state at regular intervals. '''
     def __init__(self,N,dt):
-        self.N      = N
-        self.n      = -1
-        self.dt     = dt
-        self.t_acc  = 0
-        self.xs     = []
-        self.ys     = []
+        self.N = N
+        self.n = -1
+        self.dt = dt
+        self.t_acc = 0
+        self.xs = []
+        self.ys = []
 
     def get_delta(self,disk):
         '''Calculate time to next sample'''
@@ -130,12 +130,12 @@ class Sample:
         disk.move(dt)
         self.xs.append(disk.x)
         self.ys.append(disk.y)
-        self.t_acc  = 0
+        self.t_acc = 0
 
     def should_continue(self):
         '''Are we there yet?'''
         self.n += 1
-        return self.n<self.N
+        return self.n < self.N
 
     def synchronize(self,dt):
         '''Accumulate time from Collisions and Wraps'''
@@ -170,49 +170,38 @@ def get_next_event(collision, wrap, sample, disk):
         first_index      = np.argmin(next_event_times)
         yield events[first_index],next_event_times[first_index]
 
-def get_plot_file_name(plot=None):
-    '''Determine plot file name from source file name or command line arguments'''
-    if plot==None:
-        return f'{splitext(basename(__file__))[0]}.png'
-    base,ext = splitext(plot)
-    return f'{plot}.png' if len(ext)==0 else plot
+def get_file_name(name,default_ext='png',seq=None):
+    '''
+    Used to create file names
+
+    Parameters:
+        name          Basis for file name
+        default_ext   Extension if non specified
+        seq           Used if there are multiple files
+    '''
+    base,ext = splitext(name)
+    if len(ext) == 0:
+        ext = default_ext
+    if seq != None:
+        base = f'{base}{seq}'
+    qualified_name = f'{base}.{ext}'
+    if ext == 'png':
+        return join(args.figs,qualified_name)
+    else:
+        return qualified_name
 
 def parse_arguments():
     parser = ArgumentParser(description = __doc__)
-    parser.add_argument('--L',
-                        type    = float,
-                        default = 1.0,
-                        help    = 'Half length of box')
-    parser.add_argument('--sigma',
-                        type    = float,
-                        default = 0.365,
-                        help    = 'Radius of sphere')
-    parser.add_argument('--N',
-                        type    = int,
-                        default = 1000000,
-                        help    = 'Number of steps to evolve configuration')
-    parser.add_argument('--m',
-                        type    = int,
-                        default = 100,
-                        help    = 'Number of bins for histogram')
-    parser.add_argument('--seed',
-                        type    = int,
-                        default = None,
-                        help    = 'Seed for random number generator')
-    parser.add_argument('--dt',
-                        type    = float,
-                        default = 0.1,
-                        help    = 'Time step for sampling')
-    parser.add_argument('--V',
-                        type    = float,
-                        default = 1.0,
-                        help    = 'Magnitude of velocity')
-    parser.add_argument('--show',
-                        action = 'store_true',
-                        help   = 'Show plot')
-    parser.add_argument('--plot',
-                        default = None,
-                        help    = 'Name of plot file')
+    parser.add_argument('--L', type    = float, default = 1.0, help    = 'Half length of box')
+    parser.add_argument('--sigma', type    = float, default = 0.365, help    = 'Radius of sphere')
+    parser.add_argument('--N', type    = int, default = 1000000, help    = 'Number of steps to evolve configuration')
+    parser.add_argument('--m', type    = int, default = 100, help    = 'Number of bins for histogram')
+    parser.add_argument('--seed', type    = int, default = None, help    = 'Seed for random number generator')
+    parser.add_argument('--dt', type    = float, default = 0.1, help    = 'Time step for sampling')
+    parser.add_argument('--V', type    = float, default = 1.0,  help    = 'Magnitude of velocity')
+    parser.add_argument('--show', action = 'store_true',  help   = 'Show plot')
+    parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
+    parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     return parser.parse_args()
 
 def flatten(Xss):
@@ -220,9 +209,12 @@ def flatten(Xss):
     return [x for Xs in Xss for x in Xs]
 
 if __name__=='__main__':
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
+    start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    disk   = create_disk(args.L, args.V, args.sigma)
+    disk = create_disk(args.L, args.V, args.sigma)
     sample = Sample(args.N,args.dt)
     for event,dt in get_next_event(collision = Collision(args.L,args.sigma,args.V),
                                    wrap      = Wrap(args.L),
@@ -241,10 +233,8 @@ if __name__=='__main__':
 
     ax1 = fig.add_subplot(1,2,1)
     ax1.axis('scaled')
-    h,_,_,m = ax1.hist2d(sample.xs, sample.ys,
-                     bins    = [bins,bins],
-                     density = True)
-    fig.colorbar(m)
+    h,_,_,mappable = ax1.hist2d(sample.xs, sample.ys, bins = [bins,bins], density = True)
+    fig.colorbar(mappable)
     ax1.set_title(fr'L={args.L}, $\sigma=${args.sigma}, N={args.N:,d}, dt={args.dt}, V={args.V}')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
@@ -260,7 +250,10 @@ if __name__=='__main__':
     ax2.set_ylabel('Frequency')
     ax2.grid(True)
 
-    fig.savefig(get_plot_file_name(args.plot))
-
+    fig.savefig(get_file_name(args.out))
+    elapsed = time() - start
+    minutes = int(elapsed/60)
+    seconds = elapsed - 60*minutes
+    print (f'Elapsed Time {minutes} m {seconds:.2f} s')
     if args.show:
         show()
