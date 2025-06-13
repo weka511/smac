@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2022 Simon Crase
+# Copyright (C) 2022=2025 Simon Crase
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,15 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Exercise 2-4. Sinai's system of two large sphere in a box. Show histogram of positions.'''
+'''
+    Exercise 2-4. Sinai's system of two large sphere in a box. Show histogram of positions.
+'''
 
-from argparse          import ArgumentParser
-from math              import sqrt
-from matplotlib        import rc
-from matplotlib.pyplot import axis, colorbar, figure, grid, hist, hist2d, savefig, show, subplot, suptitle, title, xlabel, ylabel
-from numpy             import allclose, argmin, linspace, pi
-from os.path           import basename, splitext
-from random            import random, seed
+from argparse import ArgumentParser
+from os.path import basename, splitext
+from matplotlib import rc
+from matplotlib.pyplot import figure, show
+import numpy as np
 
 class HardDisk:
     '''Keeps track of position and velocity of disk'''
@@ -41,8 +41,8 @@ class HardDisk:
 
     def get_direction_cosines(self):
         '''Find direction of centre, ralative to origin'''
-        radius = sqrt(self.x**2 + self.y**2)
-        assert allclose(2*self.sigma, radius,
+        radius = np.sqrt(self.x**2 + self.y**2)
+        assert np.allclose(2*self.sigma, radius,
                         rtol = 1e-5,
                         atol = 0),f'{2*self.sigma} {radius}'
         return self.x/radius, self.y/radius
@@ -60,14 +60,14 @@ class Collision:
         c     = disk.x**2 + disk.y**2 - 4*self.sigma**2
         delta = b**2 - self.a *c
         if delta>0 and b<0:
-            return (-b - sqrt(delta))/self.a
+            return (-b - np.sqrt(delta))/self.a
         return float('inf')
 
     '''Collide spheres. We need to reverse the radial component of velocity, while preserving theta component.'''
     def exec(self,disk,dt,sample):
         disk.move(dt)
         x, y     = disk.get_direction_cosines()
-        assert allclose(1,x**2 + y**2,
+        assert np.allclose(1,x**2 + y**2,
                         rtol = 1e-5,
                         atol = 0),f'{1} not = {x**2 + y**2}'
         v_r      =   x * disk.u + y * disk.v
@@ -75,7 +75,7 @@ class Collision:
         v_r     *= -1
         disk.v   = v_theta * x + v_r * y
         disk.u   = v_r * x     - v_theta * y
-        assert allclose(self.a, disk.u**2+disk.v**2,
+        assert np.allclose(self.a, disk.u**2+disk.v**2,
                         rtol = 1e-5,
                         atol = 0),f'{self.a} not = {disk.u**2+disk.v**2}'
         sample.synchronize(dt)
@@ -90,9 +90,9 @@ class Wrap:
            Compute time to next collision with Wall.
            Store the number of the wall that gives next collision
         '''
-        Deltas    = [self.get_one_delta(disk.x,disk.u),
+        Deltas = [self.get_one_delta(disk.x,disk.u),
                     self.get_one_delta(disk.y,disk.v)]
-        self.axis = argmin(Deltas)
+        self.axis = np.argmin(Deltas)
         return Deltas[self.axis]
 
     def exec(self,disk,dt,sample):
@@ -141,7 +141,7 @@ class Sample:
         '''Accumulate time from Collisions and Wraps'''
         self.t_acc += dt
 
-def create_disk(L,V,sigma):
+def create_disk(L,V,sigma, rng = np.random.default_rng()):
     '''
        Set up one disk that is in a valid position, i.e. outside reference disk,
        but otherwise has a random position and direction.
@@ -153,12 +153,10 @@ def create_disk(L,V,sigma):
     '''
     x,y = 0,0
     while x**2 + y**2 < sigma**2:
-        x = L * (2 * random()-1)
-        y = L * (2 * random()-1)
+        x,y = L * (2 * rng.random((2))-1)
 
-    u    = 2*random()-1
-    v    = 2*random()-1
-    norm = sqrt(u**2 + v**2)
+    u,v = 2*rng.random((2))-1
+    norm = np.sqrt(u**2 + v**2)
     return HardDisk(x, y, u*V/norm, v*V/norm,sigma)
 
 def get_next_event(collision, wrap, sample, disk):
@@ -169,7 +167,7 @@ def get_next_event(collision, wrap, sample, disk):
     events = [collision, wrap, sample]
     while sample.should_continue():
         next_event_times = [event.get_delta(disk) for event in events]
-        first_index      = argmin(next_event_times)
+        first_index      = np.argmin(next_event_times)
         yield events[first_index],next_event_times[first_index]
 
 def get_plot_file_name(plot=None):
@@ -223,7 +221,7 @@ def flatten(Xss):
 
 if __name__=='__main__':
     args = parse_arguments()
-    seed(args.seed)
+    rng = np.random.default_rng(args.seed)
     disk   = create_disk(args.L, args.V, args.sigma)
     sample = Sample(args.N,args.dt)
     for event,dt in get_next_event(collision = Collision(args.L,args.sigma,args.V),
@@ -232,36 +230,37 @@ if __name__=='__main__':
                                    disk      = disk):
         event.exec(disk,dt,sample)
 
-    bins = linspace(-args.L, args.L,
+    bins = np.linspace(-args.L, args.L,
                     num = args.m)
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
-    figure(figsize=(12,6))
-    suptitle('Sinai two-disk system')
+    fig = figure(figsize=(12,6))
+    fig.suptitle('Sinai two-disk system')
 
     # Plot 2d histogram showing time spent at each position
 
-    subplot(1,2,1)
-    axis('scaled')
-    h,_,_,_ = hist2d(sample.xs, sample.ys,
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.axis('scaled')
+    h,_,_,_ = ax1.hist2d(sample.xs, sample.ys,
                      bins    = [bins,bins],
                      density = True)
-    colorbar()
-    title(fr'L={args.L}, $\sigma=${args.sigma}, N={args.N:,d}, dt={args.dt}, V={args.V}')
-    xlabel('X')
-    ylabel('Y')
+    # ax1.colorbar()
+    ax1.set_title(fr'L={args.L}, $\sigma=${args.sigma}, N={args.N:,d}, dt={args.dt}, V={args.V}')
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
 
     # Show distribution of frequencies
 
-    subplot(1,2,2)
-    hist (flatten(h),
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.hist (flatten(h),
           density = True,
           color = 'xkcd:blue')
-    title(fr'Projected Densities $\eta=${pi*args.sigma**2/(4*args.L**2):.3f}')
-    xlabel('Density')
-    ylabel('Frequency')
-    grid(True)
+    ax2.set_title(fr'Projected Densities $\eta=${np.pi*args.sigma**2/(4*args.L**2):.3f}')
+    ax2.set_xlabel('Density')
+    ax2.set_ylabel('Frequency')
+    # ax2.grid(True)
 
-    savefig(get_plot_file_name(args.plot))
+    fig.savefig(get_plot_file_name(args.plot))
+
     if args.show:
         show()

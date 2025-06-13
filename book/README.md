@@ -29,7 +29,7 @@
 -|exercise_1_21.py|Exercise 1.21 Determine the mean value of x**(gamma-zeta) in a simple implementation of Algorithm 1.31 (markov-zeta)
 -|markov-zeta.py|Algorithm 1.31 Markov-chain Monto Carlo algorithm for a point x on the interval [0,1] with probability proportional to x**zeta
 1.4.4|levy-convolution.py|Algorithm 1.32
-2.1.4|spheres2.py|Exercise 2-4: Sinai's system of two large sphere in a box. Show histogram of positions.
+2.1.4|exercise_2_4.py|Exercise 2-4: Sinai's system of two large sphere in a box. Show histogram of positions.
 2.2.1|pair-time.py|Exercise 2.1: Implement algorithm 2.2 (pair-time) and incorporate it into a test program  generating 2 random positions with ans(delta_x) > 2 sigma. Propagate both disks up to t_pair if finite and verify that they touch; otherwise verify that delta_x.delta_v = 0.
 -|exercise_2_2.py|Exercise 2.2/Algorithm 2.3 (pair collision). Verify that energy and momentum are both conserved in a collision.
 -|exercise_2_3.py|Exercise 2.3. Exercise 2.3. Implement algorithm 2.1 (event disks) for disks in a square box without periodic boundary conditions. Start from a legal configuration, allowing restart as discussed in exercise 1.3. Sample at regular intervals, and generate histograms of position and velocity.
