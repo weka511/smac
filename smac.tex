@@ -1,0 +1,86 @@
+% MIT License
+
+% Copyright (c) 2025 Simon Crase
+
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the ''Software''), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+
+% The above copyright notice and this permission notice shall be included in all
+% copies or substantial portions of the Software.
+
+% THE SOFTWARE IS PROVIDED ''AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+% LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+% SOFTWARE.
+
+\documentclass[]{article}
+
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{tocloft}
+\usepackage{thmtools}
+\usepackage{cancel}
+\usepackage[toc,acronym,nonumberlist]{glossaries}
+\usepackage{glossaries-extra}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usetikzlibrary{arrows,automata}
+\graphicspath{{figs/}}
+\newcommand\numberthis{\addtocounter{equation}{1}\tag{\theequation}}
+\newcommand*\xor{\oplus}
+\newtheorem{defn}{Definition}
+\newtheorem{thm}{Theorem}
+\newtheorem{lemma}{Lemma}
+\setlength{\cftsubsecindent}{0em}
+\setlength{\cftsecnumwidth}{3em}
+\setlength{\cftsubsecnumwidth}{3em} 
+\widowpenalty10000
+\clubpenalty10000
+
+\makeglossaries
+%opening
+\title{}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Monte Carlo methods}
+
+\section{Hard disks and spheres}
+
+\begin{align*}
+	\vec{x}(t) =& \vec{x}(0)+\vec{v}t\\
+	4\sigma^2 =& \vert \vec{x} - \vec{x_c} \vert^2 \text{, at impact}\\
+	=& \vert \vec{x}(0)+\vec{v}t  - \vec{x_c}\vert^2\\
+	=& \vert \big(\vec{x}(0)- \vec{x_c}\big)+\vec{v}t  \vert^2\\
+	=& \vert \vec{\Delta}+\vec{v}t   \vert^2 \text{, where }\\
+	\vec{\Delta} =&\vec{x}(0)- \vec{x_c}
+\end{align*}
+
+\begin{align*}
+	\Delta^2 + 2 \vec{\Delta}\cdot\vec{v}t + v^2t^2 =& 4\sigma^2\\
+	t^2 + 2\frac{\vec{\Delta}\cdot\vec{v}}{v^2}t + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]^2=& \frac{ 4\sigma^2 - \Delta^2}{v^2}  + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]^2\\
+	t + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]=& \pm \sqrt{\frac{ 4\sigma^2 - \Delta^2}{v^2}  + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]^2}\\
+	=& \pm \frac{\sqrt{\big(4\sigma^2 - \Delta^2\big)v^2  + \big[\vec{\Delta}\cdot\vec{v}\big]^2}}{v^2}\\
+	t =& - \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big] \pm \frac{\sqrt{\big(4\sigma^2 - \Delta^2\big)v^2  + \big[\vec{\Delta}\cdot\vec{v}\big]^2}}{v^2}
+\end{align*}
+\end{document}
