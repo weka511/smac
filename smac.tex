@@ -60,13 +60,15 @@
 \maketitle
 
 \begin{abstract}
-
+This document contains derivations of equations used in this repo.
 \end{abstract}
-
+\tableofcontents
+\listoffigures
 \section{Monte Carlo methods}
 
 \section{Hard disks and spheres}
 
+\subsection{Exercise 2.4}
 \begin{align*}
 	\vec{x}(t) =& \vec{x}(0)+\vec{v}t\\
 	4\sigma^2 =& \vert \vec{x} - \vec{x_c} \vert^2 \text{, at impact}\\
@@ -79,8 +81,22 @@
 \begin{align*}
 	\Delta^2 + 2 \vec{\Delta}\cdot\vec{v}t + v^2t^2 =& 4\sigma^2\\
 	t^2 + 2\frac{\vec{\Delta}\cdot\vec{v}}{v^2}t + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]^2=& \frac{ 4\sigma^2 - \Delta^2}{v^2}  + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]^2\\
-	t + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]=& \pm \sqrt{\frac{ 4\sigma^2 - \Delta^2}{v^2}  + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]^2}\\
-	=& \pm \frac{\sqrt{\big(4\sigma^2 - \Delta^2\big)v^2  + \big[\vec{\Delta}\cdot\vec{v}\big]^2}}{v^2}\\
-	t =& - \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big] \pm \frac{\sqrt{\big(4\sigma^2 - \Delta^2\big)v^2  + \big[\vec{\Delta}\cdot\vec{v}\big]^2}}{v^2}
+	t + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]=& \pm \sqrt{\frac{ 4\sigma^2 - \Delta^2}{v^2}  + \big[\frac{\vec{\Delta}\cdot\vec{v}}{v^2}\big]^2} \text{. Now define} \\
+	\Upsilon =&\big( \vec{\Delta}\cdot\vec{v}\big)^2 +  \big(4\sigma^2 - \Delta^2\big) v^2 \text{. Then, provided that $\Upsilon\ge 0$,}\\
+	t=&\frac{-\vec{\Delta}\cdot\vec{v} \pm \sqrt{\Upsilon}}{v^2}
 \end{align*}
+
+\begin{figure}[H]
+\begin{center}
+	\begin{tikzpicture}
+		\draw[fill=none](0,0) circle (2.0) node [black,yshift=-1.5cm] {};
+		\draw[fill=none](2.8284271247461903,2.8284271247461903) circle (2.0) node [black,yshift=-1.5cm] {};,
+		\draw (0,0) -- (1.4142135623730951,1.4142135623730951);
+		\draw  (2,5
+		)--(1.4142135623730951,1.4142135623730951);
+		
+	\end{tikzpicture}
+\end{center}
+
+\end{figure}
 \end{document}
