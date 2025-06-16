@@ -15,15 +15,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+'''
+    Exercise 2-4. Sinai's system of two large sphere in a box. Show histogram of positions.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
+from numpy.testing import assert_allclose
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-
 
 def parse_arguments():
     '''Parse command line arguments'''
@@ -34,8 +36,15 @@ def parse_arguments():
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('--L', type = float, default = 1.0, help = 'Length of box')
     parser.add_argument('--sigma', type = float, default = 0.365, help = 'Radius of sphere')
-    parser.add_argument('--N', type = int, default = 1000000, help = 'Number of steps to evolve configuration')
-    return parser.parse_args()
+    parser.add_argument('--N', type = int, default = 1000, help = 'Number of steps to evolve configuration')
+    parser.add_argument('--DeltaT', type = float, default = 1.0, help = 'For sampling')
+    parser.add_argument('--freq', type = int, default = 250, help = 'For reporting')
+    parser.add_argument('--action', default = 'run',choices=['first','run'])
+    args = parser.parse_args()
+    if 0.25*args.L < args.sigma and args.sigma < 0.5 * args.L:
+        return args
+    else:
+        parser.error('sigma should be between 0.25L and 0.5L')
 
 
 def get_file_name(name,default_ext='png',seq=None):
@@ -58,18 +67,59 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
-def create_config(sigma= 0.365,L=1,d=2,corners=np.array([[0,0],[0,1],[1,1],[1,0]]),rng = np.random.default_rng(),V=1):
+def create_config(sigma= 0.375,L=1,d=2,corners=np.array([[0,0],[0,1],[1,1],[1,0]]),rng = np.random.default_rng(),V=1):
     def acceptable(x):
         for i in range(2*d):
-            if np.linalg.norm(x - corners[i,:]) < sigma:
+            if np.dot(x - corners[i,:],x - corners[i,:]) < 4*sigma**2:
                 return False
         return True
-    x = L*np.ones((d))
+
+    x = L*rng.random((d))
     while not acceptable(x):
-        x = rng.random((d))
+        x = L*rng.random((d))
 
     v = 2*rng.random((d)) - 1
     return x,v/np.linalg.norm(v)
+
+def get_pair_time(x, x_center, v, sigma = 0.01,cutoff=1e-6):
+    '''
+    Algorithm 2.2 Pair Time. Pair collision time for two spheres
+
+    Parameters:
+        x         Centre of moving sphere
+        x_center  Centre of the other sphere
+        v         Velocity of moving sphere
+        sigma     Radius of sphere
+
+    Returns:
+        The time at which two spheres will collide: may be np.inf
+    '''
+    Delta = x - x_center
+    Upsilon = np.dot(Delta,v)**2 + np.dot(v,v)*( 4*sigma**2 - np.dot(Delta,Delta) )
+    if Upsilon > 0:
+        dt1 = - (np.dot(Delta,v) + np.sqrt(Upsilon)) / np.dot(v,v)
+        dt2 = - (np.dot(Delta,v) - np.sqrt(Upsilon)) / np.dot(v,v)
+        if dt1 > cutoff and dt2 > cutoff: return min(dt1,dt2)
+        if dt1 > cutoff and dt2 < 0: return dt1
+        if dt1 < 0 and dt2 > cutoff: return dt2
+    return float('inf')
+
+def collide_pair(x, x_center, v):
+    '''
+        Algorithm 2.3 Pair collision
+
+        Parameters:
+            x          Centre of moving sphere
+            x_center   Centre of stationary sphere
+            v          Velocity of moving sphere
+
+        Returns:
+           Velocities after collision
+        '''
+    Delta_x = x - x_center
+    e_hat_perp = Delta_x/np.linalg.norm(Delta_x)
+    Delta_v_perp = np.dot(v,e_hat_perp)
+    return v - 2* Delta_v_perp*e_hat_perp
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -77,16 +127,77 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
+
     corners = np.array([[0,0],[0,args.L],[args.L,args.L],[args.L,0]])
+    T = np.zeros((len(corners)+1))
+    X = np.zeros((args.N,2))
+    V = np.zeros((args.N,2))
+    x,v = create_config(args.sigma,args.L,corners=corners,rng=rng)
 
-    x = np.zeros((args.N,2))
-    for i in range(args.N):
-        x[i,:],_ = create_config(args.sigma,args.L,corners=corners,rng=rng)
+    match args.action:
+        case 'first':
+            X0 = np.zeros((args.N,2))
+            for i in range(args.N):
+                X0[i,:],_ = create_config(args.sigma,args.L,corners=corners,rng=rng)
+            X[0,:],V[0,:] =x,v
+            T[len(corners)] = args.DeltaT
+            for j in range(len(corners)):
+                T[j] = get_pair_time(x, corners[j,:], v, sigma = args.sigma)
 
-    fig = figure(figsize=(8,12))
-    ax1 = fig.add_subplot(1,1,1)
-    ax1.scatter(x[:,0],x[:,1],s=1)
-    fig.savefig(get_file_name(args.out))
+            j = np.argmin(T)
+            x += (T[j] * v)
+            if j < len(corners):
+                assert_allclose(2*args.sigma, np.sqrt(np.dot(x- corners[j,:],x- corners[j,:])))
+                v = collide_pair(x, corners[j,:], v)
+
+            fig = figure(figsize=(8,12))
+            ax1 = fig.add_subplot(1,1,1)
+            ax1.scatter(X0[:,0],X0[:,1],label='background',s=1)
+            ax1.scatter(corners[:,0], corners[:,1],label='corners',marker='+')
+            ax1.scatter(X[0,0],X[0,1],label='start')
+            ax1.arrow(X[0,0],X[0,1],T[j] *V[0,0],T[j] *V[0,1],label='v')
+            ax1.scatter(x[0],x[1],label='collision',marker='x')
+            ax1.arrow(x[0],x[1],T[j] *v[0],T[j] *v[1],label='v')
+            ax1.legend()
+
+        case 'run':
+            X[0,:],V[0,:] =x,v
+            for i in range(1,args.N):
+                t = args.DeltaT * i
+                T[len(corners)] = args.DeltaT# + t
+                if i%args.freq == 0:
+                    print (f'Epoch={i:,}, t={t}')
+                sampled = False
+                # Iterate through a sequence of collisions until
+                # we reach a time step so we can sample
+                while not sampled:
+                    for j in range(len(corners)):
+                        T[j] = get_pair_time(x, corners[j,:], v, sigma = args.sigma)
+
+                    j = np.argmin(T)
+                    x += T[j] * v
+                    if j < len(corners):
+                        # assert_allclose(2*args.sigma, np.sqrt(np.dot(x- corners[j,:],x- corners[j,:])))
+                        v = collide_pair(x, corners[j,:], v)
+                        T[len(corners)] -= T[j]
+                    else:
+                        # print (x)
+                        for k in range(2):
+                            while x[k] > args.L:
+                                x[k] -= args.L
+                            while x[k] < 0:
+                                x[k] += args.L
+                        # print (x)
+                        X[i,:],V[i,:] =x,v
+                        sampled = True
+                    # print (T)
+
+
+            fig = figure(figsize=(8,12))
+            ax1 = fig.add_subplot(1,1,1)
+            ax1.scatter(X[:,0],X[:,1],s=1)
+            fig.savefig(get_file_name(args.out))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
