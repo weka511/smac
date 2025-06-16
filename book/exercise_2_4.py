@@ -39,15 +39,25 @@ def parse_arguments():
     parser.add_argument('--N', type = int, default = 1000, help = 'Number of steps to evolve configuration')
     parser.add_argument('--DeltaT', type = float, default = 1.0, help = 'For sampling')
     parser.add_argument('--freq', type = int, default = 250, help = 'For reporting')
-    parser.add_argument('--action', default = 'run',choices=['first','run'])
     parser.add_argument('--m', type = int, default = 100, help = 'Number of bins for histogram')
     parser.add_argument('--V', type = float, default = 1.0, help = 'Velocity')
+    parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
     args = parser.parse_args()
     if 0.25*args.L < args.sigma and args.sigma < 0.5 * args.L:
         return args
     else:
         parser.error('sigma should be between 0.25L and 0.5L')
 
+def get_bins(bins):
+    '''
+    Used to parse args.bins: either a number of bins, or the name of a binning strategy.
+    '''
+    try:
+        return int(bins)
+    except ValueError:
+        if bins in ['auto', 'fd', 'doane', 'scott', 'sturges', 'sqrt', 'stone', 'rice']:
+            return bins
+        raise ArgumentTypeError(f'Invalid binning strategy "{bins}"')
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -147,82 +157,55 @@ if __name__=='__main__':
     V = np.zeros((args.N,2))
     x,v = create_config(args.sigma,args.L,corners=corners,rng=rng,V=args.V)
 
-    match args.action:
-        case 'first':
-            X0 = np.zeros((args.N,2))
-            for i in range(args.N):
-                X0[i,:],_ = create_config(args.sigma,args.L,corners=corners,rng=rng)
-            X[0,:],V[0,:] =x,v
-            T[len(corners)] = args.DeltaT
+    X[0,:],V[0,:] =x,v
+    for i in range(1,args.N):
+        t = args.DeltaT * i
+        T[len(corners)] = args.DeltaT# + t
+        if i%args.freq == 0:
+            print (f'Epoch={i:,}, t={t}')
+        sampled = False
+        # Iterate through a sequence of collisions until
+        # we reach a time step so we can sample
+        while not sampled:
             for j in range(len(corners)):
                 T[j] = get_pair_time(x, corners[j,:], v, sigma = args.sigma)
 
             j = np.argmin(T)
-            x += (T[j] * v)
+            x += T[j] * v
             if j < len(corners):
-                assert_allclose(2*args.sigma, np.sqrt(np.dot(x- corners[j,:],x- corners[j,:])))
+                # assert_allclose(2*args.sigma, np.sqrt(np.dot(x- corners[j,:],x- corners[j,:])))
                 v = collide_pair(x, corners[j,:], v)
+                T[len(corners)] -= T[j]
+            else:
+                x = box_it(x,L=args.L)
+                X[i,:],V[i,:] =x,v
+                sampled = True
 
-            fig = figure(figsize=(8,12))
-            ax1 = fig.add_subplot(1,1,1)
-            ax1.scatter(X0[:,0],X0[:,1],label='background',s=1)
-            ax1.scatter(corners[:,0], corners[:,1],label='corners',marker='+')
-            ax1.scatter(X[0,0],X[0,1],label='start')
-            ax1.arrow(X[0,0],X[0,1],T[j] *V[0,0],T[j] *V[0,1],label='v')
-            ax1.scatter(x[0],x[1],label='collision',marker='x')
-            ax1.arrow(x[0],x[1],T[j] *v[0],T[j] *v[1],label='v')
-            ax1.legend()
+    bins = np.linspace(0, args.L, num = args.m)
+    fig = figure(figsize=(8,12))
+    fig.suptitle(fr'L={args.L}, $\sigma=${args.sigma}, N={args.N:,d}, $\Delta T=${args.DeltaT}, V={args.V}')
 
-        case 'run':
-            X[0,:],V[0,:] =x,v
-            for i in range(1,args.N):
-                t = args.DeltaT * i
-                T[len(corners)] = args.DeltaT# + t
-                if i%args.freq == 0:
-                    print (f'Epoch={i:,}, t={t}')
-                sampled = False
-                # Iterate through a sequence of collisions until
-                # we reach a time step so we can sample
-                while not sampled:
-                    for j in range(len(corners)):
-                        T[j] = get_pair_time(x, corners[j,:], v, sigma = args.sigma)
+    ax1 = fig.add_subplot(2,2,1)
+    ax1.scatter(X[:,0],X[:,1],s=1)
 
-                    j = np.argmin(T)
-                    x += T[j] * v
-                    if j < len(corners):
-                        # assert_allclose(2*args.sigma, np.sqrt(np.dot(x- corners[j,:],x- corners[j,:])))
-                        v = collide_pair(x, corners[j,:], v)
-                        T[len(corners)] -= T[j]
-                    else:
-                        x = box_it(x,L=args.L)
-                        X[i,:],V[i,:] =x,v
-                        sampled = True
+    ax2 = fig.add_subplot(2,2,2)
+    ax2.axis('scaled')
+    h,_,_,mappable = ax2.hist2d(X[:,0],X[:,1], bins = [bins,bins], density = True)
+    fig.colorbar(mappable)
 
-            bins = np.linspace(0, args.L, num = args.m)
-            fig = figure(figsize=(8,12))
-            fig.suptitle(fr'L={args.L}, $\sigma=${args.sigma}, N={args.N:,d}, $\Delta T=${args.DeltaT}, V={args.V}')
+    ax2.set_xlabel('X')
+    ax2.set_ylabel('Y')
 
-            ax1 = fig.add_subplot(2,2,1)
-            ax1.scatter(X[:,0],X[:,1],s=1)
+    # Show distribution of frequencies
 
-            ax2 = fig.add_subplot(2,2,2)
-            ax2.axis('scaled')
-            h,_,_,mappable = ax2.hist2d(X[:,0],X[:,1], bins = [bins,bins], density = True)
-            fig.colorbar(mappable)
+    ax3 = fig.add_subplot(2,2,3)
+    ax3.hist (h.ravel(), density = True, color = 'xkcd:blue')
+    ax3.set_title(fr'Projected Densities $\eta=${np.pi*args.sigma**2/(4*args.L**2):.3f}')
+    ax3.set_xlabel('Density')
+    ax3.set_ylabel('Frequency')
+    ax3.grid(True)
 
-            ax2.set_xlabel('X')
-            ax2.set_ylabel('Y')
-
-            # Show distribution of frequencies
-
-            ax3 = fig.add_subplot(2,2,3)
-            ax3.hist (h.ravel(), density = True, color = 'xkcd:blue')
-            ax3.set_title(fr'Projected Densities $\eta=${np.pi*args.sigma**2/(4*args.L**2):.3f}')
-            ax3.set_xlabel('Density')
-            ax3.set_ylabel('Frequency')
-            ax3.grid(True)
-
-            fig.savefig(get_file_name(args.out))
+    fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
     minutes = int(elapsed/60)
