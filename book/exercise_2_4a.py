@@ -40,6 +40,8 @@ def parse_arguments():
     parser.add_argument('--DeltaT', type = float, default = 1.0, help = 'For sampling')
     parser.add_argument('--freq', type = int, default = 250, help = 'For reporting')
     parser.add_argument('--action', default = 'run',choices=['first','run'])
+    parser.add_argument('--m', type = int, default = 100, help = 'Number of bins for histogram')
+    parser.add_argument('--V', type = float, default = 1.0, help = 'Velocity')
     args = parser.parse_args()
     if 0.25*args.L < args.sigma and args.sigma < 0.5 * args.L:
         return args
@@ -132,7 +134,7 @@ if __name__=='__main__':
     T = np.zeros((len(corners)+1))
     X = np.zeros((args.N,2))
     V = np.zeros((args.N,2))
-    x,v = create_config(args.sigma,args.L,corners=corners,rng=rng)
+    x,v = create_config(args.sigma,args.L,corners=corners,rng=rng,V=args.V)
 
     match args.action:
         case 'first':
@@ -192,11 +194,29 @@ if __name__=='__main__':
                         sampled = True
                     # print (T)
 
-
+            bins = np.linspace(0, args.L, num = args.m)
             fig = figure(figsize=(8,12))
-            ax1 = fig.add_subplot(1,1,1)
+            ax1 = fig.add_subplot(2,2,1)
             ax1.scatter(X[:,0],X[:,1],s=1)
+
+            ax2 = fig.add_subplot(2,2,2)
+            ax2.axis('scaled')
+            h,_,_,mappable = ax2.hist2d(X[:,0],X[:,1], bins = [bins,bins], density = True)
+            fig.colorbar(mappable)
+            ax2.set_title(fr'L={args.L}, $\sigma=${args.sigma}, N={args.N:,d}, $\Delta T=${args.DeltaT}, V={args.V}')
+            ax2.set_xlabel('X')
+            ax2.set_ylabel('Y')
+
             fig.savefig(get_file_name(args.out))
+
+            # Show distribution of frequencies
+
+            ax3 = fig.add_subplot(2,2,3)
+            ax3.hist (h.ravel(), density = True, color = 'xkcd:blue')
+            ax3.set_title(fr'Projected Densities $\eta=${np.pi*args.sigma**2/(4*args.L**2):.3f}')
+            ax3.set_xlabel('Density')
+            ax3.set_ylabel('Frequency')
+            ax3.grid(True)
 
     elapsed = time() - start
     minutes = int(elapsed/60)
