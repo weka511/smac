@@ -46,7 +46,7 @@ def parse_arguments():
     parser.add_argument('-L','--L', type = float, nargs = '+', default = [1,1], help = 'Lengths of box walls')
     parser.add_argument('-d','--d', type = int, default = 2, choices = [2,3], help = 'Dimension of space')
     parser.add_argument('--freq', type = int, default = 250, help = 'For reporting')
-    parser.add_argument('--DeltaT', type = float, default = 1.0, help = 'For sampleing')
+    parser.add_argument('--DeltaT', type = float, default = 1.0, help = 'For sampling')
     parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
     parser.add_argument('--restart', default = None, help  = 'Restart from checkpoint')
     return parser.parse_args()
