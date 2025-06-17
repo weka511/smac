@@ -109,11 +109,16 @@ def get_pair_time(x, x_center, v, sigma = 0.01,cutoff=1e-6):
     Delta = x - x_center
     Upsilon = np.dot(Delta,v)**2 + np.dot(v,v)*( 4*sigma**2 - np.dot(Delta,Delta) )
     if Upsilon > 0:
-        dt1 = - (np.dot(Delta,v) + np.sqrt(Upsilon)) / np.dot(v,v)
-        dt2 = - (np.dot(Delta,v) - np.sqrt(Upsilon)) / np.dot(v,v)
-        if dt1 > cutoff and dt2 > cutoff: return min(dt1,dt2)
-        if dt1 > cutoff and dt2 < 0: return dt1
-        if dt1 < 0 and dt2 > cutoff: return dt2
+        if abs(np.dot(Delta,v)**2 - Upsilon) > cutoff:
+            dt1 = - (np.dot(Delta,v) + np.sqrt(Upsilon)) / np.dot(v,v)
+            dt2 = - (np.dot(Delta,v) - np.sqrt(Upsilon)) / np.dot(v,v)
+            if dt1 > cutoff and dt2 > cutoff: return min(dt1,dt2)
+            if dt1 > cutoff and dt2 < 0: return dt1
+            if dt1 < 0 and dt2 > cutoff: return dt2
+        else:
+            dt = -2 * np.dot(Delta,v)/ np.dot(v,v)
+            if dt > 0:
+                return dt
     return float('inf')
 
 def collide_pair(x, x_center, v):
@@ -160,7 +165,7 @@ if __name__=='__main__':
     X[0,:],V[0,:] =x,v
     for i in range(1,args.N):
         t = args.DeltaT * i
-        T[len(corners)] = args.DeltaT# + t
+        T[len(corners)] = args.DeltaT          # Time until next sample due
         if i%args.freq == 0:
             print (f'Epoch={i:,}, t={t}')
         sampled = False
@@ -170,13 +175,14 @@ if __name__=='__main__':
             for j in range(len(corners)):
                 T[j] = get_pair_time(x, corners[j,:], v, sigma = args.sigma)
 
-            j = np.argmin(T)
-            x += T[j] * v
-            if j < len(corners):
+            j = np.argmin(T)    # Index of next event: either collision or sample
+            x += T[j] * v       # Position of next event
+
+            if j < len(corners):   # Collision
                 # assert_allclose(2*args.sigma, np.sqrt(np.dot(x- corners[j,:],x- corners[j,:])))
                 v = collide_pair(x, corners[j,:], v)
-                T[len(corners)] -= T[j]
-            else:
+                T[len(corners)] -= T[j]               # Update time until next sample
+            else:                                     # Event is a sample
                 x = box_it(x,L=args.L)
                 X[i,:],V[i,:] =x,v
                 sampled = True
