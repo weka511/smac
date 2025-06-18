@@ -334,10 +334,7 @@ class Torus(BoundedGeometry):
         '''Used in titles of plots'''
         return 'with periodic boundary conditions'
 
-def GeometryFactory(periodic = False,
-                    L = np.array([1,1]),
-                    sigma = 0.125,
-                    d = 2):
+def GeometryFactory(periodic = False,L = np.array([1,1]),sigma = 0.125,d = 2):
     '''
     Create a periodic or aperiodic Geometry
 
