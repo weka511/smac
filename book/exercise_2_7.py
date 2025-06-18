@@ -47,9 +47,9 @@ def parse_arguments():
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
-    parser.add_argument('--N', type = int, default = 10000, help='Number of configurations to be tried')
+    parser.add_argument('--N', type = int, default = 100000, help='Number of configurations to be tried')
     parser.add_argument('--NTrials', type = int, default = maxsize, help='Number of attempts to create configuration')
-    parser.add_argument('--Disks', type = int, default = 4, help='Number of disks in each configuration')
+    parser.add_argument('--Disks', type = int, default = 2, help='Number of disks in each configuration')
     parser.add_argument('--sigma', type = float,  default = 0.251,  help='Radius of a disk')
     parser.add_argument('--d', type = int, default =2,  help='Dimensionality of space')
     parser.add_argument('--show', action = 'store_true', help = 'Show plot')
@@ -91,19 +91,14 @@ if __name__=='__main__':
     eta = geometry.get_density(N = args.Disks)
     print (f'sigma = {args.sigma}, eta = {eta:.3}')
     x_coordinates = np.empty((args.N,args.Disks))
-    coordinates0 = np.empty((args.N,args.d))
-    coordinates1 = np.empty((args.N,args.d))
+    distances = np.empty((args.N))
     for j in range(args.N):
         configuration = geometry.direct_disks(N=args.Disks,NTrials=args.NTrials)
         x_coordinates[j,:] = configuration[:,0]
-        coordinates0[j,:] = configuration[0,:]
-        coordinates1[j,:] = configuration[1,:]
+        distances[j] = geometry.get_distance(configuration[0,:], configuration[1,:])
     hist,bin_edges = np.histogram( np.reshape(x_coordinates, args.N*args.Disks), bins = args.bins, density = True)
     actual_bins = [0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)]
 
-    distances = np.empty((args.N))
-    for i in range(args.N):
-        distances[i] = geometry.get_distance(coordinates0[i], coordinates1[i])
     ax1 = fig.add_subplot(1,2,1)
     ax1.plot(actual_bins, hist,label = fr'$\sigma=${args.sigma}, $\eta=${eta:.3}')
     ax1.legend(title='Disks')
@@ -114,8 +109,12 @@ if __name__=='__main__':
     ax1.set_ylabel('Frequency')
 
     ax2 = fig.add_subplot(1,2,2)
-    ax2.hist(distances,bins=args.bins,color='xkcd:blue',density=True)
-    ax2.axvline(x=2*args.sigma,color='xkcd:red')
+    ax2.hist(distances,bins=args.bins,color='xkcd:blue',density=True,label='Histogram')
+    ax2.axvline(x=2*args.sigma,color='xkcd:red',label=r'$2\sigma$')
+    ax2.set_xlabel(r'$\Delta$')
+    ax2.set_ylabel('Frequency')
+    ax2.legend()
+
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
