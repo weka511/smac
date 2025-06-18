@@ -102,17 +102,16 @@ def create_config(sigma=0.375,L=1,V=1,corners=np.array([[0,0],[0,1],[1,1],[1,0]]
         return True
 
     m,d = corners.shape
-    x = L*rng.random((d))
     for i in range(n):
+        x = L*rng.random((d))
         if acceptable(x):
             return x,V*(2*rng.random((d)) - 1)
-        else:
-            x = L*rng.random((d))
+
     raise ValueError(f'create_config(...) Could not find a starting configuration with sigma={sigma} after {n} attempts')
 
 
 
-def get_pair_time(x, x_center, v, sigma = 0.01,cutoff=1e-6):
+def get_pair_time(x, x_center, v, sigma = 0.01,cutoff=1e-8):
     '''
     Algorithm 2.2 Pair Time. Pair collision time for two spheres
 
@@ -139,6 +138,37 @@ def get_pair_time(x, x_center, v, sigma = 0.01,cutoff=1e-6):
             if dt > 0:
                 return dt
     return float('inf')
+
+def get_wall_time(x,v,L=1,d=2):
+    '''
+    Establish the time to the next collision with a wall
+
+    Parameters:
+        x
+        v
+        L
+        d
+
+    Returns:
+        t
+        index
+        direction
+    '''
+    t = float('inf')
+    direction = 0
+    index = -1
+    for i in range(d):
+        if v[i] < 0:
+            t0 = - x[i]/v[i]
+        if v[i] > 0:
+            t0 = (L - x[i])/v[i]
+
+        if t0 < t:
+            t = t0
+            index = i
+            direction = np.sign(v[i])
+
+    return t,index,direction
 
 def collide_pair(x, x_center, v):
     '''
@@ -183,28 +213,33 @@ if __name__=='__main__':
 
     X[0,:],V[0,:] =x,v
     for i in range(1,args.N):
-        t = args.DeltaT * i
         T[len(corners)] = args.DeltaT          # Time until next sample due
         if i%args.freq == 0:
-            print (f'Epoch={i:,}, t={t}')
+            print (f'Epoch={i:,}')
         sampled = False
         # Iterate through a sequence of collisions until
         # we reach a time step so we can sample
         while not sampled:
+            t_wall,index,direction = get_wall_time(x,v,L=args.L)
             for j in range(len(corners)):
                 T[j] = get_pair_time(x, corners[j,:], v, sigma = args.sigma)
 
             j = np.argmin(T)    # Index of next event: either collision or sample
-            x += T[j] * v       # Position of next event
+            if t_wall < T[j]:
+                x += t_wall * v
+                x[index] -= args.L * direction
+                T[len(corners)] -= t_wall
+            else:
+                x += T[j] * v       # Position of next event
 
-            if j < len(corners):   # Collision
-                # assert_allclose(2*args.sigma, np.sqrt(np.dot(x- corners[j,:],x- corners[j,:])))
-                v = collide_pair(x, corners[j,:], v)
-                T[len(corners)] -= T[j]               # Update time until next sample
-            else:                                     # Event is a sample
-                x = box_it(x,L=args.L)
-                X[i,:],V[i,:] =x,v
-                sampled = True
+                if j < len(corners):   # Collision
+                    assert_allclose(2*args.sigma, np.sqrt(np.dot(x- corners[j,:],x- corners[j,:])))
+                    v = collide_pair(x, corners[j,:], v)
+                    T[len(corners)] -= T[j]               # Update time until next sample
+                else:                                     # Event is a sample
+                    x = box_it(x,L=args.L)
+                    X[i,:],V[i,:] =x,v
+                    sampled = True
 
     bins = np.linspace(0, args.L, num = args.m)
     fig = figure(figsize=(8,12))
@@ -224,12 +259,21 @@ if __name__=='__main__':
     # Show distribution of frequencies
 
     ax3 = fig.add_subplot(2,2,3)
-    ax3.hist (h.ravel(), density = True, color = 'xkcd:blue')
-    ax3.set_title(fr'Projected Densities $\eta=${np.pi*args.sigma**2/(4*args.L**2):.3f}')
+    r = h.ravel()
+    ax3.hist (r[r>0], density = True, color = 'xkcd:blue',bins=args.bins)
+    ax3.set_title(fr'Projected Densities $\eta=${np.pi*args.sigma**2/(4*args.L**2):.3f}, ignoring empty regions')
     ax3.set_xlabel('Density')
     ax3.set_ylabel('Frequency')
     ax3.grid(True)
 
+    ax4 = fig.add_subplot(2,2,4)
+    ax4.hist(np.sqrt((X**2).sum(axis=1)),density=True,color = 'xkcd:blue',bins=args.bins,label='Distribution')
+    ax4.axvline(x=2*args.sigma,label=r'$2\sigma$',color='xkcd:red')
+    ax4.set_xlabel(r'$\Delta$')
+    ax4.set_title('Distribution of distances between centres')
+    ax4.legend()
+
+    fig.tight_layout(h_pad=3)
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
