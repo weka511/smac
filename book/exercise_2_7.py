@@ -28,6 +28,18 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from geometry import Geometry, GeometryFactory
+from md import get_L
+
+def get_bins(bins):
+    '''
+    Used to parse args.bins: either a number of bins, or the name of a binning strategy.
+    '''
+    try:
+        return int(bins)
+    except ValueError:
+        if bins in ['auto', 'fd', 'doane', 'scott', 'sturges', 'sqrt', 'stone', 'rice']:
+            return bins
+        raise ArgumentTypeError(f'Invalid binning strategy "{bins}"')
 
 def parse_arguments():
     '''Parse command line arguments'''
@@ -38,10 +50,10 @@ def parse_arguments():
     parser.add_argument('--N', type = int, default = 10000, help='Number of configurations to be tried')
     parser.add_argument('--NTrials', type = int, default = maxsize, help='Number of attempts to create configuration')
     parser.add_argument('--Disks', type = int, default = 4, help='Number of disks in each configuration')
-    parser.add_argument('--sigma', type = float,  nargs   = '+',  default = [0.25],  help='Radius of a disk')
+    parser.add_argument('--sigma', type = float,  default = 0.251,  help='Radius of a disk')
     parser.add_argument('--d', type = int, default =2,  help='Dimensionality of space')
     parser.add_argument('--show', action = 'store_true', help = 'Show plot')
-    parser.add_argument('--bins', type = int, default = 100, help = 'Number of bins for histogram')
+    parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
     parser.add_argument('--L', type = float, nargs   = '+', default = [1], help='Lengths of walls')
     return parser.parse_args()
 
@@ -74,32 +86,33 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize = (12,12))
     fig.suptitle(fr'x coordinates for {args.N:,} Trials, {args.Disks} Disks')
-    m,n = Geometry.get_side_dimensions(len(args.sigma))
-    for i,sigma in enumerate(args.sigma):
-        try:
-            geometry = GeometryFactory(periodic = True,
-                                       L = np.array(args.L if len(args.L)==args.d else args.L * args.d),
-                                       sigma = sigma,
-                                       d = args.d)
-            eta = geometry.get_density(N = args.Disks)
-            print (f'sigma = {sigma}, eta = {eta:.3}')
-            x_coordinates = np.empty((args.N,args.Disks))
-            for j in range(args.N):
-                configuration = geometry.direct_disks(N=args.Disks,NTrials=args.NTrials)
-                x_coordinates[j,:] = configuration[:,0]
-            hist,bin_edges = np.histogram( np.reshape(x_coordinates, args.N*args.Disks), bins = args.bins, density = True)
-            actual_bins = [0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)]
-            ax1 = fig.add_subplot(m,n,i+1)
-            ax1.plot(actual_bins, hist,label = fr'$\sigma=${sigma}, $\eta=${eta:.3}')
-            ax1.legend(title='Disks')
 
-        except RuntimeError as e:
-            print (e)
+    geometry = GeometryFactory(periodic=True,L=get_L(args.L, args.d),sigma = args.sigma,d = args.d)
+    eta = geometry.get_density(N = args.Disks)
+    print (f'sigma = {args.sigma}, eta = {eta:.3}')
+    x_coordinates = np.empty((args.N,args.Disks))
+    y_coordinates = np.empty((args.N,args.Disks))
+    for j in range(args.N):
+        configuration = geometry.direct_disks(N=args.Disks,NTrials=args.NTrials)
+        x_coordinates[j,:] = configuration[:,0]
+        y_coordinates[j,:] = configuration[:,1]
+    hist,bin_edges = np.histogram( np.reshape(x_coordinates, args.N*args.Disks), bins = args.bins, density = True)
+    actual_bins = [0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)]
+
+    x_gaps = x_coordinates[:,1] - x_coordinates[:,0]
+    y_gaps = y_coordinates[:,1] - y_coordinates[:,0]
+    distances = np.sqrt(x_gaps**2 + y_gaps**2)
+    ax1 = fig.add_subplot(1,2,1)
+    ax1.plot(actual_bins, hist,label = fr'$\sigma=${args.sigma}, $\eta=${eta:.3}')
+    ax1.legend(title='Disks')
 
     ax1.set_title(fr'x coordinates for {args.N:,} Trials, {args.Disks} Disks, {geometry.get_description()}')
 
     ax1.set_xlabel('Position')
     ax1.set_ylabel('Frequency')
+
+    ax2 = fig.add_subplot(1,2,2)
+    ax2.hist(distances,bins=args.bins)
 
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
