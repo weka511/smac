@@ -86,17 +86,25 @@ This document contains derivations of equations used in this repo.
 	t=&\frac{-\vec{\Delta}\cdot\vec{v} \pm \sqrt{\Upsilon}}{v^2}
 \end{align*}
 
+I ran into a few problems where $t\approxeq 0$. Now $t=0$ iff
+\begin{align*}
+	\big(\vec{\Delta}\cdot\vec{v}\big)^2 =& \Upsilon\\
+	=& \big( \vec{\Delta}\cdot\vec{v}\big)^2 +  \big(4\sigma^2 - \Delta^2\big) v^2\\
+	4\sigma^2 =& \Delta^2\text{, as we expect, so the other solution is given by}\\
+	 t=&-2\frac{\vec{\Delta}\cdot\vec{v} }{v^2}
+\end{align*}
+
 \begin{figure}[H]
-\begin{center}
-	\begin{tikzpicture}
-		\draw[fill=none](0,0) circle (2.0) node [black,yshift=-1.5cm] {};
-		\draw[fill=none](2.8284271247461903,2.8284271247461903) circle (2.0) node [black,yshift=-1.5cm] {};,
-		\draw (0,0) -- (1.4142135623730951,1.4142135623730951);
-		\draw  (2,5
-		)--(1.4142135623730951,1.4142135623730951);
-		
-	\end{tikzpicture}
-\end{center}
+	\begin{center}
+		\begin{tikzpicture}
+			\draw[fill=none](0,0) circle (2.0) node [black,yshift=-1.5cm] {};
+			\draw[fill=none](2.8284271247461903,2.8284271247461903) circle (2.0) node [black,yshift=-1.5cm] {};,
+			\draw (0,0) -- (1.4142135623730951,1.4142135623730951);
+			\draw  (2,5
+			)--(1.4142135623730951,1.4142135623730951);
+			
+		\end{tikzpicture}
+	\end{center}
 
 \end{figure}
 \end{document}
