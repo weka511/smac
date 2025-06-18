@@ -266,8 +266,12 @@ if __name__=='__main__':
     ax3.set_ylabel('Frequency')
     ax3.grid(True)
 
+    Distances= np.zeros((args.N,4))
+    for i in range(4):
+        Distances[:,i] = np.sqrt(((X-corners[i])**2).sum(axis=1))
+
     ax4 = fig.add_subplot(2,2,4)
-    ax4.hist(np.sqrt((X**2).sum(axis=1)),density=True,color = 'xkcd:blue',bins=args.bins,label='Distribution')
+    ax4.hist(Distances.min(axis=1),density=True,color = 'xkcd:blue',bins=args.bins,label='Distribution')
     ax4.axvline(x=2*args.sigma,label=r'$2\sigma$',color='xkcd:red')
     ax4.set_xlabel(r'$\Delta$')
     ax4.set_title('Distribution of distances between centres')
