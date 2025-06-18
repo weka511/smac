@@ -79,19 +79,38 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
-def create_config(sigma= 0.375,L=1,d=2,corners=np.array([[0,0],[0,1],[1,1],[1,0]]),rng = np.random.default_rng(),V=1):
+def create_config(sigma=0.375,L=1,V=1,corners=np.array([[0,0],[0,1],[1,1],[1,0]]),rng=np.random.default_rng(),n=100):
+    '''
+    Establish a starting point for iterations.
+
+    Parameters:
+        sigma    Radius of sphere
+        L        Length of one size of box
+        V        Used to normalize velocities
+        corners  Centres of the 4 quarter spheres (fixed sphere)
+        rng      Random number generator
+        n        Number of attempts to generate acceptable starting point
+
+    Returns:
+        x      An acceptable starting position
+        v      A random velocity in the range (-V,V)
+    '''
     def acceptable(x):
-        for i in range(2*d):
+        for i in range(m):
             if np.dot(x - corners[i,:],x - corners[i,:]) < 4*sigma**2:
                 return False
         return True
 
+    m,d = corners.shape
     x = L*rng.random((d))
-    while not acceptable(x):
-        x = L*rng.random((d))
+    for i in range(n):
+        if acceptable(x):
+            return x,V*(2*rng.random((d)) - 1)
+        else:
+            x = L*rng.random((d))
+    raise ValueError(f'create_config(...) Could not find a starting configuration with sigma={sigma} after {n} attempts')
 
-    v = 2*rng.random((d)) - 1
-    return x,v/np.linalg.norm(v)
+
 
 def get_pair_time(x, x_center, v, sigma = 0.01,cutoff=1e-6):
     '''
