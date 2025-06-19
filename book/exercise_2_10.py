@@ -22,31 +22,42 @@
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
+from sys import maxsize
 from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-from markov_disks import markov_disks, Checkpointer
 from geometry import Geometry, GeometryFactory
 from md import get_L
+from markov_disks import markov_disks
+
+def get_bins(bins):
+    '''
+    Used to parse args.bins: either a number of bins, or the name of a binning strategy.
+    '''
+    try:
+        return int(bins)
+    except ValueError:
+        if bins in ['auto', 'fd', 'doane', 'scott', 'sturges', 'sqrt', 'stone', 'rice']:
+            return bins
+        raise ArgumentTypeError(f'Invalid binning strategy "{bins}"')
 
 def parse_arguments():
+    '''Parse command line arguments'''
     parser = ArgumentParser(description = __doc__)
-    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
-    parser.add_argument('--N', type = int,  default = 10000, help = 'Number of iterations')
-    parser.add_argument('--Disks', type = int, default = 4, help = 'Number of disks/spheres')
-    parser.add_argument('--sigma', type = float, default = 0.125, help = 'Radius of disk/sphere')
-    parser.add_argument('--d', type = int, choices = [2,3], default = 2, help = 'Number of dimensions for space')
-    parser.add_argument('--L', type = float, nargs = '+', default = [1], help = 'Length of each side of box (just one value for square/cube)')
-    parser.add_argument('--delta', type = float, nargs   = '+', default = [0.1], help    = 'Maximum distance for each step')
-    parser.add_argument('--bins', type = int, default = 100, help = 'Number of bins for histogram')
-    parser.add_argument('--burn', type = int, default = 0, help = 'Used to skip over early steps without accumulating stats')
+    parser.add_argument('--N', type = int, default = 1000, help='Number of configurations to be tried')
+    parser.add_argument('--NTrials', type = int, default = maxsize, help='Number of attempts to create configuration')
+    parser.add_argument('--Disks', type = int, default = 4, help='Number of disks in each configuration')
+    parser.add_argument('--sigma', type = float,  default = 0.125,  help='Radius of a disk')
+    parser.add_argument('--d', type = int, default =2,  help='Dimensionality of space')
+    parser.add_argument('--show', action = 'store_true', help = 'Show plot')
+    parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
+    parser.add_argument('--L', type = float, default = 1, help='Lengths of walls')
     parser.add_argument('--frequency', type = int, default = 1000,  help  = 'For reporting progress')
-    parser.add_argument('--restart', action = 'store_true', help  = 'Restart from checkpoint')
-    parser.add_argument('--eta', type = float, default = None, help = 'Used to specify density (override sigma)')
+    parser.add_argument('--delta', type = float,  default = 0.375, help    = 'Maximum distance for each step')
     return parser.parse_args()
 
 
@@ -70,51 +81,82 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
+def get_actual_bins(bin_edges):
+    return  np.array([0.5*(bin_edges[i] + bin_edges[i+1]) for i in range(len(bin_edges)-1)])
+
 if __name__=='__main__':
+    rc('font',**{'family':'serif','serif':['Palatino']})
+    rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
-    check = Checkpointer()
     rng = np.random.default_rng(args.seed)
-    delta = np.array(args.delta if len(args.delta)==args.d else args.delta * args.d)
-    geometry = GeometryFactory(periodic = True, L = get_L(args.L,args.d), sigma = args.sigma, d = args.d)
-    if args.eta != None:
-        geometry.set_sigma(eta = args.eta, N = args.Disks)
+
+    geometry = GeometryFactory(periodic=True,L=get_L(args.L, args.d),sigma = args.sigma,d = args.d)
     eta = geometry.get_density(N = args.Disks)
+    print (f'sigma = {args.sigma}, eta = {eta:.3}')
+    x_coordinates = np.empty((args.N,args.Disks))
+    ndisk_pairs = (args.Disks-1)*args.Disks//2
+    distances = np.empty((args.N,ndisk_pairs))
+    for i in range(args.N):
+        configuration = geometry.direct_disks(N=args.Disks,NTrials=args.NTrials)
+        x_coordinates[i,:] = configuration[:,0]
+        l = 0
+        for j in range(args.Disks):
+            for k in range(j):
+                distances[i,l] = geometry.get_distance(configuration[j,:], configuration[k,:])
+                l += 1
+    hist,bin_edges = np.histogram( np.reshape(x_coordinates, args.N*args.Disks), bins = args.bins, density = True)
+
+
+    X = np.zeros((args.N,args.Disks,args.d))
+    X[0,:,:] = geometry.create_configuration(N = args.Disks)
+    distances_markov = np.zeros((args.N-1,ndisk_pairs))
     n_accepted = 0
-    if args.restart:
-        X,HistogramBins = check.np.load()
-        histograms = geometry.create_Histograms(n = args.bins, HistogramBins = HistogramBins)
-    else:
-        X = geometry.create_configuration(N = args.Disks)
-        histograms = geometry.create_Histograms(n=args.bins)
+    for i in range(1,args.N):
+        k,X[i,:,:] = markov_disks(X[i-1,:,:], rng = rng, delta = args.delta, geometry = geometry)
+        l = 0
+        for j in range(args.Disks):
+            for kk in range(j):
+                distances_markov[i-1,l] = geometry.get_distance(X[i,j,:], X[i,kk,:])
+                l += 1
+        if k > -1:
+            n_accepted += 1
+        if i%args.frequency ==0:
+            print (f'Epoch {i:,} Accepted: {n_accepted/i:.1}')
 
-    for epoch in range(args.N):
-        k,X = markov_disks(X, rng = rng, delta = delta, geometry = geometry)
+    hist_markov,bin_edges_markov = np.histogram( np.reshape(X[:,:,0], args.N*args.Disks), bins = args.bins, density = True)
 
-        if epoch > args.burn:
-            if k >- 1:
-                n_accepted += 1
-            for i in range(args.d):
-                for x in np.array(X[:,i]):
-                    histograms[i].add(x)
+    fig = figure(figsize = (12,12))
+    fig.suptitle(fr'Comparison between direct disks and MCMC: {args.N:,} Trials, {args.Disks} Disks')
 
-        if epoch%args.frequency ==0:
-            print (f'Epoch {epoch:,} Accepted: {n_accepted:,}')
-            check.save(X = X, geometry   = geometry)
+    ax1 = fig.add_subplot(2,2,1)
+    ax1.plot(get_actual_bins(bin_edges), hist,label = fr'$\sigma=${args.sigma}, $\eta=${eta:.3}')
+    ax1.legend(title='Direct Disks')
+    ax1.set_title('x coordinates, direct disks')
+    ax1.set_xlabel('Position')
+    ax1.set_ylabel('Frequency')
 
-    fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(1,1,1)
+    ax2 = fig.add_subplot(2,2,2)
+    ax2.hist(distances.ravel(),bins=args.bins,color='xkcd:blue',density=True,label='Histogram')
+    ax2.axvline(x=2*args.sigma,color='xkcd:red',label=r'$2\sigma$')
+    ax2.set_xlabel(r'$\Delta$')
+    ax2.set_ylabel('Frequency')
+    ax2.legend()
 
-    for j in range(args.d):
-        h,bins = histograms[j].get_hist()
-        ax1.bar([0.5*(bins[i]+bins[i+1]) for i in range(len(h))],h,
-                width = [0.5*(bins[i+1]-bins[i]) for i in range(len(h))],
-                label = f'{Geometry.get_coordinate_description(j)}',
-                alpha = 0.5,
-                color = Geometry.get_coordinate_colour(j))
-        break
-    ax1.set_title(fr'{args.Disks} Disks {geometry.get_description()}: $\sigma=${geometry.sigma:.3g}, $\eta=${eta:.3g}, $\delta=${max(args.delta):.2g}, acceptance = {100*n_accepted/(args.N-args.burn):.3g}%')
-    ax1.legend()
+    ax3 = fig.add_subplot(2,2,3)
+    ax3.plot(get_actual_bins(bin_edges_markov), hist_markov,label = fr'$\sigma=${args.sigma}, $\eta=${eta:.3}')
+    ax3.legend(title='MCMC')
+    ax3.set_title('x coordinates')
+    ax3.set_xlabel('x')
+    ax3.set_ylabel('Frequency')
+
+    ax4 = fig.add_subplot(2,2,4)
+    ax4.hist(distances_markov.ravel(),bins=args.bins,color='xkcd:blue',density=True,label='Histogram')
+    ax4.axvline(x=2*args.sigma,color='xkcd:red',label=r'$2\sigma$')
+    ax4.set_xlabel(r'$\Delta$')
+    ax4.set_ylabel('Frequency')
+    ax4.legend()
+
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
