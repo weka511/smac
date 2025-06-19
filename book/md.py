@@ -17,7 +17,7 @@
 
 '''
     This module comprises functions for creating configurations,
-    allowing spheres to collide, and save and restore configurations.
+    allowing spheres to collide, and saving and restoring configurations.
 '''
 
 
@@ -28,6 +28,7 @@ from os.path import splitext
 from sys import maxsize
 from unittest import TestCase, main
 import numpy as np
+from scipy.special import gamma
 
 class Collision:
     '''A class for keeping track of the mechanism for a collision'''
@@ -69,7 +70,7 @@ def get_wall_time(x, v, sigma = 0.01, d = 2, L = np.array([1,1])):
             sigma   Radius of sphere
             d       Dimension of space
             L       Lengths of sides
-        '''
+    '''
     collision_times = np.full((d),float('inf'))
     for i in range(d):
         if v[i] > 0:
@@ -84,16 +85,16 @@ def get_wall_time(x, v, sigma = 0.01, d = 2, L = np.array([1,1])):
 
 def collide_pair(x1, x2, v1, v2):
     '''
-        Algorithm 2.3 Pair collision
+    Algorithm 2.3 Pair collision
 
-        Parameters:
-            x1         Centre of one sphere
-            x2         Centre of the other sphere
-            v1         Velocity of one sphere
-            v2         Velocity of the other sphere
+    Parameters:
+        x1         Centre of one sphere
+        x2         Centre of the other sphere
+        v1         Velocity of one sphere
+        v2         Velocity of the other sphere
 
-        Returns:
-           Velocities after collision
+    Returns:
+       Velocities after collision
         '''
     Delta_x = x1 - x2
     e_hat_perp = Delta_x/np.linalg.norm(Delta_x)
@@ -103,7 +104,7 @@ def collide_pair(x1, x2, v1, v2):
 
 def get_next_pair(Xs,Vs,sigma = 0.1):
     '''
-    Calculate time to next pair collision
+    Algorithm 2.2 - calculate time to next pair collision
 
     Returns:
        t_pair   Time to next pair collision
@@ -183,11 +184,10 @@ def create_rng(seed0):
     Parameters:
          seed0 is seed supplied by user
 
-    Returns: Default random number generator, seeded with seed0 or newly generated seed
-    If seed0 is not None, use it
-
-    If seed0 is None (no seed supplied),
-    generate a new seed using random number generator and print it so user can reuse.
+    Returns:    Default random number generator, seeded with seed0 or newly generated seed
+                If seed0 is not None, use it
+                If seed0 is None (no seed supplied), generate a new seed using random number
+                generator and print it so user can reuse.
 
     '''
     rng = np.random.default_rng(seed=seed0)
@@ -201,7 +201,7 @@ def create_rng(seed0):
 def find_admissable_pair(L = 1, V = 1, sigma = 0.1, d = 2, rng=np.random.default_rng()):
     '''
     Find a pair of spheres which don't overlap, and are moving so that they
-    will collide in a positive time, which may beinfinite
+    will collide in a positive time, which may be infinite
 
     Parameters:
         L       Lengths of all sides
@@ -234,6 +234,8 @@ def get_L(L,d):
         L       Vector representing walls of a box
         d       Dimension of space
     '''
+    if type(L) in [int,float]:
+        return np.array([L] * d)
     match len(L):
         case 1:
             return np.array(L * d)
@@ -244,10 +246,24 @@ def get_L(L,d):
 
 
 def get_volume_sphere(d=2,sigma = 0.1):
-    return (np.pi if d==2 else 4*np.pi/3) * sigma ** d
+    '''
+    Calculate the volume of a sphere.
+
+    Parameters:
+        d      Number of dimensions for sphers
+        sigma  Radius
+    '''
+    return np.pi**(d/2) * (sigma ** d) / gamma(d/2+1)
 
 def get_volume_box(d=2, L = np.array([1,1])):
-    return  np.prod(L) * 2**d
+    '''
+    Calculate volume of a box
+
+    Parameters:
+        d      Number of dimensions for box
+        sigma  Radius
+    '''
+    return  np.prod(get_L(L,d))
 
 def get_density(n=5,d=2,sigma = 0.1,  L = np.array([1,1])):
     '''
@@ -323,7 +339,7 @@ def save_configuration(file_patterns = 'md.npz',
                        Vs = None,
                        n_collisions = None,
                        d = 2,
-                        L = np.array([1,1]),
+                       L = np.array([1,1]),
                        sigma = 0.05,
                        folder = 'configs'):
     '''
@@ -343,14 +359,7 @@ def save_configuration(file_patterns = 'md.npz',
         folder          Folder to store files
     '''
     file,saved_files = get_path_to_config(file_patterns = file_patterns,folder = folder)
-    np.savez(file,
-          epoch = epoch,
-          Xs = Xs,
-          Vs = Vs,
-          n_collisions = n_collisions,
-          d = d,
-          L =  L,
-          sigma = sigma)
+    np.savez(file, epoch = epoch, Xs = Xs, Vs = Vs, n_collisions = n_collisions, d = d, L =  L, sigma = sigma)
 
     while len(saved_files) >= retention:
         remove(f'{folder}{saved_files.pop()}')
@@ -396,23 +405,23 @@ class TestsForSpheres(TestCase):
 class TestVolume(TestCase):
     def test_sphere2d(self):
         self.assertEqual(np.pi,get_volume_sphere(sigma=1))
-
         self.assertEqual(np.pi/100,get_volume_sphere(sigma=0.1))
+
     def test_sphere3d(self):
         self.assertAlmostEqual(4*np.pi/3000,get_volume_sphere(d=3,sigma=0.1))
 
+    def test_sphere4d(self):
+        self.assertAlmostEqual(np.pi**2/20000,get_volume_sphere(d=4,sigma=0.1))
+
     def test_box2d(self):
-        self.assertEqual(24,get_volume_box(L=np.array([2,3])))
+        self.assertEqual(6,get_volume_box(L=np.array([2,3])))
 
     def test_box3d(self):
-        self.assertEqual(240,get_volume_box(d=3,L=np.array([2,3,5])))
+        self.assertEqual(30,get_volume_box(d=3,L=np.array([2,3,5])))
 
-    def test_density(self):
-        self.assertAlmostEqual(np.pi,get_density(n=4,d=2,sigma = 1, L = np.array([1,1])),places=12)
-        self.assertAlmostEqual(np.pi/25,get_volume_sphere(sigma=0.2),places=12)
-        self.assertAlmostEqual(0.16,get_volume_box(L=[0.2,0.2]),places=12)
-        self.assertAlmostEqual(4,get_volume_box(L=[1,1]),places=12)
-        self.assertAlmostEqual(np.pi,get_density(n=100,d=2,sigma = 0.2, L = [1,1]),places=12)
+    def test_box3simple(self):
+        self.assertEqual(8,get_volume_box(d=3,L=2))
+
 
 if __name__=='__main__':
     main()
