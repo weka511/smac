@@ -17,7 +17,8 @@
 
 '''
     Exercise 2.10 and Algorithm 2.9. Generating a hard disk configuration
-    from an earlier valid configuration using MCMC
+    from an earlier valid configuration using MCMC. Compare with algorithm
+    2.7 - direct-disks.
 '''
 
 from argparse import ArgumentParser
@@ -132,8 +133,7 @@ if __name__=='__main__':
     ax1 = fig.add_subplot(2,2,1)
     ax1.plot(get_actual_bins(bin_edges), hist,label = fr'$\sigma=${args.sigma}, $\eta=${eta:.3}')
     ax1.legend(title='Direct Disks')
-    ax1.set_title('x coordinates, direct disks')
-    ax1.set_xlabel('Position')
+    ax1.set_xlabel('x')
     ax1.set_ylabel('Frequency')
 
     ax2 = fig.add_subplot(2,2,2)
@@ -146,7 +146,6 @@ if __name__=='__main__':
     ax3 = fig.add_subplot(2,2,3)
     ax3.plot(get_actual_bins(bin_edges_markov), hist_markov,label = fr'$\sigma=${args.sigma}, $\eta=${eta:.3}')
     ax3.legend(title='MCMC')
-    ax3.set_title('x coordinates')
     ax3.set_xlabel('x')
     ax3.set_ylabel('Frequency')
 
@@ -157,6 +156,7 @@ if __name__=='__main__':
     ax4.set_ylabel('Frequency')
     ax4.legend()
 
+    fig.tight_layout(h_pad=0.3)
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
