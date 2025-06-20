@@ -35,18 +35,27 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-    parser.add_argument('--NPoints', type=int, default=1000)
+    parser.add_argument('--NPoints', type=int, default=100000)
     parser.add_argument('--N', type=int, default=5)
     return parser.parse_args()
 
-def get_piston_patricles(N=12,betaP=1,rng = np.random.default_rng()):
+def get_piston_particles(N=12,beta=1,P=1,rng = np.random.default_rng()):
+    '''
+     Direct sampling of one-dimensional point particles
+     and a piston at pressure P
+
+    Parameters:
+        N
+        beta
+        P
+        rng
+    '''
     Upsilon = rng.random()
-    alpha = np.zeros(N)
+    alpha = rng.random((N))
     for k in range(N):
-        alpha[k] = rng.random()
         Upsilon *= rng.random()
-    L = - np.log(Upsilon)/betaP
-    return Upsilon,L,alpha * L
+    L = - np.log(Upsilon)/(beta*P)
+    return L,alpha * L
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -80,13 +89,12 @@ if __name__=='__main__':
     for n in range(args.N):
         L = np.zeros((args.NPoints))
         for i in range(args.NPoints):
-            _,L[i],_ = get_piston_patricles(N=n,betaP=1,rng = rng)
+            L[i],_ = get_piston_particles(N=n,rng = rng)
         freq,bins = np.histogram(L,bins=12,density=True)
         ax1.plot(0.5*(bins[1:] + bins[:-1]),freq,label=f'{n}')
 
     ax1.legend(title='N')
-
-
+    ax1.set_title(r'Sampling the $\Gamma$ distribution using direct-piston-particles')
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
