@@ -15,7 +15,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+'''
+    Sample the gamma distribution using the naive algorithm contained in Algorithm 2.13.
+    Likewise implement Algorithm 2.15, gamma-cut.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -32,16 +35,18 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('--NPoints', type=int, default=1000)
+    parser.add_argument('--N', type=int, default=5)
     return parser.parse_args()
 
-def get_piston_patricles(N,betaP=1,rng = np.random.default_rng()):
+def get_piston_patricles(N=12,betaP=1,rng = np.random.default_rng()):
     Upsilon = rng.random()
     alpha = np.zeros(N)
     for k in range(N):
         alpha[k] = rng.random()
         Upsilon *= rng.random()
     L = - np.log(Upsilon)/betaP
-    return L,alpha * L
+    return Upsilon,L,alpha * L
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -70,15 +75,18 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize=(12,12))
-
-    L = np.zeros((6))
-    X = np.zeros((6))
-    for N in range(6):
-        L[N],alpha = get_piston_patricles(N,betaP=1,rng = rng)
-        X[N] = alpha.sum()
     ax1 = fig.add_subplot(1,1,1)
-    ax1.plot(list(range(6)),L)
-    ax1.plot(list(range(6)),X)
+
+    for n in range(args.N):
+        L = np.zeros((args.NPoints))
+        for i in range(args.NPoints):
+            _,L[i],_ = get_piston_patricles(N=n,betaP=1,rng = rng)
+        freq,bins = np.histogram(L,bins=12,density=True)
+        ax1.plot(0.5*(bins[1:] + bins[:-1]),freq,label=f'{n}')
+
+    ax1.legend(title='N')
+
+
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
