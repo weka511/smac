@@ -92,7 +92,7 @@ def markov_discrete_pebble(k,table,rng=np.random.default_rng()):
    k_next = rng.choice(table[k,:])
    return k if k_next == -1 else k_next
 
-def markov_visits(m,n,i,j,N):
+def markov_visits(m,n,i,j,N,neighbour_table=neighbour_table):
    def row(cell):
       return cell//3
 
