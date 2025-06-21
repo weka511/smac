@@ -27,7 +27,6 @@ import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 
-
 def parse_arguments():
     '''Parse command line arguments'''
     parser = ArgumentParser(__doc__)
@@ -35,8 +34,8 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-    parser.add_argument('--NPoints', type=int, default=100000)
-    parser.add_argument('--N', type=int, default=5)
+    parser.add_argument('--NTrials', type=int, default=100000, help='Number of trials for histogram')
+    parser.add_argument('--N', type=int, default=5,help='Maximum number of particles for histogram')
     return parser.parse_args()
 
 def get_piston_particles(N=12,beta=1,P=1,rng = np.random.default_rng()):
@@ -45,10 +44,14 @@ def get_piston_particles(N=12,beta=1,P=1,rng = np.random.default_rng()):
      and a piston at pressure P
 
     Parameters:
-        N
-        beta
-        P
-        rng
+        N       Number of particles
+        beta    Inverse temperature
+        P       Pressure
+        rng     Random number generator
+
+    Returns:
+        L       Variable to be sampled
+        alpha   Positions of particles
     '''
     Upsilon = rng.random()
     alpha = rng.random((N))
@@ -87,8 +90,8 @@ if __name__=='__main__':
     ax1 = fig.add_subplot(1,1,1)
 
     for n in range(args.N):
-        L = np.zeros((args.NPoints))
-        for i in range(args.NPoints):
+        L = np.zeros((args. NTrials))
+        for i in range(args. NTrials):
             L[i],_ = get_piston_particles(N=n,rng = rng)
         freq,bins = np.histogram(L,bins=12,density=True)
         ax1.plot(0.5*(bins[1:] + bins[:-1]),freq,label=f'{n}')
