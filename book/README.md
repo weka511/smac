@@ -5,12 +5,13 @@
 -|template.py|Template for python programs
 1|smac.py|Useful functions: BoxMuller, CircleThrowing, and SphereGenerator
 1.1|direct-plot.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.
--|markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.
--|direct.py|1.3 Store state in file
+1.1.1|direct.py|1.3 Store state in file
+1.1.2|markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.
+1.1.3|direct-needle.py|Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch)
+1.1.4|nbr.py|Tabl1 1.3 Neighbour table
 -|smacfiletoken.py|
 -|markov-discrete-pebble.py| 1.4 Use table
 -|large-markov.py|
--|direct-needle.py|Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch)
 1.2|permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often
 -|permutation-histogram.py
 -|naivegauss.py|1.12 Gauss
