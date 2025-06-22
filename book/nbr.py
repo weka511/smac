@@ -28,6 +28,7 @@ class NeighbourTable:
       self.n = n
 
    def get_row(self,row_index):
+
       def get_index(i,j):
          return i * self.n + j
 
@@ -53,10 +54,15 @@ class NeighbourTableTest(TestCase):
    def test_3_3(self):
       nbt = NeighbourTable(3,3)
       self.assert_elements_equal(nbt.get_row(0),np.array([1,3,-1,-1]))
-      self.assert_elements_equal(nbt.get_row(4),np.array([5,7,3,1]))
-      self.assert_elements_equal(nbt.get_row(8),np.array([7,5,-1,-1]))
-      self.assert_elements_equal(nbt.get_row(5),np.array([8,4,2,-1]))
+      self.assert_elements_equal(nbt.get_row(1),np.array([2,4,0,-1]))
+      self.assert_elements_equal(nbt.get_row(2),np.array([-1,5,1,-1]))
       self.assert_elements_equal(nbt.get_row(3),np.array([4,6,0,-1]))
+      self.assert_elements_equal(nbt.get_row(4),np.array([5,7,3,1]))
+      self.assert_elements_equal(nbt.get_row(5),np.array([-1,8,4,2]))
+      self.assert_elements_equal(nbt.get_row(6),np.array([ 7,-1,-1,3]))
+      self.assert_elements_equal(nbt.get_row(7),np.array([ 8,-1,6,4]))
+      self.assert_elements_equal(nbt.get_row(8),np.array([7,5,-1,-1]))
+
 
 if __name__=='__main__':
    main()
