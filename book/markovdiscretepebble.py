@@ -16,7 +16,8 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-   Algorithm 1.6: discrete Markov Chain Monte Carlo for the pebble game
+   Algorithm 1.6, markov-discrete-pebble: log-log plot of relative error
+   std/mean) as a function of number of steps.
 '''
 
 from argparse import ArgumentParser

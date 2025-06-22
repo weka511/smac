@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Exercise 1.4 '''
+'''Exercise 1.4: implement algorithm 1.6, an earlier attempt'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
