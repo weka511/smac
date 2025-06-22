@@ -11,8 +11,6 @@
 1.1.3|direct-needle.py|Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch)
 1.1.4|nbr.py|Table 1.3 Neighbour table
 -|exercise_1_4.py|Exercise 1.4: implement algorithm 1.6, markov-discrete-pebble, using a subroutine for the numbering scheme and neighbour table. Check that, during long runs, all sites are visited equally often.
--|markovdiscretepebble.py| Algorithm 1.6, markov-discrete-pebble: log-log plot of relative error (std/mean) as a function of number of steps.
--|large-markov.py|Exercise 1.4: implement algorithm 1.6, an earlier attempt.
 1.2|permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often
 -|permutation-histogram.py
 -|naivegauss.py|1.12 Gauss
