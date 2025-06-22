@@ -75,10 +75,25 @@ def get_frequencies(m,n,N,rng=np.random.default_rng()):
     nbt = NeighbourTable(m,n)
     Counts = np.zeros((m*n))
     k = rng.integers(m*n)
+    log_errors = []
+    log_iterations = []
+    next_sample = 10
+    log_next_sample = 1
     for i in range(N):
         k = markov_discrete_pebble(k,nbt,rng=rng)
         Counts[k] += 1
-    return Counts / args.N
+        if i + 1 == next_sample:
+            error = np.std(Counts[:i]/next_sample)
+            if error > 0:
+                log_error = np.log10(error)
+                log_errors.append(log_error)
+                log_iterations.append(log_next_sample)
+            next_sample *= 10
+            log_next_sample += 1
+    while log_errors[0] == 0:
+        log_errors.pop(0)
+        log_iterations.pop(0)
+    return Counts / args.N,log_iterations,log_errors
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -107,17 +122,17 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
 
-    Frequencies = get_frequencies(args.m,args.n,args.N,rng=rng)
+    Frequencies,log_iterations,log_errors = get_frequencies(args.m,args.n,args.N,rng=rng)
 
     statistic,pvalue = chisquare(Frequencies)
     mean = np.mean(Frequencies)
     std = np.std(Frequencies)
 
     fig = figure(figsize=(12,12))
-    fig.suptitle(rf'N={args.N:,},m={args.m},n={args.n}')
-    ax1 = fig.add_subplot(1,2,1)
+    fig.suptitle(rf'N={args.N:,}, m={args.m}, n={args.n}')
+    ax1 = fig.add_subplot(2,2,1)
     ax1.hist(Frequencies,bins='sqrt')
-    ax1.set_title(rf'$\chi^2=${statistic:.3},pvalue={pvalue:.3},$\sigma=${std:.3},CV={std/mean:.3}')
+    ax1.set_title(rf'$\chi^2=${statistic:.3}, pvalue={pvalue:.3}, $\sigma=${std:.3}, CV={std/mean:.3}')
     ax1.axvline(mean+std,color='r',linestyle='dashed')
     ax1.axvline(mean+2*std,color='r',linestyle='dashdot')
     ax1.axvline(mean+3*std,color='r',linestyle='dotted')
@@ -125,10 +140,16 @@ if __name__=='__main__':
     ax1.axvline(mean-2*std,color='r',linestyle='dashed')
     ax1.axvline(mean-3*std,color='r',linestyle='dotted')
 
-    ax2 = fig.add_subplot(1,2,2)
+    ax2 = fig.add_subplot(2,2,2)
     map2 = ax2.imshow(Frequencies.reshape(args.m,args.n),cmap='viridis')
     ax2.set_xticks([])
     ax2.set_yticks([])
+
+    ax3 = fig.add_subplot(2,2,3)
+    ax3.plot(log_iterations,log_errors)
+    ax3.set_xlabel('Log N trials')
+    ax3.set_ylabel('Log Error')
+    ax3.set_title('Error vs iteration number')
 
     fig.colorbar(map2)
     fig.savefig(get_file_name(args.out))
