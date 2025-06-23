@@ -42,7 +42,7 @@ def parse_arguments():
     parser.add_argument('--N', default=1000,type=int,help='Number of steps for Markov process')
     return parser.parse_args()
 
-def markov_discrete_pebble(k,nbt,rng=np.random.default_rng()):
+def markov_discrete_pebble(k,Table,rng=np.random.default_rng()):
     '''
     Algorithm 1.6: discrete Markov Chain Monte Carlo for the pebble game
 
@@ -54,9 +54,10 @@ def markov_discrete_pebble(k,nbt,rng=np.random.default_rng()):
        Returns:
           Next state
     '''
-    choices = nbt.get_row(k)
-    i = rng.integers(len(choices))
-    return choices[i] if choices[i] >= 0 else k
+    # choices = nbt.get_row(k)
+    i = rng.integers(4)   #FIXME
+    k_next = Table[k,i]
+    return k_next if k_next >= 0 else k#choices[i] if choices[i] >= 0 else k
 
 def get_frequencies(m,n,N,rng=np.random.default_rng()):
     '''
@@ -73,6 +74,7 @@ def get_frequencies(m,n,N,rng=np.random.default_rng()):
         An array showing frequencies for each state
     '''
     nbt = NeighbourTable(m,n)
+    Table = nbt.create_Table()
     Counts = np.zeros((m*n))
     k = rng.integers(m*n)
     log_errors = []
@@ -80,7 +82,7 @@ def get_frequencies(m,n,N,rng=np.random.default_rng()):
     next_sample = 10
     log_next_sample = 1
     for i in range(N):
-        k = markov_discrete_pebble(k,nbt,rng=rng)
+        k = markov_discrete_pebble(k,Table,rng=rng)
         Counts[k] += 1
         if i + 1 == next_sample:
             error = np.std(Counts[:i]/next_sample)

@@ -47,6 +47,15 @@ class NeighbourTable:
 
       return result
 
+   def create_Table(self):
+      '''
+      Construct an actual table, rather than simulating one
+      '''
+      Table = np.empty((self.m*self.n,4),dtype=int)
+      for i in range(self.m*self.n):
+         Table[i,:] = self.get_row(i)
+      return Table
+
 class NeighbourTableTest(TestCase):
    def assert_elements_equal(self,actual, desired, err_msg='', verbose=True, *, strict=False):
       assert_array_equal(np.sort(actual), np.sort(desired), err_msg='', verbose=True,  strict=False)
@@ -63,6 +72,18 @@ class NeighbourTableTest(TestCase):
       self.assert_elements_equal(nbt.get_row(7),np.array([ 8,-1,6,4]))
       self.assert_elements_equal(nbt.get_row(8),np.array([7,5,-1,-1]))
 
+   def test_create_Table(self):
+      nbt = NeighbourTable(3,3)
+      Table = nbt.create_Table()
+      self.assert_elements_equal(Table[0,:],np.array([1,3,-1,-1]))
+      self.assert_elements_equal(Table[1,:],np.array([2,4,0,-1]))
+      self.assert_elements_equal(Table[2,:],np.array([-1,5,1,-1]))
+      self.assert_elements_equal(Table[3,:],np.array([4,6,0,-1]))
+      self.assert_elements_equal(Table[4,:],np.array([5,7,3,1]))
+      self.assert_elements_equal(Table[5,:],np.array([-1,8,4,2]))
+      self.assert_elements_equal(Table[6,:],np.array([ 7,-1,-1,3]))
+      self.assert_elements_equal(Table[7,:],np.array([ 8,-1,6,4]))
+      self.assert_elements_equal(Table[8,:],np.array([7,5,-1,-1]))
 
 if __name__=='__main__':
    main()
