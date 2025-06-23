@@ -48,16 +48,14 @@ def markov_discrete_pebble(k,Table,rng=np.random.default_rng()):
 
     Parameters:
         k       State
-        table   Transition table
+        Table   Transition table
         rng     Random number generator
 
        Returns:
           Next state
     '''
-    # choices = nbt.get_row(k)
-    i = rng.integers(4)   #FIXME
-    k_next = Table[k,i]
-    return k_next# if k_next >= 0 else k#choices[i] if choices[i] >= 0 else k
+    return Table[k,rng.integers(4)]
+
 
 def get_frequencies(m,n,N,rng=np.random.default_rng()):
     '''
