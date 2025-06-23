@@ -53,7 +53,9 @@ class NeighbourTable:
       '''
       Table = np.empty((self.m*self.n,4),dtype=int)
       for i in range(self.m*self.n):
-         Table[i,:] = self.get_row(i)
+         row = self.get_row(i)
+         for j in range(4):
+            Table[i,j] = row[j] if row[j] > -1 else i
       return Table
 
 class NeighbourTableTest(TestCase):
