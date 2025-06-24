@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+'''Exercise 1.3: find a rejection-free algorithm'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -34,6 +34,74 @@ def parse_arguments():
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     return parser.parse_args()
 
+def global_balance():
+    c =- np.zeros((24))
+    c[1] = 1
+    A_ub = -np.ones((1,24))
+    b_ub = -9*np.ones(1)
+    A_eq = np.zeros((9,24))
+    A_eq[0,0] = 1
+    A_eq[0,1] = 1
+    A_eq[0,9] = -1
+    A_eq[0,2] = -1
+
+    A_eq[1,2] = 1
+    A_eq[1,3] = 1
+    A_eq[1,4] = 1
+    A_eq[1,1] = -1
+    A_eq[1,13] = -1
+    A_eq[1,5] = -1
+
+    A_eq[2,5] = 1
+    A_eq[2,6] = 1
+    A_eq[2,4] = -1
+    A_eq[2,16] = -1
+
+    A_eq[3,7] = 1
+    A_eq[3,8] = 1
+    A_eq[3,9] = 1
+    A_eq[3,17] = -1
+    A_eq[3,10] = -1
+    A_eq[3,0] = -1
+
+    A_eq[4,10] = 1
+    A_eq[4,11] = 1
+    A_eq[4,12] = 1
+    A_eq[4,13] = 1
+    A_eq[4,8] = -1
+    A_eq[4,20] = -1
+    A_eq[4,15] = -1
+    A_eq[4,3] = -1
+
+    A_eq[5,14] = 1
+    A_eq[5,15] = 1
+    A_eq[5,16] = 1
+    A_eq[5,23] = -1
+    A_eq[5,12] = -1
+    A_eq[5,6] = -1
+
+    A_eq[6,17] = 1
+    A_eq[6,18] = 1
+    A_eq[6,7] = -1
+    A_eq[6,19] = -1
+
+    A_eq[7,19] = 1
+    A_eq[7,20] = 1
+    A_eq[7,21] = 1
+    A_eq[7,18] = -1
+    A_eq[7,11] = -1
+    A_eq[7,22] = -1
+
+    A_eq[8,22] = 1
+    A_eq[8,23] = 1
+    A_eq[8,21] = -1
+    A_eq[8,14] = -1
+
+    b_eq = np.zeros((9))
+    res = linprog(c, A_eq=A_eq, A_ub=A_ub, b_eq=b_eq, b_ub=b_ub,bounds=(0,1),method='simplex')
+    print (res)
+    print (res.x)
+    print (np.dot(A_eq,res.x))
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -55,70 +123,34 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
+def markov( T = [[3],
+                 [4,2],
+                 [1,5],
+                 [6,4,0],
+                 [3,7,5,1],
+                 [8,4,2],
+                 [3,7],
+                 [6,4,8],
+                 [7,5],
+                 ],
+            rng = np.random.default_rng()):
+
+    k = rng.integers(9)
+    Counts = np.zeros(9)
+    for i in range (100000):
+        k = T[k][rng.integers(len(T[k]))]
+        Counts[k] += 1
+    print (max(Counts)/min(Counts))
+
 if __name__=='__main__':
-    c =- np.ones((24))
-    # c[1] = 1
-    A = np.zeros((18,24))
-    A[0,0] = 1
-    A[0,1] = 1
-    A[1,2] = 1
-    A[1,3] = 1
-    A[1,4] = 1
-    A[2,5] = 1
-    A[2,6] = 1
-    A[3,7] = 1
-    A[3,8] = 1
-    A[3,9] = 1
-    A[4,10] = 1
-    A[4,11] = 1
-    A[4,12] = 1
-    A[4,13] = 1
-    A[5,14] = 1
-    A[5,15] = 1
-    A[5,16] = 1
-    A[6,17] = 1
-    A[6,18] = 1
-    A[7,19] = 1
-    A[7,20] = 1
-    A[7,21] = 1
-    A[8,22] = 1
-    A[8,23] = 1
-
-    A[9,9] = 1
-    A[9,2] = 1
-    A[10,1] = 1
-    A[10,13] = 1
-    A[10,5] = 1
-    A[11,4] = 1
-    A[11,16] = 1
-    A[12,17] = 1
-    A[12,10] = 1
-    A[12,0] = 1
-    A[13,8] = 1
-    A[13,20] = 1
-    A[13,15] = 1
-    A[13,3] = 1
-    A[14,23] = 1
-    A[14,12] = 1
-    A[14,6] = 1
-    A[15,7] = 1
-    A[15,19] = 1
-    A[16,18] = 1
-    A[16,11] = 1
-    A[16,22] = 1
-    A[17,21] = 1
-    A[17,14] = 1
-    b = np.ones((18))
-    res = linprog(c, A_eq=A, b_eq=b, bounds=(0.1,1),method='revised simplex',options={'rr':False})
-    print (res)
-    print (res.x)
-    T = np.zeros((9,9))
-
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
+
+    global_balance()
+    markov(rng=rng)
     fig = figure(figsize=(12,12))
 
     fig.savefig(get_file_name(args.out))
