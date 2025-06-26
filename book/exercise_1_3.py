@@ -21,6 +21,7 @@ from argparse import ArgumentParser
 from os.path import basename, join, splitext
 from time import time
 import numpy as np
+from numpy.testing import assert_array_almost_equal
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
 from scipy.optimize import linprog
@@ -52,6 +53,16 @@ mapping = bidict({(0,  (3,0)),
                   (23, (5,8))
               })
 
+rules = [ [(3,0), (1,0)],
+          [(0,1),(4,1),(2,1)],
+          [(1,2), (5,2)],
+          [(6,3),(4,3),(0,3)],
+          [(3,4),(7,4),(5,4),(1,4)],
+          [(8,5),(4,5),(2,5)],
+          [(3,6), (7,6)],
+          [(6,7), (4,7),(8,7)],
+          [(7,8), (5,8)] ]
+
 def parse_arguments():
     '''Parse command line arguments'''
     parser = ArgumentParser(__doc__)
@@ -62,15 +73,7 @@ def parse_arguments():
     parser.add_argument('-N', '--N', type=int,default=100000)
     return parser.parse_args()
 
-def transform_all(rules = [ [(3,0), (1,0)],
-                            [(0,1),(4,1),(2,1)],
-                            [(1,2), (5,2)],
-                            [(6,3),(4,3),(0,3)],
-                            [(3,4),(7,4),(5,4),(1,4)],
-                            [(8,5),(4,5),(2,5)],
-                            [(3,6), (7,6)],
-                            [(6,7), (4,7),(8,7)],
-                            [(7,8), (5,8)] ]):
+def transform_all():
     return [transform(boundaries) for boundaries in rules]
 
 def transform(boundaries = [(3,0), (1,0)]):
@@ -81,79 +84,40 @@ def transform(boundaries = [(3,0), (1,0)]):
         minus.append(mapping.inverse[(b,a)])
     return plus,minus
 
-def global_balance():
+def build(Table):
+    T = []
+    for a,b,_ in Table:
+        if  a+1 > len(T):
+            T.append([])
+        T[a].append(b)
+    return T
 
-    c = np.ones((24))
+def global_balance():
+    c = np.zeros((24))
     c[1] = 1
     A_ub = -np.ones((1,24))
     b_ub = -9*np.ones(1)
     A_eq = np.zeros((9,24))
     for i,(plus,minus) in enumerate(transform_all()):
-        print (i,plus,minus)
         for j in plus:
             A_eq[i,j] = +1
         for j in minus:
             A_eq[i,j] = -1
 
-    # A_eq[0,0] = 1
-    # A_eq[0,1] = 1
-    # A_eq[0,9] = -1
-    # A_eq[0,2] = -1
-
-    # A_eq[1,2] = 1
-    # A_eq[1,3] = 1
-    # A_eq[1,4] = 1
-    # A_eq[1,1] = -1
-    # A_eq[1,13] = -1
-    # A_eq[1,5] = -1
-
-    # A_eq[2,5] = 1
-    # A_eq[2,6] = 1
-    # A_eq[2,4] = -1
-    # A_eq[2,16] = -1
-
-    # A_eq[3,7] = 1
-    # A_eq[3,8] = 1
-    # A_eq[3,9] = 1
-    # A_eq[3,17] = -1
-    # A_eq[3,10] = -1
-    # A_eq[3,0] = -1
-
-    # A_eq[4,10] = 1
-    # A_eq[4,11] = 1
-    # A_eq[4,12] = 1
-    # A_eq[4,13] = 1
-    # A_eq[4,8] = -1
-    # A_eq[4,20] = -1
-    # A_eq[4,15] = -1
-    # A_eq[4,3] = -1
-
-    # A_eq[5,14] = 1
-    # A_eq[5,15] = 1
-    # A_eq[5,16] = 1
-    # A_eq[5,23] = -1
-    # A_eq[5,12] = -1
-    # A_eq[5,6] = -1
-
-    # A_eq[6,17] = 1
-    # A_eq[6,18] = 1
-    # A_eq[6,7] = -1
-    # A_eq[6,19] = -1
-
-    # A_eq[7,19] = 1
-    # A_eq[7,20] = 1
-    # A_eq[7,21] = 1
-    # A_eq[7,18] = -1
-    # A_eq[7,11] = -1
-    # A_eq[7,22] = -1
-
-    # A_eq[8,22] = 1
-    # A_eq[8,23] = 1
-    # A_eq[8,21] = -1
-    # A_eq[8,14] = -1
-
     b_eq = np.zeros((9))
-    return linprog(c, A_eq=A_eq, A_ub=A_ub, b_eq=b_eq, b_ub=b_ub,bounds=(0,1),method='simplex'),A_eq
+    result = linprog(c, A_eq=A_eq, A_ub=A_ub, b_eq=b_eq, b_ub=b_ub,bounds=(0,1),method='simplex')
+    if result.success:
+        assert_array_almost_equal(np.dot(A_eq,result.x),b_eq)
+        print (result.message)
+        Table = []
+        for i,x in enumerate(result.x):
+            a,b = mapping[i]
+            if x > 0:
+                Table.append((a,b,x))
+        Table.sort()
+        return build(Table)
+    else:
+        print (result.message)
 
 
 def get_file_name(name,default_ext='png',seq=None):
@@ -202,13 +166,7 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-
-    result,A_eq = global_balance()
-    print (result.message)
-    if result.success:
-        print (result.x)
-        print (np.dot(A_eq,result.x))
-    Counts = markov(rng=rng)
+    Counts = markov(T=global_balance(),rng=rng)
     print (Counts)
     print (max(Counts)/min(Counts))
     fig = figure(figsize=(12,12))
