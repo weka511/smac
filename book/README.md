@@ -12,16 +12,18 @@
 1.1.4|nbr.py|Table 1.3 Neighbour table
 -|exercise_1_4.py|Exercise 1.4: implement algorithm 1.6, markov-discrete-pebble, using a subroutine for the numbering scheme and neighbour table. Check that, during long runs, all sites are visited equally often.
 -|exercise_1_5.py|Exercise 1.5: For the 3x3 pebble game, find a rejection-free local Monte Carlo algorithm--WIP
-1.2|permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often
+1.2|-|Basic Sampling
+1.2.2|permutation.py|Exercise1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often
 -|permutation-histogram.py
--|naivegauss.py|1.12 Gauss
+1.2.3|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algoritms 1.13 and 1.14
+1.2.5|naivegauss.py|Exercise 1.12 Gauss
 -|direct-surface.py|Monte Carlo simulation of Exercise 2.11 of Chaosbook: in higher dimensions, any two vectors are nearly orthogonal
 -|ran-perm.py|Exercise 1.9 (a) Sample permutations using algoritm 1.11 and check that this algorithm generates all 120 permutations of 5 elements equally often.  (b) Determine the cycle representation of each permutation that is generated.
 -|ran-perm-alt.py|Exercise 1.9 (c) Alternative algorithm
 -|exercise_1_12.py|Exercise 1.12. Implement both naive Algorithm 1.17 (naive Gauss) and 1.18 (Box Muller). For what value of K can you still detect statistially significant differences between the two algorithms?
 -|exercise_1_12a.py|Exercise 1.12 - plot results of KS test.
+-|exercise_1_13.py|Exercise 1-13: generate uniformly distributed vectors inside sphere, add rejection, and compute ratios of volumes
 -|exercise_1_14.py|Exercise 1.14. Sample random vectors on the surface of a sphere using Algorithm 1.22 and plot x[0]**2 + y[0]**2
--|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algoritms 1.13 and 1.14
 1.3|binomialconvolution.py|Exercise 1.18 and Algorithm 1.25 from Krauth
 -|data-bunch.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). First part: test with a single, very long, simulation of Alg 1.2, markov-pi, with throwing ranges of 0.03, 0.1, 0.3.
 -|data-bunch-discrete-pebble.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). Second part: test it also with the output of Alg 1.6, markov-discrete-pebble.py.
