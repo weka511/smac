@@ -15,11 +15,11 @@
 1.2|-|Basic Sampling
 1.2.2|permutation.py|Exercise1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often
 -|permutation-histogram.py
-1.2.3|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algoritms 1.13 and 1.14
-1.2.5|naivegauss.py|Exercise 1.12 Gauss
--|direct-surface.py|Monte Carlo simulation of Exercise 2.11 of Chaosbook: in higher dimensions, any two vectors are nearly orthogonal
 -|ran-perm.py|Exercise 1.9 (a) Sample permutations using algoritm 1.11 and check that this algorithm generates all 120 permutations of 5 elements equally often.  (b) Determine the cycle representation of each permutation that is generated.
 -|ran-perm-alt.py|Exercise 1.9 (c) Alternative algorithm
+1.2.3|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algorithms 1.13 and 1.14
+1.2.5|naivegauss.py|Exercise 1.12 Gauss
+-|direct-surface.py|Monte Carlo simulation of Exercise 2.11 of Chaosbook: in higher dimensions, any two vectors are nearly orthogonal
 -|exercise_1_12.py|Exercise 1.12. Implement both naive Algorithm 1.17 (naive Gauss) and 1.18 (Box Muller). For what value of K can you still detect statistially significant differences between the two algorithms?
 -|exercise_1_12a.py|Exercise 1.12 - plot results of KS test.
 -|exercise_1_13.py|Exercise 1-13: generate uniformly distributed vectors inside sphere, add rejection, and compute ratios of volumes
