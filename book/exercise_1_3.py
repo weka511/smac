@@ -85,10 +85,12 @@ def transform(boundaries = [(3,0), (1,0)]):
     return plus,minus
 
 def build(Table):
-    T = []
+    max_index = -1
+    for a,_,_ in Table:
+        if a > max_index:
+            max_index = a
+    T = [[] for _ in range(max_index+1)]
     for a,b,_ in Table:
-        if  a+1 > len(T):
-            T.append([])
         T[a].append(b)
     return T
 
@@ -117,7 +119,7 @@ def global_balance():
         Table.sort()
         return build(Table)
     else:
-        print (result.message)
+        raise RuntimeError(result.message)
 
 
 def get_file_name(name,default_ext='png',seq=None):
