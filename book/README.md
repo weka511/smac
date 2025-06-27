@@ -10,8 +10,8 @@
 1.1.2|markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.
 1.1.3|direct-needle.py|Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch)
 1.1.4|nbr.py|Table 1.3 Neighbour table
--|exercise_1_13.py|Exercise 1.3: WIP
 -|exercise_1_4.py|Exercise 1.4: implement algorithm 1.6, markov-discrete-pebble, using a subroutine for the numbering scheme and neighbour table. Check that, during long runs, all sites are visited equally often.
+-|exercise_1_5.py|Exercise 1.5: For the 3x3 pebble game, find a rejection-free local Monte Carlo algorithm--WIP
 1.2|permutation.py|1.9 Sample permutations using Alg. 1.11 and verify that it generate all 120 permutations of 5 elements equally often
 -|permutation-histogram.py
 -|naivegauss.py|1.12 Gauss

@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 1.3: find a rejection-free algorithm'''
+'''Exercise 1.5: For the 3x3 pebble game, find a rejection-free local Monte Carlo algorithm.'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
