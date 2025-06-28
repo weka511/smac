@@ -17,7 +17,8 @@
 
 '''
     Exercise 1-13: generate uniformly distributed vectors inside sphere,
-    add rejection, and compute ratios of volumes.
+    then augment with an additional component in the range (-1,+1), and reject if length exceeds 1.
+    Use to estimate ratios of volumes.
 '''
 
 from argparse import ArgumentParser
@@ -30,7 +31,9 @@ from scipy.special import gamma
 
 
 def parse_arguments():
-    '''Parse command line arguments'''
+    '''
+    Parse command line arguments
+    '''
     parser = ArgumentParser(__doc__)
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
@@ -55,16 +58,31 @@ def direct_sphere(d=3,sigma=1.0,rng = np.random.default_rng()):
     return Upsilon*X/np.sqrt(Sigma)
 
 def estimate_ratio(d=3,N=1000,rng = np.random.default_rng()):
+    '''
+    Exercise 1-13: generate uniformly distributed vectors inside sphere,
+    then augment with an additional component in the range (-1,+1), and reject if length exceeds 1.
+
+    Parameters:
+        d
+        N
+        rng
+    '''
     accepted = 0
     for _ in range(N):
-        X = np.empty((d+1))
-        X[0:-1] = direct_sphere(d=d,rng=rng)
-        X[-1] = 2*rng.random() - 1
+        X = np.empty(d+1)
+        X[0:d] = direct_sphere(d=d,rng=rng)
+        X[d] = 2*rng.random() - 1
         if np.sum(X*X) < 1:
             accepted += 1
     return accepted/N
 
 def get_V(d):
+    '''
+    Calculate volume of a unit sphere after Equation 1.39
+
+    Parameters:
+        d   Dimension of space
+    '''
     return (np.pi**(d/2))/gamma(d/2+1)
 
 def get_file_name(name,default_ext='png',seq=None):
@@ -93,21 +111,18 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    Estimated = np.ones((args.d[1]+2))
-
-    V = np.ones((args.d[1]+2))
-    for d in range(args.d[0],args.d[1]+2):
-        V[d] = get_V(d)
-        Estimated[d] = estimate_ratio(d=d,N=args.N)
-    Ratios = (V[1:]/V[:-1])[args.d[0]:]
     Ds = np.linspace(args.d[0],args.d[1],num=args.d[1]-args.d[0]+1)
-    Comparison = Estimated[args.d[0]:-1]/Ratios
+    Estimated = np.vectorize(lambda d:estimate_ratio(int(d),N=args.N))(Ds)
+    Ratios = np.vectorize(lambda d:get_V(d+1)/get_V(d))(Ds)
+    Comparison = Estimated/Ratios
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
-    ax1.plot(Ds,Estimated[args.d[0]:-1],label=f'Estimated {args.N} iterations')
-    ax1.plot(Ds,Ratios,label='Ratios of volumes')
-    ax1.plot(Ds,Comparison,label='Estimates vs. Ratios. {Comparison.mean()}')
-    ax1.legend()
+    ax1.plot(Ds,Estimated,label=f'Estimated, after {args.N:,} iterations',color='red')
+    ax1.plot(Ds,Ratios,label='Ratios of volumes',color='blue')
+    ax2 = ax1.twinx()
+    ax2.plot(Ds,Comparison,label=f'Estimates vs. Ratios. {Comparison.mean()}',color='green')
+    ax1.legend(loc='upper left')
+    ax2.legend(loc='upper right')
     ax1.set_xlabel('Dimension')
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
