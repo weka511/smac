@@ -90,7 +90,8 @@ if __name__=='__main__':
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
-    print (f'Elapsed Time (reject_finite) {minutes} m {seconds:.2f} s')
+    et1 = f'Sampling with Rejection: Elapsed Time {minutes} m {seconds:.2f} s'
+    print (et1)
 
     start = time()
     samples2 = np.zeros((args.N),dtype=int)
@@ -100,15 +101,17 @@ if __name__=='__main__':
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
-    print (f'Elapsed Time (tower_sample) {minutes} m {seconds:.2f} s')
+    et2 = f'Sampling without Rejection: Elapsed Time {minutes} m {seconds:.2f} s'
+    print (et2)
 
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,2,1)
     ax1.hist(samples1,bins=args.n,color='blue')
-    ax1.set_title('Sampling with Rejection')
+    ax1.set_title(et1)
+
     ax2 = fig.add_subplot(1,2,2)
     ax2.hist(samples2,bins=args.n,color='red')
-    ax2.set_title('Sampling without Rejection')
+    ax2.set_title(et2)
 
     fig.savefig(get_file_name(args.out))
 
