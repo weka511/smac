@@ -43,16 +43,16 @@ def parse_arguments():
     parser.add_argument('-d', '--d', type=int, default=[3,30],nargs=2)
     return parser.parse_args()
 
-def direct_sphere(d=3,sigma=1.0,rng = np.random.default_rng()):
+def direct_sphere(d=3,radius=1.0,rng = np.random.default_rng()):
     '''
     Algorithm 1.21: generate a uniform random vector inside a sphere
 
     Parameters:
-        d
-        sigma
-        rng
+        d         Dimension of sphere
+        radius    Radius of sphere
+        rng       Random number generator
     '''
-    X = rng.normal(scale=sigma,size=(d))
+    X = rng.normal(scale=radius,size=d)
     Sigma = np.sum(X*X)
     Upsilon = rng.random()**(1/d)
     return Upsilon*X/np.sqrt(Sigma)
@@ -63,17 +63,19 @@ def estimate_ratio(d=3,N=1000,rng = np.random.default_rng()):
     then augment with an additional component in the range (-1,+1), and reject if length exceeds 1.
 
     Parameters:
-        d
-        N
-        rng
+        d       Dimension of initial sphere (final is d+1)
+        N       Number of dimensions
+        rng     Random number generator
     '''
     accepted = 0
+
     for _ in range(N):
         X = np.empty(d+1)
         X[0:d] = direct_sphere(d=d,rng=rng)
         X[d] = 2*rng.random() - 1
         if np.sum(X*X) < 1:
             accepted += 1
+
     return accepted/N
 
 def get_V(d):
@@ -81,9 +83,18 @@ def get_V(d):
     Calculate volume of a unit sphere after Equation 1.39
 
     Parameters:
-        d   Dimension of space
+        d   Dimension of sphere
     '''
     return (np.pi**(d/2))/gamma(d/2+1)
+
+def get_ratio(d=4):
+    '''
+    Equation 1.42: ratio of volume of d dimensional sphere to (d-2)
+
+    Parameters:
+        d   Dimension of final sphere
+    '''
+    return np.pi/(d/2)
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -111,10 +122,18 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
+    for d in [2,4,10,20,60]:
+        print (d,get_V(d=d))
+    print (get_V(d=4)/get_V(d=2),get_ratio(d=4), 2* estimate_ratio(d=3,N=args.N,rng=rng) *2* estimate_ratio(d=2,N=args.N,rng=rng))
+    r501 = 2* estimate_ratio(d=500,N=args.N,rng=rng)
+    r502 = 2* estimate_ratio(d=501,N=args.N,rng=rng)
+    print (r502, r501, r502*r501,  2*np.pi/502)
+
     Ds = np.linspace(args.d[0],args.d[1],num=args.d[1]-args.d[0]+1)
-    Estimated = 2*np.vectorize(lambda d:estimate_ratio(int(d),N=args.N))(Ds)  #FIXME - fudge factor
+    Estimated = 2*np.vectorize(lambda d:estimate_ratio(d=int(d),N=args.N,rng=rng))(Ds)  #FIXME - fudge factor
     Ratios = np.vectorize(lambda d:get_V(d+1)/get_V(d))(Ds)
     Comparison = Estimated/Ratios
+
     fig = figure(figsize=(12,12))
     fig.suptitle('Exercise 1.13')
     ax1 = fig.add_subplot(1,1,1)
