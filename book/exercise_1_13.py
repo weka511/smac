@@ -70,13 +70,13 @@ def estimate_ratio(d=3,N=1000,rng = np.random.default_rng()):
     accepted = 0
 
     for _ in range(N):
-        X = np.empty(d+1)
+        X = np.zeros(d+1)
         X[0:d] = direct_sphere(d=d,rng=rng)
         X[d] = 2*rng.random() - 1
         if np.sum(X*X) < 1:
             accepted += 1
 
-    return accepted/N
+    return 2 * accepted/N # We need to compare with 2R, not R - e.g. Figure 1.5
 
 def get_V(d):
     '''
@@ -122,29 +122,24 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    for d in [2,4,10,20,60]:
-        print (d,get_V(d=d))
-    print (get_V(d=4)/get_V(d=2),get_ratio(d=4), 2* estimate_ratio(d=3,N=args.N,rng=rng) *2* estimate_ratio(d=2,N=args.N,rng=rng))
-    r501 = 2* estimate_ratio(d=500,N=args.N,rng=rng)
-    r502 = 2* estimate_ratio(d=501,N=args.N,rng=rng)
-    print (r502, r501, r502*r501,  2*np.pi/502)
+
+    r501 = estimate_ratio(d=500,N=args.N,rng=rng)
+    r502 = estimate_ratio(d=501,N=args.N,rng=rng)
+    # print (r502, r501, r502*r501,  2*np.pi/502)
 
     Ds = np.linspace(args.d[0],args.d[1],num=args.d[1]-args.d[0]+1)
-    Estimated = 2*np.vectorize(lambda d:estimate_ratio(d=int(d),N=args.N,rng=rng))(Ds)  #FIXME - fudge factor
+    Estimated = np.vectorize(lambda d:estimate_ratio(d=int(d),N=args.N,rng=rng))(Ds)
     Ratios = np.vectorize(lambda d:get_V(d+1)/get_V(d))(Ds)
-    Comparison = Estimated/Ratios
 
     fig = figure(figsize=(12,12))
-    fig.suptitle('Exercise 1.13')
+    fig.suptitle(r'Exercise 1.13: $\frac{V_{252}(1)}{V_{250}(1)}=$ 'f'{r502*r501:.6}'
+                 r'$\approx\frac{2\pi}{d}=$' f'{2*np.pi/502:.6}')
     ax1 = fig.add_subplot(1,1,1)
     ax1.plot(Ds,Estimated,label=f'Estimated, after {args.N:,} iterations',color='red',linestyle=(0,(5,5)))
     ax1.plot(Ds,Ratios,label='Ratios of volumes',color='blue',linestyle=(5,(5,5)))
-    ax2 = ax1.twinx()
-    ax2.plot(Ds,Comparison,label=f'Estimates vs. Ratios. {Comparison.mean():.2f}',color='green')
-    h1, l1 = ax1.get_legend_handles_labels()
-    h2, l2 = ax2.get_legend_handles_labels()
-    ax1.legend(h1+h2, l1+l2, loc='lower left')
+    ax1.legend()
     ax1.set_xlabel('Dimension')
+    ax1.set_ylabel('Ratio')
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
