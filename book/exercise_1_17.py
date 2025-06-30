@@ -39,16 +39,23 @@ def reject_continuous(x0,x1,pi, pi_max=1, rng = np.random.default_rng(),size=1,m
     X = np.zeros(size)
     for i in range(size):
         j = 0
-        while True:
+        Upsilon = float('inf')
+        while Upsilon > pi(X[i]):
             X[i] = rng.uniform(x0,x1)
             Upsilon = rng.uniform(0,pi_max)
-            if Upsilon < pi(X[i]):
-                break
-            else:
-                j += 1
-        assert j < max_tries
+            j += 1
+            assert j < max_tries
 
     return X
+
+def pi(x):
+    return 0.5*np.sin(x)
+
+def sample(x0,x1, rng = np.random.default_rng(),size=1):
+    def scale(x):
+        return 2*x/np.pi -1
+    Y = rng.uniform(scale(x0),scale(x1),size=size)
+    return np.arccos(Y)
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -76,11 +83,22 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-
-    X = reject_continuous(0,np.pi,lambda x:0.5*np.sin(x), pi_max=0.5, rng = rng,size=args.N)
+    X0 = np.linspace(0,np.pi)
+    X = reject_continuous(0,np.pi,pi, pi_max=0.5, rng = rng,size=args.N)
     fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(1,1,1)
-    ax1.hist(X,bins='sqrt')
+    ax1 = fig.add_subplot(2,1,1)
+    ax1.hist(X,bins='sqrt',density=True,label='Sampled')
+    ax1.plot(X0,pi(X0),label=r'$y=0.5\sin(x)$')
+    ax1.legend()
+    ax1.set_title('Rejection')
+
+    ax2 = fig.add_subplot(2,1,2)
+    XX = sample(0,np.pi, rng = rng,size=args.N)
+    ax2.hist(XX,bins='sqrt',density=True,label='Sampled')
+    ax2.plot(X0,pi(X0),label=r'$y=0.5\sin(x)$')
+    ax2.legend()
+    ax2.set_title('Direct')
+
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
