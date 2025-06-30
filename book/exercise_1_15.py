@@ -32,9 +32,10 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
+    parser.add_argument('--N',type=int,default=100000)
     return parser.parse_args()
 
-def direct_surface(d,rng = np.random.default_rng(None)):
+def direct_surface(d=3,rng = np.random.default_rng(None)):
     '''
     Sample random vectors on the surface of a sphere using Algorithm 1.22
 
@@ -43,10 +44,9 @@ def direct_surface(d,rng = np.random.default_rng(None)):
         rng      Random number generator
     '''
     sigma = 1/np.sqrt(d)
-    while True:
-        x = rng.normal(scale=sigma,size=(d))
-        Sigma = np.square(x).sum()
-        yield x/np.sqrt(Sigma)
+    x = rng.normal(scale=sigma,size=d)
+    Sigma = np.square(x).sum()
+    return x/np.sqrt(Sigma)
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -68,14 +68,38 @@ def get_file_name(name,default_ext='png',seq=None):
     else:
         return qualified_name
 
+def direct_coordinates():
+    '''
+    Create random orthonormal corrdinate systems
+    '''
+    x0 = direct_surface()
+    x1 = direct_surface()
+    alpha = 1
+    beta = -alpha*np.dot(x0,x0)/np.dot(x0,x1)
+    x1prime = alpha*x0 + beta*x1
+    x1prime /= np.sqrt(np.dot(x1prime,x1prime))
+    return np.array([x0,x1prime,np.cross(x0,x1prime)])
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    fig = figure(figsize=(12,12))
+    Products = np.zeros((args.N,3))
+    for i in range(args.N):
+        x = direct_coordinates()
+        xprime = direct_coordinates()
+        for j in range(3):
+            Products[i,j] = np.dot(x[j],xprime[j])
+    Average = np.average(Products,axis=0)
 
+    fig = figure(figsize=(12,12))
+    ax1 = fig.add_subplot(1,1,1)
+    ax1.hist(Products,bins=25,density=True)
+    ax1.set_title(f'N={args.N}: Averages = {Average}')
+    ax1.set_xlabel('Inner Product')
+    ax1.set_ylabel('Frequency')
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
