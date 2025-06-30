@@ -17,7 +17,8 @@
 -|permutation-histogram.py
 -|ran-perm.py|Exercise 1.9 (a) Sample permutations using algoritm 1.11 and check that this algorithm generates all 120 permutations of 5 elements equally often.  (b) Determine the cycle representation of each permutation that is generated.
 -|ran-perm-alt.py|Exercise 1.9 (c) Alternative algorithm
-1.2.3|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algorithms 1.13 and 1.14
+1.2.3|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algorithms 1.13 (reject-finite) and 1.14 (tower-sampling)
+1.2.4|exercise_1_17.py|Exercise 1-17: Use a sample transformation to derive random numbers distributed as 0.5 sin(phi)
 1.2.5|naivegauss.py|Exercise 1.12 Gauss
 -|chaosbook_2_11.py|Monte Carlo simulation of Exercise 2.11 of Chaosbook: in higher dimensions, any two vectors are nearly orthogonal
 -|exercise_1_12.py|Exercise 1.12. Implement both naive Algorithm 1.17 (naive Gauss) and 1.18 (Box Muller). For what value of K can you still detect statistially significant differences between the two algorithms?
@@ -25,7 +26,6 @@
 -|exercise_1_13.py|Exercise 1-13: generate uniformly distributed vectors inside sphere, then augment with an additional component in the range (-1,+1), and reject if length exceeds 1. Use to estimate ratios of volumes.
 -|exercise_1_14.py|Exercise 1.14. Sample random vectors on the surface of a sphere using Algorithm 1.22 and plot x[0]**2 + y[0]**2
 -|exercise_1_15.py|Exercise 1.15. Generate 3 dimensional orthonormal coordinate systems with axes randomly oriented in space, using Algorithm 1.22. Test by computing average scalar products for pairs of random coordinate systems.
--|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algoritms 1.13 (reject-finite) and 1.14 (tower-sampling)
 1.3|binomialconvolution.py|Exercise 1.18 and Algorithm 1.25 from Krauth
 -|data-bunch.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). First part: test with a single, very long, simulation of Alg 1.2, markov-pi, with throwing ranges of 0.03, 0.1, 0.3.
 -|data-bunch-discrete-pebble.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). Second part: test it also with the output of Alg 1.6, markov-discrete-pebble.py.
