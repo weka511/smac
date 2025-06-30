@@ -35,8 +35,8 @@ def parse_arguments():
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
-    parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-    parser.add_argument('--N',type=int,default=100000)
+    parser.add_argument('--show', action = 'store_true', help = 'Show plot')
+    parser.add_argument('--N', type=int, default=100000, help='Number of iterations')
     return parser.parse_args()
 
 def direct_surface(d=3,rng = np.random.default_rng(None)):
