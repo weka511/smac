@@ -63,6 +63,7 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize=(12,12))
+    ax1 = fig.add_subplot(1,1,1)
 
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
