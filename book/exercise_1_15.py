@@ -15,7 +15,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-''' Template for Python programs'''
+'''
+    Exercise 1.15. Generate 3 dimensional orthonormal coordinate systems
+    with axes randomly oriented in space, using Algorithm 1.22.
+    Test by computing average scalar products for pairs of random coordinate systems.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -48,6 +52,25 @@ def direct_surface(d=3,rng = np.random.default_rng(None)):
     Sigma = np.square(x).sum()
     return x/np.sqrt(Sigma)
 
+def direct_coordinates():
+    '''
+    Generate 3 dimensional orthonormal coordinate systems
+    with axes randomly oriented in space, using Algorithm 1.22.
+
+    Returns:
+        An array comprising:
+            x0         A random unit vector
+            x1prime    A unit vector, orthogonal to x0, in a plane defined by x0 and a random vector
+            x2         The vector product of x0 and x1prime
+    '''
+    x0 = direct_surface()
+    x1 = direct_surface()
+    alpha = 1
+    beta = -alpha*np.dot(x0,x0)/np.dot(x0,x1)
+    x1prime = alpha*x0 + beta*x1
+    x1prime /= np.sqrt(np.dot(x1prime,x1prime))
+    return np.array([x0,x1prime,np.cross(x0,x1prime)])
+
 def get_file_name(name,default_ext='png',seq=None):
     '''
     Used to create file names
@@ -67,18 +90,6 @@ def get_file_name(name,default_ext='png',seq=None):
         return join(args.figs,qualified_name)
     else:
         return qualified_name
-
-def direct_coordinates():
-    '''
-    Create random orthonormal corrdinate systems
-    '''
-    x0 = direct_surface()
-    x1 = direct_surface()
-    alpha = 1
-    beta = -alpha*np.dot(x0,x0)/np.dot(x0,x1)
-    x1prime = alpha*x0 + beta*x1
-    x1prime /= np.sqrt(np.dot(x1prime,x1prime))
-    return np.array([x0,x1prime,np.cross(x0,x1prime)])
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})

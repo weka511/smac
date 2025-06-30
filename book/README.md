@@ -24,7 +24,7 @@
 -|exercise_1_12a.py|Exercise 1.12 - plot results of KS test.
 -|exercise_1_13.py|Exercise 1-13: generate uniformly distributed vectors inside sphere, then augment with an additional component in the range (-1,+1), and reject if length exceeds 1. Use to estimate ratios of volumes.
 -|exercise_1_14.py|Exercise 1.14. Sample random vectors on the surface of a sphere using Algorithm 1.22 and plot x[0]**2 + y[0]**2
--|exercise_1_15.py|Exercise 1.15
+-|exercise_1_15.py|Exercise 1.15. Generate 3 dimensional orthonormal coordinate systems with axes randomly oriented in space, using Algorithm 1.22. Test by computing average scalar products for pairs of random coordinate systems.
 -|exercise_1_16.py|Exercise 1.16. Compare sampling efficiencies of Algoritms 1.13 (reject-finite) and 1.14 (tower-sampling)
 1.3|binomialconvolution.py|Exercise 1.18 and Algorithm 1.25 from Krauth
 -|data-bunch.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). First part: test with a single, very long, simulation of Alg 1.2, markov-pi, with throwing ranges of 0.03, 0.1, 0.3.
