@@ -32,7 +32,8 @@ def parse_arguments():
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
     parser.add_argument('--figs', default = './figs', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-    parser.add_argument('-N', '--N', type=int, default=100, help='Number of iterations')
+    parser.add_argument('-N', '--N', type=int, default=100000, help='Number of iterations for rejestion sampling')
+    parser.add_argument('-n', '--n', type=int, default=1000, help='Number of steps for direct sampling')
     return parser.parse_args()
 
 def reject_continuous(x0,x1,pi, pi_max=1, rng = np.random.default_rng(),size=1,max_tries=100):
@@ -91,16 +92,16 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
 
     fig = figure(figsize=(12,12))
-
+    fig.suptitle(f'Exercise 1.17')
     # Plot rejection sampling of sin
 
     Rejection_Samples_sin = reject_continuous(0,np.pi,pi, pi_max=0.5, rng = rng,size=args.N)
-    X0 = np.linspace(0,np.pi)
+    X0 = np.linspace(0,np.pi,num=args.n)
     ax1 = fig.add_subplot(2,2,1)
     ax1.hist(Rejection_Samples_sin,bins='sqrt',density=True,label='Sampled')
     ax1.plot(X0,pi(X0),label=r'$y=0.5\sin(x)$')
     ax1.legend()
-    ax1.set_title('Rejection')
+    ax1.set_title(f'Rejection {args.N:,} iterations')
     ax1.set_xlabel('$x$')
     ax1.set_ylabel(r'$\pi(x)$')
 
@@ -111,19 +112,19 @@ if __name__=='__main__':
     ax3.hist(Direct_Samples,bins='sqrt',density=True,label='Sampled')
     ax3.plot(X0,pi(X0),label=r'$y=0.5\sin(x)$')
     ax3.legend()
-    ax3.set_title('Direct')
+    ax3.set_title(f'Direct: {args.n:,} points')
     ax3.set_xlabel('$x$')
     ax3.set_ylabel(r'$\pi(x)$')
 
     # Plot rejection sampling of cos
 
-    X0_cos = np.linspace(0,0.5*np.pi)
+    X0_cos = np.linspace(0,0.5*np.pi,num=args.n)
     Rejection_Samples_cos = reject_continuous(0,0.5*np.pi, np.cos, rng = rng,size=args.N)
     ax2 = fig.add_subplot(2,2,2)
     ax2.hist(Rejection_Samples_cos,bins='sqrt',density=True,label='Sampled')
     ax2.plot(X0_cos,np.cos(X0_cos),label=r'$y=\cos(x)$')
     ax2.legend()
-    ax2.set_title('Rejection')
+    ax2.set_title(f'Rejection {args.N:,} iterations')
     ax2.set_xlabel('$x$')
     ax2.set_ylabel(r'$\pi(x)$')
 
@@ -134,7 +135,7 @@ if __name__=='__main__':
     ax4.hist(Direct_Samples_cos,bins='sqrt',density=True,label='Sampled')
     ax4.plot(X0_cos,np.cos(X0_cos),label=r'$y=\cos(x)$')
     ax4.legend()
-    ax4.set_title('Direct')
+    ax4.set_title(f'Direct: {args.n:,} points')
     ax4.set_xlabel('$x$')
     ax4.set_ylabel(r'$\pi(x)$')
 
