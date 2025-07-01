@@ -51,11 +51,17 @@ def reject_continuous(x0,x1,pi, pi_max=1, rng = np.random.default_rng(),size=1,m
 def pi(x):
     return 0.5*np.sin(x)
 
-def sample(x0,x1, rng = np.random.default_rng(),size=1):
+def sample_sin(x0,x1, rng = np.random.default_rng(),size=1):
     def scale(x):
         return 2*x/np.pi -1
     Y = rng.uniform(scale(x0),scale(x1),size=size)
     return np.arccos(Y)
+
+def sample_cos(x0,x1, rng = np.random.default_rng(),size=1):
+    def scale(x):
+        return x/np.pi
+    Y = rng.uniform(scale(x0),scale(x1),size=size)
+    return np.arcsin(Y)
 
 def get_file_name(name,default_ext='png',seq=None):
     '''
@@ -83,22 +89,56 @@ if __name__=='__main__':
     start  = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    X0 = np.linspace(0,np.pi)
-    X = reject_continuous(0,np.pi,pi, pi_max=0.5, rng = rng,size=args.N)
+
     fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(2,1,1)
-    ax1.hist(X,bins='sqrt',density=True,label='Sampled')
+
+    # Plot rejection sampling of sin
+
+    Rejection_Samples_sin = reject_continuous(0,np.pi,pi, pi_max=0.5, rng = rng,size=args.N)
+    X0 = np.linspace(0,np.pi)
+    ax1 = fig.add_subplot(2,2,1)
+    ax1.hist(Rejection_Samples_sin,bins='sqrt',density=True,label='Sampled')
     ax1.plot(X0,pi(X0),label=r'$y=0.5\sin(x)$')
     ax1.legend()
     ax1.set_title('Rejection')
+    ax1.set_xlabel('$x$')
+    ax1.set_ylabel(r'$\pi(x)$')
 
-    ax2 = fig.add_subplot(2,1,2)
-    XX = sample(0,np.pi, rng = rng,size=args.N)
-    ax2.hist(XX,bins='sqrt',density=True,label='Sampled')
-    ax2.plot(X0,pi(X0),label=r'$y=0.5\sin(x)$')
+    # Plot direct sampling of sin
+
+    Direct_Samples = sample_sin(0,np.pi, rng = rng,size=args.N)
+    ax3 = fig.add_subplot(2,2,3)
+    ax3.hist(Direct_Samples,bins='sqrt',density=True,label='Sampled')
+    ax3.plot(X0,pi(X0),label=r'$y=0.5\sin(x)$')
+    ax3.legend()
+    ax3.set_title('Direct')
+    ax3.set_xlabel('$x$')
+    ax3.set_ylabel(r'$\pi(x)$')
+
+    # Plot rejection sampling of cos
+
+    X0_cos = np.linspace(0,0.5*np.pi)
+    Rejection_Samples_cos = reject_continuous(0,0.5*np.pi, np.cos, rng = rng,size=args.N)
+    ax2 = fig.add_subplot(2,2,2)
+    ax2.hist(Rejection_Samples_cos,bins='sqrt',density=True,label='Sampled')
+    ax2.plot(X0_cos,np.cos(X0_cos),label=r'$y=\cos(x)$')
     ax2.legend()
-    ax2.set_title('Direct')
+    ax2.set_title('Rejection')
+    ax2.set_xlabel('$x$')
+    ax2.set_ylabel(r'$\pi(x)$')
 
+    # Plot direct sampling of cos
+
+    Direct_Samples_cos = sample_cos(0,np.pi, rng = rng,size=args.N)
+    ax4 = fig.add_subplot(2,2,4)
+    ax4.hist(Direct_Samples_cos,bins='sqrt',density=True,label='Sampled')
+    ax4.plot(X0_cos,np.cos(X0_cos),label=r'$y=\cos(x)$')
+    ax4.legend()
+    ax4.set_title('Direct')
+    ax4.set_xlabel('$x$')
+    ax4.set_ylabel(r'$\pi(x)$')
+
+    fig.tight_layout(pad=3)
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
     minutes = int(elapsed/60)
