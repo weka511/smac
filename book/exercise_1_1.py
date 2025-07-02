@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2015-2022 Greenweaves Software Limited
+# Copyright (C) 2015-2025 Greenweaves Software Pty Ltd
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -8,36 +8,39 @@
 # (at your option) any later version.
 
 # This software is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# but WITHOUT ANY WARRANTY; with out even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-'''Problem 1.1 from Werner Krauth, Statistical Mechanics, Algorithms & Computations plus Problem 1.3'''
+'''Implement Algorithm 1.1. Plot error and investigate relationship with N.'''
 
-from random        import uniform
-from smacfiletoken import Registry
+import random,math,matplotlib.pyplot as plt
 
-if __name__=='__main__':
-    n_trials = 400000
+n_trials=10
+mult = 2
 
-    registry = Registry()
-    registry.register_all("direct%d.txt")
+errors=[]
+iterations=[]
+for n in range(12):
+    print ('n=%(n)d,n_trials=%(n_trials)d'%locals())
+    error=0
+    for i in range(20):
+        n_hits=0
+        for iter in range(n_trials):
+            x, y = random.uniform(-1.0, 1.0), random.uniform(-1.0, 1.0)
+            if x*x + y*y < 1.0:  n_hits += 1
+        pi_approx=4.0 * n_hits / float(n_trials)
+        error+=(math.pi-pi_approx)*(math.pi-pi_approx)
+    n_trials *= mult
+    errors.append(math.log(error))
+    iterations.append(n)
 
-    [total_trials,n_hits]= registry.read([0,0])
-
-    for iter in range(n_trials):
-        if registry.is_kill_token_present(): break
-        x, y = uniform(-1.0, 1.0), uniform(-1.0, 1.0)
-        if x*x + y*y < 1.0:
-            n_hits += 1
-        total_trials+=1
-
-    print ('Total Trials=%(total_trials)d, hits=%(n_hits)d, estimate%(estimate)f'%{
-        'total_trials':total_trials,
-        'n_hits':n_hits,
-        'estimate': 4.0 * n_hits / float(total_trials)})
-
-    registry.write([total_trials,n_hits])
+plt.plot(iterations, errors, 'o')
+plt.xlabel('Log N trials')
+plt.ylabel('Log Error')
+plt.title('Error vs iteration number')
+plt.savefig('direct-plot.png')
+plt.show()

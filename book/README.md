@@ -4,8 +4,8 @@
 -----|--------------|---------------------------------------------------------------------------------------
 -|template.py|Template for python programs
 1|smac.py|Useful functions: BoxMuller, CircleThrowing, and SphereGenerator
-1.1|direct-plot.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.
-1.1.1|exercise_1_1.py|Problems 1.1 and 1.3'
+1.1.1|exercise_1_1.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.
+-|exercise_1_3.py|Problems 1.1 and 1.3'
 -|smacfiletoken.py|
 1.1.2|markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.
 1.1.3|direct-needle.py|Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch)
