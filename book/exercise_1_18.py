@@ -80,7 +80,7 @@ def direct_pi(m,rng = np.random.default_rng()):
             n_hits += 1
     return n_hits/m
 
-def run(M,m,rng = np.random.default_rng()):
+def get_frequence_from_direct_pi(M,m,rng = np.random.default_rng()):
     frequency = np.zeros((M))
     for i in range(M):
         frequency[i] = direct_pi(m,rng=rng)
@@ -93,10 +93,6 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
 
-    frequency = run(args.M,args.m,rng=rng)
-    sigma = np.sqrt((np.pi/4)*(1-np.pi/4))
-    rescaled = (frequency-np.pi/4)/sigma
-
     fig = figure(figsize=(12,12))
     fig.suptitle('Exercise 1.18')
 
@@ -104,25 +100,33 @@ if __name__=='__main__':
     imax = P.argmax()
     ax1 = fig.add_subplot(2,2,1)
     ax1.plot(P,label=f'Peak: {imax/len(P)}')
-    ax1.set_title(fr'Binomial convolution $\theta=${args.theta:.4}, {args.N} iterations')
+    ax1.set_title(fr'Binomial convolution $\theta=${args.theta:.4}, {args.N:,} iterations')
     ax1.set_xlabel('$x$')
-    ax1.set_ylabel(r'$\pi$')
+    ax1.set_ylabel(r'$\pi(x)$')
     ax1.legend()
 
+    frequency = get_frequence_from_direct_pi(args.M,args.m,rng=rng)
     ax2 = fig.add_subplot(2,2,2)
     ax2.hist(frequency,bins=args.bins,label=f'{mode(frequency).mode}')
-    ax2.set_title('Direct pi')
+    ax2.set_title(f'Direct pi: {args.m:,} runs of {args.M:,} samples.')
+    ax2.set_xlabel('$x$')
+    ax2.set_ylabel(r'$\pi(x)$')
     ax2.legend()
 
     ax3 = fig.add_subplot(2,2,3)
     ax3.plot(P/args.N,label=f'{imax/len(P)}')
-    ax3.set_title('Scaled Binomial coefficients')
+    ax3.set_title(f'Scaled Binomial coefficients divided by {args.N:,}')
+    ax3.set_xlabel('$x$')
+    ax3.set_ylabel(r'$\pi(x)$')
     ax3.legend()
 
+    rescaled = (frequency-np.pi/4)/np.sqrt((np.pi/4)*(1-np.pi/4))
     ax4 = fig.add_subplot(2,2,4)
     ax4.hist(rescaled,bins=args.bins,label=f'{mode(rescaled).mode}')
     ax4.legend()
-    ax4.set_title('Rescaled direct pi')
+    ax4.set_xlabel(r'$\frac{x-\frac{\pi}{4}}{\sigma}$')
+    ax4.set_ylabel(r'$\pi(x)$')
+    ax4.set_title('Direct pi--normalized')
 
     fig.tight_layout(h_pad=3)
     fig.savefig(get_file_name(args.out))
