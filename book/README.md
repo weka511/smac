@@ -5,7 +5,7 @@
 -|template.py|Template for python programs
 1|smac.py|Useful functions: BoxMuller, CircleThrowing, and SphereGenerator
 1.1.1|exercise_1_1.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.
--|exercise_1_3.py|Problems 1.1 and 1.3'
+-|exercise_1_3.py|Problems 1.1 and 1.3
 -|smacfiletoken.py|
 1.1.2|markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.
 1.1.3|direct-needle.py|Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch)
@@ -62,10 +62,10 @@
 5.1|energy_ising.py|5.1: Compute energy of a simple Ising configuration
 -|edge_ising.py|Algorithm 5.5 edge-ising. Gray code enumeration of the loop configurations in Figure 5.8
 -|enumerate_ising.py|Algorithm 5.3: single flip enumeration for the Ising model.
--|Exercise 5-2. Generate configurations from binary representation (incomplete)
--|Exercise 5-4: Implement thermo-ising for mean energ and cV
--|Exercise 5-6.Plot magnetization as a function of temperature
--|exercise_5.7.py|Exercise 5.7. Compute Partition function using loop configurations as described in 5.1.3
+-|exercise_5_2.py|Exercise 5-2. Generate configurations from binary representation (incomplete)
+-|exercise_5_4.py|Exercise 5-4: Implement thermo-ising for mean energ and cV
+-|exercise_5_6.py|Exercise 5-6.Plot magnetization as a function of temperature
+-|exercise_5_7.py|Exercise 5.7. Compute Partition function using loop configurations as described in 5.1.3
 -|ising.py|Shared code for Ising model: Algorithm 5.2, Gray code for spins; generate neighbours of a spin; calculate energy for a configuration.
 -|ising_enum.py|Algorithm 5.3: Single spin-slip enumeration for Ising model
 -|ising-stats.py|Figure 6.6 - plot data from ising.py
