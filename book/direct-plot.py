@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-# direct-plot.py
-
-# Copyright (C) 2015 Greenweaves Software Pty Ltd
+# Copyright (C) 2015-2025 Greenweaves Software Pty Ltd
 
 # This is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +14,8 @@
 
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
+'''Implement Algorithm 1.1. Plot error and investigate relationship with N.'''
 
 import random,math,matplotlib.pyplot as plt
 
