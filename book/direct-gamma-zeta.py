@@ -12,7 +12,7 @@
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
 '''
-    Exercise 1.21, Algorithm 1.31.
+    Implement Algorithm 1.30: using importance sampling to compute the gamma integral.
 '''
 import argparse
 from os.path import basename, join, splitext
@@ -22,28 +22,41 @@ from matplotlib.pyplot import figure, show
 from matplotlib import rc
 
 def direct_gamma_zeta(gamma,zeta,n, rng=np.random.default_rng()):
+    '''
+    Algorithm 1.30: using importance sampling to compute the gamma integral
+
+    Parameters:
+        gamma
+        zeta
+        n
+        rn
+    '''
     def get_positive_sample():
+        '''
+        Used to compute random numbers in the open interval (0.0,1.0),
+        i.e. exclude zero.
+        '''
         while True:
             x = rng.random()
             if x > 0: return x
 
-    sigma = 0
+    sigma_x = 0
     sigma2 = 0
     for i in range(n):
         x = get_positive_sample()
-        x1 = x**(1/(1+zeta))
-        x2 = x1**(gamma - zeta)
-        sigma += x2
+        x1 = x ** (1/(1+zeta))
+        x2 = x1 ** (gamma - zeta)
+        sigma_x += x2
         sigma2 += x2**2
 
-    mean = sigma/n
+    mean = sigma_x/n
     return (mean,np.sqrt(sigma2/n-mean*mean)/np.sqrt(n))
 
 def parse_arguments():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('-n', '--n', type=int, default=1000,help='Number of steps for integral')
     parser.add_argument('--gammas', type=float, default= [2.0,1.0,0.0,-0.1,-0.4,-0.8], nargs='+')
-    parser.add_argument('--zetas', type=float, default= [0.0, -0.1, -0.7], nargs='+')
+    parser.add_argument('--zetas', type=float, default= [0.0, -0.1, -0.7, -0.8], nargs='+')
     parser.add_argument('--seed',type=int,default=None,help='Seed for random number generator')
     parser.add_argument('--show', action = 'store_true', help = 'Show plot')
     parser.add_argument('-o', '--out', default = basename(splitext(__file__)[0]),help='Name of output file')
