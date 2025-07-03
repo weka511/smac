@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
-'''Algorithm 1.32 levy convolution'''
+'''Algorithm 1.32 Levy convolution'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -60,27 +60,36 @@ def get_file_name(name,default_ext='png',seq=None):
 def levy_convolution(pi,A_Plus=1.25,alpha=1.25):
     '''
     Algorithm 1.32 levy convolution
+
     Parameters:
-        pi
-        A_Plus
-        alpha
+        pi       List of form [(x,p(x)),....]
+        A_Plus   See page 72 of Krauth
+        alpha    See page 72 of Krauth
+
+    Returns:
+        Convolution of padded p with itself
     '''
 
     x0,_ = pi[0]
     xK,_ = pi[-1]
     K    = len(pi)
     Delta = (xK-x0)/(K-1)
-    for k in range(K):
-        x = x0 + (K + k) * Delta
-        pik = A_Plus/x**(1+alpha)
-        pi.append((x,pik))
-    pi_dash=[]
-    for k in range(0,2*K):
-        x = (pi[0][0]+pi[k][0])/(2**(1/alpha))
-        pi_x = Delta * sum([pi[i][1]*pi[k-i][1] for i in range(k)])/2**(1/alpha)
-        pi_dash.append((x,pi_x))
-    norm = sum([p for (_,p) in pi_dash])
-    return [(x,p/norm) for (x,p) in pi_dash if x>= x0 and x0 <= xK]
+    def pad_pi():
+        for k in range(K):
+            x = x0 + (K + k) * Delta
+            pi.append((x,A_Plus/x**(1+alpha)))
+        return pi
+
+    def convolve(pi):
+        pi_dash = []
+        for k in range(0,2*K):
+            x = (pi[0][0]+pi[k][0]) / (2**(1/alpha))
+            pi_dash.append((x,Delta * sum([pi[i][1]*pi[k-i][1] for i in range(k)])  * 2**(1/alpha)))
+        return pi_dash
+
+    pi_reduced = [(x,p) for (x,p) in convolve(pad_pi()) if x>= x0 and x <= xK]
+    norm = sum([p for (_,p) in pi_reduced])
+    return [(x,p/norm) for (x,p) in pi_reduced]
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -91,15 +100,16 @@ if __name__=='__main__':
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
     pi = [(x/10,0.1) for x in range(11)]
-    ax1.plot([x for (x,_) in pi],[p for (_,p) in pi],label=f'{0}')
+
     for i in range(args.N):
         pi = levy_convolution(pi)
-        ax1.plot([x for (x,_) in pi],[p for (_,p) in pi],label=f'{i+1}')
+        ax1.plot([x for (x,_) in pi],[p for (_,p) in pi],label=f'{i}',linestyle='dashed')
     ax1.legend()
     ax1.set_xlabel('$x$')
     ax1.set_ylabel(r'$\pi(x)$')
-
+    ax1.set_title('Algorithm 1.32 Levy convolution')
     fig.savefig(get_file_name(args.out))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
