@@ -25,8 +25,8 @@
 -|exercise_1_15.py|Exercise 1.15. Generate 3 dimensional orthonormal coordinate systems with axes randomly oriented in space, using Algorithm 1.22. Test by computing average scalar products for pairs of random coordinate systems.
 -|chaosbook_2_11.py|Monte Carlo simulation of Exercise 2.11 of Chaosbook: in higher dimensions, any two vectors are nearly orthogonal
 1.3.1|exercise_1_18.py|Exercise 1.18 and Algorithm 1.25 from Krauth
-1.3.5|data-bunch.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). First part: test with a single, very long, simulation of Alg 1.2, markov-pi, with throwing ranges of 0.03, 0.1, 0.3.
--|data-bunch-discrete-pebble.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). Second part: test it also with the output of Alg 1.6, markov-discrete-pebble.py.
+1.3.5|exercise_1_20.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). First part: test with a single, very long, simulation of Alg 1.2, markov-pi, with throwing ranges of 0.03, 0.1, 0.3.
+-|exercise_1_20a.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). Second part: test it also with the output of Alg 1.6, markov-discrete-pebble.py.
 1.4.2|exercise_1_22.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
 -|direct-gamma-zeta.py|Implement Algorithm 1.30
 1.4.3|exercise_1_21.py|Exercise 1.21 Determine the mean value of x**(gamma-zeta) in a simple implementation of Algorithm 1.31 (markov-zeta)
