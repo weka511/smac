@@ -57,7 +57,7 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 
-def levy(pi,A_Plus=1.25,alpha=1.25):
+def levy_convolution(pi,A_Plus=1.25,alpha=1.25):
     '''
     Algorithm 1.32 levy convolution
     Parameters:
@@ -91,9 +91,13 @@ if __name__=='__main__':
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
     pi = [(x/10,0.1) for x in range(11)]
+    ax1.plot([x for (x,_) in pi],[p for (_,p) in pi],label=f'{0}')
     for i in range(args.N):
-        pi = levy(pi)
-        ax1.plot(pi)
+        pi = levy_convolution(pi)
+        ax1.plot([x for (x,_) in pi],[p for (_,p) in pi],label=f'{i+1}')
+    ax1.legend()
+    ax1.set_xlabel('$x$')
+    ax1.set_ylabel(r'$\pi(x)$')
 
     fig.savefig(get_file_name(args.out))
     elapsed = time() - start
