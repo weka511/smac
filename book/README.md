@@ -6,7 +6,7 @@
 1.1.1|exercise_1_1.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.
 -|exercise_1_3.py|Problems 1.1 and 1.3
 -|smacfiletoken.py|Allow program to be stopped by creating kill token
-1.1.2|markov-pi.py|Implement Algorithm 1.2. Plot error and rejection rate.
+1.1.2|exercise_1_2.py|Implement Algorithm 1.2. Plot error and rejection rate.
 1.1.3|direct-needle.py|Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch)
 1.1.4|nbr.py|Table 1.3 Neighbour table
 -|exercise_1_4.py|Exercise 1.4: implement algorithm 1.6, markov-discrete-pebble, using a subroutine for the numbering scheme and neighbour table. Check that, during long runs, all sites are visited equally often.
@@ -28,10 +28,10 @@
 1.3.5|exercise_1_20.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). First part: test with a single, very long, simulation of Alg 1.2, markov-pi, with throwing ranges of 0.03, 0.1, 0.3.
 -|exercise_1_20a.py|Exercise 1.20. Implemement algorithm 1.28 (data-bunch). Second part: test it also with the output of Alg 1.6, markov-discrete-pebble.py.
 1.4.2|exercise_1_22.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
--|direct-gamma-zeta.py|Implement Algorithm 1.30
+-|direct-gamma-zeta.py|Implement Algorithm 1.30: using importance sampling to compute the gamma integral.
 1.4.3|exercise_1_21.py|Exercise 1.21 Determine the mean value of x**(gamma-zeta) in a simple implementation of Algorithm 1.31 (markov-zeta)
 -|markov-zeta.py|Algorithm 1.31 Markov-chain Monto Carlo algorithm for a point x on the interval [0,1] with probability proportional to x**zeta
-1.4.4|levy-convolution.py|Algorithm 1.32
+1.4.4|levy-convolution.py|Algorithm 1.32 Levy convolution: distribution is convoluted with itself, after being padded as in Figure 1.47.
 2.1.4|exercise_2_4.py|Exercise 2-4: Sinai's system of two large sphere in a box. Show histogram of positions.
 2.2.1|pair-time.py|Exercise 2.1: Implement algorithm 2.2 (pair-time) and incorporate it into a test program  generating 2 random positions with ans(delta_x) > 2 sigma. Propagate both disks up to t_pair if finite and verify that they touch; otherwise verify that delta_x.delta_v = 0.
 -|exercise_2_2.py|Exercise 2.2/Algorithm 2.3 (pair collision). Verify that energy and momentum are both conserved in a collision.
