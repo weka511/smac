@@ -15,7 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>
 
-'''Algorithm 1.32 Levy convolution'''
+'''
+    Algorithm 1.32 Levy convolution: distribution is convoluted with itself,
+    after being padded as in Figure 1.47.
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -87,9 +90,7 @@ def levy_convolution(pi,A_Plus=1.25,alpha=1.25):
             pi_dash.append((x,Delta * sum([pi[i][1]*pi[k-i][1] for i in range(k)])  * 2**(1/alpha)))
         return pi_dash
 
-    pi_reduced = [(x,p) for (x,p) in convolve(pad_pi()) if x>= x0 and x <= xK]
-    norm = sum([p for (_,p) in pi_reduced])
-    return [(x,p/norm) for (x,p) in pi_reduced]
+    return [(x,p) for (x,p) in convolve(pad_pi()) if x>= x0 and x <= xK]
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -98,16 +99,19 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
     fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(1,1,1)
+    fig.suptitle('Algorithm 1.32 Levy convolution')
+    m = int(np.sqrt(args.N))
+    n = args.N // m
+    while m*n < args.N:
+        n+= 1
     pi = [(x/10,0.1) for x in range(11)]
 
     for i in range(args.N):
+        ax1 = fig.add_subplot(m,n,i+1)
         pi = levy_convolution(pi)
-        ax1.plot([x for (x,_) in pi],[p for (_,p) in pi],label=f'{i}',linestyle='dashed')
-    ax1.legend()
-    ax1.set_xlabel('$x$')
-    ax1.set_ylabel(r'$\pi(x)$')
-    ax1.set_title('Algorithm 1.32 Levy convolution')
+        ax1.plot([x for (x,_) in pi],[p for (_,p) in pi])
+        ax1.set_title(f'Iteration {i+1}')
+
     fig.savefig(get_file_name(args.out))
 
     elapsed = time() - start
