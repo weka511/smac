@@ -3,7 +3,6 @@
 #|File|Problem/Algorithm/Description
 -----|--------------|---------------------------------------------------------------------------------------
 -|template.py|Template for python programs
-1|smac.py|Useful functions: BoxMuller, CircleThrowing, and SphereGenerator
 1.1.1|exercise_1_1.py|Implement Algorithm 1.1. Plot error and investigate relationship with N.
 -|exercise_1_3.py|Problems 1.1 and 1.3
 -|smacfiletoken.py|
