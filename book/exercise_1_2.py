@@ -60,24 +60,16 @@ def get_file_name(name,default_ext='png',seq=None):
         return qualified_name
 
 
-def normalize(xs):
-    '''
-    Calculate normalized errors, using the maximum as our normalization.
-    Normalized errors range from 0 to 1
-    '''
-    m = max(xs)
-    return [x/m for x in xs]
-
 def perform_markov(n_trials,delta=0.1,rng = np.random.default_rng()):
     '''
     Algorithm 1.2 from Werner Krauth, Statistical Mechanics, Algorithms & Computations
     '''
-    x, y = 1.0, 1.0
+    x, y = rng.uniform(-1, 1,size=(2))
     n_hits = 0
     n_reject = 0
 
     for i in range(n_trials):
-        del_x, del_y = rng.uniform(-delta, delta), rng.uniform(-delta, delta)
+        del_x, del_y = rng.uniform(-delta, delta,size=(2))
         if abs(x + del_x) < 1.0 and abs(y + del_y) < 1.0:
             x, y = x + del_x, y + del_y
         else:
@@ -92,7 +84,7 @@ if __name__=='__main__':
     start = time()
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
-    deltas = np.arange(1,3,step=0.1)
+    deltas = np.arange(0.1,3,step=0.1)
     errors = np.zeros((len(deltas)))
     rejections = np.zeros((len(deltas)))
 
@@ -110,16 +102,18 @@ if __name__=='__main__':
     fig = figure(figsize=(12,12))
 
     ax1 = fig.add_subplot(2,1,1)
-    ax1.plot(deltas, normalize(errors), 'o', label='Errors')
-    ax1.plot(deltas, rejections,'+', label='Rejections')
+    ax1a = ax1.twinx()
+    plot1 = ax1.plot(deltas, errors, color='xkcd:red', label='Errors')
+    plot1a = ax1a.plot(deltas, rejections,color='xkcd:blue', label='Rejections')
     ax1.set_xlabel(r'$\delta$')
     ax1.set_ylabel(r'$Error$')
+    ax1a.set_ylabel(r'$Rejection$')
     ax1.set_title(r'Error and rejection rate vs step size')
-    legend = ax1.legend(loc='upper center', shadow=True, fontsize='x-large')
-    legend.get_frame().set_facecolor('#00FFCC')
+    plots = plot1 + plot1a
+    ax1.legend(plots,[p.get_label() for p in plots])
 
     ax2 = fig.add_subplot(2,1,2)
-    ax2.plot(rejections[1:], errors[1:],'x')
+    ax2.plot(rejections[1:], errors[1:])
     ax2.set_xlabel('Rejection')
     ax2.set_ylabel('Error')
     ax2.set_title('Error vs rejection rate')
