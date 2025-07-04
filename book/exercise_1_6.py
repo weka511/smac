@@ -15,7 +15,9 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-'''Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch).'''
+'''
+    Exercise 1.6: implement Alg 1.4 direct needle and Alg 1.5 direct-needle(patch).
+'''
 
 from argparse import ArgumentParser
 from os.path import basename, join, splitext
@@ -97,7 +99,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_file_name(name,default_ext='png',seq=None):
+def get_file_name(name,default_ext='png',figs='./figs',seq=None):
     '''
     Used to create file names
 
@@ -112,10 +114,7 @@ def get_file_name(name,default_ext='png',seq=None):
     if seq != None:
         base = f'{base}{seq}'
     qualified_name = f'{base}.{ext}'
-    if ext == 'png':
-        return join(args.figs,qualified_name)
-    else:
-        return qualified_name
+    return join(figs,qualified_name) if ext == 'png' else qualified_name
 
 
 def get_hits(a,b,x=0,cos_phi=0):
@@ -173,7 +172,7 @@ if __name__=='__main__':
     ax2.get_xaxis().set_ticks([])
     ax2.get_yaxis().set_ticks([])
 
-    fig.savefig(get_file_name(args.out))
+    fig.savefig(get_file_name(args.out,figs=args.figs))
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
