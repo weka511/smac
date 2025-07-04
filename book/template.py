@@ -36,13 +36,14 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_file_name(name,default_ext='png',seq=None):
+def get_file_name(name,default_ext='png',figs='./figs',seq=None):
     '''
     Used to create file names
 
     Parameters:
         name          Basis for file name
         default_ext   Extension if non specified
+        figs          Directory for storing figures
         seq           Used if there are multiple files
     '''
     base,ext = splitext(name)
@@ -51,10 +52,7 @@ def get_file_name(name,default_ext='png',seq=None):
     if seq != None:
         base = f'{base}{seq}'
     qualified_name = f'{base}.{ext}'
-    if ext == 'png':
-        return join(args.figs,qualified_name)
-    else:
-        return qualified_name
+    return join(figs,qualified_name) if ext == 'png' else qualified_name
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -65,7 +63,7 @@ if __name__=='__main__':
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
 
-    fig.savefig(get_file_name(args.out))
+    fig.savefig(get_file_name(args.out,figs=args.figs))
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
