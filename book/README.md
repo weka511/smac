@@ -31,7 +31,8 @@
 1.4.2|exercise_1_22.py|1.22 Importance sampling:Implement Algorithm 1.29, subtract mean value for each sample, and generate histograms of the average of N samples  and the rescaled averages.
 -|direct-gamma-zeta.py|Implement Algorithm 1.30: using importance sampling to compute the gamma integral.
 1.4.3|exercise_1_21.py|Exercise 1.21 Determine the mean value of x**(gamma-zeta) in a simple implementation of Algorithm 1.31 (markov-zeta)
--|markov-zeta.py|Algorithm 1.31 Markov-chain Monto Carlo algorithm for a point x on the interval [0,1] with probability proportional to x**zeta
+-|markov-zeta.py|Algorithm 1.31 Markov-chain Monto Carlo algorithm for a point x on the interval [0,1] with probability proportional to x**zeta. Algorithm 1.31 Markov-chain Monto Carlo algorithm for a point x on the interval [0,1]
+    with probability proportional to x**zeta. The code illustrates both an integrable and a non-integrable singularity.
 1.4.4|levy-convolution.py|Algorithm 1.32 Levy convolution: distribution is convoluted with itself, after being padded as in Figure 1.47.
 2.1.4|exercise_2_4.py|Exercise 2-4: Sinai's system of two large sphere in a box. Show histogram of positions.
 2.2.1|pair-time.py|Exercise 2.1: Implement algorithm 2.2 (pair-time) and incorporate it into a test program  generating 2 random positions with ans(delta_x) > 2 sigma. Propagate both disks up to t_pair if finite and verify that they touch; otherwise verify that delta_x.delta_v = 0.
