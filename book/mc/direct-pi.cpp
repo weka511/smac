@@ -27,18 +27,18 @@
  using namespace std;
  
  int main() {
-	auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+	auto seed = chrono::system_clock::now().time_since_epoch().count();
 	auto engine = mt19937(seed);
 	auto uniform_real = uniform_real_distribution<double> (-1.0, 1.0);
   
 	auto n_hits = 0;
-	auto N = 1000000;
+	auto N = 100000000;
 	for (auto i = 0; i < N; i++){
 		auto x = uniform_real(engine);
 		auto y = uniform_real(engine);
 		if (x*x + y*y < 1)
 			 n_hits ++;
 	 } 
-	 cout << n_hits << endl;
+	 cout << (4.0 * n_hits) / N<< endl;
  }
  
