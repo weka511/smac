@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  *
- * Molecular dynamics simulation for hard disks or hard spheres, as described
+ * Simple Monte-Carlo example, Algorithm 1.1, as described
  * in Statistical Mechanics: Algorithms and Computations, by Werner Krauth,
- * ISBN 978-0-19-851535-7. This program performs the calculations, and the data
- * in the outout files are analyzed by md-plot.py.
+ * ISBN 978-0-19-851535-7.
  */
  
  #include <iostream>
@@ -28,14 +27,14 @@
  
  int main() {
 	auto seed = chrono::system_clock::now().time_since_epoch().count();
-	auto engine = mt19937(seed);
+	auto rng = mt19937(seed);
 	auto uniform_real = uniform_real_distribution<double> (-1.0, 1.0);
   
 	auto n_hits = 0;
-	auto N = 100000000;
-	for (auto i = 0; i < N; i++){
-		auto x = uniform_real(engine);
-		auto y = uniform_real(engine);
+	auto N = 1000000000;
+	for (auto i {0}; i < N; i++){
+		auto x = uniform_real(rng);
+		auto y = uniform_real(rng);
 		if (x*x + y*y < 1)
 			 n_hits ++;
 	 } 
