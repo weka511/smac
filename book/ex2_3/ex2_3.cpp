@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 	
-	cout << "Hello world" << endl;
+	cout << "ex2_3: " << VERSION << endl;
 	EventDisks event_disks(params.n);
+	event_disks.event_disks();
 }

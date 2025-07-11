@@ -23,11 +23,12 @@
 #include <iostream>
 #include <random>
 #include <limits>
+#include <cmath>
 #include "EventDisks.hpp"
 
 using namespace std;
 
-EventDisks::EventDisks(const int n, const double L, const double V): _n(n) {
+EventDisks::EventDisks(const int n, const double L, const double V, const double sigma): _n(n), _sigma(sigma) {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<> uniform_v(-V, V);
@@ -41,9 +42,6 @@ EventDisks::EventDisks(const int n, const double L, const double V): _n(n) {
 	for (int i = 0; i < n; ++i)
 		for (int j = 0; j < _d; ++j)
 			_v[i][j] = uniform_v(gen);
-		
-	for (int i = 0; i < n; ++i)
-		cout << "("<<_x[i][0] << "," << _x[i][1] <<"," << _x[i][2] <<"), ("<< _v[i][0] << "," << _v[i][1] <<"," << _v[i][2] << ")"<< endl;
 }
 
 void EventDisks::event_disks() {
@@ -59,8 +57,15 @@ void EventDisks::event_disks() {
 }
 		
 double EventDisks::get_pair_time(int i,int j) {
-	double inf = numeric_limits<double>::infinity();
-	return inf;
+	auto DeltaX = array{_x[i][0]-_x[j][0], _x[i][1]-_x[j][1], _x[i][2]-_x[j][2]};
+	auto DeltaV = array{_v[i][0]-_v[j][0], _v[i][1]-_v[j][1], _x[i][2]-_x[j][2]};
+	auto DeltaX_Delta_V = _inner_product(DeltaX,DeltaV);
+	auto V2 = _inner_product(DeltaV,DeltaV);
+	auto Upsilon = DeltaX_Delta_V*DeltaX_Delta_V - V2 * (_inner_product(DeltaX,DeltaX) - 4*_sigma*_sigma);
+	if (Upsilon > 0 && DeltaX_Delta_V < 0)
+		return -(DeltaX_Delta_V + sqrt(Upsilon))/V2;
+	else
+		return  numeric_limits<double>::infinity();
 }
 
 tuple<double,int,int> EventDisks::get_next_pair_time(){
@@ -77,17 +82,20 @@ tuple<double,int,int> EventDisks::get_next_pair_time(){
 	return result;
 }
 		
-double EventDisks::get_wall_time(int i, int j) {
-	double inf = std::numeric_limits<double>::infinity();
-	return inf;
+double EventDisks::get_wall_time(int i, int wall) {
+	if (_v[i][wall] > 0)
+		return (_L-_x[i][wall])/_v[i][wall];
+	if (_v[i][wall] < 0)
+		return - _x[i][wall]/_v[i][wall];
+	return numeric_limits<double>::infinity();
 }
 
 tuple<double,int> EventDisks::get_next_wall_time(){
 	double t0 =  numeric_limits<double>::infinity();
 	tuple<double,int> result = make_tuple(t0,-1);
 	for (int i=0;i<_n;i++)
-		for (int j=0;j<2*_d;j++){
-			const double t1 = get_wall_time(i,j);
+		for (int wall=0;wall<_d;wall++){
+			const double t1 = get_wall_time(i,wall);
 			if (t1 < t0){
 				result = make_tuple(t1,i);
 				t0 = t1;
@@ -96,8 +104,20 @@ tuple<double,int> EventDisks::get_next_wall_time(){
 	return result;
 }
 
-void EventDisks::move_all(double t){}
+void EventDisks::move_all(double t){
+	for (int i=0;i<_n;i++){
+		_x[i][0] += t * _v[i][0];
+		_x[i][1] += t * _v[i][1];
+		_x[i][2] += t * _v[i][2];
+	}
+}
 
-void  EventDisks::wall_collision(int j) {}
+void  EventDisks::wall_collision(int j) {
+	cout << "Wall collision " << j << endl;
+	exit(0);
+}
 		
-void  EventDisks::pair_collision(int k,int j) {}
+void  EventDisks::pair_collision(int k,int j) {
+	cout << "Pair collision " << k <<"," <<j << endl;
+	exit(0);
+}
