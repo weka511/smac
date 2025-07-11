@@ -1,0 +1,84 @@
+/**
+ * Copyright (C) 2022 Greenweaves Software Limited
+ *
+ * This is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>
+ */
+ 
+
+
+#include <getopt.h>
+#include <iostream>
+#include "params.hpp"
+ using namespace std;
+ 
+ /**
+  * Create ParameterSet from command line parameters
+  */
+ ParameterSet::ParameterSet(int argc, char **argv){
+	 struct option long_options[] = {
+			{"epochs",    required_argument,	0, 	'N'},
+			{"particles", required_argument,	0, 	'n'},
+			{"help",  	  no_argument, 		    0, 	'h'},
+			{"dimension", required_argument, 	0, 	'd'},
+			{0, 				0, 				0, 	0}
+	};	
+
+	auto c = 0;
+	auto option_index = 0;
+	while ((c = getopt_long (argc, argv, "N:n:hd:M:f:L:V:s:o:r:y:",long_options, &option_index)) != -1)
+		_extract(c);
+	 
+ }
+ 
+/**
+ *   Used to extract one command line parameter and store in Parameter Set
+ */
+ void ParameterSet::_extract(const int c) {
+	 try {
+		 switch(c) {
+			case 'N':
+				N = stoi(optarg);
+				break;
+			case 'n':
+				n = stoi(optarg);
+				break;
+			case 'd':
+				d = stoi(optarg);
+				break;
+			case 'h':
+				_help();
+				exit(0);
+			default:
+				parsing_error = true;
+				return;
+		}
+	 } catch(exception const & e){
+		 char arg = c;
+		 cerr<<"error parsing argument: " << arg << " " << optarg << " " << e.what() <<endl;
+		 parsing_error  = true;
+	 }
+
+}
+
+
+/**
+ * Display help text.
+ */
+void ParameterSet::_help() {
+	cout << "Molecular Dynamics"                                 << endl        << endl;
+	cout << "    Parameters"                                                    << endl;
+	cout << "\tN\tNumber of iterations\t\t\t\t"                  << N           << endl;
+	cout << "\tn\tNumber of spheres\t\t\t\t"                     << n           << endl;
+	cout << "\td\tDimension of box\t\t\t\t"                      << d           << endl;
+}
