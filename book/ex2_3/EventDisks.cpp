@@ -24,20 +24,37 @@
 #include <random>
 #include <limits>
 #include <cmath>
+#include <stdexcept>
 #include "EventDisks.hpp"
 
 using namespace std;
 
-EventDisks::EventDisks(const int n, const double L, const double V, const double sigma): _n(n), _sigma(sigma) {
+bool EventDisks::is_valid(unique_ptr<double[][3]> &x,const int n,  const double sigma){
+	auto sigma2 = sigma*sigma;
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < i; ++j) {
+			auto DeltaX = array{x[i][0]-x[j][0], x[i][1]-x[j][1], x[i][2]-x[j][2]};
+			if (_inner_product(DeltaX,DeltaX) < sigma2) return false;
+		}
+	return true;
+}
+
+EventDisks::EventDisks(const int n, const double L, const double V, const double sigma, const int m): _n(n), _sigma(sigma) {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<> uniform_v(-V, V);
 	std::uniform_real_distribution<> uniform_x(0.0, L);
 	_x = make_unique<double[][3]>(n);
-	for (int i = 0; i < n; ++i)
-		for (int j = 0; j < _d; ++j)
-			_x[i][j] = uniform_x(gen);
-
+	auto has_been_validated = false;
+	for (int k=0;!has_been_validated && k<m;k++){
+		for (int i = 0; i < n; ++i)
+			for (int j = 0; j < _d; ++j)
+				_x[i][j] = uniform_x(gen);
+		has_been_validated = is_valid(_x,n,sigma);	
+	}
+	if (!has_been_validated)
+		throw runtime_error("Failed to create valid configuration");
+	
 	_v = make_unique<double[][3]>(n);
 	for (int i = 0; i < n; ++i)
 		for (int j = 0; j < _d; ++j)
@@ -53,7 +70,7 @@ void EventDisks::event_disks() {
 	if (t_wall<t_pair)
 		wall_collision(j);
 	else
-		pair_collision(k,j);
+		pair_collision(k,l);
 }
 		
 double EventDisks::get_pair_time(int i,int j) {
@@ -114,10 +131,14 @@ void EventDisks::move_all(double t){
 
 void  EventDisks::wall_collision(int j) {
 	cout << "Wall collision " << j << endl;
+	cout << _x[j][0] << "," <<_x[j][1] << "," << _x[j][2] << endl;
 	exit(0);
 }
 		
 void  EventDisks::pair_collision(int k,int j) {
 	cout << "Pair collision " << k <<"," <<j << endl;
-	exit(0);
+	cout << _x[k][0] << "," <<_x[k][1] << "," << _x[k][2] << endl;
+	cout << _x[j][0] << "," <<_x[j][1] << "," << _x[j][2] << endl;
+	auto DeltaX = array{_x[k][0]-_x[j][0], _x[k][1]-_x[j][1], _x[k][2]-_x[j][2]};
+	cout << sqrt(_inner_product(DeltaX,DeltaX)) << endl;
 }

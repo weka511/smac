@@ -33,6 +33,10 @@ int main(int argc, char **argv) {
 	}
 	
 	cout << "ex2_3: " << VERSION << endl;
-	EventDisks event_disks(params.n);
-	event_disks.event_disks();
+	try {
+		EventDisks ed;
+		ed.event_disks();
+	}  catch (const exception& e) {
+        cerr << "Exception caught: " << e.what() << endl;
+    }
 }

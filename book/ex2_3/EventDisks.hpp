@@ -25,8 +25,8 @@
 using namespace std;
 
 class EventDisks {
-	public:
-		EventDisks(const int n, const double L=1.0, const double V=1.0, const double sigma = 1.0/8.0);
+	public:	
+		EventDisks(const int n=10, const double L=1.0, const double V=1.0, const double sigma = 1.0/64.0, const int m=100);
 		
 		void event_disks();
 		
@@ -51,7 +51,9 @@ class EventDisks {
 		int _d = 3;
 		double _sigma = 1.0/8.0;
 		
-		double _inner_product(array<double,3> &u,array<double,3> &v) {
+		static bool is_valid(unique_ptr<double[][3]> &x,const int n=100,  const double sigma = 1.0/8.0);
+		
+		static double _inner_product(array<double,3> &u,array<double,3> &v) {
 			return u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
 		}
 };
