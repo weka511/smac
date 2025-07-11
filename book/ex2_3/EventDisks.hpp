@@ -34,27 +34,39 @@ class EventDisks {
 		
 		tuple<double,int,int> get_next_pair_time();
 		
-		double get_wall_time(int i, int wall);
+		double get_wall_time(int sphere, int wall);
 		
-		tuple<double,int> get_next_wall_time();
+		tuple<double,int,int> get_next_wall_time();
 		
 		void move_all(double t);
 		
-		void wall_collision(int j);
+		void wall_collision(int sphere, int wall);
 		
 		void pair_collision(int k,int j);
 		
 	private:
 		unique_ptr<double[][3]> _x;
+		
 		unique_ptr<double[][3]> _v;
+		
 		int _n;
+		
 		int _d = 3;
+		
+		int _length;
+		
 		double _sigma = 1.0/8.0;
 		
-		static bool is_valid(unique_ptr<double[][3]> &x,const int n=100,  const double sigma = 1.0/8.0);
+		/**
+		 * Verify that configuration is valid, i.e. no two spheres overlap
+		 */
+		static bool _is_valid(unique_ptr<double[][3]> &x,const int n=100,  const double sigma = 1.0/8.0);
 		
 		static double _inner_product(array<double,3> &u,array<double,3> &v) {
-			return u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+			auto sum=0.0;
+			for (int j=0;j<3;j++)
+				sum += u[j]*v[j];
+			return sum;
 		}
 };
 

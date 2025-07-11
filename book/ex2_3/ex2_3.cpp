@@ -35,7 +35,8 @@ int main(int argc, char **argv) {
 	cout << "ex2_3: " << VERSION << endl;
 	try {
 		EventDisks ed;
-		ed.event_disks();
+		for (int i=0;i<25;i++)
+			ed.event_disks();
 	}  catch (const exception& e) {
         cerr << "Exception caught: " << e.what() << endl;
     }
