@@ -23,20 +23,24 @@
 #include <iostream>
 #include "params.hpp"
 #include "EventDisks.hpp"
+
 using namespace std;
 
 int main(int argc, char **argv) {
 	ParameterSet params(argc, argv);
-	if (params.parsing_error) {
+	if (params.has_parsing_error()) {
 		cerr << "Terminating because of errors" << endl;
 		exit(1);
 	}
 	
 	cout << "ex2_3: " << VERSION << endl;
 	try {
-		EventDisks ed;
-		for (int i=0;i<25;i++)
+		EventDisks ed(params.n,params.L,params.V,params.sigma,params.m);
+		for (int i=0;i<params.N;i++){
+			if (i%params.freq==0)
+				cout << "Epoch " << i << ", T=" << ed.get_time()<<endl;
 			ed.event_disks();
+		}
 	}  catch (const exception& e) {
         cerr << "Exception caught: " << e.what() << endl;
     }

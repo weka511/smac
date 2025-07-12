@@ -20,7 +20,8 @@
 #include <getopt.h>
 #include <iostream>
 #include "params.hpp"
- using namespace std;
+
+using namespace std;
  
  /**
   * Create ParameterSet from command line parameters
@@ -29,8 +30,12 @@
 	 struct option long_options[] = {
 			{"epochs",    required_argument,	0, 	'N'},
 			{"particles", required_argument,	0, 	'n'},
+			{"sigma",     required_argument,	0, 	's'},
 			{"help",  	  no_argument, 		    0, 	'h'},
-			{"dimension", required_argument, 	0, 	'd'},
+			{"freq",      required_argument,	0, 	'f'},
+			{"Length",    required_argument,	0, 	'L'},
+			{"Velocity",  required_argument,	0, 	'V'},
+			{"Attempts",  required_argument,	0, 	'm'},
 			{0, 				0, 				0, 	0}
 	};	
 
@@ -47,26 +52,38 @@
  void ParameterSet::_extract(const int c) {
 	 try {
 		 switch(c) {
+			case 'f':
+				freq = stoi(optarg);
+				break;
+			case 'L':
+				L = stod(optarg);
+				break;
+			case 'V':
+				V = stod(optarg);
+				break;
+			case 'm':
+				m = stoi(optarg);
+				break;
 			case 'N':
 				N = stoi(optarg);
 				break;
 			case 'n':
 				n = stoi(optarg);
 				break;
-			case 'd':
-				d = stoi(optarg);
-				break;
+			case 's':
+				sigma = stod(optarg);
+				break;	
 			case 'h':
 				_help();
 				exit(0);
 			default:
-				parsing_error = true;
+				_parsing_error = true;
 				return;
 		}
 	 } catch(exception const & e){
 		 char arg = c;
 		 cerr<<"error parsing argument: " << arg << " " << optarg << " " << e.what() <<endl;
-		 parsing_error  = true;
+		 _parsing_error  = true;
 	 }
 
 }
@@ -80,5 +97,4 @@ void ParameterSet::_help() {
 	cout << "    Parameters"                                                    << endl;
 	cout << "\tN\tNumber of iterations\t\t\t\t"                  << N           << endl;
 	cout << "\tn\tNumber of spheres\t\t\t\t"                     << n           << endl;
-	cout << "\td\tDimension of box\t\t\t\t"                      << d           << endl;
 }

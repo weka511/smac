@@ -29,15 +29,6 @@
 
 using namespace std;
 
-bool EventDisks::_is_valid(unique_ptr<double[][3]> &x,const int n,  const double sigma){
-	auto sigma2 = sigma*sigma;
-	for (int i = 0; i < n; ++i)
-		for (int j = 0; j < i; ++j) {
-			auto DeltaX = array{x[i][0]-x[j][0], x[i][1]-x[j][1], x[i][2]-x[j][2]};
-			if (_inner_product(DeltaX,DeltaX) < sigma2) return false;
-		}
-	return true;
-}
 
 EventDisks::EventDisks(const int n, const double L, const double V, const double sigma, const int m): _n(n), _sigma(sigma),_length(L) {
 	std::random_device rd;
@@ -75,14 +66,26 @@ void EventDisks::event_disks() {
 	tie(t_wall,sphere,wall) = get_next_wall_time();
 	
 	if (t_wall<t_pair){
-		move_all(t_wall);
+		move_all(t_wall); 
 		wall_collision(sphere,wall);
+		_t += t_wall;
 	} else {
 		move_all(t_pair);
 		pair_collision(k,l);
+		_t += t_pair;
 	}
 }
-		
+	
+bool EventDisks::_is_valid(unique_ptr<double[][3]> &x,const int n,  const double sigma){
+	auto sigma2 = sigma*sigma;
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < i; ++j) {
+			auto DeltaX = array{x[i][0]-x[j][0], x[i][1]-x[j][1], x[i][2]-x[j][2]};
+			if (_inner_product(DeltaX,DeltaX) < sigma2) return false;
+		}
+	return true;
+}
+	
 double EventDisks::get_pair_time(int i,int j) {
 	auto DeltaX = array{_x[i][0]-_x[j][0], _x[i][1]-_x[j][1], _x[i][2]-_x[j][2]};
 	auto DeltaV = array{_v[i][0]-_v[j][0], _v[i][1]-_v[j][1], _x[i][2]-_x[j][2]};
@@ -144,9 +147,20 @@ void  EventDisks::wall_collision(int sphere,int wall) {
 		
 void  EventDisks::pair_collision(int k,int j) {
 	cout << "Pair collision " << k <<"," <<j << endl;
-	cout << _x[k][0] << "," <<_x[k][1] << "," << _x[k][2] << endl;
-	cout << _x[j][0] << "," <<_x[j][1] << "," << _x[j][2] << endl;
-	auto DeltaX = array{_x[k][0]-_x[j][0], _x[k][1]-_x[j][1], _x[k][2]-_x[j][2]};
-	cout << sqrt(_inner_product(DeltaX,DeltaX)) << endl;
-	exit(0);
+	// cout << _x[k][0] << "," <<_x[k][1] << "," << _x[k][2] << endl;
+	// cout << _x[j][0] << "," <<_x[j][1] << "," << _x[j][2] << endl;
+	auto DeltaX = array{_x[k][0]-_x[j][0], _x[k][1]-_x[j][1], _x[k][2]-_x[j][2]}; 
+	auto norm = sqrt(_inner_product(DeltaX,DeltaX));
+	// cout << norm << "," <<2*_sigma<<endl;
+	for (int i=0;i<_d;i++)
+		DeltaX[i] /= norm;
+	
+	auto DeltaV = array{_v[k][0]-_v[j][0], _v[k][1]-_v[j][1], _v[k][2]-_v[j][2]};
+	auto DeltaV_perp =  _inner_product(DeltaX,DeltaV);
+	// cout << _inner_product(DeltaX,DeltaV) <<endl;
+	for (int i=0;i<_d;i++){
+		_x[k][i] -= DeltaV_perp*DeltaX[i];
+		_x[j][i] += DeltaV_perp*DeltaX[i];
+	}
+	
 }

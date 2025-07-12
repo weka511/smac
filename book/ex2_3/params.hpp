@@ -26,28 +26,37 @@ using namespace std;
  */ 
 class ParameterSet {
   public:
-	int    N               = 10000;
-	int    n               = 100;
-	int    d               = 3;
-	bool   parsing_error   = false;
+	int N = 10000;
+	
+	int n = 90;
+
+	float sigma = 1.0/16.0;
+	
+	int freq = 25;
+	
+	double L = 1.0;
+	
+	double V = 1.0;
+	
+	double m = 100;
 	
 	/**
 	 *  Create ParameterSet from command line parameters
 	 */
 	ParameterSet(int argc, char **argv);
 	
-
+	bool has_parsing_error() {return _parsing_error;};
 	
   private:	
+  
+  	bool _parsing_error = false;
 	
-  void _extract(const int c);
+	void _extract(const int c);
   
 	/**
 	 * Display help text.
 	 */
 	void _help();
-	
-
 };
 
 #endif //_PARAMS_HPP_
