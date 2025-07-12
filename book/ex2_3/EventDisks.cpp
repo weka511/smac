@@ -141,23 +141,18 @@ void EventDisks::move_all(double t){
 }
 
 void  EventDisks::wall_collision(int sphere,int wall) {
-	cout << "Wall " << wall << " collision " << sphere << ": ("  << _x[sphere][0] << "," <<_x[sphere][1] << "," << _x[sphere][2] <<")"<< endl;
 	_v[sphere][wall] = -_v[sphere][wall];
 }
 		
 void  EventDisks::pair_collision(int k,int j) {
-	cout << "Pair collision " << k <<"," <<j << endl;
-	// cout << _x[k][0] << "," <<_x[k][1] << "," << _x[k][2] << endl;
-	// cout << _x[j][0] << "," <<_x[j][1] << "," << _x[j][2] << endl;
 	auto DeltaX = array{_x[k][0]-_x[j][0], _x[k][1]-_x[j][1], _x[k][2]-_x[j][2]}; 
 	auto norm = sqrt(_inner_product(DeltaX,DeltaX));
-	// cout << norm << "," <<2*_sigma<<endl;
+
 	for (int i=0;i<_d;i++)
 		DeltaX[i] /= norm;
 	
 	auto DeltaV = array{_v[k][0]-_v[j][0], _v[k][1]-_v[j][1], _v[k][2]-_v[j][2]};
 	auto DeltaV_perp =  _inner_product(DeltaX,DeltaV);
-	// cout << _inner_product(DeltaX,DeltaV) <<endl;
 	for (int i=0;i<_d;i++){
 		_x[k][i] -= DeltaV_perp*DeltaX[i];
 		_x[j][i] += DeltaV_perp*DeltaX[i];
