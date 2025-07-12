@@ -26,13 +26,13 @@
 using namespace std;
 
 int main(int argc, char **argv) {
+	cout << "ex2_3: " << VERSION << endl;
 	ParameterSet params(argc, argv);
 	if (params.has_parsing_error()) {
 		cerr << "Terminating because of errors" << endl;
 		exit(1);
 	}
 	
-	cout << "ex2_3: " << VERSION << endl;
 	cout << "n="<< params.n << ", L=" <<params.L<< ", V=" <<params.V<< ", sigma=" <<params.sigma<< ", m=" <<params.m<< endl;
 	cout << "N=" << params.N << endl;
 	try {
@@ -43,6 +43,7 @@ int main(int argc, char **argv) {
 			ed.event_disks();
 		}
 	}  catch (const exception& e) {
-        cerr << "Error: " << e.what() << endl;
+        cerr << "Terminating because of errors: " << e.what() << endl;
+		exit(1);
     }
 }

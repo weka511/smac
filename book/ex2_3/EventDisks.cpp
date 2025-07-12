@@ -29,7 +29,9 @@
 
 using namespace std;
 
-
+/**
+ *  Create a valid configuration, comprising positions and velocites.
+ */
 EventDisks::EventDisks(const int n, const double L, const double V, const double sigma, const int m): _n(n), _sigma(sigma),_length(L) {
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -45,18 +47,20 @@ EventDisks::EventDisks(const int n, const double L, const double V, const double
 		// Verify that no two spheres overlap
 		has_been_validated = _is_valid(_x,n,sigma);	
 	}
-	if (!has_been_validated)
+	if (has_been_validated){
+		_v = make_unique<double[][3]>(n);
+		for (int i = 0; i < n; ++i)
+			for (int j = 0; j < _d; ++j)
+				_v[i][j] = uniform_v(gen);
+	} else
 		throw runtime_error("Failed to create valid configuration");
-	
-	_v = make_unique<double[][3]>(n);
-	for (int i = 0; i < n; ++i)
-		for (int j = 0; j < _d; ++j)
-			_v[i][j] = uniform_v(gen);
-		
-	for (int i = 0; i < n; ++i)
-		cout << "("<<_x[i][0] << "," << _x[i][1] << "," << _x[i][2] << "," << endl;
 }
 
+/**
+ * Algorithm 2.1: perform one step of the simulation. Determine time to next collision,
+ * of either type, update all positions to just befroe collision,
+ * then update velocities to just after.
+ */
 void EventDisks::event_disks() {
 	double t_pair;
 	double t_wall;
@@ -64,18 +68,17 @@ void EventDisks::event_disks() {
 	int sphere,wall;
 	tie(t_pair,k,l) = get_next_pair_time();
 	tie(t_wall,sphere,wall) = get_next_wall_time();
-	
-	if (t_wall<t_pair){
-		move_all(t_wall); 
+	auto t_next = min(t_wall,t_pair);
+	move_all(t_next);
+	if (t_wall<t_pair)
 		wall_collision(sphere,wall);
-		_t += t_wall;
-	} else {
-		move_all(t_pair);
+	else
 		pair_collision(k,l);
-		_t += t_pair;
-	}
 }
-	
+
+/**
+ * Validate configuration: make sure no two sphere overlap
+ */ 
 bool EventDisks::_is_valid(unique_ptr<double[][3]> &x,const int n,  const double sigma){
 	auto sigma2 = sigma*sigma;
 	for (int i = 0; i < n; ++i)
@@ -85,7 +88,10 @@ bool EventDisks::_is_valid(unique_ptr<double[][3]> &x,const int n,  const double
 		}
 	return true;
 }
-	
+
+/**
+ * Algorithm 2.2: calculate time to the next collision of two specified spheres.
+ */ 
 double EventDisks::get_pair_time(int i,int j) {
 	auto DeltaX = array{_x[i][0]-_x[j][0], _x[i][1]-_x[j][1], _x[i][2]-_x[j][2]};
 	auto DeltaV = array{_v[i][0]-_v[j][0], _v[i][1]-_v[j][1], _x[i][2]-_x[j][2]};
@@ -98,6 +104,9 @@ double EventDisks::get_pair_time(int i,int j) {
 		return  numeric_limits<double>::infinity();
 }
 
+/**
+ * Calculate time to the next collision of any two spheres.
+ */ 	
 tuple<double,int,int> EventDisks::get_next_pair_time(){
 	double t0 =  numeric_limits<double>::infinity();
 	tuple<double,int,int> result = make_tuple(t0,-1,-1);
@@ -112,6 +121,9 @@ tuple<double,int,int> EventDisks::get_next_pair_time(){
 	return result;
 }
 		
+/**
+ * Calculate time to next collision between a specified sphere and specified wall
+ */
 double EventDisks::get_wall_time(int sphere, int wall) {
 	if (_v[sphere][wall] > 0)
 		return (_length-_x[sphere][wall])/_v[sphere][wall];
@@ -120,6 +132,9 @@ double EventDisks::get_wall_time(int sphere, int wall) {
 	return numeric_limits<double>::infinity();
 }
 
+/**
+ * Calculate time to next collision between any sphere and any wall
+ */
 tuple<double,int,int> EventDisks::get_next_wall_time(){
 	double best_wall_time =  numeric_limits<double>::infinity();
 	tuple<double,int,int> result = make_tuple(best_wall_time,-1,-1);
@@ -134,16 +149,26 @@ tuple<double,int,int> EventDisks::get_next_wall_time(){
 	return result;
 }
 
-void EventDisks::move_all(double t){
+/**
+ *  Run configuration forward for a specified time interval, updating current time and positions.
+ */
+void EventDisks::move_all(double dt){
 	for (int i=0;i<_n;i++)
 		for (int j=0;j<_d;j++)
-			_x[i][j] += (t * _v[i][j]);
+			_x[i][j] += (dt * _v[i][j]);
+	_t += dt;
 }
 
+/**
+ *  Collide sphere with wall, reversing velocity component normal to wall
+ */
 void  EventDisks::wall_collision(int sphere,int wall) {
 	_v[sphere][wall] = -_v[sphere][wall];
 }
-		
+
+/**
+ *  Collide two spheres, reversing velocity components normal to tangent plane
+ */	
 void  EventDisks::pair_collision(int k,int j) {
 	auto DeltaX = array{_x[k][0]-_x[j][0], _x[k][1]-_x[j][1], _x[k][2]-_x[j][2]}; 
 	auto norm = sqrt(_inner_product(DeltaX,DeltaX));
@@ -154,8 +179,8 @@ void  EventDisks::pair_collision(int k,int j) {
 	auto DeltaV = array{_v[k][0]-_v[j][0], _v[k][1]-_v[j][1], _v[k][2]-_v[j][2]};
 	auto DeltaV_perp =  _inner_product(DeltaX,DeltaV);
 	for (int i=0;i<_d;i++){
-		_x[k][i] -= DeltaV_perp*DeltaX[i];
-		_x[j][i] += DeltaV_perp*DeltaX[i];
+		_x[k][i] -= 2*DeltaV_perp*DeltaX[i];
+		_x[j][i] += 2*DeltaV_perp*DeltaX[i];
 	}
 	
 }

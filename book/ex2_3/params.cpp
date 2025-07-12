@@ -28,7 +28,7 @@ using namespace std;
   */
  ParameterSet::ParameterSet(int argc, char **argv){
 	 struct option long_options[] = {
-			{"epochs",    required_argument,	0, 	'N'},
+			{"iterations",required_argument,	0, 	'N'},
 			{"particles", required_argument,	0, 	'n'},
 			{"sigma",     required_argument,	0, 	's'},
 			{"help",  	  no_argument, 		    0, 	'h'},
@@ -93,8 +93,13 @@ using namespace std;
  * Display help text.
  */
 void ParameterSet::_help() {
-	cout << "Molecular Dynamics"                                 << endl        << endl;
-	cout << "    Parameters"                                                    << endl;
-	cout << "\tN\tNumber of iterations\t\t\t\t"                  << N           << endl;
-	cout << "\tn\tNumber of spheres\t\t\t\t"                     << n           << endl;
+	cout << "Molecular Dynamics"                                << endl        << endl;
+	cout << "    Parameters"                                                   << endl;
+	cout << "\tN\tNumber of iterations\t\t\t\t"                 << N           << endl;
+	cout << "\tn\tNumber of spheres\t\t\t\t"                    << n           << endl;
+	cout << "\tf\tFrequency\t\t\t\t\t"                     		<< freq        << endl;
+	cout << "\ts\tRadius of sphere\t\t\t\t"                     << sigma       << endl;
+	cout << "\tL\tLength\t\t\t\t\t\t"                    		<< L           << endl;
+	cout << "\tV\tInitial velocity\t\t\t\t"                     << V           << endl;
+	cout << "\tm\tNumber of attempts\t\t\t\t"                   << m           << endl;
 }

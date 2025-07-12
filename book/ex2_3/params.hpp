@@ -18,11 +18,10 @@
 #ifndef _PARAMS_HPP_
 #define _PARAMS_HPP_
 
-#include <string>
 using namespace std;
 
  /**
- * This class looks after command line paramters.
+ * This class parses command line paramters.
  */ 
 class ParameterSet {
   public:
@@ -45,12 +44,21 @@ class ParameterSet {
 	 */
 	ParameterSet(int argc, char **argv);
 	
+	/**
+	 *  Indicates that an error occured while parsing command line parameters
+	 */
 	bool has_parsing_error() {return _parsing_error;};
 	
   private:	
   
+  	/**
+	 *  Indicates that an error occured while parsing command line parameters
+	 */
   	bool _parsing_error = false;
 	
+	/**
+	 * Parse one command liune parameter.
+	 */
 	void _extract(const int c);
   
 	/**
