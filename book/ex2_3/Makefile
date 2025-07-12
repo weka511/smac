@@ -19,15 +19,13 @@ GIT_VERSION := $(shell git describe --tags)
 CPPFLAGS  = -g -O3  -D_RUNTIME_CHECKS -pthread -I/sw/include/root  -std=c++23 -DVERSION="\"$(GIT_VERSION)\""
 LDFLAGS   = -g -O3
 LDLIBS    =
-CC        = gcc
 CXX       = g++
 RM        = rm -f
 MKDIR     = mkdir
 SRCS      = params.cpp EventDisks.cpp
 
 		
-OBJS1     = $(subst .cpp,.o,$(SRCS)) 
-OBJS      = $(subst .cc,.o,$(OBJS1)) 
+OBJS     = $(subst .cpp,.o,$(SRCS)) 
 
 MAIN      = ex2_3.exe
 TARGETS   = $(MAIN) 
