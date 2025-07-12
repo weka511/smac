@@ -16,8 +16,7 @@
  *
  * Molecular dynamics simulation for hard disks or hard spheres, as described
  * in Statistical Mechanics: Algorithms and Computations, by Werner Krauth,
- * ISBN 978-0-19-851535-7. This program performs the calculations, and the data
- * in the outout files are analyzed by md-plot.py.
+ * ISBN 978-0-19-851535-7.
  */
 
 #include <iostream>
@@ -34,6 +33,8 @@ int main(int argc, char **argv) {
 	}
 	
 	cout << "ex2_3: " << VERSION << endl;
+	cout << "n="<< params.n << ", L=" <<params.L<< ", V=" <<params.V<< ", sigma=" <<params.sigma<< ", m=" <<params.m<< endl;
+	cout << "N=" << params.N << endl;
 	try {
 		EventDisks ed(params.n,params.L,params.V,params.sigma,params.m);
 		for (int i=0;i<params.N;i++){
@@ -42,6 +43,6 @@ int main(int argc, char **argv) {
 			ed.event_disks();
 		}
 	}  catch (const exception& e) {
-        cerr << "Exception caught: " << e.what() << endl;
+        cerr << "Error: " << e.what() << endl;
     }
 }
