@@ -22,7 +22,7 @@ LDLIBS    =
 CXX       = g++
 RM        = rm -f
 MKDIR     = mkdir
-SRCS      = params.cpp EventDisks.cpp
+SRCS      = params.cpp EventDisks.cpp sampler.cpp
 
 		
 OBJS     = $(subst .cpp,.o,$(SRCS)) 

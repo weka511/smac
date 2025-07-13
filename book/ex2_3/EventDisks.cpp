@@ -153,10 +153,29 @@ tuple<double,int,int> EventDisks::get_next_wall_time(){
  *  Run configuration forward for a specified time interval, updating current time and positions.
  */
 void EventDisks::move_all(double dt){
+	auto t_next_sample = t_sampled + dt_sample;
+	auto t_next_collision = _t + dt;
+	if (t_next_collision < t_next_sample)
+		move0(dt,_t + dt);
+	else {
+		while (t_next_collision >= t_next_sample) {
+			auto dt_next_sample = t_next_sample - _t;
+			move0(dt_next_sample,t_next_sample);
+			sample();
+			t_sampled = t_next_sample;
+			t_next_sample = t_sampled + dt_sample;
+		}
+		move0(t_next_collision - _t,t_next_collision);
+	}
+		
+
+}
+
+void  EventDisks::move0(double dt,double time_new) {
 	for (int i=0;i<_n;i++)
 		for (int j=0;j<_d;j++)
 			_x[i][j] += (dt * _v[i][j]);
-	_t += dt;
+	_t = time_new;
 }
 
 /**

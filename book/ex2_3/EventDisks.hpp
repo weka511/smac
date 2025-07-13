@@ -21,6 +21,7 @@
 #include <array>
 #include <memory>
 #include <tuple>
+#include "sampler.hpp"
 
 using namespace std;
 
@@ -65,7 +66,9 @@ class EventDisks {
 		/**
 		  *  Run configuration forward for a specified time interval, updating current time and positions.
 		  */
-		void move_all(double t);
+		void move_all(double dt);
+		
+		void move0(double dt,double time_new);
 		
 		/**
 		 *  Collide sphere with wall, reversion velocity component normal to wall
@@ -82,6 +85,7 @@ class EventDisks {
 		 */
 		double get_time() {return _t;}
 		
+		void sample() {;}
 	private:
 		/**
 		 *   Positions of centres of spheres
@@ -116,7 +120,11 @@ class EventDisks {
 		/**
 		 * Current time in simulation
 		 */
-		double _t = 0;
+		double _t = 0.0;
+		
+		double dt_sample = 1.0;
+		
+		double t_sampled = 0.0;
 		
 		/**
 		 * Validate configuration: make sure no two sphere overlap
