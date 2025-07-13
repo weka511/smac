@@ -23,15 +23,28 @@
 
 using namespace std;
 
+/**
+ * This class is responsible for sampling the positions and velocities of all particles,
+ * and writing them to a file.
+ */
 class Sampler {
 	
   public:
 	Sampler(int n,string file_name);
 	
+	/**
+	 * Sample configuration at a specified time.
+	 */
     void sample(double t,unique_ptr<double[][3]>& x,unique_ptr<double[][3]>& v);
 	
+	virtual ~Sampler();
+	
   private:
+	/**
+	 * Number of particles
+	 */
      int _n;
+	 
 	 std::ofstream _outputFile;
 };
 
