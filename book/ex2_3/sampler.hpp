@@ -18,12 +18,21 @@
 #ifndef _SAMPLER_HPP_
 #define _SAMPLER_HPP_
 
+#include <fstream>
+#include <string>
 
 using namespace std;
 
 class Sampler {
+	
   public:
+	Sampler(int n,string file_name);
+	
     void sample(double t,unique_ptr<double[][3]>& x,unique_ptr<double[][3]>& v);
+	
+  private:
+     int _n;
+	 std::ofstream _outputFile;
 };
 
 #endif // _SAMPLER_HPP_

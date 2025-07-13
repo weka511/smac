@@ -18,6 +18,8 @@
 #ifndef _PARAMS_HPP_
 #define _PARAMS_HPP_
 
+#include <string>
+
 using namespace std;
 
  /**
@@ -25,19 +27,23 @@ using namespace std;
  */ 
 class ParameterSet {
   public:
-	int N = 10000;
+	int N = 1000000;
 	
 	int n = 90;
 
 	float sigma = 1.0/16.0;
 	
-	int freq = 25;
+	int freq = 10000;
 	
 	double L = 1.0;
 	
 	double V = 1.0;
 	
 	double m = 100;
+	
+	double dt_sample = 1.0;
+	
+	string sample_file = "samples.csv";
 	
 	/**
 	 *  Create ParameterSet from command line parameters

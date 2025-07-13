@@ -23,10 +23,21 @@
 #include <iostream>
 #include <array>
 #include <memory>
+#include <stdexcept>
 #include "sampler.hpp"
 
 using namespace std;
 
-void Sampler::sample(double t,unique_ptr<double[][3]>& x,unique_ptr<double[][3]>& v) {;}
+Sampler::Sampler(int n,string file_name) :_n(n){
+	_outputFile.open(file_name);
+	if (!_outputFile.is_open())
+        throw runtime_error( "Error: Unable to open file.");
+}
+
+void Sampler::sample(double t,unique_ptr<double[][3]>& x,unique_ptr<double[][3]>& v) {
+	
+	for (int i=0;i<_n;i++)
+		_outputFile << t << "," << x[i][0] << "," << x[i][1]<< "," << x[i][2]<< "," << v[i][0]<< "," << v[i][1]<< "," << v[i][2]<<endl;
+}
  
  

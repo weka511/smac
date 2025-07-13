@@ -21,6 +21,7 @@
 #include <array>
 #include <memory>
 #include <tuple>
+#include <string>
 #include "sampler.hpp"
 
 using namespace std;
@@ -34,7 +35,8 @@ class EventDisks {
 		/**
 		 *  Create a valid configuration, comprising positions and velocites.
 		 */
-		EventDisks(const int n=10, const double L=1.0, const double V=1.0, const double sigma = 1.0/16.0, const int m=100);
+		EventDisks(const int n=10, const double L=1.0, const double V=1.0, 
+					const double sigma = 1.0/16.0, const int m=100, double dt_sample=1.0, string sample_file = "samples.csv");
 		
 		/**
          * Algorithm 2.1: perform one step of the simulation. Determine time to next collision,
@@ -85,7 +87,6 @@ class EventDisks {
 		 */
 		double get_time() {return _t;}
 		
-		void sample() {;}
 	private:
 		/**
 		 *   Positions of centres of spheres
@@ -126,6 +127,8 @@ class EventDisks {
 		
 		double t_sampled = 0.0;
 		
+		//Sampler _sampler = Sampler();
+		unique_ptr<Sampler> _sampler;
 		/**
 		 * Validate configuration: make sure no two sphere overlap
 		 */ 

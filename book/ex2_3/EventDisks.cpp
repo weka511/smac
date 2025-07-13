@@ -32,11 +32,13 @@ using namespace std;
 /**
  *  Create a valid configuration, comprising positions and velocites.
  */
-EventDisks::EventDisks(const int n, const double L, const double V, const double sigma, const int m): _n(n), _sigma(sigma),_length(L) {
+EventDisks::EventDisks(const int n, const double L, const double V, const double sigma, 
+						const int m, double dt_sample,string sample_file): _n(n), _sigma(sigma),_length(L),dt_sample(dt_sample) {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_real_distribution<> uniform_v(-V, V);
 	std::uniform_real_distribution<> uniform_x(0.0, L);
+	
 	_x = make_unique<double[][3]>(n);
 	auto has_been_validated = false;
 	for (int k=0;!has_been_validated && k<m;k++){
@@ -47,6 +49,7 @@ EventDisks::EventDisks(const int n, const double L, const double V, const double
 		// Verify that no two spheres overlap
 		has_been_validated = _is_valid(_x,n,sigma);	
 	}
+	
 	if (has_been_validated){
 		_v = make_unique<double[][3]>(n);
 		for (int i = 0; i < n; ++i)
@@ -54,6 +57,8 @@ EventDisks::EventDisks(const int n, const double L, const double V, const double
 				_v[i][j] = uniform_v(gen);
 	} else
 		throw runtime_error("Failed to create valid configuration");
+	
+	_sampler = make_unique<Sampler>(n,sample_file);
 }
 
 /**
@@ -156,22 +161,20 @@ void EventDisks::move_all(double dt){
 	auto t_next_sample = t_sampled + dt_sample;
 	auto t_next_collision = _t + dt;
 	if (t_next_collision < t_next_sample)
-		move0(dt,_t + dt);
+		move0(dt,t_next_collision);
 	else {
 		while (t_next_collision >= t_next_sample) {
 			auto dt_next_sample = t_next_sample - _t;
 			move0(dt_next_sample,t_next_sample);
-			sample();
+			_sampler->sample(t_next_sample,_x,_v);
 			t_sampled = t_next_sample;
 			t_next_sample = t_sampled + dt_sample;
 		}
 		move0(t_next_collision - _t,t_next_collision);
 	}
-		
-
 }
 
-void  EventDisks::move0(double dt,double time_new) {
+void EventDisks::move0(double dt,double time_new) {
 	for (int i=0;i<_n;i++)
 		for (int j=0;j<_d;j++)
 			_x[i][j] += (dt * _v[i][j]);
@@ -196,10 +199,10 @@ void  EventDisks::pair_collision(int k,int j) {
 		DeltaX[i] /= norm;
 	
 	auto DeltaV = array{_v[k][0]-_v[j][0], _v[k][1]-_v[j][1], _v[k][2]-_v[j][2]};
-	auto DeltaV_perp =  _inner_product(DeltaX,DeltaV);
+	auto DeltaV_perp = _inner_product(DeltaX,DeltaV);
+	
 	for (int i=0;i<_d;i++){
 		_x[k][i] -= 2*DeltaV_perp*DeltaX[i];
 		_x[j][i] += 2*DeltaV_perp*DeltaX[i];
 	}
-	
 }

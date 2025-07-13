@@ -36,6 +36,8 @@ using namespace std;
 			{"Length",    required_argument,	0, 	'L'},
 			{"Velocity",  required_argument,	0, 	'V'},
 			{"Attempts",  required_argument,	0, 	'm'},
+			{"sample",    required_argument,    0,  'p'},
+			{"dsample",   required_argument,    0,  'd'},
 			{0, 				0, 				0, 	0}
 	};	
 
@@ -72,6 +74,12 @@ using namespace std;
 				break;
 			case 's':
 				sigma = stod(optarg);
+				break;
+			case 'p':
+				sample_file = optarg;
+				break;	
+			case 'd':
+				dt_sample = stod(optarg);
 				break;	
 			case 'h':
 				_help();
@@ -102,4 +110,6 @@ void ParameterSet::_help() {
 	cout << "\tL\tLength\t\t\t\t\t\t"                    		<< L           << endl;
 	cout << "\tV\tInitial velocity\t\t\t\t"                     << V           << endl;
 	cout << "\tm\tNumber of attempts\t\t\t\t"                   << m           << endl;
+	cout << "\tm\tsample file name\t\t\t\t"                     << sample_file << endl;
+	cout << "\tm\tInterval between samples\t\t\t\t"             << dt_sample   << endl;
 }
