@@ -19,13 +19,12 @@
  
 
 #include "catch.hpp"
-
 #include "configuration.hpp"
 
-TEST_CASE( "Particle Tests", "[particle]" ) {
+TEST_CASE( "Configuration Tests", "[config]" ) {
 	
 	SECTION("Test distance"){
-		
+		Configuration atus(10, 1.0, 1.0, 1.0/32.0, 10);
 	}
 	
 

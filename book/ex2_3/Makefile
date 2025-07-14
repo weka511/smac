@@ -22,14 +22,14 @@ LDLIBS    =
 CXX       = g++
 RM        = rm -f
 MKDIR     = mkdir
-SRCS      = params.cpp EventDisks.cpp sampler.cpp particle.cpp
+SRCS      = params.cpp EventDisks.cpp sampler.cpp particle.cpp configuration.cpp
 
 		
 OBJS     = $(subst .cpp,.o,$(SRCS)) 
 TEST_OBJS = $(subst .cpp,.o,$(TESTS))
 MAIN      = ex2_3.exe
 TARGETS   = $(MAIN) 
-TESTS     = test-particle.cpp	
+TESTS     = test-particle.cpp	test-configuration.cpp
 TEST_MAIN = tests.exe
 
 all : $(MAIN)

@@ -15,26 +15,22 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef _PARTICLE_HPP_
-#define _PARTICLE_HPP_
+#ifndef _CONFIGURATION_HPP_
+#define _CONFIGURATION_HPP_
 
-#include <array>
-#include <random>
+#include <memory>
+#include "particle.hpp"
 
 using namespace std;
 
-class Particle {
+class Configuration {
   private:
-   array<double, 3> _x = {0.,0.,0.};
-   array<double, 3> _v = {0.,0.,0.};
-   
+    unique_ptr<Particle[]> _particles;
   public:
-    void init_v(mt19937& gen,uniform_real_distribution<>&uniform_v);
-	void init_x(mt19937& gen,uniform_real_distribution<>&uniform_v);
-	
-	double get_distance(Particle & other);
+	Configuration(const int n, const double L, const double V, const double sigma, 
+						const int m);
+  private:
+    bool static _is_valid(unique_ptr<Particle[]> & particles,const int n,const double sigma);
 };
 
-
-
-#endif //_PARTICLE_HPP_
+#endif // _CONFIGURATION_HPP_

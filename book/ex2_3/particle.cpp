@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2025 Greenweaves Software Limited
+ * Copyright (C) 2025 Simon Crase
  *
  * This is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,21 +15,31 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
  
-
- #include "particle.hpp"
+#include <iostream>
+#include <cmath>
+#include "particle.hpp"
  
  using namespace std;
  
 
- void init_v(mt19937& gen,uniform_real_distribution<>&uniform_v) {
-	 ;
+ void Particle::init_v(mt19937& gen,uniform_real_distribution<>&uniform_v) {
+	 for (int i=0;i<3;i++)
+		 _v[i]=uniform_v(gen);
+	 cout << _v[0] << "," << _v[1] << "," << _v[2] << endl;
+}
+
+void Particle::init_x(mt19937& gen,uniform_real_distribution<>&uniform_x) {
+	 for (int i=0;i<3;i++)
+		 _x[i]=uniform_x(gen);
+	  cout << _x[0] << "," << _x[1] << "," << _x[2] << endl;
 }
  
- Configuration::Configuration(const int n, const double L, const double V, const double sigma, 
-						const int m){
-	random_device rd;
-	mt19937 gen(rd());
-	uniform_real_distribution<> uniform_v(-V, V);
-	uniform_real_distribution<> uniform_x(0.0, L);
-	_particles = make_unique<Particle[]>(n);
-}
+ double Particle::get_distance(Particle & other){
+	 double sumsq = 0;
+	 for (int i=0;i<3;i++){
+		 const double delta = _v[i] - other._v[i];
+		 sumsq += delta*delta;
+	 }
+	 return sqrt(sumsq);
+ }
+ 
