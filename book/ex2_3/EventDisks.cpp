@@ -214,17 +214,17 @@ void  EventDisks::wall_collision(int sphere,int wall) {
  *  Collide two spheres, reversing velocity components normal to tangent plane
  */	
 void  EventDisks::pair_collision(int k,int j) {
-	auto DeltaX = array{_x[k][0]-_x[j][0], _x[k][1]-_x[j][1], _x[k][2]-_x[j][2]}; 
-	auto norm = sqrt(_inner_product(DeltaX,DeltaX));
+	auto e_perpendicular = array{_x[k][0]-_x[j][0], _x[k][1]-_x[j][1], _x[k][2]-_x[j][2]}; 
+	auto norm = sqrt(_inner_product(e_perpendicular,e_perpendicular));
 
 	for (int i=0;i<_d;i++)
-		DeltaX[i] /= norm;
+		e_perpendicular[i] /= norm;
 	
 	auto DeltaV = array{_v[k][0]-_v[j][0], _v[k][1]-_v[j][1], _v[k][2]-_v[j][2]};
-	auto DeltaV_perp = _inner_product(DeltaX,DeltaV);
+	auto DeltaV_perp = _inner_product(e_perpendicular,DeltaV);
 	
 	for (int i=0;i<_d;i++){
-		_v[k][i] -= DeltaV_perp*DeltaX[i];
-		_v[j][i] += DeltaV_perp*DeltaX[i];
+		_v[k][i] -= DeltaV_perp*e_perpendicular[i];
+		_v[j][i] += DeltaV_perp*e_perpendicular[i];
 	}
 }
