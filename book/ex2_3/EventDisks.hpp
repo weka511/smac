@@ -66,11 +66,15 @@ class EventDisks {
 		tuple<double,int,int> get_next_wall_time();
 		
 		/**
+		 *  Run configuration forward for a specified time interval,
+		 *  and sample data if it is time.
+		 */
+		void move_and_sample(double dt);
+		
+		/**
 		  *  Run configuration forward for a specified time interval, updating current time and positions.
 		  */
-		void move_all(double dt);
-		
-		void move0(double dt,double time_new);
+		double move_all_spheres(double dt,double time_new);
 		
 		/**
 		 *  Collide sphere with wall, reversion velocity component normal to wall
@@ -125,7 +129,7 @@ class EventDisks {
 		
 		double dt_sample = 1.0;
 		
-		double t_sampled = 0.0;
+		int n_sampled = 0;
 		
 		//Sampler _sampler = Sampler();
 		unique_ptr<Sampler> _sampler;

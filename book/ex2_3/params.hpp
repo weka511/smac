@@ -26,23 +26,51 @@ using namespace std;
  * This class parses command line paramters.
  */ 
 class ParameterSet {
+	
   public:
+	/**
+	 *   Number of iterations
+	 */
 	int N = 1000000;
 	
+	/**
+	 *    Number of spheres.
+	 */
 	int n = 90;
-
-	float sigma = 1.0/16.0;
 	
+	/**
+	 *  Radius of each sphere 
+	 */
+	float sigma = 1.0/64;
+	
+	/**
+	 *   Interval between tracing statements.
+	 */
 	int freq = 10000;
 	
+	/**
+	 *   Length of one side
+	 */
 	double L = 1.0;
 	
+	/**
+	 *   Limit for veloecities when we initialize
+	 */
 	double V = 1.0;
 	
-	double m = 100;
+	/**
+	 *   Number of attempts to create configuratio
+	 */
+	double m = 250;
 	
+	/**
+	 *   Time interval between samples
+	 */
 	double dt_sample = 1.0;
 	
+	/**
+	 *   File name for storing samples
+	 */
 	string sample_file = "samples.csv";
 	
 	/**
