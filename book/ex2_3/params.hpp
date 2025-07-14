@@ -41,7 +41,7 @@ class ParameterSet {
 	/**
 	 *  Radius of each sphere 
 	 */
-	float sigma = 1.0/64;
+	float sigma = 1.0/32;
 	
 	/**
 	 *   Interval between tracing statements.
