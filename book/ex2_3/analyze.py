@@ -90,12 +90,20 @@ if __name__=='__main__':
     T,E,X,V = read_data(join(args.path,args.samples))
 
     fig = figure(figsize=(12,12))
+    fig.suptitle(args.samples)
+
     ax1 = fig.add_subplot(2,2,1)
     ax1.hist(X[:,0],bins='sqrt',density=True)
+    ax1.set_xlabel('$x_0$')
+
     ax2 = fig.add_subplot(2,2,2)
     ax2.hist(V[:,0],bins='sqrt',density=True)
+    ax2.set_xlabel('$V_0$')
+
     ax3 = fig.add_subplot(2,2,3)
     ax3.hist(E[:],bins='sqrt',density=True)
+    ax3.set_xlabel('$E$')
+
     fig.savefig(get_file_name(args.out,figs=args.figs))
     elapsed = time() - start
     minutes = int(elapsed/60)
