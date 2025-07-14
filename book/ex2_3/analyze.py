@@ -35,8 +35,19 @@ def parse_arguments():
     parser.add_argument('--path', default = r'C:\cygwin64\home\Weka\smac\book\ex2_3', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
     parser.add_argument('-N', '--N', type=int, default=100000, help='Number of iterations')
+    parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
     return parser.parse_args()
 
+def get_bins(bins):
+    '''
+    Used to parse args.bins: either a number of bins, or the name of a binning strategy.
+    '''
+    try:
+        return int(bins)
+    except ValueError:
+        if bins in ['auto', 'fd', 'doane', 'scott', 'sturges', 'sqrt', 'stone', 'rice']:
+            return bins
+        raise ArgumentTypeError(f'Invalid binning strategy "{bins}"')
 
 def get_file_name(name,default_ext='png',figs='./figs',seq=None):
     '''
@@ -93,18 +104,20 @@ if __name__=='__main__':
     fig.suptitle(args.samples)
 
     ax1 = fig.add_subplot(2,2,1)
-    ax1.hist(X[:,0],bins='sqrt',density=True)
+    ax1.hist(X[:,0],bins=args.bins,density=True)
     ax1.set_xlabel('$x_0$')
 
     ax2 = fig.add_subplot(2,2,2)
-    ax2.hist(V[:,0],bins='sqrt',density=True)
+    ax2.hist(V[:,0],bins=args.bins,density=True)
     ax2.set_xlabel('$V_0$')
 
     ax3 = fig.add_subplot(2,2,3)
-    ax3.hist(E[:],bins='sqrt',density=True)
+    ax3.hist(E[:],bins=args.bins,density=True)
     ax3.set_xlabel('$E$')
 
+    fig.tight_layout(h_pad=3)
     fig.savefig(get_file_name(args.out,figs=args.figs))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
