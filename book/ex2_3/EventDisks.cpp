@@ -36,10 +36,10 @@ using namespace std;
  */
 EventDisks::EventDisks(const int n, const double L, const double V, const double sigma, 
 						const int m, double dt_sample,string sample_file): _n(n), _sigma(sigma),_length(L),dt_sample(dt_sample) {
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> uniform_v(-V, V);
-	std::uniform_real_distribution<> uniform_x(0.0, L);
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_real_distribution<> uniform_v(-V, V);
+	uniform_real_distribution<> uniform_x(0.0, L);
 	
 	_x = make_unique<double[][3]>(n);
 	auto has_been_validated = false;
