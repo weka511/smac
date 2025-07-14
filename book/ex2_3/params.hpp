@@ -36,7 +36,7 @@ class ParameterSet {
 	/**
 	 *    Number of spheres.
 	 */
-	int n = 90;
+	int n = 200;
 	
 	/**
 	 *  Radius of each sphere 
