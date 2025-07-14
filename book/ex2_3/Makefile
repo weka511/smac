@@ -26,16 +26,19 @@ SRCS      = params.cpp EventDisks.cpp sampler.cpp
 
 		
 OBJS     = $(subst .cpp,.o,$(SRCS)) 
-
+TEST_OBJS = $(subst .cpp,.o,$(TESTS))
 MAIN      = ex2_3.exe
 TARGETS   = $(MAIN) 
-
+TESTS     = test-particle.cpp	
+TEST_MAIN = tests.exe
 
 all : $(MAIN)
 
 run : all 
 	./$(MAIN)
 	
+tests : $(TEST_MAIN)
+	./$(TEST_MAIN)
 	
 clean :
 	${RM} *.o *.stackdump
@@ -55,6 +58,8 @@ install: rebuild
 $(MAIN): $(OBJS) ex2_3.o
 	${CXX} $(LDFLAGS) -o  $(MAIN) ex2_3.o ${OBJS} ${LDLIBS}
 
+$(TEST_MAIN): $(OBJS) tests.o $(TEST_OBJS)
+	${CXX} $(LDFLAGS) -o $(TEST_MAIN) tests.o ${OBJS} $(TEST_OBJS) ${LDLIBS}
 	
 distclean: clean
 	$(RM) *~ .depend
