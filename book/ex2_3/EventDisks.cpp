@@ -109,7 +109,6 @@ double EventDisks::get_pair_time(int i,int j) {
 	auto Upsilon = DeltaX_V*DeltaX_V - DeltaV_2 * (DeltaX_2 - 4*_sigma*_sigma);
 	if (Upsilon > 0 && DeltaX_V < 0){
 		auto dt = -(DeltaX_V + sqrt(Upsilon))/DeltaV_2;
-		// cout << __FILE__ << " "<< __LINE__<< " i=" << i << ",j=" << j << ",dt="<< dt << endl;
 		if (dt > epsilon) return dt;
 	}
 
@@ -139,13 +138,11 @@ tuple<double,int,int> EventDisks::get_next_pair_time(){
 double EventDisks::get_wall_time(int sphere, int wall) {
 	if (_v[sphere][wall] > 0){
 		auto dt = (_length-_x[sphere][wall])/_v[sphere][wall];
-		// cout << __FILE__ << " "<< __LINE__<< " dt="<< dt << endl;
 		assert (dt > 0);
 		return dt;
 	}
 	if (_v[sphere][wall] < 0){
 		auto dt =  _x[sphere][wall]/(-_v[sphere][wall]);
-		// cout << __FILE__ << " "<< __LINE__<< " dt="<< dt << endl;
 		assert (dt > 0);
 		return dt;
 	}
@@ -174,7 +171,6 @@ tuple<double,int,int> EventDisks::get_next_wall_time(){
  *  and sample data if it is time.
  */
 void EventDisks::move_and_sample(double dt){
-	// cout << __FILE__ << " "<< __LINE__<< " dt="<<dt  << endl;
 	assert(dt > 0);
 	auto t_next_sample = (n_sampled + 1) * dt_sample;
 	auto t_next_collision = _t + dt;
@@ -200,7 +196,6 @@ void EventDisks::move_and_sample(double dt){
  *  Run configuration forward for a specified time interval, updating current time and positions.
  */
 double EventDisks::move_all_spheres(double dt,double time_new) {
-	// cout << __FILE__ << " "<< __LINE__<< " dt="<<dt << ", time_new="<<time_new << endl;
 	for (int i=0;i<_n;i++)
 		for (int j=0;j<_d;j++)
 			_x[i][j] += (dt * _v[i][j]);
