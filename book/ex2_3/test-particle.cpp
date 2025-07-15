@@ -18,6 +18,7 @@
  */
  
 #include <cmath>
+#include <limits>
 #include "catch.hpp"
 #include "particle.hpp"
 
@@ -41,7 +42,7 @@ TEST_CASE( "Particle Tests", "[particle]" ) {
 		REQUIRE(2/sqrt(6.0) == x1[2]);
 	}
 	
-	SECTION("Test collision"){
+	SECTION("Test 2 particle collision"){
 		Particle particle_1(0,-0.1,0,1.0,1,0);
 		Particle particle_2(0,0.1,0,1.0,-1,0);
 		REQUIRE(1 == particle_1.get_v(0));
@@ -53,5 +54,13 @@ TEST_CASE( "Particle Tests", "[particle]" ) {
 		REQUIRE(1 == particle_2.get_v(0));
 		REQUIRE(-1 == particle_1.get_v(1));
 		REQUIRE(1 == particle_2.get_v(0));
+	}
+	
+	SECTION("Test collision between particle and wall"){
+		Particle particle_1(0.3,0.2,0, -1.0,1.0,0);
+		REQUIRE( 0.3 == particle_1.get_wall_time(0,1));
+		REQUIRE( 0.8 == particle_1.get_wall_time(1,1));
+		REQUIRE( numeric_limits<double>::infinity() == particle_1.get_wall_time(2,1));
+		
 	}
 }

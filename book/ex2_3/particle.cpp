@@ -18,6 +18,7 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
+#include <cassert>
 #include "particle.hpp"
  
  using namespace std;
@@ -40,6 +41,24 @@
 	return  numeric_limits<double>::infinity();
   }
   
+  
+ /**
+ * Calculate time to next collision between particle and a specified wall
+ */
+double Particle::get_wall_time(const int wall, const double L) {
+	if (_v[wall] > 0){
+		auto dt = (L-_x[wall])/_v[wall];
+		assert (dt > 0);
+		return dt;
+	}
+	if (_v[wall] < 0){
+		auto dt =  _x[wall]/(-_v[wall]);
+		assert (dt > 0);
+		return dt;
+	}
+	return numeric_limits<double>::infinity();
+}
+
 void Particle::collide(Particle & other){
 	auto e_perpendicular =  get_normalized(_get_difference(_x,other._x));
 	auto DeltaV = _get_difference(_v,other._v);

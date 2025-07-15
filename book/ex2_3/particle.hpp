@@ -29,23 +29,36 @@ class Particle {
    array<double, 3> _v = {0.,0.,0.};
    
   public:
+    /**
+     * This is the usual constructor for a Particle. 
+	 * It expects that init_x() and init_v() will be called to set up the
+	 * the position and velocity to random values
+	 */
     Particle () {};
 	
-	Particle (double x,double y, double z, double vx=0.0,double vy=0.0, double vz=0.0) {
+	/**
+	 * Constructor used for testing only; it sets up known a known position and velocity
+	 */
+	Particle (double x,double y, double z, double vx=0.0,double vy=0.0, double vz=0.0) { 
 		_x[0] = x;
 		_x[1] = y;
 		_x[2] = z;
 		_v[0] = vx;
 		_v[1] = vy;
 		_v[2] = vz;
-		// cout << _v[0] << endl;
 	};
 	
+	/**
+	 * Set velocity to a random value.
+	 */
     void init_v(mt19937& gen,uniform_real_distribution<>&uniform){
 		for (int i=0;i<3;i++)
 			_v[i] = uniform(gen);
 	};
 	
+	/**
+	 * Set position to random place within box
+	 */
 	void init_x(mt19937& gen,uniform_real_distribution<>&uniform){
 		for (int i=0;i<3;i++)
 			_x[i] = uniform(gen);
@@ -69,7 +82,22 @@ class Particle {
 	 */ 
 	double get_pair_time(Particle & other,double _sigma=1.0/32.0);
 	
+	/**
+	 * Calculate time to next collision between particle and a specified wall
+	 */
+	double get_wall_time(const int wall, const double L) ;
+	
+	/**
+	 *  Collide two spheres, reversing velocity components normal to tangent plane
+	 */	
 	void collide(Particle & other);
+	
+	/**
+	 *  Collide particle with wall, reversing velocity component normal to wall
+	 */
+	void  wall_collision(int wall) {
+		_v[wall] *= -1;
+	}
 	
 	double get_v(const int i) {return _v[i];}
 	
