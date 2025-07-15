@@ -48,7 +48,7 @@ depend: Makefile .depend
 install: rebuild
 	cp $(MAIN) /usr/local/bin
 	
-.depend: $(SRCS)   ex2_3.cpp
+.depend: $(SRCS) $(TESTS)  ex2_3.cpp
 	$(RM) ./.depend
 	$(CXX) $(CPPFLAGS) -MM $^>>./.depend;
 	sed -i -e 's/\/home\/Weka\/smac\/book\///$g' .depend
