@@ -17,29 +17,28 @@
  
 #include <iostream>
 #include <cmath>
+#include <limits>
 #include "particle.hpp"
  
  using namespace std;
  
+ /**
+  * Algorithm 2.2: calculate time to the next collision of two specified spheres.
+  */ 
+  double Particle::get_pair_time(Particle & other, double _sigma){
+	auto DeltaX =  _get_difference(_x,other._x);
+	auto DeltaV = _get_difference(_v,other._v);
+	auto DeltaX_V = _inner_product(DeltaX,DeltaV);
+	auto DeltaV_2 = _inner_product(DeltaV,DeltaV);
+	auto DeltaX_2 = _inner_product(DeltaX,DeltaX);
+	auto Upsilon = DeltaX_V*DeltaX_V - DeltaV_2 * (DeltaX_2 - 4*_sigma*_sigma);
+	if (Upsilon > 0 && DeltaX_V < 0){
+		auto dt = -(DeltaX_V + sqrt(Upsilon))/DeltaV_2;
+		if (dt > 0) return dt;
+	}
 
- void Particle::init_v(mt19937& gen,uniform_real_distribution<>&uniform_v) {
-	 for (int i=0;i<3;i++)
-		 _v[i]=uniform_v(gen);
-	 cout << _v[0] << "," << _v[1] << "," << _v[2] << endl;
-}
-
-void Particle::init_x(mt19937& gen,uniform_real_distribution<>&uniform_x) {
-	 for (int i=0;i<3;i++)
-		 _x[i]=uniform_x(gen);
-	  cout << _x[0] << "," << _x[1] << "," << _x[2] << endl;
-}
- 
- double Particle::get_distance(Particle & other){
-	 double sumsq = 0;
-	 for (int i=0;i<3;i++){
-		 const double delta = _v[i] - other._v[i];
-		 sumsq += delta*delta;
-	 }
-	 return sqrt(sumsq);
- }
+	return  numeric_limits<double>::infinity();
+  }
+	
+	
  
