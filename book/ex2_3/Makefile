@@ -16,20 +16,18 @@
 # Makefile snarfed from https://stackoverflow.com/questions/2481269/how-to-make-a-simple-c-makefile
 
 GIT_VERSION := $(shell git describe --tags)
-CPPFLAGS  = -g -O3  -D_RUNTIME_CHECKS -pthread -I/sw/include/root  -std=c++23 -DVERSION="\"$(GIT_VERSION)\""
-LDFLAGS   = -g -O3
-LDLIBS    =
-CXX       = g++
-RM        = rm -f
-MKDIR     = mkdir
-SRCS      = params.cpp EventDisks.cpp sampler.cpp particle.cpp configuration.cpp
-
-		
-OBJS     = $(subst .cpp,.o,$(SRCS)) 
+CPPFLAGS = -g -O3  -D_RUNTIME_CHECKS -pthread -I/sw/include/root  -std=c++23 -DVERSION="\"$(GIT_VERSION)\""
+LDFLAGS = -g -O3
+LDLIBS =
+CXX = g++
+RM = rm -f
+MKDIR = mkdir
+SRCS = params.cpp EventDisks.cpp sampler.cpp particle.cpp configuration.cpp
+OBJS = $(subst .cpp,.o,$(SRCS)) 
+MAIN = ex2_3.exe
+TARGETS = $(MAIN) 
+TESTS = test-particle.cpp	test-configuration.cpp
 TEST_OBJS = $(subst .cpp,.o,$(TESTS))
-MAIN      = ex2_3.exe
-TARGETS   = $(MAIN) 
-TESTS     = test-particle.cpp	test-configuration.cpp
 TEST_MAIN = tests.exe
 
 all : $(MAIN)
