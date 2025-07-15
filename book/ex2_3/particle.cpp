@@ -39,6 +39,16 @@
 
 	return  numeric_limits<double>::infinity();
   }
+  
+void Particle::collide(Particle & other){
+	auto e_perpendicular =  get_normalized(_get_difference(_x,other._x));
+	auto DeltaV = _get_difference(_v,other._v);
+	auto DeltaV_perp = _inner_product(e_perpendicular,DeltaV);
+	for (int i=0;i<3;i++){
+		_v[i] -= DeltaV_perp*e_perpendicular[i];
+		other._v[i] += DeltaV_perp*e_perpendicular[i];
+	}
+}
 	
 	
  

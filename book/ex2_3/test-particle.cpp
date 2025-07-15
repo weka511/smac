@@ -31,5 +31,27 @@ TEST_CASE( "Particle Tests", "[particle]" ) {
 		REQUIRE(sqrt(14.0) == particle_2.get_distance(particle_1));
 		REQUIRE(0.0 == particle_1.get_distance(particle_1));
 		REQUIRE(sqrt(8.0) == particle_1.get_distance(particle_3));
+		auto x = Particle::get_normalized({1,0,1});
+		REQUIRE(1/sqrt(2.0) == x[0]);
+		REQUIRE(0== x[1]);
+		REQUIRE(1/sqrt(2.0) == x[2]);
+		auto x1 = Particle::get_normalized({1,-1,2});
+		REQUIRE(1/sqrt(6.0) == x1[0]);
+		REQUIRE(-1/sqrt(6.0) == x1[1]);
+		REQUIRE(2/sqrt(6.0) == x1[2]);
+	}
+	
+	SECTION("Test collision"){
+		Particle particle_1(0,-0.1,0,1.0,1,0);
+		Particle particle_2(0,0.1,0,1.0,-1,0);
+		REQUIRE(1 == particle_1.get_v(0));
+		REQUIRE(1 == particle_2.get_v(0));
+		REQUIRE(1 == particle_1.get_v(1));
+		REQUIRE(-1 == particle_2.get_v(1));
+		particle_1.collide(particle_2);
+		REQUIRE(1 == particle_1.get_v(0));
+		REQUIRE(1 == particle_2.get_v(0));
+		REQUIRE(-1 == particle_1.get_v(1));
+		REQUIRE(1 == particle_2.get_v(0));
 	}
 }

@@ -35,6 +35,10 @@ class Particle {
 		_x[0] = x;
 		_x[1] = y;
 		_x[2] = z;
+		_v[0] = vx;
+		_v[1] = vy;
+		_v[2] = vz;
+		// cout << _v[0] << endl;
 	};
 	
     void init_v(mt19937& gen,uniform_real_distribution<>&uniform){
@@ -52,10 +56,22 @@ class Particle {
 		return sqrt(_inner_product(difference,difference));
 	};
 	
+	array<double, 3> static get_normalized(array<double, 3> x){
+		auto norm = sqrt(_inner_product(x,x));
+		array<double, 3> result = {0,0,0};
+		for (int i=0;i<3;i++)
+			result[i] = x[i]/norm;
+		return result;
+	}
+	
 	/**
 	 * Algorithm 2.2: calculate time to the next collision of two specified spheres.
 	 */ 
 	double get_pair_time(Particle & other,double _sigma=1.0/32.0);
+	
+	void collide(Particle & other);
+	
+	double get_v(const int i) {return _v[i];}
 	
   private:
     array<double, 3> static _get_difference(array<double, 3> &x0, array<double, 3> &x1){
