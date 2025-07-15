@@ -22,7 +22,7 @@
  using namespace std;
  
  Configuration::Configuration(const int n, const double L, const double V, const double sigma, 
-						const int m){
+						const int m) : _n(n){
 	random_device rd;
 	mt19937 gen(rd());
 	uniform_real_distribution<> uniform_v(-V, V);

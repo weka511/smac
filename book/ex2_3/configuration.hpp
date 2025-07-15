@@ -26,9 +26,12 @@ using namespace std;
 class Configuration {
   private:
     unique_ptr<Particle[]> _particles;
+	const int _n;
   public:
 	Configuration(const int n, const double L, const double V, const double sigma, 
 						const int m);
+	int size() {return _n;};
+	
   private:
     bool static _is_valid(unique_ptr<Particle[]> & particles,const int n,const double sigma);
 };
