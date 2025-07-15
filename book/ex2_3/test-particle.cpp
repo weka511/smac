@@ -17,17 +17,19 @@
  * This file contains tests for the Particle class
  */
  
-
+#include <cmath>
 #include "catch.hpp"
-
-#include "configuration.hpp"
+#include "particle.hpp"
 
 TEST_CASE( "Particle Tests", "[particle]" ) {
 	
 	SECTION("Test distance"){
-		
+		Particle particle_1(1,2,3);
+		Particle particle_2;
+		Particle particle_3(3,2,1);
+		REQUIRE(sqrt(14.0) == particle_1.get_distance(particle_2));
+		REQUIRE(sqrt(14.0) == particle_2.get_distance(particle_1));
+		REQUIRE(0.0 == particle_1.get_distance(particle_1));
+		REQUIRE(sqrt(8.0) == particle_1.get_distance(particle_3));
 	}
-	
-
-
 }
