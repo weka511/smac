@@ -36,7 +36,7 @@ class ParameterSet {
 	/**
 	 *    Number of spheres.
 	 */
-	int n = 200;
+	int n = 100;
 	
 	/**
 	 *  Radius of each sphere 
@@ -61,7 +61,7 @@ class ParameterSet {
 	/**
 	 *   Number of attempts to create configuratio
 	 */
-	double m = 250;
+	double m = 500;
 	
 	/**
 	 *   Time interval between samples

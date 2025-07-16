@@ -15,13 +15,27 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#include "event.hpp"
+#ifndef _EVENT_DISKS_HPP_
+#define _EVENT_DISKS_HPP_
+
+#include <memory>
+#include "configuration.hpp"
 
 using namespace std;
 
-void WallCollisionEvent::execute() {}
+class EventDisks {
+  private:
+	const double _dt_sample;
+	double _t = 0;
+	
+  public: 
+	EventDisks(double dt_sample) : _dt_sample(dt_sample) {};
+    void event_disks(Configuration& configuration) {;}
+	/**
+	 *  Accessor for current time
+	 */
+	double get_time() {return _t;}
+	
+};
 
-void ParticleCollisionEvent::execute() {}
-
-void SampleEvent::execute() {}
-
+#endif // _EVENT_DISKS_HPP_

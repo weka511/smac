@@ -15,36 +15,7 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef _EVENT_HPP_
-#define _EVENT_HPP_
-
-#include <memory>
-#include "particle.hpp"
+#include "event-disks.hpp"
 
 using namespace std;
 
-class Event {
-  public:
-    virtual void execute() = 0;
-};
-
-class CollisionEvent : public Event {
-	shared_ptr<Particle> _particle1;
-};
-
-class WallCollisionEvent : public CollisionEvent  {
-	const int wall=0;
-	void execute();
-};
-
-class ParticleCollisionEvent : public CollisionEvent  {
-	shared_ptr<Particle> _particle2;
-	void execute();
-};
-
-
-class SampleEvent : public Event {
-	void execute();
-};
-
-#endif // _EVENT_HPP_
