@@ -80,7 +80,7 @@ class Particle {
 	/**
 	 * Algorithm 2.2: calculate time to the next collision of two specified spheres.
 	 */ 
-	double get_pair_time(Particle & other,double _sigma=1.0/32.0);
+	double get_pair_time(Particle & other, const double sigma=1.0/32.0);
 	
 	/**
 	 * Calculate time to next collision between particle and a specified wall

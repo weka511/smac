@@ -26,13 +26,13 @@
  /**
   * Algorithm 2.2: calculate time to the next collision of two specified spheres.
   */ 
-  double Particle::get_pair_time(Particle & other, double _sigma){
+  double Particle::get_pair_time(Particle & other, const double sigma){
 	auto DeltaX =  _get_difference(_x,other._x);
 	auto DeltaV = _get_difference(_v,other._v);
 	auto DeltaX_V = _inner_product(DeltaX,DeltaV);
 	auto DeltaV_2 = _inner_product(DeltaV,DeltaV);
 	auto DeltaX_2 = _inner_product(DeltaX,DeltaX);
-	auto Upsilon = DeltaX_V*DeltaX_V - DeltaV_2 * (DeltaX_2 - 4*_sigma*_sigma);
+	auto Upsilon = DeltaX_V*DeltaX_V - DeltaV_2 * (DeltaX_2 - 4*sigma*sigma);
 	if (Upsilon > 0 && DeltaX_V < 0){
 		auto dt = -(DeltaX_V + sqrt(Upsilon))/DeltaV_2;
 		if (dt > 0) return dt;

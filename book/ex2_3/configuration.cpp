@@ -17,12 +17,13 @@
  
 #include <iostream>
 #include <stdexcept>
+#include <limits>
 #include "configuration.hpp"
  
  using namespace std;
  
  Configuration::Configuration(const int n, const double L, const double V, const double sigma, 
-						const int m) : _n(n){
+						const int m) : _n(n),_sigma(sigma),_length(L){
 	random_device rd;
 	mt19937 gen(rd());
 	uniform_real_distribution<> uniform_v(-V, V);
@@ -47,4 +48,38 @@ bool Configuration::_is_valid(unique_ptr<Particle[]>& particles,const int n,cons
 			if (particles[i].get_distance(particles[j])<2*sigma)
 				return false;
 	return true;
+}
+
+/**
+ * Calculate time to the next collision of any two spheres.
+ */ 	
+tuple<double,int,int> Configuration::get_next_pair_collision(){
+	double t0 =  numeric_limits<double>::infinity();
+	tuple<double,int,int> result = make_tuple(t0,-1,-1);
+	for (int i=0;i<_n;i++)
+		for (int j=0;j<i;j++){
+			const double t1 = _particles[i].get_pair_time(_particles[j],_sigma);
+			if (t1 < t0){
+				result = make_tuple(t1,i,j);
+				t0 = t1;
+			} 
+		}
+	return result;
+}
+
+/**
+ * Calculate time to next collision between any sphere and any wall
+ */
+tuple<double,int,int> Configuration::get_next_wall_collision(){
+	double best_wall_time =  numeric_limits<double>::infinity();
+	tuple<double,int,int> result = make_tuple(best_wall_time,-1,-1);
+	for (int i=0;i<_n;i++)
+		for (int wall=0;wall<3;wall++){
+			const double t = _particles[i].get_wall_time(wall,_length);
+			if (t < best_wall_time){
+				best_wall_time = t;
+				result = make_tuple(best_wall_time,i,wall);
+			} 
+		}
+	return result;
 }
