@@ -34,9 +34,8 @@ def parse_arguments():
     parser.add_argument('--samples', default = 'samples.csv', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--path', default = r'C:\cygwin64\home\Weka\smac\book\ex2_3', help = 'Name of folder where plots are to be stored')
     parser.add_argument('--show', action = 'store_true', help   = 'Show plot')
-    # parser.add_argument('-N', '--N', type=int, default=100000, help='Number of iterations')
     parser.add_argument('--bins', default='sqrt', type=get_bins, help = 'Binning strategy or number of bins')
-    parser.add_argument('-b', '--burn', type=int, default=100000, help='Burn in time')
+    parser.add_argument('-b', '--burn', type=int, default=10, help='Burn in time')
     return parser.parse_args()
 
 def get_bins(bins):
@@ -100,20 +99,23 @@ if __name__=='__main__':
     rng = np.random.default_rng(args.seed)
 
     T,E,X,V = read_data(join(args.path,args.samples))
-
+    m = len(T)
+    n = len(np.unique(T))
+    k = m//n
+    burn_in = args.burn * k
     fig = figure(figsize=(12,12))
-    fig.suptitle(args.samples)
+    fig.suptitle(f'{args.samples}:  {k} spheres, {n} samples, burn in for {args.burn} samples')
 
     ax1 = fig.add_subplot(2,2,1)
-    ax1.hist(X[args.burn:,0],bins=args.bins,density=True)
+    ax1.hist(X[burn_in:,0],bins=args.bins,density=True)
     ax1.set_xlabel('$x_0$')
 
     ax2 = fig.add_subplot(2,2,2)
-    ax2.hist(V[args.burn:,0],bins=args.bins,density=True)
+    ax2.hist(V[burn_in:,0],bins=args.bins,density=True)
     ax2.set_xlabel('$V_0$')
 
     ax3 = fig.add_subplot(2,2,3)
-    ax3.hist(E[args.burn:],bins=args.bins,density=True)
+    ax3.hist(E[burn_in:],bins=args.bins,density=True)
     ax3.set_xlabel('$E$')
 
     fig.tight_layout(h_pad=3)
