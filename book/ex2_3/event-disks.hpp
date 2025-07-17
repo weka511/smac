@@ -19,18 +19,42 @@
 #define _EVENT_DISKS_HPP_
 
 #include <memory>
+#include <cassert>
 #include "configuration.hpp"
+#include "sampler.hpp"
 
 using namespace std;
 
 class EventDisks {
   private:
 	const double _dt_sample;
-	double _t = 0;
+
+	/**
+	 * Current time in simulation
+	 */
+	double _t = 0.0;
+	
+	double _t_next_sample_due = 0.0;
+		
+	/**
+	 * Number of samples at present time.
+	 */
+	int _n_sampled = 0;
+		
+	Sampler& _sampler;
+	
+	Configuration& _configuration;
 	
   public: 
-	EventDisks(double dt_sample) : _dt_sample(dt_sample) {};
-    void event_disks(Configuration& configuration) {;}
+	EventDisks(double dt_sample,Configuration& configuration, Sampler& sampler);
+
+	/**
+	 * Algorithm 2.1: perform one step of the simulation. Determine time to next collision,
+	 * of either type, update all positions to just befroe collision,
+	 * then update velocities to just after.
+	 */	
+    void event_disks();
+	
 	/**
 	 *  Accessor for current time
 	 */

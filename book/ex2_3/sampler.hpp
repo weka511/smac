@@ -20,6 +20,7 @@
 
 #include <fstream>
 #include <string>
+#include "configuration.hpp"
 
 using namespace std;
 
@@ -35,7 +36,7 @@ class Sampler {
 	/**
 	 * Sample configuration at a specified time.
 	 */
-    void sample(double t,unique_ptr<double[][3]>& x,unique_ptr<double[][3]>& v);
+    void sample(double t,Configuration& configuration);
 	
 	virtual ~Sampler();
 	

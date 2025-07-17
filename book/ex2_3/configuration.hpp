@@ -43,6 +43,31 @@ class Configuration {
 	
 	tuple<double,int,int> get_next_wall_collision();
 	
+	/**
+	 * Determine position of all particles after a specifed time,
+	 * assuming constant veleocity
+	 */
+	void evolve(double dt) {
+		for (int i=0;i<_n;i++)
+			_particles[i].evolve(dt);
+	}
+	
+	/**
+	 *  Collide two spheres, reversing velocity components normal to tangent plane
+	 */	
+	void collide(int i, int j) {_particles[i].collide(_particles[j]);};
+	
+	/**
+	 *  Collide particle with wall, reversing velocity component normal to wall
+	 */
+	void  wall_collision(int i,int wall) {_particles[i].wall_collision(wall);};
+	
+	void output(const double t,std::ostream& os) {
+		for (int i=0;i<_n;i++)
+			os << t << "," <<_particles[i] << endl;
+	}
+	
+	
   private:
     bool static _is_valid(unique_ptr<Particle[]> & particles,const int n,const double sigma);
 };

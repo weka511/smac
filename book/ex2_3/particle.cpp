@@ -68,6 +68,9 @@ void Particle::collide(Particle & other){
 		other._v[i] += DeltaV_perp*e_perpendicular[i];
 	}
 }
-	
+
+std::ostream &operator<<(std::ostream &os, Particle const &particle) { 
+    return os << particle._x[0] << "," << particle._x[1] << "," << particle._x[2] << "," <<particle._v[0] << "," << particle._v[1] << "," << particle._v[2]<< ",";
+}
 	
  

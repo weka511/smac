@@ -23,6 +23,7 @@
 #include "params.hpp"
 #include "configuration.hpp"
 #include "event-disks.hpp"
+#include "sampler.hpp"
 
 using namespace std;
 
@@ -35,14 +36,15 @@ int main(int argc, char **argv) {
 	}
 	
 	cout << "n="<< params.n << ", L=" <<params.L<< ", V=" <<params.V<< ", sigma=" <<params.sigma<< ", m=" <<params.m<< endl;
-	cout << "N=" << params.N << endl;
+	cout << "N=" << params.N << endl;;
+	Sampler sampler(params.n,params.sample_file);
+	Configuration configuration(params.n,params.L,params.V,params.sigma,params.m);
 	try {
-		Configuration configuration(params.n,params.L,params.V,params.sigma,params.m);
-		EventDisks ed(params.dt_sample);
+		EventDisks ed(params.dt_sample, configuration, sampler);
 		for (int i=0;i<params.N;i++){
 			if (i%params.freq==0)
 				cout << "Epoch " << i << ", T=" << ed.get_time()<<endl;
-			ed.event_disks(configuration);
+			ed.event_disks();
 		}
 	}  catch (const exception& e) {
         cerr << "Terminating because of errors: " << e.what() << endl;

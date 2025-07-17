@@ -19,3 +19,38 @@
 
 using namespace std;
 
+EventDisks::EventDisks(double dt_sample,Configuration& configuration, Sampler& sampler)
+  : _dt_sample(dt_sample),_sampler(sampler),_configuration(configuration) {
+	  _t_next_sample_due = _dt_sample;
+};
+
+/**
+ * Algorithm 2.1: perform one step of the simulation. Determine time to next collision,
+ * of either type, update all positions to just befroe collision,
+ * then update velocities to just after.
+ */	
+void EventDisks::event_disks() {
+	double dt_pair;
+	int k,l;
+	tie(dt_pair,k,l) = _configuration.get_next_pair_collision();
+	double dt_wall;
+	int sphere,wall;
+	tie(dt_wall,sphere,wall) = _configuration.get_next_wall_collision();
+	double dt_next_collision = min(dt_wall,dt_pair);
+	while (_t + dt_next_collision > _t_next_sample_due) {
+		const double dt = _t_next_sample_due - _t; 
+		_configuration.evolve(dt);
+		_t += _dt_sample;
+		_sampler.sample(_t,_configuration);
+		_n_sampled ++;
+		_t_next_sample_due = (_n_sampled+1) * _dt_sample;
+		dt_next_collision -= dt;
+	}
+	assert(dt_next_collision>0);
+	_configuration.evolve(dt_next_collision);
+	if (dt_wall < dt_pair)
+		_configuration.wall_collision(sphere,wall);
+	else
+		_configuration.collide(k,l);
+	_t += dt_next_collision;
+}

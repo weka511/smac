@@ -39,6 +39,7 @@
 			_particles[i].init_x(gen,uniform_x);
 		has_been_validated = _is_valid(_particles,n,sigma);	
 	}
+	
 	if (!has_been_validated) throw runtime_error("Failed to create valid configuration");
 }
 

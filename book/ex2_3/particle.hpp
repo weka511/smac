@@ -20,15 +20,18 @@
 
 #include <array>
 #include <random>
+#include <iostream>
 
 using namespace std;
 
 class Particle {
+	
   private:
    array<double, 3> _x = {0.,0.,0.};
    array<double, 3> _v = {0.,0.,0.};
    
   public:
+  friend std::ostream& operator<<(std::ostream& os, Particle const &particle);
     /**
      * This is the usual constructor for a Particle. 
 	 * It expects that init_x() and init_v() will be called to set up the
@@ -101,6 +104,17 @@ class Particle {
 	
 	double get_v(const int i) {return _v[i];}
 	
+	double get_x(const int i) {return _x[i];}
+	
+	/**
+	 * Determine position of particle after a specifed time,
+	 * assuming constant veleocity
+	 */
+	void evolve(const double dt) {
+		for (int i=0;i<3;i++)
+			_x[i] += (dt * _v[i]);
+	}
+	
   private:
     array<double, 3> static _get_difference(array<double, 3> &x0, array<double, 3> &x1){
 		array<double, 3> difference = {0,0,0};
@@ -117,7 +131,6 @@ class Particle {
 		return result;
 	}
 };
-
 
 
 #endif //_PARTICLE_HPP_
