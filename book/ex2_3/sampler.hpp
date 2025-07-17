@@ -38,6 +38,9 @@ class Sampler {
 	 */
     void sample(double t,Configuration& configuration);
 	
+	/**
+	 * Used to close output stresm.
+	 */
 	virtual ~Sampler();
 	
   private:

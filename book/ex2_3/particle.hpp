@@ -24,6 +24,9 @@
 
 using namespace std;
 
+/**
+ * This class represents a small sphere
+ */
 class Particle {
 	
   private:
@@ -31,7 +34,8 @@ class Particle {
    array<double, 3> _v = {0.,0.,0.};
    
   public:
-  friend std::ostream& operator<<(std::ostream& os, Particle const &particle);
+  
+    friend std::ostream& operator<<(std::ostream& os, Particle const &particle);
     /**
      * This is the usual constructor for a Particle. 
 	 * It expects that init_x() and init_v() will be called to set up the
@@ -67,11 +71,17 @@ class Particle {
 			_x[i] = uniform(gen);
 	};
 	
+	/**
+	 * Calcuklate the distance between the centres of two spheres.
+	 */ 
 	double get_distance(Particle & other){
 		auto difference = _get_difference(_x,other._x);
 		return sqrt(_inner_product(difference,difference));
 	};
 	
+	/**
+	 * Rescale a vector so it has unit length
+	 */
 	array<double, 3> static get_normalized(array<double, 3> x){
 		auto norm = sqrt(_inner_product(x,x));
 		array<double, 3> result = {0,0,0};
@@ -116,6 +126,10 @@ class Particle {
 	}
 	
   private:
+  
+    /**
+	 * Subtract one vector from another 
+	 */
     array<double, 3> static _get_difference(array<double, 3> &x0, array<double, 3> &x1){
 		array<double, 3> difference = {0,0,0};
 		for (int i=0;i<3;i++)
@@ -123,6 +137,9 @@ class Particle {
 		return difference;
 	}
 	
+	/**
+	 * Determine the inner poroduct of two vectors.
+	 */
 	double static _inner_product(array<double, 3> &u, array<double, 3> &v){
 		double result = 0;
 		for (int i=0;i<3;i++)
