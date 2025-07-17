@@ -26,7 +26,11 @@
 using namespace std;
 
 class EventDisks {
+	
   private:
+	/**
+	 *    Time interval between samples
+	 */
 	const double _dt_sample;
 
 	/**
@@ -34,6 +38,9 @@ class EventDisks {
 	 */
 	double _t = 0.0;
 	
+	/**
+	 *   Used to record time when we next need to sample. Calculated from
+	 */
 	double _t_next_sample_due = 0.0;
 		
 	/**
@@ -59,6 +66,12 @@ class EventDisks {
 	 *  Accessor for current time
 	 */
 	double get_time() {return _t;}
+	
+  private:
+	/**
+	 *   Used to determine  when we next need to sample.
+	 */
+	double get_t_next_sample_due() {return (_n_sampled+1) * _dt_sample;}
 	
 };
 

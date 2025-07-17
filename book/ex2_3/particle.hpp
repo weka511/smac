@@ -35,7 +35,11 @@ class Particle {
    
   public:
   
+	/**
+	 *  This is used to facilitate recording sampled in a CSV filke.
+	 */
     friend std::ostream& operator<<(std::ostream& os, Particle const &particle);
+	
     /**
      * This is the usual constructor for a Particle. 
 	 * It expects that init_x() and init_v() will be called to set up the
@@ -112,8 +116,14 @@ class Particle {
 		_v[wall] *= -1;
 	}
 	
+	/**
+     * Accessor used for testing only.
+	 */
 	double get_v(const int i) {return _v[i];}
 	
+	/**
+     * Accessor used for testing only.
+	 */
 	double get_x(const int i) {return _x[i];}
 	
 	/**

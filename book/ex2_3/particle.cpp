@@ -59,6 +59,9 @@ double Particle::get_wall_time(const int wall, const double L) {
 	return numeric_limits<double>::infinity();
 }
 
+/**
+ *  Collide two spheres, reversing velocity components normal to tangent plane
+ */	
 void Particle::collide(Particle & other){
 	auto e_perpendicular =  get_normalized(_get_difference(_x,other._x));
 	auto DeltaV = _get_difference(_v,other._v);
@@ -69,8 +72,11 @@ void Particle::collide(Particle & other){
 	}
 }
 
+/**
+ *  This is used to facilitate recording samples in a CSV filke.
+ */
 std::ostream &operator<<(std::ostream &os, Particle const &particle) { 
-    return os << particle._x[0] << "," << particle._x[1] << "," << particle._x[2] << "," <<particle._v[0] << "," << particle._v[1] << "," << particle._v[2]<< ",";
+    return os << particle._x[0] << "," << particle._x[1] << "," << particle._x[2] << "," <<particle._v[0] << "," << particle._v[1] << "," << particle._v[2];
 }
 	
  
