@@ -45,14 +45,14 @@
  /**
  * Calculate time to next collision between particle and a specified wall
  */
-double Particle::get_wall_time(const int wall, const double L) {
+double Particle::get_wall_time(const int wall, const double L, const double sigma) {
 	if (_v[wall] > 0){
-		auto dt = (L-_x[wall])/_v[wall];
+		auto dt = (L - sigma -_x[wall])/_v[wall];
 		assert (dt > 0);
 		return dt;
 	}
 	if (_v[wall] < 0){
-		auto dt =  _x[wall]/(-_v[wall]);
+		auto dt =  (_x[wall]-sigma)/(-_v[wall]);
 		assert (dt > 0);
 		return dt;
 	}

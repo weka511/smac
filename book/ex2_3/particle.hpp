@@ -102,7 +102,7 @@ class Particle {
 	/**
 	 * Calculate time to next collision between particle and a specified wall
 	 */
-	double get_wall_time(const int wall, const double L) ;
+	double get_wall_time(const int wall, const double L, const double sigma) ;
 	
 	/**
 	 *  Collide two spheres, reversing velocity components normal to tangent plane

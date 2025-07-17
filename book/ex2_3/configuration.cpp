@@ -76,7 +76,7 @@ tuple<double,int,int> Configuration::get_next_wall_collision(){
 	tuple<double,int,int> result = make_tuple(best_wall_time,-1,-1);
 	for (int i=0;i<_n;i++)
 		for (int wall=0;wall<3;wall++){
-			const double t = _particles[i].get_wall_time(wall,_length);
+			const double t = _particles[i].get_wall_time(wall,_length,_sigma);
 			if (t < best_wall_time){
 				best_wall_time = t;
 				result = make_tuple(best_wall_time,i,wall);

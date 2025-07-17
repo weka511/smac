@@ -58,9 +58,9 @@ TEST_CASE( "Particle Tests", "[particle]" ) {
 	
 	SECTION("Test collision between particle and wall"){
 		Particle particle_1(0.3,0.2,0, -1.0,1.0,0);
-		REQUIRE( 0.3 == particle_1.get_wall_time(0,1));
-		REQUIRE( 0.8 == particle_1.get_wall_time(1,1));
-		REQUIRE( numeric_limits<double>::infinity() == particle_1.get_wall_time(2,1));
+		REQUIRE_THAT(particle_1.get_wall_time(0,1,0.1),Catch::Matchers::WithinAbs( 0.2, 0.0001));
+		REQUIRE_THAT(particle_1.get_wall_time(1,1,0.1),Catch::Matchers::WithinAbs( 0.7, 0.0001));
+		REQUIRE( numeric_limits<double>::infinity() == particle_1.get_wall_time(2,1,0.1));
 		
 	}
 }
