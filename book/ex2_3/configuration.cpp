@@ -27,7 +27,7 @@
 	random_device rd;
 	mt19937 gen(rd());
 	uniform_real_distribution<> uniform_v(-V, V);
-	uniform_real_distribution<> uniform_x(0.0, L);
+	uniform_real_distribution<> uniform_x(sigma, L-sigma);
 	
 	_particles = make_unique<Particle[]>(n);
 	for (int i=0;i<n;i++)
