@@ -20,6 +20,7 @@
  */
 
 #include <iostream>
+#include <chrono>
 #include "params.hpp"
 #include "configuration.hpp"
 #include "event-disks.hpp"
@@ -28,6 +29,7 @@
 using namespace std;
 
 int main(int argc, char **argv) {
+	auto start = chrono::high_resolution_clock::now();
 	cout << "ex2_3: " << VERSION << endl;
 	ParameterSet params(argc, argv);
 	if (params.has_parsing_error()) {
@@ -50,4 +52,9 @@ int main(int argc, char **argv) {
         cerr << "Terminating because of errors: " << e.what() << endl;
 		exit(1);
     }
+	auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+
+    std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
+    return 0;
 }
