@@ -70,9 +70,14 @@ if __name__=='__main__':
             index = rng.choice(len(frequencies))
             frequencies[index] += 1
 
+    frequencies.sort(reverse=True)
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
-    ax1.plot(frequencies)
+    rr = [np.log(1+f) for f in frequencies]
+    ff = np.log(frequencies)
+    ax1.plot(rr,ff,label='Probabilities')
+    ax1.plot([rr[0],rr[-1]],[ff[0],ff[-1]],linestyle=':',label='Approx')
+    ax1.legend()
     fig.savefig(get_file_name(args.out,figs=args.figs))
     elapsed = time() - start
     minutes = int(elapsed/60)
