@@ -84,3 +84,7 @@
 5.3||Generalized Ising models
 6||Entropic Forces
 7||Dynamic Monte Carlo Methods
+
+File|Problem/Algorithm/Description
+--------------|---------------------------------------------------------------------------------------
+preferential.py|Simulate preferential attachment
