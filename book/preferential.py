@@ -93,13 +93,14 @@ if __name__=='__main__':
     n,frequencies = build(args.N,args.p,rng = rng)
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
-    xdata = np.arange(0,n) #[f for f in range(len(frequencies))]
+    xdata = np.arange(0,n)
 
     popt, pcov = curve_fit(power_law, xdata, frequencies)
     ax1.plot(xdata,frequencies,label='Probabilities')
     ydata = [power_law(x,popt[0],popt[1]) for x in xdata]
-    ax1.plot(xdata,ydata,linestyle=':',label=f'Power law: a={popt[0]:.6f},b={popt[1]:.6f},cond={cond(pcov):.6f}')
+    ax1.plot(xdata,ydata,linestyle=':',label=f'Power law: a={popt[0]:.3f}({-(1+1/(1-args.p)):3f}),b={popt[1]:.3f},cond={cond(pcov):.3f}')
     ax1.legend()
+    ax1.set_title(f'Preferential attachment: p={args.p}')
     fig.savefig(get_file_name(args.out,figs=args.figs))
     elapsed = time() - start
     minutes = int(elapsed/60)
