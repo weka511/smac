@@ -56,10 +56,15 @@ def get_file_name(name,default_ext='png',figs='./figs',seq=None):
     qualified_name = f'{base}.{ext}'
     return join(figs,qualified_name) if ext == 'png' else qualified_name
 
-def power_law(x, a, b):
-    return (a **x) * b
-
 def build(N,p,rng = np.random.default_rng()):
+    '''
+    Simulate preferential attachment. Use tower sampling to build table of frequencies
+
+    Parameters:
+        N
+        p
+        rng
+    '''
     n = 0
     frequencies = np.zeros((N),dtype=int)
     frequencies[n] = 1
@@ -81,7 +86,17 @@ def build(N,p,rng = np.random.default_rng()):
                 tower[i] += 1
                 i += 1
 
-    return n,np.flip(np.sort(np.resize(frequencies,(n))))
+    return np.flip(np.sort(np.resize(frequencies,(n))))
+
+def get_frequencies(word_counts):
+    '''
+    Establish mapping from word occurrences to frequency
+    '''
+    m = word_counts[0]
+    frequencies = np.zeros((m))
+    for i in range((len(word_counts))):
+        frequencies[word_counts[i]-1] += 1
+    return frequencies/sum(frequencies)
 
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
@@ -90,18 +105,24 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
 
-    n,frequencies = build(args.N,args.p,rng = rng)
-    fig = figure(figsize=(12,12))
-    ax1 = fig.add_subplot(1,1,1)
+    word_counts = build(args.N,args.p,rng = rng)
+    frequencies = get_frequencies(word_counts)
+
+    n = len(frequencies)
     xdata = np.arange(0,n)
+    power_law = lambda x,a,b: (a**x) * b
 
     popt, pcov = curve_fit(power_law, xdata, frequencies)
-    ax1.plot(xdata,frequencies,label='Probabilities')
     ydata = [power_law(x,popt[0],popt[1]) for x in xdata]
-    ax1.plot(xdata,ydata,linestyle=':',label=f'Power law: a={popt[0]:.3f}({-(1+1/(1-args.p)):3f}),b={popt[1]:.3f},cond={cond(pcov):.3f}')
+
+    fig = figure(figsize=(12,12))
+    ax1 = fig.add_subplot(1,1,1)
+    ax1.plot(xdata,frequencies,label='Probabilities')
+    ax1.plot(xdata,ydata,linestyle=':',label=f'Power law: a={popt[0]:.3f}({-(1+1/(1-args.p)):.3f}),b={popt[1]:.3f},cond={cond(pcov):.3f}')
     ax1.legend()
     ax1.set_title(f'Preferential attachment: p={args.p}')
     fig.savefig(get_file_name(args.out,figs=args.figs))
+
     elapsed = time() - start
     minutes = int(elapsed/60)
     seconds = elapsed - 60*minutes
