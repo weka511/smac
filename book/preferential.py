@@ -59,6 +59,30 @@ def get_file_name(name,default_ext='png',figs='./figs',seq=None):
 def power_law(x, a, b):
     return (a **x) * b
 
+def build(N,p,rng = np.random.default_rng()):
+    n = 0
+    frequencies = np.zeros((N),dtype=int)
+    frequencies[n] = 1
+    tower = np.zeros((N),dtype=int)
+    tower[n] = 1
+    n += 1
+    for _ in range(N):
+        if rng.uniform() < p:
+            frequencies[n] = 1
+            tower[n] = tower[n-1] + 1
+            n += 1
+        else:
+            sample = rng.choice(tower[n-1])
+            i = 0
+            while tower[i] < sample:
+                i += 1
+            frequencies[i] += 1
+            while i<n:
+                tower[i] += 1
+                i += 1
+
+    return n,np.flip(np.sort(np.resize(frequencies,(n))))
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -66,18 +90,10 @@ if __name__=='__main__':
     args = parse_arguments()
     rng = np.random.default_rng(args.seed)
 
-    frequencies = [1]
-    for _ in range(args.N):
-        if rng.uniform() < args.p:
-            frequencies.append(1)
-        else:
-            index = rng.choice(len(frequencies))
-            frequencies[index] += 1
-
-    frequencies.sort(reverse=True)
+    n,frequencies = build(args.N,args.p,rng = rng)
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
-    xdata = [f for f in range(len(frequencies))]
+    xdata = np.arange(0,n) #[f for f in range(len(frequencies))]
 
     popt, pcov = curve_fit(power_law, xdata, frequencies)
     ax1.plot(xdata,frequencies,label='Probabilities')
