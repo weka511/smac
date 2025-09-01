@@ -23,7 +23,8 @@ from time import time
 import numpy as np
 from matplotlib import rc
 from matplotlib.pyplot import figure, show
-
+from numpy.linalg import cond
+from scipy.optimize import curve_fit
 
 def parse_arguments():
     '''Parse command line arguments'''
@@ -55,6 +56,9 @@ def get_file_name(name,default_ext='png',figs='./figs',seq=None):
     qualified_name = f'{base}.{ext}'
     return join(figs,qualified_name) if ext == 'png' else qualified_name
 
+def power_law(x, a, b):
+    return (a **x) * b
+
 if __name__=='__main__':
     rc('font',**{'family':'serif','serif':['Palatino']})
     rc('text', usetex=True)
@@ -73,10 +77,12 @@ if __name__=='__main__':
     frequencies.sort(reverse=True)
     fig = figure(figsize=(12,12))
     ax1 = fig.add_subplot(1,1,1)
-    rr = [np.log(1+f) for f in frequencies]
-    ff = np.log(frequencies)
-    ax1.plot(rr,ff,label='Probabilities')
-    ax1.plot([rr[0],rr[-1]],[ff[0],ff[-1]],linestyle=':',label='Approx')
+    xdata = [f for f in range(len(frequencies))]
+
+    popt, pcov = curve_fit(power_law, xdata, frequencies)
+    ax1.plot(xdata,frequencies,label='Probabilities')
+    ydata = [power_law(x,popt[0],popt[1]) for x in xdata]
+    ax1.plot(xdata,ydata,linestyle=':',label=f'Power law: a={popt[0]:.6f},b={popt[1]:.6f},cond={cond(pcov):.6f}')
     ax1.legend()
     fig.savefig(get_file_name(args.out,figs=args.figs))
     elapsed = time() - start
